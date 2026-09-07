@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_09_laplace_approximation_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_09_laplace_approximation_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_09_laplace_approximation_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_09_laplace_approximation_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_09_laplace_approximation_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_09_laplace_approximation_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_09_laplace_approximation_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
@@ -14,8 +14,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_09_laplace_approximation_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_09_laplace_approximation_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -98,8 +98,8 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="Lec_09_laplace_approximation_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
-  <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -116,12 +116,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -321,16 +321,16 @@ f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
 <h2>Example: Poisson Rate with a Gamma Prior</h2>
 <p><span class="math inline">y_1,\ldots,y_n\mid\lambda\sim\text{Pois}(\lambda)</span>, <span class="math inline">\lambda\sim\text{Gamma}(\alpha,\beta)</span>. The posterior is <span class="math inline">\text{Gamma}(\alpha+\sum y_i,\ \beta+n)</span> and <span class="math inline">P(y)</span> is available exactly, so we can measure the Laplace error.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>alpha <span class="ot">&lt;-</span> <span class="dv">2</span>; beta <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb3-2"><a href=""></a>laplace_ml <span class="ot">&lt;-</span> <span class="cf">function</span>(y) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(y); s <span class="ot">&lt;-</span> <span class="fu">sum</span>(y)</span>
-<span id="cb3-3"><a href=""></a>  h  <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>(<span class="fu">sum</span>(<span class="fu">dpois</span>(y, l, <span class="at">log =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span> <span class="fu">dgamma</span>(l, alpha, beta, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb3-4"><a href=""></a>  op <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">mean</span>(y) <span class="sc">+</span> <span class="fl">0.5</span>, h, <span class="at">method =</span> <span class="st">"L-BFGS-B"</span>, <span class="at">lower =</span> <span class="fl">1e-6</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-5"><a href=""></a>  <span class="fu">c</span>(<span class="at">mode =</span> op<span class="sc">$</span>par, <span class="at">log_ml =</span> <span class="sc">-</span>op<span class="sc">$</span>value <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(op<span class="sc">$</span>hessian[<span class="dv">1</span>, <span class="dv">1</span>])) }</span>
-<span id="cb3-6"><a href=""></a>exact_log_ml <span class="ot">&lt;-</span> <span class="cf">function</span>(y) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(y); s <span class="ot">&lt;-</span> <span class="fu">sum</span>(y)</span>
-<span id="cb3-7"><a href=""></a>  alpha <span class="sc">*</span> <span class="fu">log</span>(beta) <span class="sc">-</span> <span class="fu">lgamma</span>(alpha) <span class="sc">+</span> <span class="fu">lgamma</span>(alpha <span class="sc">+</span> s) <span class="sc">-</span> (alpha <span class="sc">+</span> s) <span class="sc">*</span> <span class="fu">log</span>(beta <span class="sc">+</span> n) <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">lfactorial</span>(y)) }</span>
-<span id="cb3-8"><a href=""></a>res <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">20</span>, <span class="dv">100</span>, <span class="dv">500</span>), <span class="cf">function</span>(n) { y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="dv">3</span>)</span>
-<span id="cb3-9"><a href=""></a>  <span class="fu">c</span>(<span class="at">n =</span> n, <span class="fu">laplace_ml</span>(y), <span class="at">exact =</span> <span class="fu">exact_log_ml</span>(y), <span class="at">post_mean =</span> (alpha <span class="sc">+</span> <span class="fu">sum</span>(y)) <span class="sc">/</span> (beta <span class="sc">+</span> n)) }))</span>
-<span id="cb3-10"><a href=""></a><span class="fu">round</span>(<span class="fu">cbind</span>(res, <span class="at">error =</span> res[, <span class="st">"log_ml"</span>] <span class="sc">-</span> res[, <span class="st">"exact"</span>]), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>alpha <span class="ot">&lt;-</span> <span class="dv">2</span>; beta <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb3-2"><a></a>laplace_ml <span class="ot">&lt;-</span> <span class="cf">function</span>(y) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(y); s <span class="ot">&lt;-</span> <span class="fu">sum</span>(y)</span>
+<span id="cb3-3"><a></a>  h  <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>(<span class="fu">sum</span>(<span class="fu">dpois</span>(y, l, <span class="at">log =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span> <span class="fu">dgamma</span>(l, alpha, beta, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb3-4"><a></a>  op <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">mean</span>(y) <span class="sc">+</span> <span class="fl">0.5</span>, h, <span class="at">method =</span> <span class="st">"L-BFGS-B"</span>, <span class="at">lower =</span> <span class="fl">1e-6</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-5"><a></a>  <span class="fu">c</span>(<span class="at">mode =</span> op<span class="sc">$</span>par, <span class="at">log_ml =</span> <span class="sc">-</span>op<span class="sc">$</span>value <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(op<span class="sc">$</span>hessian[<span class="dv">1</span>, <span class="dv">1</span>])) }</span>
+<span id="cb3-6"><a></a>exact_log_ml <span class="ot">&lt;-</span> <span class="cf">function</span>(y) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(y); s <span class="ot">&lt;-</span> <span class="fu">sum</span>(y)</span>
+<span id="cb3-7"><a></a>  alpha <span class="sc">*</span> <span class="fu">log</span>(beta) <span class="sc">-</span> <span class="fu">lgamma</span>(alpha) <span class="sc">+</span> <span class="fu">lgamma</span>(alpha <span class="sc">+</span> s) <span class="sc">-</span> (alpha <span class="sc">+</span> s) <span class="sc">*</span> <span class="fu">log</span>(beta <span class="sc">+</span> n) <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">lfactorial</span>(y)) }</span>
+<span id="cb3-8"><a></a>res <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">20</span>, <span class="dv">100</span>, <span class="dv">500</span>), <span class="cf">function</span>(n) { y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="dv">3</span>)</span>
+<span id="cb3-9"><a></a>  <span class="fu">c</span>(<span class="at">n =</span> n, <span class="fu">laplace_ml</span>(y), <span class="at">exact =</span> <span class="fu">exact_log_ml</span>(y), <span class="at">post_mean =</span> (alpha <span class="sc">+</span> <span class="fu">sum</span>(y)) <span class="sc">/</span> (beta <span class="sc">+</span> n)) }))</span>
+<span id="cb3-10"><a></a><span class="fu">round</span>(<span class="fu">cbind</span>(res, <span class="at">error =</span> res[, <span class="st">"log_ml"</span>] <span class="sc">-</span> res[, <span class="st">"exact"</span>]), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       n   mode    log_ml     exact post_mean   error
 [1,]   5 2.5000  -11.0017  -10.9962    2.6667 -0.0056
@@ -371,6 +371,7 @@ f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
 <li>Deterministic, fast, and accurate to <span class="math inline">O(1/n)</span>, but blind to skewness and multimodality; Monte Carlo methods (next lectures) remove these limitations at higher computational cost</li>
 </ul>
 
+
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -380,19 +381,19 @@ f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

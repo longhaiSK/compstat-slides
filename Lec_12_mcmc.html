@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_12_mcmc_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_12_mcmc_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_12_mcmc_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_12_mcmc_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_12_mcmc_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_12_mcmc_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_12_mcmc_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
@@ -14,8 +14,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_12_mcmc_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_12_mcmc_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -98,8 +98,8 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="Lec_12_mcmc_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
-  <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -116,12 +116,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_12_mcmc_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_12_mcmc_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_12_mcmc_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_12_mcmc_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_12_mcmc_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_12_mcmc_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -253,13 +253,13 @@ Longhai Li
 <h2>Example: A Three-State Chain</h2>
 <p>State space <span class="math inline">\{0,1,2\}</span>. From each state, stay with probability <span class="math inline">0.1</span>, move to each of the other two states with probability <span class="math inline">0.45</span>: <span class="math display">T = \begin{pmatrix} 0.1 &amp; 0.45 &amp; 0.45\\ 0.45 &amp; 0.1 &amp; 0.45\\ 0.45 &amp; 0.45 &amp; 0.1\end{pmatrix}, \qquad T_{jk} = P(\theta_i = k\mid\theta_{i-1} = j)</span></p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>simulate_chain <span class="ot">&lt;-</span> <span class="cf">function</span>(T, theta0, n) {</span>
-<span id="cb3-2"><a href=""></a>  theta <span class="ot">&lt;-</span> <span class="fu">integer</span>(n <span class="sc">+</span> <span class="dv">1</span>); theta[<span class="dv">1</span>] <span class="ot">&lt;-</span> theta0</span>
-<span id="cb3-3"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>(n <span class="sc">+</span> <span class="dv">1</span>)) theta[i] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq_len</span>(<span class="fu">ncol</span>(T)), <span class="dv">1</span>, <span class="at">prob =</span> T[theta[i <span class="sc">-</span> <span class="dv">1</span>], ])</span>
-<span id="cb3-4"><a href=""></a>  theta <span class="sc">-</span> <span class="dv">1</span> }                                                  <span class="co"># states 0, 1, 2</span></span>
-<span id="cb3-5"><a href=""></a>T3 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.1</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.1</span>), <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-6"><a href=""></a>th <span class="ot">&lt;-</span> <span class="fu">simulate_chain</span>(T3, <span class="at">theta0 =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">10000</span>)</span>
-<span id="cb3-7"><a href=""></a><span class="fu">head</span>(th, <span class="dv">20</span>); <span class="fu">table</span>(th) <span class="sc">/</span> <span class="fu">length</span>(th)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>simulate_chain <span class="ot">&lt;-</span> <span class="cf">function</span>(T, theta0, n) {</span>
+<span id="cb3-2"><a></a>  theta <span class="ot">&lt;-</span> <span class="fu">integer</span>(n <span class="sc">+</span> <span class="dv">1</span>); theta[<span class="dv">1</span>] <span class="ot">&lt;-</span> theta0</span>
+<span id="cb3-3"><a></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>(n <span class="sc">+</span> <span class="dv">1</span>)) theta[i] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq_len</span>(<span class="fu">ncol</span>(T)), <span class="dv">1</span>, <span class="at">prob =</span> T[theta[i <span class="sc">-</span> <span class="dv">1</span>], ])</span>
+<span id="cb3-4"><a></a>  theta <span class="sc">-</span> <span class="dv">1</span> }                                                  <span class="co"># states 0, 1, 2</span></span>
+<span id="cb3-5"><a></a>T3 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.1</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.45</span>, <span class="fl">0.1</span>), <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-6"><a></a>th <span class="ot">&lt;-</span> <span class="fu">simulate_chain</span>(T3, <span class="at">theta0 =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">10000</span>)</span>
+<span id="cb3-7"><a></a><span class="fu">head</span>(th, <span class="dv">20</span>); <span class="fu">table</span>(th) <span class="sc">/</span> <span class="fu">length</span>(th)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 0 1 2 0 2 1 2 1 2 1 2 0 2 2 1 0 2 0 1 0</code></pre>
 </div>
@@ -281,7 +281,7 @@ Longhai Li
 <p><span class="math inline">\pi</span> is the <strong>equilibrium</strong> (stationary, limiting) <strong>distribution</strong> of the chain: after many steps the chain forgets where it started, and the marginal distribution of <span class="math inline">\theta_n</span> settles at <span class="math inline">\pi</span>.</p>
 <p>For the three-state chain, <span class="math inline">P(\theta_n = \cdot\mid\theta_0 = 0)</span> is the first row of <span class="math inline">T^n</span>:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>Tn <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="dv">3</span>); <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>) { Tn <span class="ot">&lt;-</span> Tn <span class="sc">%*%</span> T3; <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"n = %d:  %s</span><span class="sc">\n</span><span class="st">"</span>, n, <span class="fu">paste</span>(<span class="fu">round</span>(Tn[<span class="dv">1</span>, ], <span class="dv">4</span>), <span class="at">collapse =</span> <span class="st">"  "</span>))) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>Tn <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="dv">3</span>); <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>) { Tn <span class="ot">&lt;-</span> Tn <span class="sc">%*%</span> T3; <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"n = %d:  %s</span><span class="sc">\n</span><span class="st">"</span>, n, <span class="fu">paste</span>(<span class="fu">round</span>(Tn[<span class="dv">1</span>, ], <span class="dv">4</span>), <span class="at">collapse =</span> <span class="st">"  "</span>))) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>n = 1:  0.1  0.45  0.45
 n = 2:  0.415  0.2925  0.2925
@@ -399,18 +399,18 @@ P(\sigma^2\mid\mu,x) &amp;\propto(\sigma^2)^{-(a_0+1)}e^{-\lambda_0/\sigma^2}\cd
 <section id="the-gibbs-sampler-continued" class="slide level2">
 <h2>The Gibbs Sampler (Continued)</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">5</span>, <span class="dv">2</span>); n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); xbar <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
-<span id="cb8-2"><a href=""></a>mu0 <span class="ot">&lt;-</span> <span class="dv">0</span>; s02 <span class="ot">&lt;-</span> <span class="dv">100</span>; a0 <span class="ot">&lt;-</span> <span class="dv">1</span>; lam0 <span class="ot">&lt;-</span> <span class="dv">1</span>                        <span class="co"># prior: N(0, 10^2), IG(1, 1)</span></span>
-<span id="cb8-3"><a href=""></a>gibbs <span class="ot">&lt;-</span> <span class="cf">function</span>(iters, <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">s2 =</span> <span class="dv">1</span>) {</span>
-<span id="cb8-4"><a href=""></a>  out <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, iters, <span class="dv">2</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"s2"</span>)))</span>
-<span id="cb8-5"><a href=""></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>iters) {</span>
-<span id="cb8-6"><a href=""></a>    v  <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">/</span> s02 <span class="sc">+</span> n <span class="sc">/</span> s2); m <span class="ot">&lt;-</span> v <span class="sc">*</span> (mu0 <span class="sc">/</span> s02 <span class="sc">+</span> n <span class="sc">*</span> xbar <span class="sc">/</span> s2)</span>
-<span id="cb8-7"><a href=""></a>    mu <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, m, <span class="fu">sqrt</span>(v))</span>
-<span id="cb8-8"><a href=""></a>    s2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">rgamma</span>(<span class="dv">1</span>, <span class="at">shape =</span> n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">+</span> a0, <span class="at">rate =</span> <span class="fu">sum</span>((x <span class="sc">-</span> mu)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">+</span> lam0)</span>
-<span id="cb8-9"><a href=""></a>    out[t, ] <span class="ot">&lt;-</span> <span class="fu">c</span>(mu, s2) }</span>
-<span id="cb8-10"><a href=""></a>  out }</span>
-<span id="cb8-11"><a href=""></a>draws <span class="ot">&lt;-</span> <span class="fu">gibbs</span>(<span class="dv">5000</span>, <span class="at">mu =</span> <span class="dv">20</span>, <span class="at">s2 =</span> <span class="dv">50</span>)                          <span class="co"># deliberately poor start</span></span>
-<span id="cb8-12"><a href=""></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">posterior_mean =</span> <span class="fu">colMeans</span>(draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>), ]), <span class="at">posterior_sd =</span> <span class="fu">apply</span>(draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>), ], <span class="dv">2</span>, sd)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">5</span>, <span class="dv">2</span>); n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); xbar <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
+<span id="cb8-2"><a></a>mu0 <span class="ot">&lt;-</span> <span class="dv">0</span>; s02 <span class="ot">&lt;-</span> <span class="dv">100</span>; a0 <span class="ot">&lt;-</span> <span class="dv">1</span>; lam0 <span class="ot">&lt;-</span> <span class="dv">1</span>                        <span class="co"># prior: N(0, 10^2), IG(1, 1)</span></span>
+<span id="cb8-3"><a></a>gibbs <span class="ot">&lt;-</span> <span class="cf">function</span>(iters, <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">s2 =</span> <span class="dv">1</span>) {</span>
+<span id="cb8-4"><a></a>  out <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, iters, <span class="dv">2</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"s2"</span>)))</span>
+<span id="cb8-5"><a></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>iters) {</span>
+<span id="cb8-6"><a></a>    v  <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">/</span> s02 <span class="sc">+</span> n <span class="sc">/</span> s2); m <span class="ot">&lt;-</span> v <span class="sc">*</span> (mu0 <span class="sc">/</span> s02 <span class="sc">+</span> n <span class="sc">*</span> xbar <span class="sc">/</span> s2)</span>
+<span id="cb8-7"><a></a>    mu <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, m, <span class="fu">sqrt</span>(v))</span>
+<span id="cb8-8"><a></a>    s2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">rgamma</span>(<span class="dv">1</span>, <span class="at">shape =</span> n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">+</span> a0, <span class="at">rate =</span> <span class="fu">sum</span>((x <span class="sc">-</span> mu)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">+</span> lam0)</span>
+<span id="cb8-9"><a></a>    out[t, ] <span class="ot">&lt;-</span> <span class="fu">c</span>(mu, s2) }</span>
+<span id="cb8-10"><a></a>  out }</span>
+<span id="cb8-11"><a></a>draws <span class="ot">&lt;-</span> <span class="fu">gibbs</span>(<span class="dv">5000</span>, <span class="at">mu =</span> <span class="dv">20</span>, <span class="at">s2 =</span> <span class="dv">50</span>)                          <span class="co"># deliberately poor start</span></span>
+<span id="cb8-12"><a></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">posterior_mean =</span> <span class="fu">colMeans</span>(draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>), ]), <span class="at">posterior_sd =</span> <span class="fu">apply</span>(draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>), ], <span class="dv">2</span>, sd)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  mu    s2
 posterior_mean 5.902 5.273
@@ -508,23 +508,23 @@ posterior_sd   0.508 1.784</code></pre>
 <section id="example-continued" class="slide level2">
 <h2>Example (Continued)</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a>log_post <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, w) { s2 <span class="ot">&lt;-</span> <span class="fu">exp</span>(w)</span>
-<span id="cb10-2"><a href=""></a>  <span class="fu">sum</span>(<span class="fu">dnorm</span>(x, mu, <span class="fu">sqrt</span>(s2), <span class="at">log =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span> <span class="fu">dnorm</span>(mu, mu0, <span class="fu">sqrt</span>(s02), <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
-<span id="cb10-3"><a href=""></a>    (<span class="sc">-</span>(a0 <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">log</span>(s2) <span class="sc">-</span> lam0 <span class="sc">/</span> s2) <span class="sc">+</span> w }                       <span class="co"># + w is the log Jacobian</span></span>
-<span id="cb10-4"><a href=""></a>mh_normal <span class="ot">&lt;-</span> <span class="cf">function</span>(iters, step, <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">w =</span> <span class="dv">0</span>) {</span>
-<span id="cb10-5"><a href=""></a>  out <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, iters, <span class="dv">2</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"s2"</span>))); acc <span class="ot">&lt;-</span> <span class="dv">0</span>; lp <span class="ot">&lt;-</span> <span class="fu">log_post</span>(mu, w)</span>
-<span id="cb10-6"><a href=""></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>iters) {</span>
-<span id="cb10-7"><a href=""></a>    mu_p <span class="ot">&lt;-</span> mu <span class="sc">+</span> step[<span class="dv">1</span>] <span class="sc">*</span> <span class="fu">rnorm</span>(<span class="dv">1</span>); w_p <span class="ot">&lt;-</span> w <span class="sc">+</span> step[<span class="dv">2</span>] <span class="sc">*</span> <span class="fu">rnorm</span>(<span class="dv">1</span>); lp_p <span class="ot">&lt;-</span> <span class="fu">log_post</span>(mu_p, w_p)</span>
-<span id="cb10-8"><a href=""></a>    <span class="cf">if</span> (<span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&lt;</span> lp_p <span class="sc">-</span> lp) { mu <span class="ot">&lt;-</span> mu_p; w <span class="ot">&lt;-</span> w_p; lp <span class="ot">&lt;-</span> lp_p; acc <span class="ot">&lt;-</span> acc <span class="sc">+</span> <span class="dv">1</span> }</span>
-<span id="cb10-9"><a href=""></a>    out[t, ] <span class="ot">&lt;-</span> <span class="fu">c</span>(mu, <span class="fu">exp</span>(w)) }</span>
-<span id="cb10-10"><a href=""></a>  <span class="fu">list</span>(<span class="at">draws =</span> out, <span class="at">accept =</span> acc <span class="sc">/</span> iters) }</span>
-<span id="cb10-11"><a href=""></a>fit <span class="ot">&lt;-</span> <span class="fu">mh_normal</span>(<span class="dv">20000</span>, <span class="at">step =</span> <span class="fu">c</span>(<span class="fl">1.2</span>, <span class="fl">0.6</span>))</span>
-<span id="cb10-12"><a href=""></a><span class="fu">c</span>(<span class="at">accept =</span> fit<span class="sc">$</span>accept)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>log_post <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, w) { s2 <span class="ot">&lt;-</span> <span class="fu">exp</span>(w)</span>
+<span id="cb10-2"><a></a>  <span class="fu">sum</span>(<span class="fu">dnorm</span>(x, mu, <span class="fu">sqrt</span>(s2), <span class="at">log =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span> <span class="fu">dnorm</span>(mu, mu0, <span class="fu">sqrt</span>(s02), <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb10-3"><a></a>    (<span class="sc">-</span>(a0 <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">log</span>(s2) <span class="sc">-</span> lam0 <span class="sc">/</span> s2) <span class="sc">+</span> w }                       <span class="co"># + w is the log Jacobian</span></span>
+<span id="cb10-4"><a></a>mh_normal <span class="ot">&lt;-</span> <span class="cf">function</span>(iters, step, <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">w =</span> <span class="dv">0</span>) {</span>
+<span id="cb10-5"><a></a>  out <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, iters, <span class="dv">2</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"s2"</span>))); acc <span class="ot">&lt;-</span> <span class="dv">0</span>; lp <span class="ot">&lt;-</span> <span class="fu">log_post</span>(mu, w)</span>
+<span id="cb10-6"><a></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>iters) {</span>
+<span id="cb10-7"><a></a>    mu_p <span class="ot">&lt;-</span> mu <span class="sc">+</span> step[<span class="dv">1</span>] <span class="sc">*</span> <span class="fu">rnorm</span>(<span class="dv">1</span>); w_p <span class="ot">&lt;-</span> w <span class="sc">+</span> step[<span class="dv">2</span>] <span class="sc">*</span> <span class="fu">rnorm</span>(<span class="dv">1</span>); lp_p <span class="ot">&lt;-</span> <span class="fu">log_post</span>(mu_p, w_p)</span>
+<span id="cb10-8"><a></a>    <span class="cf">if</span> (<span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&lt;</span> lp_p <span class="sc">-</span> lp) { mu <span class="ot">&lt;-</span> mu_p; w <span class="ot">&lt;-</span> w_p; lp <span class="ot">&lt;-</span> lp_p; acc <span class="ot">&lt;-</span> acc <span class="sc">+</span> <span class="dv">1</span> }</span>
+<span id="cb10-9"><a></a>    out[t, ] <span class="ot">&lt;-</span> <span class="fu">c</span>(mu, <span class="fu">exp</span>(w)) }</span>
+<span id="cb10-10"><a></a>  <span class="fu">list</span>(<span class="at">draws =</span> out, <span class="at">accept =</span> acc <span class="sc">/</span> iters) }</span>
+<span id="cb10-11"><a></a>fit <span class="ot">&lt;-</span> <span class="fu">mh_normal</span>(<span class="dv">20000</span>, <span class="at">step =</span> <span class="fu">c</span>(<span class="fl">1.2</span>, <span class="fl">0.6</span>))</span>
+<span id="cb10-12"><a></a><span class="fu">c</span>(<span class="at">accept =</span> fit<span class="sc">$</span>accept)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>accept 
 0.2589 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">MH =</span> <span class="fu">colMeans</span>(fit<span class="sc">$</span>draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>), ]), <span class="at">Gibbs =</span> <span class="fu">colMeans</span>(draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>), ])), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">MH =</span> <span class="fu">colMeans</span>(fit<span class="sc">$</span>draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>), ]), <span class="at">Gibbs =</span> <span class="fu">colMeans</span>(draws[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>), ])), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mu    s2
 MH    5.934 5.223
@@ -601,22 +601,22 @@ p \leftarrow p + \tfrac\epsilon2\,\nabla\log\pi(\theta)
 <section id="the-hmc-algorithm-continued" class="slide level2">
 <h2>The HMC Algorithm (Continued)</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a>hmc <span class="ot">&lt;-</span> <span class="cf">function</span>(log_pi, grad_log_pi, theta, eps, L, iters, <span class="at">M =</span> <span class="fu">diag</span>(<span class="fu">length</span>(theta))) {</span>
-<span id="cb14-2"><a href=""></a>  out <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, iters, <span class="fu">length</span>(theta)); acc <span class="ot">&lt;-</span> <span class="dv">0</span>; Minv <span class="ot">&lt;-</span> <span class="fu">solve</span>(M)</span>
-<span id="cb14-3"><a href=""></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>iters) {</span>
-<span id="cb14-4"><a href=""></a>    p <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">t</span>(<span class="fu">chol</span>(M)) <span class="sc">%*%</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(theta))); th <span class="ot">&lt;-</span> theta; pp <span class="ot">&lt;-</span> p</span>
-<span id="cb14-5"><a href=""></a>    pp <span class="ot">&lt;-</span> pp <span class="sc">+</span> eps <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">grad_log_pi</span>(th)                            <span class="co"># leapfrog: half step in p</span></span>
-<span id="cb14-6"><a href=""></a>    <span class="cf">for</span> (l <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>L) { th <span class="ot">&lt;-</span> th <span class="sc">+</span> eps <span class="sc">*</span> Minv <span class="sc">%*%</span> pp</span>
-<span id="cb14-7"><a href=""></a>      <span class="cf">if</span> (l <span class="sc">&lt;</span> L) pp <span class="ot">&lt;-</span> pp <span class="sc">+</span> eps <span class="sc">*</span> <span class="fu">grad_log_pi</span>(th) }                 <span class="co"># full steps in theta and p</span></span>
-<span id="cb14-8"><a href=""></a>    pp <span class="ot">&lt;-</span> pp <span class="sc">+</span> eps <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">grad_log_pi</span>(th)                            <span class="co"># final half step in p</span></span>
-<span id="cb14-9"><a href=""></a>    H0 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log_pi</span>(theta) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>(p <span class="sc">*</span> (Minv <span class="sc">%*%</span> p)); H1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log_pi</span>(th) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>(pp <span class="sc">*</span> (Minv <span class="sc">%*%</span> pp))</span>
-<span id="cb14-10"><a href=""></a>    <span class="cf">if</span> (<span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&lt;</span> H0 <span class="sc">-</span> H1) { theta <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(th); acc <span class="ot">&lt;-</span> acc <span class="sc">+</span> <span class="dv">1</span> }</span>
-<span id="cb14-11"><a href=""></a>    out[t, ] <span class="ot">&lt;-</span> theta }</span>
-<span id="cb14-12"><a href=""></a>  <span class="fu">list</span>(<span class="at">draws =</span> out, <span class="at">accept =</span> acc <span class="sc">/</span> iters) }</span>
-<span id="cb14-13"><a href=""></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.98</span>, <span class="fl">0.98</span>, <span class="dv">1</span>), <span class="dv">2</span>); Sinv <span class="ot">&lt;-</span> <span class="fu">solve</span>(Sigma)    <span class="co"># target: strongly correlated N(0, Sigma)</span></span>
-<span id="cb14-14"><a href=""></a>fit_hmc <span class="ot">&lt;-</span> <span class="fu">hmc</span>(<span class="cf">function</span>(z) <span class="sc">-</span><span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>(z <span class="sc">*</span> (Sinv <span class="sc">%*%</span> z)), <span class="cf">function</span>(z) <span class="sc">-</span><span class="fu">as.vector</span>(Sinv <span class="sc">%*%</span> z),</span>
-<span id="cb14-15"><a href=""></a>               <span class="at">theta =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>), <span class="at">eps =</span> <span class="fl">0.05</span>, <span class="at">L =</span> <span class="dv">30</span>, <span class="at">iters =</span> <span class="dv">2000</span>)</span>
-<span id="cb14-16"><a href=""></a><span class="fu">c</span>(<span class="at">accept =</span> fit_hmc<span class="sc">$</span>accept, <span class="at">mean1 =</span> <span class="fu">mean</span>(fit_hmc<span class="sc">$</span>draws[, <span class="dv">1</span>]), <span class="at">sd1 =</span> <span class="fu">sd</span>(fit_hmc<span class="sc">$</span>draws[, <span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>hmc <span class="ot">&lt;-</span> <span class="cf">function</span>(log_pi, grad_log_pi, theta, eps, L, iters, <span class="at">M =</span> <span class="fu">diag</span>(<span class="fu">length</span>(theta))) {</span>
+<span id="cb14-2"><a></a>  out <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, iters, <span class="fu">length</span>(theta)); acc <span class="ot">&lt;-</span> <span class="dv">0</span>; Minv <span class="ot">&lt;-</span> <span class="fu">solve</span>(M)</span>
+<span id="cb14-3"><a></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>iters) {</span>
+<span id="cb14-4"><a></a>    p <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">t</span>(<span class="fu">chol</span>(M)) <span class="sc">%*%</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(theta))); th <span class="ot">&lt;-</span> theta; pp <span class="ot">&lt;-</span> p</span>
+<span id="cb14-5"><a></a>    pp <span class="ot">&lt;-</span> pp <span class="sc">+</span> eps <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">grad_log_pi</span>(th)                            <span class="co"># leapfrog: half step in p</span></span>
+<span id="cb14-6"><a></a>    <span class="cf">for</span> (l <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>L) { th <span class="ot">&lt;-</span> th <span class="sc">+</span> eps <span class="sc">*</span> Minv <span class="sc">%*%</span> pp</span>
+<span id="cb14-7"><a></a>      <span class="cf">if</span> (l <span class="sc">&lt;</span> L) pp <span class="ot">&lt;-</span> pp <span class="sc">+</span> eps <span class="sc">*</span> <span class="fu">grad_log_pi</span>(th) }                 <span class="co"># full steps in theta and p</span></span>
+<span id="cb14-8"><a></a>    pp <span class="ot">&lt;-</span> pp <span class="sc">+</span> eps <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">grad_log_pi</span>(th)                            <span class="co"># final half step in p</span></span>
+<span id="cb14-9"><a></a>    H0 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log_pi</span>(theta) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>(p <span class="sc">*</span> (Minv <span class="sc">%*%</span> p)); H1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log_pi</span>(th) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>(pp <span class="sc">*</span> (Minv <span class="sc">%*%</span> pp))</span>
+<span id="cb14-10"><a></a>    <span class="cf">if</span> (<span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&lt;</span> H0 <span class="sc">-</span> H1) { theta <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(th); acc <span class="ot">&lt;-</span> acc <span class="sc">+</span> <span class="dv">1</span> }</span>
+<span id="cb14-11"><a></a>    out[t, ] <span class="ot">&lt;-</span> theta }</span>
+<span id="cb14-12"><a></a>  <span class="fu">list</span>(<span class="at">draws =</span> out, <span class="at">accept =</span> acc <span class="sc">/</span> iters) }</span>
+<span id="cb14-13"><a></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.98</span>, <span class="fl">0.98</span>, <span class="dv">1</span>), <span class="dv">2</span>); Sinv <span class="ot">&lt;-</span> <span class="fu">solve</span>(Sigma)    <span class="co"># target: strongly correlated N(0, Sigma)</span></span>
+<span id="cb14-14"><a></a>fit_hmc <span class="ot">&lt;-</span> <span class="fu">hmc</span>(<span class="cf">function</span>(z) <span class="sc">-</span><span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>(z <span class="sc">*</span> (Sinv <span class="sc">%*%</span> z)), <span class="cf">function</span>(z) <span class="sc">-</span><span class="fu">as.vector</span>(Sinv <span class="sc">%*%</span> z),</span>
+<span id="cb14-15"><a></a>               <span class="at">theta =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>), <span class="at">eps =</span> <span class="fl">0.05</span>, <span class="at">L =</span> <span class="dv">30</span>, <span class="at">iters =</span> <span class="dv">2000</span>)</span>
+<span id="cb14-16"><a></a><span class="fu">c</span>(<span class="at">accept =</span> fit_hmc<span class="sc">$</span>accept, <span class="at">mean1 =</span> <span class="fu">mean</span>(fit_hmc<span class="sc">$</span>draws[, <span class="dv">1</span>]), <span class="at">sd1 =</span> <span class="fu">sd</span>(fit_hmc<span class="sc">$</span>draws[, <span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     accept       mean1         sd1 
 0.988000000 0.007152857 1.001538076 </code></pre>
@@ -641,6 +641,7 @@ p \leftarrow p + \tfrac\epsilon2\,\nabla\log\pi(\theta)
 <li><strong>Hamiltonian Monte Carlo</strong> adds momentum and follows gradient-driven trajectories (leapfrog + Metropolis correction), giving distant proposals with high acceptance and nearly independent draws; the default in modern software (Stan)</li>
 </ul>
 
+
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -650,19 +651,19 @@ p \leftarrow p + \tfrac\epsilon2\,\nabla\log\pi(\theta)
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_12_mcmc_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
