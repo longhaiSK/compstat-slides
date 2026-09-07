@@ -1,0 +1,211 @@
+---
+title: "STAT 812/420"
+subtitle: "Computational Statistics"
+author: "Longhai Li"
+format: banner_slides-revealjs
+---
+
+## Number Representation: Place Value in Different Bases
+
+![](Lec%2003%20arithmetics_images/p02.png)
+
+Base-10 place value:
+$$1348 = 1\times10^3 + 3\times10^2 + 4\times10^1 + 8\times10^0$$
+
+Binary (base-2) place value and the binary-to-decimal correspondence for 3-bit patterns:
+
+| binary | decimal |
+|:---:|:---:|
+| 000 | 0 |
+| 001 | 1 |
+| 010 | 2 |
+| 011 | 3 |
+| 100 | 4 |
+
+## Integer Representation
+
+![](Lec%2003%20arithmetics_images/p03.png)
+
+- Integers are stored as a fixed-length sequence of bits (e.g., 32 bits), each bit is 0 or 1.
+- With $p$ bits, the largest representable unsigned integer satisfies
+$$\sum_{i=0}^{p-1} 2^i = 2^p - 1$$
+- A 3-bit example: patterns `000, 001, 010, 011` represent decimal `0, 1, 2, 3`.
+
+## Floating Point Representation
+
+![](Lec%2003%20arithmetics_images/p04.png)
+
+A floating point number is stored as **sign**, **mantissa**, and **exponent**:
+$$(-1)^s \times (\text{mantissa}) \times 2^{\text{exp}}$$
+
+- Sign: 1 bit
+- Mantissa: 52 bits (double precision)
+- Exponent: 11 bits
+- Example mantissa bit pattern shown: $0.0101011 \times 2^{\dots}$
+
+## A Model for Understanding Floating Point Numbers
+
+![](Lec%2003%20arithmetics_images/p05.png)
+
+Floating point numbers are not evenly spaced: near 0 the representable values are packed closely together, while as magnitude grows (moving from $10$, to $100$, to $1000$, ...) the gaps between representable numbers grow as well.
+
+## Overflow and Underflow
+
+![](Lec%2003%20arithmetics_images/p06.png)
+
+- **Underflow**: numbers too small in magnitude collapse to $0$. The smallest positive representable double is about
+$$2^{-1074} \approx 10^{-300}$$
+- **Overflow**: numbers too large in magnitude become non-representable (`Inf`). The largest representable double is about
+$$2^{1023} \approx 10^{300}$$
+- Any value smaller than roughly $2^{-2000}$ underflows to exactly $0$.
+
+## Roundoff Error
+
+![](Lec%2003%20arithmetics_images/p07.png)
+
+- The mantissa can only hold a finite number of digits, so arithmetic results must be **rounded** to fit back into the representable grid.
+- Example: adding a small perturbation to `1.121` can push the true result past what the mantissa can store, so it gets rounded back to the nearest representable number, e.g. `1.121` again — the update is silently lost.
+- Consequence: $a + b$ computed in floating point may not equal the mathematically exact sum; e.g. `0.0001` added to a much larger number may not change the stored value at all (`0.0000 \ne 0.0001`, i.e. the tiny addend was rounded away).
+
+## Example: Machine Epsilon (1)
+
+![](Lec%2003%20arithmetics_images/p08.png)
+
+Working through $1 + 2^{-40}$: the mantissa has a fixed number of bits, so whether adding $2^{-40}$ to $1$ changes the stored value depends on whether $2^{-40}$ is small enough, relative to $1$, to fall entirely below the precision of the mantissa.
+
+## Example: Machine Epsilon (2)
+
+![](Lec%2003%20arithmetics_images/p09.png)
+
+Continuing the machine-epsilon example: once the added term is smaller than the smallest increment the mantissa can represent next to $1$, the computed sum rounds back down to exactly the original number.
+
+## Example: Adding Numbers of Different Magnitudes
+
+![](Lec%2003%20arithmetics_images/p10.png)
+
+With 4 significant (decimal) digits available:
+$$1.000 + 0.0001 + 0.0001$$
+$$= 1.000\times10^0 + 1.000\times10^{-4} + 1.000\times10^{-4}$$
+$$= 1.000 + 2.000\times10^{-4}$$
+
+Adding two numbers of the same small magnitude first, then adding the result to the large number, keeps more information than adding them one at a time when precision is limited.
+
+## Example: Taylor Series for $e^x$
+
+Using the Taylor series to approximate $e^x$:
+$$e^x \approx 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots + \frac{x^k}{k!}$$
+
+- For $x < 0$, the terms alternate in sign:
+$$+,\ -,\ +,\ -,\ +,\ -,\ \dots$$
+- Summing terms of alternating sign that are individually much larger than the final result causes **catastrophic cancellation** and loss of precision.
+
+## Avoiding Cancellation: $e^{-x} = 1/e^{x}$
+
+For $x > 0$:
+$$e^{-x} = \frac{1}{e^{x}}$$
+
+- Rather than evaluating the alternating Taylor series directly for a negative argument, compute $e^{x}$ for the corresponding **positive** argument (all terms positive, no cancellation), then take the reciprocal.
+
+## Example: Sum of Squared Deviations
+
+$$\sum_{i=1}^{n}(x_i - \bar{x})^2 = \sum_{i=1}^{n} x_i^2 - n\bar{x}^2 = \sum_i x_i^2 - \frac{\left(\sum_i x_i\right)^2}{n}$$
+
+- The right-hand ("computational") formula needs only $\sum x_i$ and $\sum x_i^2$, so it can be computed in a single pass over the data.
+- However, when the $x_i$ are large in magnitude but close together, $\sum x_i^2$ and $\left(\sum x_i\right)^2/n$ are both huge and nearly equal — subtracting them causes catastrophic cancellation.
+
+## Example: Catastrophic Cancellation (Large Numbers)
+
+![](Lec%2003%20arithmetics_images/p14.png)
+
+- Take $x_1, x_2, x_3$ to be $1, 2, 3$: then $\sum (x_i - \bar{x})^2 = 2$.
+- Now shift all three points by a large constant $M$: $x_1, x_2, x_3 = 2M+1,\, 2M+2,\, 2M+3$. The true value of $\sum(x_i-\bar x)^2$ is unchanged, still $2$.
+- But $\left(\sum x_i\right)^2 = (6M+6)^2 \approx 12M^2$, which for large $M$ can be as large as $10^{12}$ or more — computing the difference of two such large, nearly-equal quantities in floating point destroys the small true answer.
+
+## Example: Catastrophic Cancellation (cont'd)
+
+![](Lec%2003%20arithmetics_images/p15.png)
+
+- On the original scale, $x_i - \bar{x}$ takes the well-separated values $-1, 0, 1$.
+- After shifting by $2B$ (i.e. $x_i = 2B+1, 2B+2, 2B+3$), the *deviations* $x_i - \bar{x}$ are exactly the same ($-1, 0, 1$) — but computing them via the naive sum-of-squares formula requires first computing and subtracting huge, nearly equal numbers, which is numerically unstable.
+
+## Example: The Sigmoid Function
+
+![](Lec%2003%20arithmetics_images/p16.png)
+
+The sigmoid function can be written two equivalent ways:
+$$\frac{e^{x}}{1+e^{x}} = \frac{1}{1+e^{-x}}$$
+
+- Naive form $\dfrac{e^x}{1+e^x}$: for large positive $x$, $e^x$ **overflows** to `Inf`, giving $\text{Inf}/\text{Inf} = \text{NaN}$; for very negative $x$, $e^x$ **underflows** to $0$, giving $0/(1+0) = 0$ (this case is actually fine).
+- Stable form $\dfrac{1}{1+e^{-x}}$: for large positive $x$, $e^{-x} \to 0$ so the result correctly $\to 1$; for very negative $x$, $e^{-x}$ overflows to `Inf`, so the result correctly $\to 0$.
+- The stable form avoids ever dividing `Inf` by `Inf`.
+
+## Motivating Example: Overflow and Underflow in Products
+
+We need to handle underflow and overflow when multiplying many numbers.
+
+- Product of many small probabilities:
+$$\prod_{i=1}^{2000} p(x_i) = \left(\frac12\right)\cdots\left(\frac12\right) = \left(\frac12\right)^{2000} = \frac{1}{2^{2000}}$$
+$$(10^{-1})^{1000} = 10^{-1000} \quad \text{underflow}$$
+
+- Product of many large numbers (factorial):
+$$1000! = 1000 \times 999 \times \cdots \times 1 \approx 1000^{1000} = 10^{3000} \quad \text{overflow}$$
+$$n! \approx n^{\,n-\frac12}\ (\text{Stirling-type approximation})$$
+
+## Representing Numbers in Logarithmic Form
+
+Represent a number $x$ by its logarithm $\ell_x = \log_e(x)$:
+
+$$x = e^{2000} \iff \ell_x = 2000 \qquad\qquad x = e^{-2000} \iff \ell_x = -2000$$
+
+- Numbers that would overflow or underflow in ordinary form can be represented compactly and safely as their logarithm.
+- Given $\ell_x = \log(x)$, define the operation on the log scale that returns $\log\big(f(e^{\ell_x})\big)$:
+$$x_1, \ldots, x_n \xrightarrow{f} y \qquad\Longleftrightarrow\qquad \ell_1, \ldots, \ell_n \xrightarrow{f} \ell_y$$
+
+## Computing Products and Quotients in Log Domain
+
+Computing $\log(e^{\ell_1}\cdot e^{\ell_2})$:
+$$\log(x_1 \cdot x_2) = \log x_1 + \log x_2 = \ell_1 + \ell_2$$
+$$\log\left(\prod_{i=1}^{n} x_i\right) = \sum_{i=1}^{n}\log x_i = \sum_{i=1}^{n}\ell_i$$
+
+**Example:** $\log(n!) = \log(n) + \log(n-1) + \cdots + \log(1)$ (implemented as `lfactorial(1000)` in R).
+
+Computing $\log(e^{\ell_1}/e^{\ell_2})$:
+$$\log\left(\frac{x_1}{x_2}\right) = \log x_1 - \log x_2 = \ell_1 - \ell_2$$
+
+**Example:** $x_1 = 2^{2000},\ x_2 = 2^{2001}$, so $\log(x_1/x_2) = \log\!\left(\tfrac12\right)$.
+
+## The Log-Sum-Exp Trick
+
+Computing $\log\sum_i e^{\ell_i}$ where $\ell_i = \log x_i$:
+$$\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right) \qquad [\text{log-sum-exp}]$$
+
+Rewriting to avoid overflow, with $m = \max_i \ell_i$:
+$$\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\cdot e^{m}\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\right) + m$$
+
+## Log-Sum-Exp: Numerical Stability Illustration
+
+![](Lec%2003%20arithmetics_images/p22.png)
+
+- If $x_i = e^{2000}, e^{2001}, e^{2002}$, each individually **overflows** to `Inf`, so $\sum x_i$ computed directly is `Inf`.
+- Working on the log scale instead, $\ell_i = 2000, 2001, 2002$ are ordinary numbers.
+- Subtracting off $m = \max_i \ell_i$ gives $\ell_i - m = -2, -1, 0$, so $e^{\ell_i-m} = e^{-2}, e^{-1}, e^{0}$ — all safely representable.
+- The final answer is recovered as $\log\left(\sum_i e^{\ell_i-m}\right) + m$, which never overflows.
+
+## Computing $\log(e^{\ell_x} - e^{\ell_y})$
+
+Suppose $x > y > 0$, with $\ell_x = \log x$ and $\ell_y = \log y$:
+$$\log(x - y) = \log\left(e^{\ell_x} - e^{\ell_y}\right)$$
+$$= \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right)$$
+$$= \ell_x + \log\left(1 - e^{\ell_y-\ell_x}\right)$$
+
+- Since $x > y$, we have $\ell_y - \ell_x < 0$, so $e^{\ell_y-\ell_x} \in (0,1)$ and the expression is numerically stable.
+
+## Practice Questions
+
+**Question 1:** How do you compute
+$$\log\left(\frac{1}{1+e^{-x}}\right)$$
+so as to avoid overflow and underflow of $e^{x}$?
+
+**Question 2:** Softmax. How do you compute
+$$\log\left(\frac{e^{x_k}}{\displaystyle\sum_{k=1}^{K} e^{x_k}}\right)$$
+so as to avoid underflow and overflow of $e^{x_k}$?

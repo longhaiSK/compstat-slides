@@ -1,0 +1,17 @@
+---
+title: "Laplace Approximation"
+author: "Longhai Li"
+format: banner_slides-revealjs
+---
+
+## Goal and Setup
+
+![](Lec%2009%20Laplace_images/p01-goal-setup.png)
+
+## Derivation: Gaussian (Laplace) Approximation
+
+![](Lec%2009%20Laplace_images/p02-gaussian-approx-derivation.png)
+
+## A Simplification: Bayesian Information Criterion (BIC)
+
+![](Lec%2009%20Laplace_images/p03-bic-and-examples.png)
