@@ -140,45 +140,26 @@ window.Quarto = {
 </header>
 
 
-<p>Welcome to the course materials for STAT 420/812, Computational Statistics. Select a lecture from the sidebar to view the slides.</p>
+<p>Welcome to the course materials for STAT 420/812, Computational Statistics. Each chapter below opens its slides in a new window.</p>
+<section id="chapters" class="level2">
+<h2 class="anchored" data-anchor-id="chapters">Chapters</h2>
+<ol type="1">
+<li><a href="Lec_01_intro-course.html" target="_blank">Introduction</a> — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration</li>
+<li><a href="Lec_03_arithmetics.html" target="_blank">Computer Arithmetic</a> — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas</li>
+<li><a href="Lec_04_Monte_Carlo.html" target="_blank">Monte Carlo</a> — random number generation, sampling distributions, and evaluating estimators and tests by simulation</li>
+<li><a href="Lec_05_MLE.html" target="_blank">Maximum Likelihood</a> — gradients, Hessians, and numerical optimization of likelihoods</li>
+<li><a href="Lec_06_EM.html" target="_blank">EM Algorithm</a> — the <span class="math inline">\(Q\)</span> function, the ascending property, mixture models, censored data, and extensions</li>
+<li><a href="Lec_07_bayesian_inference.html" target="_blank">Bayesian Inference</a> — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example</li>
+<li><a href="Lec_08_numerical_quadrature.html" target="_blank">Numerical Quadrature</a> — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality</li>
+<li><a href="Lec_09_laplace_approximation.html" target="_blank">Laplace Approximation</a> — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC</li>
+<li><a href="Lec_10_Rejection_sampling.html" target="_blank">Rejection Sampling</a> — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling</li>
+<li><a href="Lec_11_Importance_Sampling.html" target="_blank">Importance Sampling</a> — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation</li>
+<li><a href="Lec_12_mcmc.html" target="_blank">MCMC</a> — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo</li>
+</ol>
+</section>
 <section id="about-the-slides" class="level2">
 <h2 class="anchored" data-anchor-id="about-the-slides">About the slides</h2>
 <p>The slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it.</p>
-</section>
-<section id="topics" class="level2">
-<h2 class="anchored" data-anchor-id="topics">Topics</h2>
-<p>The course is organized around four computational tasks that recur throughout statistics.</p>
-<section id="calculation" class="level3">
-<h3 class="anchored" data-anchor-id="calculation">Calculation</h3>
-<ul>
-<li>Why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as computational problems</li>
-<li>Computer arithmetic: floating-point representation, overflow, underflow, rounding error, and stable formulas for variances and log-likelihoods</li>
-</ul>
-</section>
-<section id="simulation" class="level3">
-<h3 class="anchored" data-anchor-id="simulation">Simulation</h3>
-<ul>
-<li>Random number generation and elementary Monte Carlo: sampling distributions, evaluating estimators and tests by simulation</li>
-<li>Rejection sampling: envelope functions, the uniform-under-the-curve view, adaptive rejection sampling for log-concave targets</li>
-<li>Importance sampling: importance weights, self-normalized estimators, effective sample size and its limitations, applications to free energy and Bayesian cross-validation</li>
-</ul>
-</section>
-<section id="optimization" class="level3">
-<h3 class="anchored" data-anchor-id="optimization">Optimization</h3>
-<ul>
-<li>Maximum likelihood and numerical optimization: gradients and Hessians, Newton-type and gradient-based methods, visualizing curvature</li>
-<li>The EM algorithm: the <span class="math inline">\(Q\)</span> function, the ascending property, EM as alternating optimization, mixture models, censored data, and extensions to clustering, hidden Markov models, and factor analysis</li>
-</ul>
-</section>
-<section id="integration" class="level3">
-<h3 class="anchored" data-anchor-id="integration">Integration</h3>
-<ul>
-<li>Bayesian inference: prior, likelihood, posterior, posterior summaries as Bayes estimates under loss, prediction, the Beta–Bernoulli example</li>
-<li>Numerical quadrature: midpoint, trapezoidal, and Simpson’s rules, transformations for infinite ranges, computing marginal likelihoods on the log scale, and the limits of quadrature in higher dimensions</li>
-<li>Laplace approximation: Gaussian approximation at the posterior mode, the marginal likelihood and BIC, approximating posterior expectations</li>
-<li>Markov chain Monte Carlo: Markov chains, invariance, detailed balance, Gibbs sampling and data augmentation, Metropolis–Hastings and step-size tuning, Metropolis-within-Gibbs, and an introduction to Hamiltonian Monte Carlo</li>
-</ul>
-</section>
 </section>
 <section id="software" class="level2">
 <h2 class="anchored" data-anchor-id="software">Software</h2>

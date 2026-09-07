@@ -1236,7 +1236,7 @@
     "href": "index.html",
     "title": "Elements of Statistical Computation",
     "section": "",
-    "text": "Welcome to the course materials for STAT 420/812, Computational Statistics. Select a lecture from the sidebar to view the slides."
+    "text": "Welcome to the course materials for STAT 420/812, Computational Statistics. Each chapter below opens its slides in a new window."
   },
   {
     "objectID": "index.html#about-the-slides",
@@ -2161,5 +2161,12 @@
     "title": "Elements of Statistical Computation",
     "section": "Summary",
     "text": "Summary\n\nImportance sampling estimates E_f[a(\\theta)] and C_f = \\int f(\\theta)\\,d\\theta from draws \\theta_i\\sim g using weights w_i = f(\\theta_i)/g(\\theta_i): \\widehat{C_f/C_g} = \\frac1n\\sum_i w_i, \\qquad \\hat A = \\sum_i a(\\theta_i)\\,\\tilde w_i, \\quad \\tilde w_i = \\frac{w_i}{\\sum_j w_j}\nGood story: a proposal shaped like the target on its support (Example 1) gives near-constant weights and S_{\\text{eff}}\\approx n\nBad stories: a proposal that misses a mode (Example 2) or part of the support (Example 3) fails silently, with perfect-looking weights; a proposal with lighter tails fails noisily, with a few huge weights\nS_{\\text{eff}} = 1/\\sum_i\\tilde w_i^2 diagnoses only the second kind of failure\nAdvanced uses: normalizing-constant ratios (free energy, marginal likelihood) via tempering steps; leave-one-out cross-validation from full-posterior draws with w_i = 1/p(y_i\\mid\\theta)"
+  },
+  {
+    "objectID": "index.html#chapters",
+    "href": "index.html#chapters",
+    "title": "Elements of Statistical Computation",
+    "section": "Chapters",
+    "text": "Chapters\n\nIntroduction — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration\nComputer Arithmetic — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas\nMonte Carlo — random number generation, sampling distributions, and evaluating estimators and tests by simulation\nMaximum Likelihood — gradients, Hessians, and numerical optimization of likelihoods\nEM Algorithm — the \\(Q\\) function, the ascending property, mixture models, censored data, and extensions\nBayesian Inference — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example\nNumerical Quadrature — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality\nLaplace Approximation — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC\nRejection Sampling — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling\nImportance Sampling — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation\nMCMC — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo"
   }
 ]
