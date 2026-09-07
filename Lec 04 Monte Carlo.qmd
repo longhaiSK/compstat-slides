@@ -1,307 +1,527 @@
 ---
+title: "STAT 812/420"
 subtitle: "Random Numbers and Elementary Monte Carlo"
 author: "Longhai Li"
 format: banner_slides-revealjs
+execute:
+  echo: true
+  fig-width: 7
+  fig-height: 4
 ---
+
+```{r}
+#| echo: false
+set.seed(812)
+```
+
+# Generating Random Numbers
 
 ## Pseudo Random Numbers
 
-![](Lec 04 Monte Carlo_images/p02.png)
+A computer is deterministic, so it cannot produce truly random numbers. It produces **pseudo random numbers**: a deterministic sequence that *behaves* like iid $\mathrm{Unif}(0,1)$ draws.
+
+A classic generator, the **linear congruential generator (LCG)**:
+$$x_{i+1} = (a\,x_i + c) \bmod m, \qquad u_{i+1} = x_{i+1}/m$$
+
+- The starting value $x_0$ is the **seed**. The same seed gives the same sequence, which makes simulations reproducible.
+- The sequence eventually repeats; a good generator has a very long period and passes statistical tests of uniformity and independence.
+- R's default is the Mersenne Twister (period $2^{19937}-1$). All other distributions in R are built from $\mathrm{Unif}(0,1)$ draws.
+
+```{r}
+lcg <- function(n, seed, a = 1103515245, c = 12345, m = 2^31) {
+  x <- numeric(n); x[1] <- seed
+  for (i in 2:n) x[i] <- (a * x[i - 1] + c) %% m
+  x / m
+}
+round(lcg(5, seed = 812), 4)
+```
+
+## Seeds and Reproducibility
+
+```{r}
+set.seed(1); runif(3)
+set.seed(1); runif(3)      # identical
+runif(3)                   # continues the sequence
+```
+
+Always `set.seed()` at the top of a simulation study so results can be reproduced and debugged.
 
 ## Example: Generating $\mathrm{Unif}(a,b)$
 
-![](Lec 04 Monte Carlo_images/p03.png)
+If $U \sim \mathrm{Unif}(0,1)$ then $X = a + (b-a)\,U \sim \mathrm{Unif}(a,b)$:
+$$P(X \le x) = P\!\left(U \le \frac{x-a}{b-a}\right) = \frac{x-a}{b-a}, \qquad a \le x \le b .$$
 
-## Inverting C.D.F. (Continuous Case)
+```{r}
+u <- runif(10000); x <- 2 + 3 * u          # Unif(2, 5)
+hist(x, breaks = 30, freq = FALSE, main = "a + (b - a) U with a = 2, b = 5")
+abline(h = 1/3, col = 2, lwd = 2)
+```
 
-![](Lec 04 Monte Carlo_images/p04.png)
+## Inverting the CDF (Continuous Case)
 
-## Proof: Validity of the Inverse-CDF Method
+Let $F_X$ be a continuous CDF with inverse (quantile function) $F_X^{-1}$.
 
-**Pf:** $X = F_X^{-1}(U)$, $\quad U = F_X(X)$
+**Theorem.** If $U \sim \mathrm{Unif}(0,1)$, then $X = F_X^{-1}(U)$ has CDF $F_X$.
 
-$$
-P(X \le x) = P\big(F_X^{-1}(U) \le x\big)
-$$
+**Proof.**
+$$P(X \le x) = P\big(F_X^{-1}(U) \le x\big) = P\big(U \le F_X(x)\big) = F_X(x).$$
 
-$$
-= P\big(U \le F_X(x)\big)
-$$
+Equivalently, by the change-of-variable formula with $u = F_X(x)$:
+$$f_X(x) = f_U\big(F_X(x)\big)\left|\frac{du}{dx}\right| = 1 \times f(x).$$
 
-$$
-= F_X(x)
-$$
+The converse also holds: if $X \sim F_X$ then $F_X(X) \sim \mathrm{Unif}(0,1)$ (the **probability integral transform**), which we will use for p-values.
 
-$$
-f_X(x) = f_U\big(F_X(x)\big)\cdot \left|\frac{du}{dx}\right| = f_U\big(F_X(x)\big) f(x) = 1 \times f(x)
-$$
+## Inverting the CDF: Picture
+
+```{r}
+#| echo: false
+curve(pexp(x, 1), 0, 5, lwd = 2, xlab = "x", ylab = "F(x)", main = "X = F^{-1}(U)")
+u <- c(0.2, 0.6, 0.9); x <- qexp(u, 1)
+segments(0, u, x, u, col = 2, lty = 2); segments(x, 0, x, u, col = 4, lty = 2)
+points(x, u, pch = 19); axis(2, u, labels = paste0("u=", u), las = 1, cex.axis = 0.8)
+axis(1, x, labels = round(x, 2), cex.axis = 0.8)
+```
+
+Draw $u$ on the vertical axis, read $x = F^{-1}(u)$ off the horizontal axis. Regions where $F$ is steep (high density) receive more draws.
 
 ## Example: Exponential Distribution
 
-![](Lec 04 Monte Carlo_images/p06.png)
+$X \sim \mathrm{Exp}(\lambda)$ has $F_X(x) = 1 - e^{-\lambda x}$ for $x > 0$. Solving $u = 1 - e^{-\lambda x}$:
+$$x = F_X^{-1}(u) = -\frac{1}{\lambda}\log(1-u).$$
 
-## Example: Exponential Distribution (cont'd)
+Since $1 - U \sim \mathrm{Unif}(0,1)$ as well, we may use $X = -\log(U)/\lambda$.
 
-![](Lec 04 Monte Carlo_images/p07.png)
+```{r}
+lambda <- 2; u <- runif(10000); x <- -log(u) / lambda
+hist(x, breaks = 40, freq = FALSE, main = "Exp(2) via inverse CDF")
+curve(dexp(x, lambda), add = TRUE, col = 2, lwd = 2)
+c(sample_mean = mean(x), true_mean = 1 / lambda)
+```
 
-## Assignment 1, Q2
+## Inverting the CDF (Discrete Case)
 
-![](Lec 04 Monte Carlo_images/p08.png)
+For a discrete $X$ with values $x_1 < x_2 < \cdots$ and CDF $F$, set
+$$X = x_k \quad\text{where } F(x_{k-1}) < U \le F(x_k).$$
 
-## Generating $N(0,1)$ Random Variables
+That is, cut $(0,1)$ into intervals of lengths $P(X = x_k)$ and see which one $U$ lands in.
 
-![](Lec 04 Monte Carlo_images/p09.png)
+```{r}
+p <- c(0.2, 0.5, 0.3); vals <- c(1, 2, 3)
+u <- runif(10000)
+x <- vals[findInterval(u, cumsum(p)) + 1]   # or sample(vals, n, TRUE, p)
+table(x) / length(x)
+```
 
-## The Law of Large Numbers
+## A Special Transformation for Generating Normal Samples
 
-**Theorem 5.1.1** (Strong Law of Large Numbers) *If random variables $X_1, X_2, \ldots$, iid from a distribution with finite mean $\mu$, then*
+$\Phi^{-1}$ has no closed form, so the inverse-CDF method is not directly usable. Instead, look at a pair $(Z_1, Z_2) \overset{iid}{\sim} N(0,1)$ in **polar coordinates**:
+$$Z_1 = R\cos\Theta, \qquad Z_2 = R\sin\Theta, \qquad R^2 = Z_1^2 + Z_2^2, \quad \Theta = \operatorname{atan2}(Z_2, Z_1).$$
 
-$$
-P\left(\frac{X_1 + \ldots + X_n}{n} \to \mu\right) = 1 \tag{5.1}
-$$
+The joint density $\frac{1}{2\pi}e^{-(z_1^2+z_2^2)/2}$ depends on $(z_1, z_2)$ only through $r^2 = z_1^2 + z_2^2$, so it is **rotationally symmetric** about the origin. Consequently:
 
-This theorem says that if we can simulate $X_i$ long enough, the sample average will almost surely converge to the true mean.
+- The angle $\Theta \sim \mathrm{Unif}(0, 2\pi)$, independent of $R$.
+- The squared radius $R^2 = Z_1^2 + Z_2^2 \sim \chi^2_2$, and $\chi^2_2$ **is** the exponential distribution with rate $1/2$:
+$$f_{\chi^2_2}(w) = \frac{1}{2}e^{-w/2}, \quad w > 0 \qquad\Longrightarrow\qquad R^2 \sim \mathrm{Exp}(\text{rate} = 1/2).$$
 
-## The Central Limit Theorem
+Both $R^2$ and $\Theta$ **can** be generated by inverting a CDF.
 
-**Theorem 5.1.2** (Central Limit Theorem) *If random variables $X_1, X_2, \ldots$, iid from a distribution with finite mean $\mu$ and finite standard deviation $\sigma$, then*
+## Illustration: Two Standard Normals in Polar Coordinates
 
-$$
-\frac{\bar X - \mu}{\sigma/\sqrt n} \to^d N(0,1) \tag{5.2}
-$$
+```{r}
+#| echo: false
+library(latex2exp)
+z1 <- rnorm(3000); z2 <- rnorm(3000); r2 <- z1^2 + z2^2; th <- atan2(z2, z1) %% (2 * pi)
+layout(matrix(c(1, 1, 2, 3), 2, 2), widths = c(1.1, 1)); par(pty = "s", mar = c(4, 4, 2, 1))
+plot(z1, z2, pch = 20, cex = 0.4, col = "grey40", asp = 1, xlab = TeX("$Z_1$"), ylab = TeX("$Z_2$"),
+     main = TeX("$(Z_1, Z_2)$ iid N(0,1)"))
+q <- sqrt(qchisq(c(0.5, 0.9, 0.99), 2))
+for (r in q) symbols(0, 0, circles = r, inches = FALSE, add = TRUE, fg = 2, lwd = 2)
+text(q + 0.25, 0.25, c("50%", "90%", "99%"), col = 2, cex = 0.8)
+par(pty = "m")
+hist(r2, breaks = 40, freq = FALSE, main = TeX("$R^2 = Z_1^2 + Z_2^2$"), xlab = "")
+curve(dexp(x, 1/2), add = TRUE, col = 2, lwd = 2); legend("topright", "Exp(rate 1/2)", col = 2, lwd = 2, bty = "n")
+hist(th, breaks = 24, freq = FALSE, main = TeX("$\\Theta$"), xlab = ""); abline(h = 1 / (2 * pi), col = 2, lwd = 2)
+```
 
-CLT can be used to calculate error bound given a confidence level. For instance, given confidence level $\alpha = 95\%$, we can conclude from CLT:
+The point cloud is rotationally symmetric: the red circles enclose 50%, 90%, 99% of the points ($R^2 \le \chi^2_2$ quantiles); the angle is uniform; $R^2$ follows $\mathrm{Exp}(1/2)$.
 
-$$
-P(-1.96\,\sigma/\sqrt n \le \bar X - \mu \le 1.96\,\sigma/\sqrt n) \approx 0.95 \tag{5.3}
-$$
+## The Box–Muller Transformation
 
-Obviously, we see that the width of error bound will decrease with $n$, in a rate of square root.
+Reverse the picture: **generate** $R^2$ and $\Theta$, then rotate back to $(Z_1, Z_2)$.
 
-$$
--1.96 < \frac{\bar X - \mu}{\sigma/\sqrt n} < 1.96 \iff |\bar X - \mu| < 1.96\cdot\frac{\sigma}{\sqrt n}
-$$
+1. $R^2 \sim \mathrm{Exp}(1/2)$ by inverse CDF: $F(w) = 1 - e^{-w/2}$, so $R^2 = -2\log U_1$, i.e. $R = \sqrt{-2\log U_1}$.
+2. $\Theta \sim \mathrm{Unif}(0, 2\pi)$: $\Theta = 2\pi U_2$.
+3. $Z_1 = R\cos\Theta$, $Z_2 = R\sin\Theta$.
 
-$$
-\iff \bar X - 1.96\frac{\sigma}{\sqrt n} < \mu < \bar X + 1.96\frac{\sigma}{\sqrt n}
-$$
+**Theorem (Box–Muller).** If $U_1, U_2 \overset{iid}{\sim} \mathrm{Unif}(0,1)$, then
+$$Z_1 = \sqrt{-2\log U_1}\,\cos(2\pi U_2), \qquad Z_2 = \sqrt{-2\log U_1}\,\sin(2\pi U_2)$$
+are independent $N(0,1)$. Two uniforms produce two normals. Then $\mu + \sigma Z \sim N(\mu, \sigma^2)$.
 
-## A Toy Example: Estimating $\pi$ with Monte Carlo Method
+## Box–Muller in R
 
-Suppose random variables $X, Y$ are uniformly distributed over rectangle $S = (-1,1)\times(-1,1)$, as displayed in Figure 5.2. The probability that $(X,Y)$ lies in the ball $C = \{(x,y)\mid x^2+y^2 \le 1\}$ is $\pi/4$, in other words,
+```{r}
+box_muller <- function(n) {
+  u1 <- runif(n); u2 <- runif(n)
+  r  <- sqrt(-2 * log(u1))            # R^2 ~ Exp(1/2), i.e. chi-square(2)
+  th <- 2 * pi * u2                   # Theta ~ Unif(0, 2 pi)
+  cbind(z1 = r * cos(th), z2 = r * sin(th))
+}
+z <- box_muller(3000)
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
+par(pty = "s"); plot(z, pch = 20, cex = 0.4, col = "grey40", asp = 1, main = "Box-Muller output")
+par(pty = "m"); qqnorm(c(z), pch = ".", main = "Normal Q-Q plot of both coordinates"); qqline(c(z), col = 2)
+c(mean = mean(z), sd = sd(z), corr = cor(z)[1, 2])
+```
 
-$$
-E(4\times I((X,Y)\in C)) = \pi.
-$$
+# Monte Carlo Integration
 
-We can draw samples of $(X,Y)$ uniformly from $S$ and count how much proportion of these samples fall into $C$, then $\pi$ is estimated by:
+## Why Monte Carlo Works: Two Theorems
 
-$$
-\hat\pi_n = 4\times \frac{\sum_{i=1}^n I((X_i,Y_i)\in C)}{n} \tag{5.4}
-$$
+Monte Carlo estimates an expectation $\mu = E(g(X))$ by an average of simulated values,
+$$\hat\mu_n = \frac{1}{n}\sum_{i=1}^n g(X_i), \qquad X_i \overset{iid}{\sim} f .$$
 
-## Figure 5.2: Estimating $\pi$
+**Theorem 5.1.1 (Strong Law of Large Numbers).** If $X_1, X_2, \ldots$ are iid with finite mean $\mu$, then
+$$P\left(\frac{X_1 + \cdots + X_n}{n} \to \mu\right) = 1 . \tag{5.1}$$
 
-::: columns
-::: {.column width="45%"}
-![](Lec 04 Monte Carlo_images/p13-fig.png)
-:::
-::: {.column width="55%"}
-$(X,Y)\sim \mathrm{Unif}(S)$
+The LLN guarantees that the average **converges** to the truth. It does not say how fast.
 
-The probability that $(X,Y)$ lies in the ball $C=\{(x,y)\mid x^2+y^2\le 1\}$ is $\pi/4$
+**Theorem 5.1.2 (Central Limit Theorem).** If in addition the variance $\sigma^2$ is finite, then
+$$\frac{\bar X - \mu}{\sigma/\sqrt n} \;\xrightarrow{d}\; N(0,1). \tag{5.2}$$
 
-$$P((X,Y)\in C) = \frac{\pi}{4}$$
+The CLT gives the **error bound**: the Monte Carlo error is of order $\sigma/\sqrt n$.
 
-$$E(I((X,Y)\in C)) = \frac{\pi}{4}$$
+## Monte Carlo Error Bound from the CLT
 
-$$
-I((X,Y)\in C) =
-\begin{cases}
-1, & (X,Y)\in C \\
-0, & \text{o.w.}
-\end{cases}
-$$
+From (5.2), with confidence level 95%,
+$$P\!\left(|\bar X - \mu| \le 1.96\,\frac{\sigma}{\sqrt n}\right) \approx 0.95, \tag{5.3}$$
+so a 95% interval for $\mu$ is
+$$\bar X \pm 1.96\,\frac{\sigma}{\sqrt n}, \qquad \sigma \text{ replaced by the sample SD } s .$$
 
-$$
-Z = 4\cdot I((X,Y)\in C), \quad E(Z) = \pi
-$$
+- Halving the error requires **four times** as many samples; each extra decimal digit of accuracy costs a **100-fold** increase in $n$.
+- The rate $n^{-1/2}$ does not depend on the dimension of $X$, which is why Monte Carlo beats numerical quadrature in high dimensions.
 
-$$
-Z_1, Z_2, \ldots, Z_n \;\Rightarrow\; \bar Z = \frac{Z_1+\cdots+Z_n}{n} = \hat\pi
-$$
-:::
-:::
+## Demonstration of the LLN
 
-## Evaluation of Point Estimators
+Running averages of $X_i \sim \mathrm{Exp}(1)$ ($\mu = 1$) for three independent sequences:
 
-$$
-\hat\theta^{(1)} = \hat\theta\big(X_1^{(1)}, \ldots, X_n^{(1)}\big)
-$$
+```{r}
+n <- 5000
+plot(NULL, xlim = c(1, n), ylim = c(0.5, 1.6), log = "x",
+     xlab = "n (log scale)", ylab = "running average", main = "LLN: Exp(1)")
+for (k in 1:3) lines(cumsum(rexp(n)) / (1:n), col = k + 1)
+abline(h = 1, lty = 2)
+```
 
-$$
-\hat\theta^{(2)} = \hat\theta\big(X_1^{(2)}, \ldots, X_n^{(2)}\big)
-$$
+## Demonstration of the CLT
 
-$$
-\vdots
-$$
+For each of $N = 5000$ repetitions, draw $n$ values from $\mathrm{Exp}(1)$ and standardize the mean, $(\bar X - 1)/(1/\sqrt n)$:
 
-$$
-\hat\theta^{(N)} = \hat\theta\big(X_1^{(N)}, \ldots, X_n^{(N)}\big)
-$$
+```{r}
+clt_demo <- function(n, N = 5000) replicate(N, (mean(rexp(n)) - 1) * sqrt(n))
+par(mfrow = c(1, 3), mar = c(4, 4, 2, 1))
+for (n in c(2, 10, 100)) {
+  hist(clt_demo(n), breaks = 40, freq = FALSE, xlim = c(-4, 4), main = paste("n =", n), xlab = "")
+  curve(dnorm, add = TRUE, col = 2, lwd = 2)
+}
+```
 
-We evaluate a point estimator $\hat\theta$ by its Mean Squared Error:
+The skewed exponential becomes approximately normal as $n$ grows.
 
-$$
-\mathrm{MSE} = E\big((\hat\theta - \theta)^2\big)
-$$
+## An Example: Estimating $\pi$ by Monte Carlo
 
-Estimated by Monte Carlo with $N$ repetitions:
+Let $(X, Y)$ be uniform on the square $S = (-1,1)\times(-1,1)$, and let $C = \{(x,y): x^2 + y^2 \le 1\}$ be the unit disk. Then
+$$P\big((X,Y) \in C\big) = \frac{\text{area}(C)}{\text{area}(S)} = \frac{\pi}{4}.$$
 
-$$
-\widehat{\mathrm{MSE}} = \frac{\sum_{i=1}^N (\hat\theta^{(i)} - \theta)^2}{N}
-$$
+Define $Z = 4\, I\big((X,Y)\in C\big)$, so $E(Z) = \pi$ and
+$$\mathrm{Var}(Z) = 16 \cdot \frac{\pi}{4}\left(1 - \frac{\pi}{4}\right) \approx 2.70, \qquad \mathrm{SD}(Z) \approx 1.64 .$$
 
-## Example of Hypothesis Testing
+Drawing $(X_i, Y_i)$ and averaging $Z_i$:
+$$\hat\pi_n = \frac{1}{n}\sum_{i=1}^n Z_i = 4 \times \frac{\#\{i: X_i^2 + Y_i^2 \le 1\}}{n}. \tag{5.4}$$
 
-| $Y_i$ | $X_i$ | $Z_i$ |
-|:---:|:---:|:---:|
-| $Y_1$ | $X_1$ | $0$ |
-| $Y_2$ | $X_2$ | $0$ |
-| $\vdots$ | $\vdots$ | $\vdots$ |
-| $Y_i$ | $\vdots$ | $1$ |
-| $\vdots$ | $\vdots$ | $\vdots$ |
-| $Y_n$ | $X_n$ | $1$ |
+## Visualizing the Method
 
-$$
-H_0: \mathrm{corr}(Y,X) = 0 \;\Big|\; H_1: \mathrm{corr}(Y,X) \ne 0
-$$
+```{r}
+n <- 2000; x <- runif(n, -1, 1); y <- runif(n, -1, 1); inside <- x^2 + y^2 <= 1
+par(pty = "s")
+plot(x, y, col = ifelse(inside, "steelblue", "grey60"), pch = 20, cex = 0.6,
+     main = sprintf("n = %d, proportion inside = %.3f, pi-hat = %.3f", n, mean(inside), 4 * mean(inside)))
+curve(sqrt(1 - x^2), -1, 1, add = TRUE, lwd = 2); curve(-sqrt(1 - x^2), -1, 1, add = TRUE, lwd = 2)
+```
 
-$$
-\mathrm{corr}(Y,Z) = 0
-$$
+## The Monte Carlo Estimate and Its Error
 
-## Hypothesis Test
+```{r}
+est_pi <- function(n) {
+  z <- 4 * (runif(n, -1, 1)^2 + runif(n, -1, 1)^2 <= 1)
+  c(estimate = mean(z), se = sd(z) / sqrt(n))
+}
+r <- est_pi(10000)
+r
+r["estimate"] + c(-1.96, 1.96) * r["se"]    # 95% interval; contains pi = 3.14159?
+```
 
-![](Lec 04 Monte Carlo_images/p16.png)
+The standard error $s/\sqrt n$ is computed from the **same** simulated values — no extra cost. Always report it with a Monte Carlo estimate.
 
-## Two Types of Errors
+## Results by Sample Size
 
-|          | $T > c_\alpha$      | $T \le c_\alpha$      |
+```{r}
+ns <- 10^(2:6)
+res <- t(sapply(ns, est_pi))
+data.frame(n = ns, estimate = round(res[, 1], 5), error = round(res[, 1] - pi, 5),
+           se = signif(res[, 2], 3), theory_se = signif(1.64 / sqrt(ns), 3))
+```
+
+- The observed error is typically within about $2$ standard errors.
+- SE shrinks by $\sqrt{10} \approx 3.2$ for each 10-fold increase in $n$, as the CLT predicts.
+
+## Convergence of $\hat\pi_n$
+
+```{r}
+n <- 1e5; z <- 4 * (runif(n, -1, 1)^2 + runif(n, -1, 1)^2 <= 1)
+k <- 1:n; pihat <- cumsum(z) / k
+plot(k, pihat, type = "l", log = "x", ylim = c(2.8, 3.5), xlab = "n (log scale)", ylab = expression(hat(pi)[n]))
+lines(k, pi + 1.96 * 1.64 / sqrt(k), lty = 2, col = 2); lines(k, pi - 1.96 * 1.64 / sqrt(k), lty = 2, col = 2)
+abline(h = pi, col = 4)
+```
+
+The red band is $\pi \pm 1.96\,\sigma/\sqrt n$; the running estimate stays inside it most of the time.
+
+# Evaluating Statistical Methods by Simulation
+
+## Evaluating a Point Estimator
+
+A point estimator $\hat\theta = \hat\theta(X_1, \ldots, X_n)$ is judged by its **mean squared error**
+$$\mathrm{MSE}(\hat\theta) = E\big[(\hat\theta - \theta)^2\big] = \mathrm{Var}(\hat\theta) + \big[\mathrm{Bias}(\hat\theta)\big]^2 .$$
+
+MSE is an expectation, so it is estimated by Monte Carlo: simulate $N$ independent data sets from a model with **known** $\theta$,
+$$\hat\theta^{(j)} = \hat\theta\big(X_1^{(j)}, \ldots, X_n^{(j)}\big), \qquad j = 1, \ldots, N,$$
+and compute
+$$\widehat{\mathrm{MSE}} = \frac{1}{N}\sum_{j=1}^N \big(\hat\theta^{(j)} - \theta\big)^2, \qquad
+\widehat{\mathrm{Bias}} = \bar{\hat\theta} - \theta, \qquad
+\widehat{\mathrm{Var}} = \frac{1}{N}\sum_{j=1}^N \big(\hat\theta^{(j)} - \bar{\hat\theta}\big)^2 .$$
+
+Two sample sizes appear: $n$ (data per replicate, fixed by the problem) and $N$ (replicates, chosen large enough that the Monte Carlo error is negligible).
+
+## Example: Mean vs. Median vs. Trimmed Mean
+
+Estimating the centre $\theta = 0$ of a symmetric distribution, $n = 20$, $N = 5000$ replicates.
+
+```{r}
+eval_est <- function(rdist, n = 20, N = 5000) {
+  est <- replicate(N, { x <- rdist(n); c(mean = mean(x), median = median(x), trim10 = mean(x, trim = 0.1)) })
+  rbind(bias = rowMeans(est), var = apply(est, 1, var), mse = rowMeans(est^2))
+}
+round(eval_est(rnorm), 4)                          # normal data
+round(eval_est(function(n) rt(n, df = 3)), 4)      # heavy-tailed t3 data
+```
+
+No estimator is best everywhere: the mean wins under normality, the trimmed mean and median win under heavy tails.
+
+# Evaluating and Conducting Hypothesis Tests
+
+## Hypothesis Tests and the Two Types of Error
+
+A test rejects $H_0$ when a statistic $T$ exceeds a critical value $c_\alpha$.
+
+|          | reject: $T > c_\alpha$      | do not reject: $T \le c_\alpha$      |
 |----------|---------------------|-----------------------|
-| $H_0$    | Type I error (FP)   | TN                    |
-| $H_1$    | TP                  | Type II error (FN)    |
+| $H_0$ true    | Type I error (false positive)   | true negative                    |
+| $H_1$ true    | true positive                  | Type II error (false negative)    |
 
-$$
-P(FP) = \hat P(T > c_\alpha \mid H_0) = \alpha
-$$
+$$\text{size} = P(T > c_\alpha \mid H_0) = \alpha, \qquad \text{power} = P(T > c_\alpha \mid H_1) = 1 - \beta .$$
 
-$$
-\text{power} = P(TP) = \hat P(T > c_\alpha \mid H_1).
-$$
-
-power is also called sensitivity.
+Both are probabilities — hence expectations of indicators — so both can be **estimated by Monte Carlo** once we can simulate data under $H_0$ and $H_1$.
 
 ## Estimating the Critical Value $c_\alpha$ by Monte Carlo
 
-Under $H_0$:
+Simulate $N$ data sets **under $H_0$** and compute $T^{(1)}, \ldots, T^{(N)}$:
 
-| Replicate | Test statistic | $c_\alpha$ | $T^{(i)} > c_\alpha$ |
-|:---:|:---:|:---:|:---:|
-| $1$ | $T^{(1)}$ | $c_\alpha$ | $1$ |
-| $2$ | $T^{(2)}$ | $c_\alpha$ | $1$ |
-| $\vdots$ | $\vdots$ | $\vdots$ | $\vdots$ |
-| $N$ | $T^{(N)}$ | $c_\alpha$ | $0$ |
+| replicate | $T^{(j)}$ | $I(T^{(j)} > c_\alpha)$ |
+|:---:|:---:|:---:|
+| 1 | $T^{(1)}$ | 1 |
+| 2 | $T^{(2)}$ | 0 |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+| $N$ | $T^{(N)}$ | 0 |
 
-$$
-\hat P(T > c_\alpha \mid H_0) = \frac{\sum_{i=1}^N I\big(T^{(i)} > c_\alpha\big)}{N} \; \dot= \; \alpha
-$$
+$$\hat P(T > c_\alpha \mid H_0) = \frac{1}{N}\sum_{j=1}^N I\big(T^{(j)} > c_\alpha\big) \;\doteq\; \alpha$$
 
-## P-value (Definition)
+so take $\hat c_\alpha$ = the $(1-\alpha)$ sample quantile of $T^{(1)}, \ldots, T^{(N)}$. This replaces the (often unknown) null distribution of $T$ by its **empirical** distribution.
 
-![](Lec 04 Monte Carlo_images/p19.png)
+## P-value
+
+The **p-value** is the probability, under $H_0$, of a statistic at least as extreme as the observed one:
+$$pv(t) = P(T \ge t \mid H_0) = 1 - F_{H_0}(t),$$
+the **survival function** of $T$ under $H_0$ evaluated at $t^{obs}$. Rejecting when $pv(t^{obs}) < \alpha$ is the same as rejecting when $t^{obs} > c_\alpha$.
+
+```{r}
+#| echo: false
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
+t0 <- 1.8; curve(dchisq(x, 3), 0, 12, lwd = 2, main = "density of T | H0", xlab = "t", ylab = "")
+xx <- seq(t0, 12, length = 100); polygon(c(t0, xx, 12), c(0, dchisq(xx, 3), 0), col = "lightblue", border = NA)
+abline(v = t0, col = 2); text(t0 + 3, 0.15, "pv = shaded area")
+curve(1 - pchisq(x, 3), 0, 12, lwd = 2, main = "survival function 1 - F(t)", xlab = "t", ylab = "")
+abline(v = t0, col = 2); abline(h = 1 - pchisq(t0, 3), lty = 2)
+```
 
 ## Uniformity of $pv(T)$ under $H_0$
 
+**Theorem.** If $T \mid H_0$ has continuous CDF $F_{H_0}$, then $pv(T) = 1 - F_{H_0}(T) \sim \mathrm{Unif}(0,1)$ under $H_0$.
+
+**Proof.** For $t \in (0,1)$,
 $$
-pv(T) \mid H_0 \sim \mathrm{Unif}((0,1))
+\begin{aligned}
+P\big(pv(T) < t\big) &= P\big(1 - F_{H_0}(T) < t\big) = P\big(F_{H_0}(T) > 1 - t\big) \\
+&= P\big(T > F_{H_0}^{-1}(1-t)\big) = 1 - F_{H_0}\big(F_{H_0}^{-1}(1-t)\big) = t .
+\end{aligned}
 $$
 
-**Pf:**
+Consequences:
 
-$pv(T) = 1 - F_{H_0}(T)$, where $F_{H_0}$ is the CDF of $T\mid H_0$.
-
-Under $H_0$:
-
-$$
-F_{pv(T)}(t) = P(pv(T) < t) = P(1 - F_{H_0}(T) < t)
-$$
-
-$$
-= P(F_{H_0}(T) > 1-t)
-$$
-
-$$
-= P\big(T > F_{H_0}^{-1}(1-t)\big)
-$$
-
-$$
-= 1 - F_{H_0}\big(F_{H_0}^{-1}(1-t)\big) = 1-(1-t)
-$$
-
-$$
-= t
-$$
-
-## Under $H_0$: Density, Survival Function and P-value
-
-![](Lec 04 Monte Carlo_images/p21.png)
+- $P(pv < \alpha \mid H_0) = \alpha$ **exactly**: rejecting when $pv < \alpha$ has size $\alpha$.
+- A histogram of simulated p-values under $H_0$ should be flat — the standard **test of a test**.
 
 ## P-value Distribution under $H_0$ vs. $H_1$
 
-![](Lec 04 Monte Carlo_images/p22.png)
+One-sample $t$-test of $H_0: \mu = 0$, $n = 20$, $N = 5000$:
 
-## Monte Carlo Estimate of $\hat P(pv < \alpha)$ under $H_0$
+```{r}
+pv_sim <- function(mu, n = 20, N = 5000) replicate(N, t.test(rnorm(n, mu))$p.value)
+pv0 <- pv_sim(0); pv1 <- pv_sim(0.5)
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
+hist(pv0, breaks = 20, main = expression(H[0]: mu == 0), xlab = "p-value"); abline(h = 250, col = 2, lty = 2)
+hist(pv1, breaks = 20, main = expression(H[1]: mu == 0.5), xlab = "p-value")
+```
 
-![](Lec 04 Monte Carlo_images/p23.png)
+Under $H_0$ the p-values are uniform; under $H_1$ they pile up near 0.
 
-## Monte Carlo Estimate of $\hat P(pv < \alpha)$ under $H_1$ (Power)
+## Monte Carlo Estimates of Size and Power
 
-![](Lec 04 Monte Carlo_images/p24.png)
+$$\widehat{\text{size}} = \hat P(pv < \alpha \mid H_0) = \frac{1}{N}\sum_{j=1}^N I\big(pv^{(j)}_{H_0} < \alpha\big), \qquad
+\widehat{\text{power}} = \hat P(pv < \alpha \mid H_1) = \frac{1}{N}\sum_{j=1}^N I\big(pv^{(j)}_{H_1} < \alpha\big)$$
 
-## Example: One-Sample $t$-test
+```{r}
+c(size = mean(pv0 < 0.05), power = mean(pv1 < 0.05),
+  exact_power = power.t.test(n = 20, delta = 0.5, sd = 1)$power)
+```
 
-![](Lec 04 Monte Carlo_images/p25.png)
+Each estimate is a proportion, so its Monte Carlo standard error is $\sqrt{\hat p(1-\hat p)/N}$ — about $0.003$ for the size with $N = 5000$.
 
-## Monte Carlo for Calculating $pv(t)$
+## Monte Carlo for Calculating a P-value
 
-![](Lec 04 Monte Carlo_images/p26.png)
+When $F_{H_0}$ is unknown, estimate $pv(t^{obs})$ by simulating $T$ under $H_0$:
+$$\widehat{pv}(t^{obs}) = \frac{1 + \sum_{j=1}^N I\big(T^{(j)} \ge t^{obs}\big)}{N + 1}.$$
 
-## Permutation Test
+(The "+1" counts the observed statistic as one draw from $H_0$; it keeps the estimate above 0 and the test exactly valid.)
 
-![](Lec 04 Monte Carlo_images/p27.png)
+Example: test $H_0: \mu = 0$ for $n = 15$ observations using $T = |\bar X|/(s/\sqrt n)$, but suppose we did not know the $t$-distribution.
 
-## Evaluating $pv(\rho^{obs})$ by Simulation
+```{r}
+x <- rnorm(15, mean = 0.6); tobs <- abs(mean(x)) / (sd(x) / sqrt(15))
+Tnull <- replicate(5000, { y <- rnorm(15); abs(mean(y)) / (sd(y) / sqrt(15)) })
+c(mc_pv = (1 + sum(Tnull >= tobs)) / 5001, exact_pv = 2 * pt(-tobs, df = 14))
+```
 
-![](Lec 04 Monte Carlo_images/p28.png)
+## A Permutation Test for the Correlation Coefficient
 
-## Power of Linear Models
+Data $(X_i, Y_i)$, $i = 1, \ldots, n$. Test $H_0: X \perp Y$ (which implies $\mathrm{corr}(X,Y) = 0$) with $T = |\hat\rho|$.
 
-![](Lec 04 Monte Carlo_images/p29.png)
+Under $H_0$, **every pairing of the $X$ values with the $Y$ values is equally likely**, so the null distribution of $T$ is obtained by re-computing $T$ after randomly permuting $Y$:
+
+1. Compute $\rho^{obs} = \hat\rho(X, Y)$.
+2. For $j = 1, \ldots, N$: permute $Y$ to get $Y^{(j)}$, compute $\rho^{(j)} = \hat\rho(X, Y^{(j)})$.
+3. $\widehat{pv} = \dfrac{1 + \#\{j : |\rho^{(j)}| \ge |\rho^{obs}|\}}{N+1}$.
+
+No normality assumption is needed; the null distribution is generated **from the data itself**.
+
+## Permutation Test for Correlation in R
+
+```{r}
+perm_cor_test <- function(x, y, N = 2000) {
+  robs <- cor(x, y)
+  rperm <- replicate(N, cor(x, sample(y)))
+  list(rho = robs, pv = (1 + sum(abs(rperm) >= abs(robs))) / (N + 1), rperm = rperm)
+}
+x <- rexp(30); y <- 0.4 * x + rexp(30)     # non-normal, dependent
+out <- perm_cor_test(x, y)
+hist(out$rperm, breaks = 40, main = "permutation distribution of rho", xlab = "rho")
+abline(v = c(-1, 1) * abs(out$rho), col = 2, lwd = 2)
+c(rho_obs = out$rho, perm_pv = out$pv, pearson_pv = cor.test(x, y)$p.value)
+```
+
+## Example: Testing a Regression With Variable Selection
+
+**Setting.** Response $Y$ and $p = 20$ candidate predictors $X_1, \ldots, X_{20}$, $n = 50$. We want to test $H_0$: $Y$ is unrelated to **all** of the $X$'s.
+
+A common practice:
+
+1. Pick the predictor $X_{k^*}$ most correlated with $Y$.
+2. Fit $Y \sim X_{k^*}$ and report the usual $t$-test p-value for its slope.
+
+**Question.** Is this a valid test of $H_0$? Does it have size $\alpha$?
 
 ## A Naive (Incorrect) Test
 
-![](Lec 04 Monte Carlo_images/p30.png)
+```{r}
+naive_test <- function(y, X) {
+  k <- which.max(abs(cor(X, y)))
+  summary(lm(y ~ X[, k]))$coefficients[2, 4]    # t-test p-value of selected slope
+}
+```
 
-## Simulation for Evaluating the Naive Test (Power/Size)
+The $t$-test p-value assumes $X_{k^*}$ was **chosen in advance**. Selecting the best of 20 predictors *after* looking at the data means that, even under $H_0$, $\max_k |\hat\rho_k|$ tends to be large. The reported p-value ignores this selection.
 
-![](Lec 04 Monte Carlo_images/p31.png)
+## Simulation for Evaluating the Naive Test
+
+Generate data under $H_0$ ($Y$ independent of all $X$'s) and check whether the p-values are uniform:
+
+```{r}
+sim_null <- function(n = 50, p = 20) list(y = rnorm(n), X = matrix(rnorm(n * p), n, p))
+pv_naive <- replicate(2000, { d <- sim_null(); naive_test(d$y, d$X) })
+hist(pv_naive, breaks = 20, main = "naive test p-values under H0", xlab = "p-value")
+c(size_at_0.05 = mean(pv_naive < 0.05))
+```
+
+The true size is far above 0.05: the naive test rejects a true $H_0$ far too often. Note that under $H_0$ the naive p-value is **not** uniform, which is a general diagnostic for an invalid test.
 
 ## Permutation Test (Full Procedure)
 
-![](Lec 04 Monte Carlo_images/p32.png)
+Fix: treat the **entire procedure** — selection plus fitting — as the test statistic, and obtain its null distribution by permuting $Y$.
 
-## Question 1 of Assignment 1
+$$T(Y, X) = \max_k |\hat\rho(X_k, Y)|$$
 
-![](Lec 04 Monte Carlo_images/p33.png)
+1. Compute $T^{obs} = T(Y, X)$.
+2. For $j = 1, \ldots, N$: permute $Y$, compute $T^{(j)} = T(Y^{(j)}, X)$ (**re-doing the selection** each time).
+3. $\widehat{pv} = \dfrac{1 + \#\{j : T^{(j)} \ge T^{obs}\}}{N+1}$.
+
+```{r}
+perm_test <- function(y, X, N = 500) {
+  Tstat <- function(y) max(abs(cor(X, y)))
+  Tobs <- Tstat(y); Tperm <- replicate(N, Tstat(sample(y)))
+  (1 + sum(Tperm >= Tobs)) / (N + 1)
+}
+```
+
+## Size and Power of the Permutation Test
+
+```{r}
+#| cache: true
+sim_alt <- function(n = 50, p = 20, beta = 0.5) {
+  X <- matrix(rnorm(n * p), n, p); list(y = beta * X[, 1] + rnorm(n), X = X)
+}
+pv_perm0 <- replicate(300, { d <- sim_null(); perm_test(d$y, d$X) })
+pv_perm1 <- replicate(300, { d <- sim_alt();  perm_test(d$y, d$X) })
+pv_naive1 <- replicate(300, { d <- sim_alt(); naive_test(d$y, d$X) })
+rbind(naive = c(size = mean(pv_naive < 0.05), power = mean(pv_naive1 < 0.05)),
+      permutation = c(size = mean(pv_perm0 < 0.05), power = mean(pv_perm1 < 0.05)))
+```
+
+- The permutation test has the correct size; its power is honest, whereas the naive test's "power" is inflated by its false positives.
+- Power comparisons are only meaningful **between tests of the same size**.
+
+## Summary
+
+- All simulation starts from pseudo-random $\mathrm{Unif}(0,1)$ draws; other distributions come from **inverse-CDF** or **transformations** (Box–Muller).
+- The LLN justifies Monte Carlo averages; the CLT gives their error, $\sigma/\sqrt n$, which is reported as a standard error.
+- Bias, variance and MSE of estimators, and size and power of tests, are expectations — simulate with known truth and average.
+- P-values are uniform under $H_0$: a flat histogram of simulated p-values is the basic test of a test.
+- When the null distribution is unknown, generate it by simulation or by **permutation**; the permuted statistic must reproduce the **entire** data-analysis procedure.

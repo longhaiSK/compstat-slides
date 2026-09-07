@@ -31,6 +31,72 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="Lec 05 MLE_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
   <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
@@ -150,7 +216,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">STAT 420/812 Computational Statistics</h1>
-  <p class="subtitle">Maximum Likelihood Estimate</p>
+  <p class="subtitle">Maximum Likelihood Estimation and Optimization</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -161,517 +227,746 @@ Longhai Li
 </div>
 
 </section>
+<section>
+<section id="review-likelihood-theory-and-mle" class="title-slide slide level1 center" data-number="1">
+<h1><span class="header-section-number">1</span> Review: Likelihood Theory and MLE</h1>
+
+</section>
 <section id="likelihood-function" class="slide level2">
 <h2>Likelihood Function</h2>
-
-<img data-src="Lec%2005%20MLE_images/p02.png" class="r-stretch"></section>
+<p>A statistical model specifies the probability (density) of data <span class="math inline">D</span> given a parameter <span class="math inline">\theta</span>: <span class="math inline">f(D \mid \theta)</span>.</p>
+<ul>
+<li><strong>As a function of <span class="math inline">D</span></strong> for fixed <span class="math inline">\theta</span>: the sampling distribution.</li>
+<li><strong>As a function of <span class="math inline">\theta</span></strong> for fixed (observed) <span class="math inline">D</span>: the <strong>likelihood function</strong> <span class="math display">L(\theta; D) = f(D \mid \theta).</span></li>
+</ul>
+<p>The likelihood measures how well each value of <span class="math inline">\theta</span> <em>explains</em> the observed data. For iid data <span class="math inline">D = (x_1, \ldots, x_n)</span>, <span class="math display">L(\theta; D) = \prod_{i=1}^n f(x_i \mid \theta), \qquad \ell(\theta) = \log L(\theta; D) = \sum_{i=1}^n \log f(x_i \mid \theta).</span></p>
+<p>We work with the <strong>log-likelihood</strong> <span class="math inline">\ell(\theta)</span> to avoid underflow of the product and because sums are easier to differentiate.</p>
+</section>
 <section id="maximum-likelihood-estimator" class="slide level2">
 <h2>Maximum Likelihood Estimator</h2>
-<p><span class="math display">
-\hat\theta_{MLE} = \arg\max_\theta L(\theta; D)
-</span></p>
-<p><strong>Example:</strong> <span class="math inline">Y_1, Y_2, Y_3 \mid \theta \overset{iid}{\sim} \mathrm{Bern}(\theta)</span>, <span class="math inline">\theta</span> is the population proportion <span class="math inline">\in [0,1]</span>.</p>
-<p><span class="math inline">y_1 = 1,\ y_2 = 1,\ y_3 = 0</span></p>
+<p><span class="math display">\hat\theta_{MLE} = \arg\max_\theta L(\theta; D) = \arg\max_\theta \ell(\theta).</span></p>
+<p><strong>Example.</strong> <span class="math inline">Y_1, Y_2, Y_3 \overset{iid}{\sim} \mathrm{Bern}(\theta)</span>, observed <span class="math inline">y = (1, 1, 0)</span>.</p>
 <table class="caption-top">
-<colgroup>
-<col style="width: 55%">
-<col style="width: 44%">
-</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: center;"><span class="math inline">\theta</span></th>
-<th style="text-align: left;"><span class="math inline">P(y_1=1, y_2=1, y_3=0 \mid \theta) = \prod_{i=1}^3 P(y_i \mid \theta)</span></th>
+<th style="text-align: left;"><span class="math inline">P(1, 1, 0 \mid \theta) = \theta^2(1-\theta)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: center;"><span class="math inline">0</span></td>
-<td style="text-align: left;"><span class="math inline">0 \cdot 0 \cdot 1 = 0</span></td>
+<td style="text-align: left;"><span class="math inline">0</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;"><span class="math inline">1/2</span></td>
-<td style="text-align: left;"><span class="math inline">\tfrac12\cdot\tfrac12\cdot\tfrac12 = 1/8 = 0.1250</span></td>
+<td style="text-align: left;"><span class="math inline">1/8 = 0.1250</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;"><span class="math inline">2/3</span></td>
-<td style="text-align: left;"><span class="math inline">\tfrac23\cdot\tfrac23\cdot\tfrac13 = 4/27 = 0.1481</span> <strong>(max)</strong></td>
+<td style="text-align: left;"><span class="math inline">4/27 = 0.1481</span> <strong>(max)</strong></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;"><span class="math inline">3/4</span></td>
-<td style="text-align: left;"><span class="math inline">\tfrac34\cdot\tfrac34\cdot\tfrac14 = 9/64 = 0.1406</span></td>
+<td style="text-align: left;"><span class="math inline">9/64 = 0.1406</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;"><span class="math inline">1</span></td>
-<td style="text-align: left;"><span class="math inline">1 \cdot 1 \cdot 0 = 0</span></td>
+<td style="text-align: left;"><span class="math inline">0</span></td>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="likelihood-for-iid-bernoulli-data" class="slide level2">
-<h2>Likelihood for iid Bernoulli Data</h2>
-<p><span class="math display">
-P(y_i \mid \theta) = \theta^{y_i} (1-\theta)^{1-y_i}
-</span></p>
-<p><span class="math display">
-L(\theta \mid y_1, \ldots, y_n) = \prod_{i=1}^n P(y_i \mid \theta)
-</span></p>
-<p><span class="math display">
-= \prod_{i=1}^n \theta^{y_i} (1-\theta)^{1-y_i}
-</span></p>
-<p><span class="math display">
-= \theta^{\sum_{i=1}^n y_i} (1-\theta)^{n - \sum_{i=1}^n y_i}
-</span></p>
-<p><span class="math display">
-= \theta^{n_1} (1-\theta)^{n_0}
-</span></p>
-</section>
-<section id="log-likelihood-function" class="slide level2">
-<h2>Log-Likelihood Function</h2>
-<p><span class="math display">
-\ell(\theta) = \log L(\theta) = n_1 \log\theta + n_0 \log(1-\theta)
-</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">curve</span>(x<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> x), <span class="dv">0</span>, <span class="dv">1</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(theta), <span class="at">ylab =</span> <span class="st">"likelihood"</span>, <span class="at">lwd =</span> <span class="dv">2</span>); <span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<img data-src="Lec%2005%20MLE_images/p05.png" class="r-stretch"></section>
-<section id="score-function" class="slide level2">
-<h2>Score Function</h2>
-<p><strong>Score function:</strong> <span class="math inline">S(\theta) = \ell'(\theta) \equiv 0</span></p>
-<p><span class="math display">
-\ell(\theta) = n_1 \log\theta + n_0 \log(1-\theta)
-</span></p>
-<p><span class="math display">
-S(\theta) = \frac{n_1}{\theta} - \frac{n_0}{1-\theta} \equiv 0
-</span></p>
-<p><span class="math display">
-\frac{n_1}{\theta} = \frac{n_0}{1-\theta} \iff \frac{\theta}{1} = \frac{n_1}{n} = \frac{\sum_{i=1}^n y_i}{n} = \bar y
-</span></p>
-<p>where <span class="math inline">n = n_1 + n_0</span>.</p>
+</div>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-2-1.png" width="672" class="r-stretch"></section>
+<section id="example-iid-bernoulli" class="slide level2">
+<h2>Example: iid Bernoulli</h2>
+<p><span class="math inline">P(y_i \mid \theta) = \theta^{y_i}(1-\theta)^{1-y_i}</span>, so with <span class="math inline">n_1 = \sum y_i</span> and <span class="math inline">n_0 = n - n_1</span>, <span class="math display">L(\theta) = \theta^{n_1}(1-\theta)^{n_0}, \qquad \ell(\theta) = n_1\log\theta + n_0\log(1-\theta).</span></p>
+<p><strong>Score function</strong> <span class="math inline">S(\theta) = \ell'(\theta)</span>. The MLE solves the <strong>score equation</strong> <span class="math inline">S(\theta) = 0</span>: <span class="math display">S(\theta) = \frac{n_1}{\theta} - \frac{n_0}{1-\theta} = 0 \iff \hat\theta = \frac{n_1}{n} = \bar y.</span></p>
+<p><strong>Second derivative</strong> <span class="math inline">\ell''(\theta) = -\dfrac{n_1}{\theta^2} - \dfrac{n_0}{(1-\theta)^2} &lt; 0</span>, so this is a maximum.</p>
 </section>
-<section id="mle-for-the-normal-distribution" class="slide level2">
-<h2>MLE for the Normal Distribution</h2>
-<p><strong>Example:</strong> <span class="math inline">X_1, \ldots, X_n \overset{iid}{\sim} N(\mu, \sigma_0^2)</span></p>
-<p><span class="math display">
-f(x_i \mid \mu) = \frac{1}{\sqrt{2\pi}\,\sigma_0} e^{-\frac{(x_i-\mu)^2}{2\sigma_0^2}}
-</span></p>
-<p><span class="math display">
-\ell(\mu; x_1,\ldots,x_n) = \sum_{i=1}^n \log f(x_i \mid \mu)
-</span></p>
-<p><span class="math display">
-= \sum_{i=1}^n \left[ \log\!\left(\frac{1}{\sqrt{2\pi}\,\sigma_0}\right) - \frac{(x_i - \mu)^2}{2\sigma_0^2} \right]
-</span></p>
+<section id="example-normal-mean-with-known-variance" class="slide level2">
+<h2>Example: Normal Mean with Known Variance</h2>
+<p><span class="math inline">X_1, \ldots, X_n \overset{iid}{\sim} N(\mu, \sigma_0^2)</span>: <span class="math display">\ell(\mu) = -\frac{n}{2}\log(2\pi\sigma_0^2) - \frac{1}{2\sigma_0^2}\sum_{i=1}^n (x_i - \mu)^2
+= C - \frac{n}{2\sigma_0^2}(\mu - \bar x)^2,</span> using <span class="math inline">\sum(x_i - \mu)^2 = \sum(x_i - \bar x)^2 + n(\bar x - \mu)^2</span>.</p>
+<p><span class="math display">S(\mu) = \frac{n}{\sigma_0^2}(\bar x - \mu) = 0 \implies \hat\mu = \bar x, \qquad -\ell''(\mu) = \frac{n}{\sigma_0^2}.</span></p>
+<ul>
+<li>The log-likelihood is exactly <strong>quadratic</strong> in <span class="math inline">\mu</span>; the score is <strong>linear</strong>; the curvature is <strong>constant</strong> and grows with <span class="math inline">n</span>.</li>
+<li><span class="math inline">-\ell''</span> measures how sharply the data pin down <span class="math inline">\mu</span>: it is the <strong>Fisher information</strong>.</li>
+</ul>
 </section>
-<section id="mle-for-the-normal-distribution-contd" class="slide level2">
-<h2>MLE for the Normal Distribution (cont’d)</h2>
-<p><span class="math display">
-= n \log\!\left(\frac{1}{\sqrt{2\pi}\,\sigma_0}\right) - \frac{\sum_{i=1}^n (x_i-\mu)^2}{2\sigma_0^2}
-</span></p>
-<p><span class="math display">
-= C - \frac{1}{2\sigma_0^2} \sum_{i=1}^n (\mu - x_i)^2
-</span></p>
-<p><span class="math display">
-= C - \frac{1}{2\sigma_0^2} \sum_{i=1}^n \left[(\mu-\bar x)^2 + (\bar x - x_i)^2 + 2(\mu-\bar x)(\bar x - x_i)\right]
-</span></p>
-<p><span class="math display">
-= C_2 - \frac{n}{2\sigma_0^2}(\mu - \bar x)^2
-</span></p>
+<section id="log-likelihood-score-and-curvature" class="slide level2">
+<h2>Log-likelihood, Score and Curvature</h2>
 
-<img data-src="Lec%2005%20MLE_images/p08.png" class="r-stretch"><p><em>(The bottom plot compares the log-likelihood curvature for a larger <span class="math inline">n</span>: it becomes narrower/more peaked around <span class="math inline">\bar x</span>.)</em></p>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-3-1.png" width="672" class="r-stretch"><p>The score crosses zero where <span class="math inline">\ell</span> is maximized; larger <span class="math inline">n</span> makes <span class="math inline">\ell</span> more peaked, the score steeper, and <span class="math inline">-\ell''</span> larger.</p>
 </section>
-<section id="score-function-normal-case" class="slide level2">
-<h2>Score Function (Normal Case)</h2>
-<p><span class="math display">
-S(\mu; x_1,\ldots,x_n) = \frac{\partial}{\partial \mu}\, \ell(\mu; x_1,\ldots,x_n)
-</span></p>
-<p><span class="math display">
-= 0 - \frac{\sum_{i=1}^n 2(\mu - x_i)}{2\sigma_0^2}
-</span></p>
-<p><span class="math display">
-= -\frac{n\mu - \sum x_i}{\sigma_0^2} = -\frac{n}{\sigma_0^2}(\mu - \bar x)
-</span></p>
-<p><span class="math display">
--\ell''(\mu; x) = \frac{n}{\sigma_0^2} \quad \Leftarrow \text{Fisher information}
-</span></p>
-</section>
-<section id="solving-the-score-equation-normal-case" class="slide level2">
-<h2>Solving the Score Equation (Normal Case)</h2>
-<p><span class="math display">
-S(\mu; x_1,\ldots,x_n) \equiv 0
-</span></p>
-<p><span class="math display">
-n\mu - \sum x_i = 0
-</span></p>
-<p><span class="math display">
-\implies \mu = \frac{\sum x_i}{n} = \bar x
-</span></p>
-<p><span class="math display">
-\hat\mu_{MLE} = \bar x
-</span></p>
-</section>
-<section id="log-likelihood-score-and-hessian-functions" class="slide level2">
-<h2>Log-likelihood, Score, and Hessian Functions</h2>
+<section id="example-cauchy-location" class="slide level2">
+<h2>Example: Cauchy Location</h2>
+<p><span class="math inline">X_1, \ldots, X_n \overset{iid}{\sim} \mathrm{Cauchy}(\theta)</span>, <span class="math inline">f(x \mid \theta) = \dfrac{1}{\pi\,[1 + (x-\theta)^2]}</span>: <span class="math display">\ell(\theta) = -n\log\pi - \sum_{i=1}^n \log\!\big(1 + (x_i - \theta)^2\big), \qquad
+S(\theta) = \sum_{i=1}^n \frac{2(x_i - \theta)}{1 + (x_i - \theta)^2}.</span></p>
+<p>The score equation has <strong>no closed-form solution</strong> and may have <strong>several roots</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>xc <span class="ot">&lt;-</span> <span class="fu">rcauchy</span>(<span class="dv">8</span>, <span class="at">location =</span> <span class="dv">3</span>)</span>
+<span id="cb4-2"><a href=""></a>llc <span class="ot">&lt;-</span> <span class="cf">function</span>(th, dat) <span class="fu">sapply</span>(th, <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="fu">dcauchy</span>(dat, t, <span class="at">log =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb4-3"><a href=""></a><span class="fu">curve</span>(<span class="fu">llc</span>(x, xc), <span class="sc">-</span><span class="dv">10</span>, <span class="dv">15</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(theta), <span class="at">ylab =</span> <span class="fu">expression</span>(<span class="fu">l</span>(theta)), <span class="at">main =</span> <span class="st">"Cauchy log-likelihood, n = 8"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<img data-src="Lec%2005%20MLE_images/p11.png" class="r-stretch"><p>The score function <span class="math inline">S(\mu;x)</span> crosses zero exactly where the log-likelihood <span class="math inline">\ell(\mu;x)</span> is maximized; <span class="math inline">-\ell''(\mu;x) = n/\sigma_0^2</span> (green) stays constant (does not depend on <span class="math inline">\mu</span>).</p>
+</div>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-4-1.png" width="672" class="r-stretch"><p>This is why we need <strong>numerical optimization</strong>.</p>
 </section>
-<section id="effect-of-sample-size-on-curvature" class="slide level2">
-<h2>Effect of Sample Size on Curvature</h2>
-
-<img data-src="Lec%2005%20MLE_images/p12.png" class="r-stretch"><p>Larger sample size (<span class="math inline">n_2=50</span> vs.&nbsp;<span class="math inline">n_1=20</span>) makes the log-likelihood more peaked, the score function steeper, and <span class="math inline">-\ell''</span> (the Fisher information) larger.</p>
-</section>
-<section id="example-cauchy-model" class="slide level2">
-<h2>Example (Cauchy Model)</h2>
-<p><span class="math inline">X_1,\ldots,X_n \sim \mathrm{Cauchy}(\theta)</span></p>
-<p><span class="math display">
-f(x_i;\theta) = \frac{1}{\pi}\cdot\frac{1}{1+(x_i-\theta)^2}, \qquad x = (x_1,\ldots,x_n)
-</span></p>
-<p><span class="math display">
-\implies \ell(\theta;x) = -\log(\pi)\cdot n - n\sum_{i=1}^n \log\!\left(1+(x_i-\theta)^2\right)
-</span></p>
-<p><span class="math display">
-\implies S(\theta;x) = -n \sum_{i=1}^n \left[\frac{1}{1+(x_i-\theta)^2}\cdot 2(\theta - x_i)\right]
-</span></p>
-
-<img data-src="Lec%2005%20MLE_images/p13.png" class="r-stretch"><p><em>(Cauchy density has heavier tails than the Normal — right plot compares <span class="math inline">\log f(x)</span> for the two models.)</em></p>
-</section>
-<section id="properties-of-mle" class="slide level2">
-<h2>Properties of MLE</h2>
-<p>Under some regularity conditions (satisfied by most statistical models used in practice), the MLE <span class="math inline">\hat\theta_{mle}</span> for iid samples has the following properties:</p>
+<section id="properties-of-the-mle" class="slide level2">
+<h2>Properties of the MLE</h2>
+<p>Under regularity conditions (satisfied by most models in practice), for iid data with true parameter <span class="math inline">\theta_*</span>:</p>
 <ol type="1">
-<li><p>The MLE is <strong>consistent</strong>: <span class="math inline">\hat\theta_{mle} \to \theta_*</span> when <span class="math inline">n \to \infty</span></p></li>
-<li><p>The MLE is <strong>asymptotically normal</strong>: <span class="math display">
-\hat\theta_{mle} \to N\!\big(\theta_*, (nI(\theta_*))^{-1}\big)
-</span> where <span class="math display">
-I(\theta_*) = -E\!\left(\frac{\Delta^2}{\Delta\theta^2}\log(f(X\mid\theta))\Big|_{\theta_*}\right) = E\!\left(\left(\frac{d^2}{d\theta_i d\theta_j}\log(f(X\mid\theta))\right)_{p\times p}\right)
-</span> (expectation is taken <strong>with respect to <span class="math inline">X</span></strong>)</p></li>
-<li><p>Plugin <span class="math inline">\hat\theta_{mle}</span> in <span class="math inline">I(\theta_*)</span>, the fact still holds: <span class="math display">
-\hat\theta_{mle} \to N\!\big(\theta_*, (nI(\hat\theta_{mle}))^{-1}\big)
-</span> <span class="math inline">I(\hat\theta_{mle})</span> is called the <strong>expected Fisher information</strong>. In contrast, <span class="math inline">I(\theta_*)</span> can also be estimated by the <strong>observed Fisher information</strong>: <span class="math display">
--\frac{1}{n}\sum_i \frac{\Delta^2}{\Delta\theta^2}\log(f(X_i\mid\theta))\Big|_{\hat\theta_{mle}}, \qquad n\cdot I(\theta_*) = -\frac{\partial^2}{\partial\theta^2}\ell(\theta_*;x)
-</span> This avoids computing the expected value, which might be difficult or impossible. Recall: <span class="math inline">E[f(X)] \approx \dfrac{f(x_1)+\cdots+f(x_n)}{n}</span></p></li>
-<li><p>The MLE is <strong>asymptotically optimal</strong>.</p></li>
+<li><strong>Consistency</strong>: <span class="math inline">\hat\theta_{MLE} \to \theta_*</span> as <span class="math inline">n \to \infty</span>.</li>
+<li><strong>Asymptotic normality</strong>: <span class="math display">\hat\theta_{MLE} \;\dot\sim\; N\!\big(\theta_*,\ [n I(\theta_*)]^{-1}\big), \qquad
+I(\theta) = -E_X\!\left[\frac{\partial^2}{\partial\theta\,\partial\theta'}\log f(X \mid \theta)\right],</span> the <strong>expected Fisher information</strong> per observation (<span class="math inline">p \times p</span> for a <span class="math inline">p</span>-dimensional <span class="math inline">\theta</span>).</li>
+<li><strong>Asymptotic efficiency</strong>: no consistent estimator has smaller asymptotic variance (Cramér–Rao bound).</li>
 </ol>
+<p>Note <span class="math inline">n I(\theta) = -E_D\big[\ell''(\theta; D)\big]</span>: the expected curvature of the log-likelihood.</p>
 </section>
-<section id="log-likelihood-setup-general" class="slide level2">
-<h2>Log-likelihood Setup (General)</h2>
-<p>Suppose <span class="math inline">X_1,\ldots,X_n \overset{iid}{\sim} f(x_i\mid\theta)</span></p>
-<p><span class="math display">
-\ell(\theta\mid x_1,\ldots,x_n) = \sum_{i=1}^n \log f(x_i\mid\theta)
-</span></p>
-<p><span class="math display">
--\ell''(\theta\mid x_1,\ldots,x_n) = \ \ldots
-</span></p>
-</section>
-<section id="simple-iteration-fixed-point-method" class="slide level2">
-<h2>Simple Iteration (Fixed-Point Method)</h2>
-
-<img data-src="Lec%2005%20MLE_images/p16.png" class="r-stretch"><p>Finding a solution to <span class="math inline">S(\theta) = 0 \iff \theta = f(\theta)</span></p>
-</section>
-<section id="fixed-point-iteration-illustration" class="slide level2">
-<h2>Fixed-Point Iteration: Illustration</h2>
-
-<img data-src="Lec%2005%20MLE_images/p17.png" class="r-stretch"><p>An advantage of this scheme: <strong>don’t need to evaluate <span class="math inline">f'(\theta)</span></strong>.</p>
-</section>
-<section id="bisection-method" class="slide level2">
-<h2>Bisection Method</h2>
-
-<img data-src="Lec%2005%20MLE_images/p18.png" class="r-stretch"><p>Here <span class="math inline">F(x) = S(x)</span>. Don’t need to evaluate <span class="math inline">S'(\theta)</span>.</p>
-</section>
-<section id="newtonraphson-iteration" class="slide level2">
-<h2>Newton–Raphson Iteration</h2>
-<p><span class="math display">
-\frac{S(\theta_i) - 0}{\theta_i - \theta_{i+1}} = S'(\theta_i)
-</span></p>
-<p><span class="math display">
-\frac{\theta_i - \theta_{i+1}}{S(\theta_i)} = \frac{1}{S'(\theta_i)}
-</span></p>
-<p><span class="math display">
-\theta_i - \theta_{i+1} = \frac{S(\theta_i)}{S'(\theta_i)}
-</span></p>
-<p><span class="math display">
-\theta_{i+1} = \theta_i - \frac{S(\theta_i)}{S'(\theta_i)} = \theta_i - \frac{-\ell'(\theta_i)}{-\ell''(\theta_i)} \quad (\text{step size})
-</span></p>
-
-<img data-src="Lec%2005%20MLE_images/p19.png" class="r-stretch"></section>
-<section id="illustration-of-newtonraphson" class="slide level2">
-<h2>Illustration of Newton–Raphson</h2>
-
-<img data-src="Lec%2005%20MLE_images/p20.png" class="r-stretch"><p>For a quadratic <span class="math inline">f(x) = a(x-u)^2 + C</span>: <span class="math inline">f'(x) = 2a(x-u)</span>, <span class="math inline">f''(x)=2a</span>, and <span class="math display">
-x_{i+1} = x_i - \frac{f'(x_i)}{f''(x_i)} = x_i - \frac{2a(x_i-u)}{2a} = x_i - \frac{(x_i-u)}{\text{step size}}
-</span> <span class="math inline">[f''(x_i)]^{-1} = (2a)^{-1}</span> is the <strong>perfect</strong> step-size modifier for <span class="math inline">x_i</span> with slope <span class="math inline">f'(x_i)</span>, if <span class="math inline">f(x)</span> is quadratic.</p>
-</section>
-<section id="fisher-scoring-vs.-newtonraphson" class="slide level2">
-<h2>Fisher Scoring vs.&nbsp;Newton–Raphson</h2>
-
-<img data-src="Lec%2005%20MLE_images/p21.png" class="r-stretch"><p><span class="math display">
-\theta_{i+1} = \theta_i - \frac{-\ell'(\theta_i;D)}{-\ell''(\theta_i;D)}
-</span></p>
-<p><span class="math inline">-\ell(\theta;D)</span> is the negative log-likelihood; depending on the curve, the iteration can <strong>converge</strong> or <strong>diverge</strong>.</p>
-</section>
-<section id="newtonraphson-observed-fisher-information" class="slide level2">
-<h2>Newton–Raphson: Observed Fisher Information</h2>
-
-<img data-src="Lec%2005%20MLE_images/p22.png" class="r-stretch"><p><span class="math inline">-\ell''(\theta_i,D)</span> is called the <strong>observed Fisher information</strong> at <span class="math inline">\theta_i</span>.</p>
-</section>
-<section id="fisher-scoring-update" class="slide level2">
-<h2>Fisher Scoring Update</h2>
-<p>Replacing <span class="math inline">-\ell''(\theta_i;D)</span> by the Fisher information at <span class="math inline">\theta_i</span>:</p>
-<p><span class="math display">
-n\cdot I(\theta_i) = E_D\big(-\ell''(\theta_i;D)\big) \quad (\text{w.r.t. } D)
-</span></p>
-<p><span class="math display">
-\theta_{i+1} = \theta_i + \frac{\ell'(\theta_i;D)}{n\cdot I(\theta_i)}
-</span></p>
-</section>
-<section id="example-ordinary-poisson" class="slide level2">
-<h2>Example (Ordinary Poisson)</h2>
-<p><span class="math inline">X_1, X_2, \ldots, X_n \sim \mathrm{Pois}(\lambda)</span></p>
-<p><span class="math display">
-\ell(\lambda) = \sum_{i=1}^n \log f(x_i\mid\lambda) = \sum_{i=1}^n \log\frac{e^{-\lambda}\lambda^{x_i}}{x_i!} = \sum_{i=1}^n \left[-\lambda + x_i\log\lambda - \log x_i!\right]
-</span></p>
-</section>
-<section id="mle-for-poisson" class="slide level2">
-<h2>MLE for Poisson</h2>
-<p><span class="math display">
-= -n\lambda + \sum x_i \log\lambda + C
-</span></p>
-<p><span class="math display">
-\ell'(\lambda) = -n + \sum x_i/\lambda \equiv 0
-</span></p>
-<p><span class="math display">
-\lambda = \frac{\sum x_i}{n}
-</span></p>
-<p><span class="math display">
-\hat\lambda_{MLE} = \bar x
-</span></p>
-</section>
-<section id="a-demonstrating-example-truncated-poisson" class="slide level2">
-<h2>A Demonstrating Example (Truncated Poisson)</h2>
-<p>Suppose we only observe nonzero iid samples <span class="math inline">X_1,\ldots,X_n</span> from a Poisson distribution, whose probability function is:</p>
-<p><span class="math display">
-P(x_1,\ldots,x_n\mid\lambda) = \prod_{i=1}^n \frac{\exp(-\lambda)\lambda^{x_i}}{x_i!}\cdot\frac{1}{1-\exp(-\lambda)} \tag{7.24}
-</span></p>
-<p><span class="math display">
-P(x_i\mid\lambda) = \frac{e^{-\lambda}\lambda^{x_i}}{x_i!}\cdot\frac{1}{P(x_i&gt;0)} = \frac{e^{-\lambda}\lambda^{x_i}}{x_i!}\cdot\frac{1}{1-e^{-\lambda}}
-</span></p>
-</section>
-<section id="truncated-poisson-score-and-fisher-information" class="slide level2">
-<h2>Truncated Poisson: Score and Fisher Information</h2>
-<p><span class="math display">
-\ell(\lambda) = -\lambda n + \sum x_i\log(\lambda) - n\log(1-\exp(-\lambda)) \tag{7.25}
-</span></p>
-<p>The score function <span class="math inline">s(\lambda) = \ell'(\lambda)</span>: <span class="math display">
-s(\lambda) = \frac{\sum x_i}{\lambda} - \frac{n}{1-\exp(-\lambda)} \tag{7.26}
-</span></p>
-<p>The equation <span class="math inline">s(\lambda) = 0</span> is equivalent to: <span class="math display">
-\frac{\bar x}{\lambda} = \frac{1}{1-e^{-\lambda}} \qquad \lambda = \bar x\,(1-\exp(-\lambda)) \quad \Leftarrow \text{simple iteration} \tag{7.27}
-</span></p>
-<p>The derivative of the score function: <span class="math display">
-s'(\lambda) = -\frac{\sum x_i}{\lambda^2} + n\frac{\exp(-\lambda)}{(1-\exp(-\lambda))^2} \tag{7.28}
-</span></p>
-<p>The Fisher information based on <span class="math inline">n</span> samples is (using <span class="math inline">E(X_i) = \lambda \cdot \frac{1}{1-e^{-\lambda}}</span>): <span class="math display">
-nI(\lambda) = -E(s'(\lambda)) = \frac{1}{\lambda(1-\exp(-\lambda))} - n\frac{\exp(-\lambda)}{(1-\exp(-\lambda))^2} \tag{7.29, 7.30}
-</span></p>
-</section>
-<section id="truncated-poisson-bias-without-truncation-correction" class="slide level2">
-<h2>Truncated Poisson: Bias Without Truncation Correction</h2>
-
-<img data-src="Lec%2005%20MLE_images/p28.png" class="r-stretch"><p>Using the plain Poisson pmf <span class="math inline">p(x) = e^{-\lambda}\lambda^x/x!</span> (top, including the <span class="math inline">x=0</span> mass) vs.&nbsp;the truncated pmf <span class="math inline">f(x) = p(x)/(1-e^{-\lambda})</span> (bottom) — treating truncated data with the ordinary Poisson model is <strong>biased without considering the zero fraction</strong>.</p>
-</section>
-<section id="truncated-poisson-expectation-derivation" class="slide level2">
-<h2>Truncated Poisson: Expectation Derivation</h2>
-<p><span class="math inline">Y \sim \mathrm{Pois}(\lambda)</span></p>
-<p><span class="math display">
-E(Y) = \sum_{y=0}^{+\infty} \frac{e^{-\lambda}\lambda^y}{y!}\cdot y = \lambda
-</span></p>
-<p><span class="math inline">X \sim Y \mid Y &gt; 0</span></p>
-<p><span class="math display">
-E(X) = \sum_{x=1}^{+\infty} \frac{e^{-\lambda}\lambda^x}{x!}\cdot x \cdot\left(\frac{1}{1-e^{-\lambda}}\right) = \left(\lambda\right)\cdot\frac{1}{1-e^{-\lambda}}
-</span></p>
-<p>as the first term (<span class="math inline">x=0</span>) in <span class="math inline">E(Y)</span> is <span class="math inline">0</span>.</p>
-</section>
-<section id="truncated-poisson-numerical-illustration" class="slide level2">
-<h2>Truncated Poisson: Numerical Illustration</h2>
-
-<img data-src="Lec%2005%20MLE_images/p30.png" class="r-stretch"><p>Log-likelihood <span class="math inline">\ell(\theta)</span> (solid) and score function <span class="math inline">S(\theta)=\ell'(\theta)</span> (dashed) plotted over a range of <span class="math inline">\lambda</span> values, from an R simulation.</p>
-</section>
-<section id="golden-section-method" class="slide level2">
-<h2>Golden Section Method</h2>
-
-<img data-src="Lec%2005%20MLE_images/p31.png" class="r-stretch"><p>Applied to <span class="math inline">f(x) = -\ell(x)</span> near its minimum <span class="math inline">x^*</span>: at each step, shrink the side with the larger of <span class="math inline">f(a')</span> or <span class="math inline">f(b')</span> (using the golden ratio split, <span class="math inline">\approx 40\%/60\%</span>), narrowing the bracket <span class="math inline">[a,b]</span> toward <span class="math inline">x^*</span>.</p>
-</section>
-<section id="example-when-newtonraphson-fails" class="slide level2">
-<h2>Example: When Newton–Raphson Fails</h2>
-
-<img data-src="Lec%2005%20MLE_images/p32.png" class="r-stretch"><p><span class="math inline">-\ell'(\theta)</span> doesn’t have a root, so the <strong>Newton–Raphson method will fail</strong> for such problems — the Golden Section Search still works since it only relies on comparing function values.</p>
-</section>
-<section id="numerically-evaluating-the-derivative" class="slide level2">
-<h2>Numerically Evaluating the Derivative</h2>
-
-<img data-src="Lec%2005%20MLE_images/p33.png" class="r-stretch"><p><span class="math display">
-f'(x) \approx \frac{f(x+\varepsilon) - f(x)}{\varepsilon}
-</span></p>
-<p>(In R, this idea underlies numerical optimizers such as <code>nlm</code>.)</p>
-</section>
+<section id="observed-and-expected-fisher-information" class="slide level2">
+<h2>Observed and Expected Fisher Information</h2>
+<p><span class="math inline">\theta_*</span> is unknown, so the variance <span class="math inline">[nI(\theta_*)]^{-1}</span> is estimated by plugging in <span class="math inline">\hat\theta</span>. Two versions:</p>
+<ul>
+<li><strong>Expected information</strong> <span class="math inline">n I(\hat\theta)</span>: requires computing <span class="math inline">E_X[\cdot]</span> analytically.</li>
+<li><strong>Observed information</strong> <span class="math inline">J(\hat\theta) = -\ell''(\hat\theta; D) = -\sum_{i=1}^n \frac{\partial^2}{\partial\theta\partial\theta'}\log f(x_i \mid \hat\theta)</span>: the actual curvature at the MLE, no expectation needed.</li>
+</ul>
+<p>By the LLN, <span class="math inline">J(\hat\theta)/n \approx I(\hat\theta)</span>. Both give <span class="math display">\widehat{\mathrm{Var}}(\hat\theta) \approx J(\hat\theta)^{-1} \quad\text{or}\quad [nI(\hat\theta)]^{-1}, \qquad \widehat{SE}(\hat\theta_j) = \sqrt{\big[\widehat{\mathrm{Var}}(\hat\theta)\big]_{jj}} .</span></p>
+<p><strong>Computational consequence</strong>: the Hessian of <span class="math inline">\ell</span> at the optimum, which Newton-type optimizers compute anyway, gives the standard errors for free.</p>
+</section></section>
 <section>
-<section id="multivariate-optimization" class="title-slide slide level1 center" data-number="1">
-<h1><span class="header-section-number">1</span> Multivariate Optimization</h1>
+<section id="univariate-optimization" class="title-slide slide level1 center" data-number="2">
+<h1><span class="header-section-number">2</span> Univariate Optimization</h1>
 
 </section>
-<section id="gradient-of-a-multivariate-function" class="slide level2">
-<h2>Gradient of a Multivariate Function</h2>
+<section id="the-problem" class="slide level2">
+<h2>The Problem</h2>
+<p>Find <span class="math inline">\hat\theta</span> maximizing <span class="math inline">\ell(\theta)</span>, <span class="math inline">\theta \in \mathbb{R}</span>. Equivalently, minimize <span class="math inline">f(\theta) = -\ell(\theta)</span>, or find a root of <span class="math inline">S(\theta) = \ell'(\theta)</span>.</p>
+<p>Methods differ in <strong>what they need</strong> and <strong>how fast they converge</strong>:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">method</th>
+<th style="text-align: left;">needs</th>
+<th style="text-align: left;">convergence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">fixed-point iteration</td>
+<td style="text-align: left;">a rearrangement <span class="math inline">\theta = g(\theta)</span></td>
+<td style="text-align: left;">linear, if at all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bisection</td>
+<td style="text-align: left;"><span class="math inline">S(\theta)</span> and a sign-changing bracket</td>
+<td style="text-align: left;">linear (halves bracket)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">golden section</td>
+<td style="text-align: left;"><span class="math inline">\ell(\theta)</span> only, and a bracket</td>
+<td style="text-align: left;">linear</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Newton–Raphson</strong></td>
+<td style="text-align: left;"><span class="math inline">S(\theta)</span> and <span class="math inline">S'(\theta) = \ell''(\theta)</span></td>
+<td style="text-align: left;"><strong>quadratic</strong> near root</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Fisher scoring</td>
+<td style="text-align: left;"><span class="math inline">S(\theta)</span> and <span class="math inline">I(\theta)</span></td>
+<td style="text-align: left;">linear–quadratic</td>
+</tr>
+</tbody>
+</table>
+<p>Running example: <strong>zero-truncated Poisson</strong>.</p>
+</section>
+<section id="running-example-zero-truncated-poisson" class="slide level2">
+<h2>Running Example: Zero-Truncated Poisson</h2>
+<p>We observe only the <strong>nonzero</strong> counts of a Poisson process (<span class="math inline">X = Y \mid Y &gt; 0</span>, <span class="math inline">Y \sim \mathrm{Pois}(\lambda)</span>): <span class="math display">P(x \mid \lambda) = \frac{e^{-\lambda}\lambda^x}{x!}\cdot\frac{1}{1 - e^{-\lambda}}, \qquad x = 1, 2, \ldots</span></p>
+<p><span class="math display">\ell(\lambda) = -n\lambda + \sum x_i \log\lambda - n\log(1 - e^{-\lambda}) + C \tag{7.25}</span> <span class="math display">S(\lambda) = \frac{\sum x_i}{\lambda} - \frac{n}{1 - e^{-\lambda}} \tag{7.26}</span> <span class="math display">S'(\lambda) = -\frac{\sum x_i}{\lambda^2} + \frac{n e^{-\lambda}}{(1 - e^{-\lambda})^2} \tag{7.28}</span></p>
+<p>Using <span class="math inline">E(X) = \dfrac{\lambda}{1 - e^{-\lambda}}</span> (the <span class="math inline">x=0</span> term of <span class="math inline">E(Y) = \lambda</span> contributes nothing), <span class="math display">nI(\lambda) = -E[S'(\lambda)] = \frac{n}{\lambda(1 - e^{-\lambda})} - \frac{n e^{-\lambda}}{(1 - e^{-\lambda})^2}. \tag{7.30}</span></p>
+</section>
+<section id="zero-truncated-poisson-in-r" class="slide level2">
+<h2>Zero-Truncated Poisson in R</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">200</span>, <span class="fl">1.5</span>); x <span class="ot">&lt;-</span> y[y <span class="sc">&gt;</span> <span class="dv">0</span>]; n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); sx <span class="ot">&lt;-</span> <span class="fu">sum</span>(x)</span>
+<span id="cb5-2"><a href=""></a>ll <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>n <span class="sc">*</span> l <span class="sc">+</span> sx <span class="sc">*</span> <span class="fu">log</span>(l) <span class="sc">-</span> n <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))</span>
+<span id="cb5-3"><a href=""></a>S  <span class="ot">&lt;-</span> <span class="cf">function</span>(l) sx <span class="sc">/</span> l <span class="sc">-</span> n <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))</span>
+<span id="cb5-4"><a href=""></a>dS <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>sx <span class="sc">/</span> l<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> n <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>l) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb5-5"><a href=""></a>nI <span class="ot">&lt;-</span> <span class="cf">function</span>(l) n <span class="sc">/</span> (l <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))) <span class="sc">-</span> n <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>l) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb5-6"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb5-7"><a href=""></a><span class="fu">curve</span>(ll, <span class="fl">0.3</span>, <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">"log-likelihood"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(lambda))</span>
+<span id="cb5-8"><a href=""></a><span class="fu">curve</span>(S, <span class="fl">0.3</span>, <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">"score"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(lambda)); <span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<img data-src="Lec%2005%20MLE_images/p35.png" class="r-stretch"><p><span class="math display">
-\nabla f = \left(\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}\right)'
-</span></p>
-<p>The gradient <span class="math inline">\nabla f</span> at a point is a vector formed by stacking the partial derivatives <span class="math inline">\partial f/\partial x_1</span> and <span class="math inline">\partial f/\partial x_2</span>; it points in the direction of steepest ascent of <span class="math inline">f(x_1,x_2)</span>, and is normal to the contour line through that point.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive_mean =</span> <span class="fu">mean</span>(x), <span class="at">true_lambda =</span> <span class="fl">1.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> naive_mean true_lambda 
+   1.908537    1.500000 </code></pre>
+</div>
+</div>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-5-1.png" width="672" class="r-stretch"><p>The plain sample mean <strong>overestimates</strong> <span class="math inline">\lambda</span> because the zeros are missing; the MLE corrects for this.</p>
 </section>
-<section id="sign-of-the-gradient-near-a-minimum" class="slide level2">
-<h2>Sign of the Gradient Near a Minimum</h2>
+<section id="fixed-point-simple-iteration" class="slide level2">
+<h2>Fixed-Point (Simple) Iteration</h2>
+<p>Rearrange <span class="math inline">S(\lambda) = 0</span> into the form <span class="math inline">\lambda = g(\lambda)</span>: <span class="math display">\frac{\bar x}{\lambda} = \frac{1}{1 - e^{-\lambda}} \iff \lambda = \bar x\,(1 - e^{-\lambda}) =: g(\lambda). \tag{7.27}</span></p>
+<p>Iterate <span class="math inline">\lambda_{k+1} = g(\lambda_k)</span>. Converges to a fixed point <span class="math inline">\lambda^* = g(\lambda^*)</span> if <span class="math inline">|g'(\lambda^*)| &lt; 1</span>; the error shrinks by the factor <span class="math inline">|g'(\lambda^*)|</span> each step (<strong>linear</strong> convergence).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>fixed_point <span class="ot">&lt;-</span> <span class="cf">function</span>(g, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">500</span>) {</span>
+<span id="cb8-2"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) { x1 <span class="ot">&lt;-</span> <span class="fu">g</span>(x0); <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k)); x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb8-3"><a href=""></a>  <span class="fu">stop</span>(<span class="st">"not converged"</span>)</span>
+<span id="cb8-4"><a href=""></a>}</span>
+<span id="cb8-5"><a href=""></a><span class="fu">fixed_point</span>(<span class="cf">function</span>(l) <span class="fu">mean</span>(x) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l)), <span class="at">x0 =</span> <span class="fu">mean</span>(x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     root      iter 
+ 1.469493 22.000000 </code></pre>
+</div>
+</div>
+<p>Advantage: no derivatives. Disadvantage: a suitable <span class="math inline">g</span> must be found, and convergence can be slow or fail.</p>
+</section>
+<section id="bisection" class="slide level2">
+<h2>Bisection</h2>
+<p>If <span class="math inline">S</span> is continuous and <span class="math inline">S(a)</span>, <span class="math inline">S(b)</span> have opposite signs, a root lies in <span class="math inline">[a, b]</span>. Evaluate <span class="math inline">S</span> at the midpoint and keep the half that still brackets the root.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a>bisection <span class="ot">&lt;-</span> <span class="cf">function</span>(S, a, b, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb10-2"><a href=""></a>  k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb10-3"><a href=""></a>  <span class="cf">while</span> (b <span class="sc">-</span> a <span class="sc">&gt;</span> tol) { m <span class="ot">&lt;-</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>; <span class="cf">if</span> (<span class="fu">S</span>(a) <span class="sc">*</span> <span class="fu">S</span>(m) <span class="sc">&lt;=</span> <span class="dv">0</span>) b <span class="ot">&lt;-</span> m <span class="cf">else</span> a <span class="ot">&lt;-</span> m; k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span> }</span>
+<span id="cb10-4"><a href=""></a>  <span class="fu">c</span>(<span class="at">root =</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">iter =</span> k)</span>
+<span id="cb10-5"><a href=""></a>}</span>
+<span id="cb10-6"><a href=""></a><span class="fu">bisection</span>(S, <span class="fl">0.1</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     root      iter 
+ 1.469493 30.000000 </code></pre>
+</div>
+</div>
+<ul>
+<li>Guaranteed to converge; the bracket halves each step, so <span class="math inline">\log_2\big((b-a)/\text{tol}\big) \approx 30</span> iterations here.</li>
+<li>Needs only <span class="math inline">S</span>, not <span class="math inline">S'</span>. R’s <code>uniroot()</code> uses a refined version (Brent’s method).</li>
+</ul>
+</section>
+<section id="golden-section-search" class="slide level2">
+<h2>Golden Section Search</h2>
+<p>Works on <span class="math inline">f(\theta) = -\ell(\theta)</span> directly, <strong>without any derivative</strong>: keep a bracket <span class="math inline">[a, b]</span> containing the minimum of a unimodal <span class="math inline">f</span> and two interior points <span class="math inline">a' &lt; b'</span> placed at the golden ratio (<span class="math inline">\phi \approx 0.618</span>).</p>
+<ul>
+<li>If <span class="math inline">f(a') &lt; f(b')</span> the minimum is in <span class="math inline">[a, b']</span>; otherwise in <span class="math inline">[a', b]</span>.</li>
+<li>The golden ratio placement lets the surviving interior point be <strong>reused</strong>, so each step costs one new evaluation and shrinks the bracket by <span class="math inline">0.618</span>.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a>golden <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb12-2"><a href=""></a>  phi <span class="ot">&lt;-</span> (<span class="fu">sqrt</span>(<span class="dv">5</span>) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="dv">2</span>; k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb12-3"><a href=""></a>  x1 <span class="ot">&lt;-</span> b <span class="sc">-</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); x2 <span class="ot">&lt;-</span> a <span class="sc">+</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f1 <span class="ot">&lt;-</span> <span class="fu">f</span>(x1); f2 <span class="ot">&lt;-</span> <span class="fu">f</span>(x2)</span>
+<span id="cb12-4"><a href=""></a>  <span class="cf">while</span> (b <span class="sc">-</span> a <span class="sc">&gt;</span> tol) {</span>
+<span id="cb12-5"><a href=""></a>    <span class="cf">if</span> (f1 <span class="sc">&lt;</span> f2) { b <span class="ot">&lt;-</span> x2; x2 <span class="ot">&lt;-</span> x1; f2 <span class="ot">&lt;-</span> f1; x1 <span class="ot">&lt;-</span> b <span class="sc">-</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f1 <span class="ot">&lt;-</span> <span class="fu">f</span>(x1) }</span>
+<span id="cb12-6"><a href=""></a>    <span class="cf">else</span>         { a <span class="ot">&lt;-</span> x1; x1 <span class="ot">&lt;-</span> x2; f1 <span class="ot">&lt;-</span> f2; x2 <span class="ot">&lt;-</span> a <span class="sc">+</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f2 <span class="ot">&lt;-</span> <span class="fu">f</span>(x2) }</span>
+<span id="cb12-7"><a href=""></a>    k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span> }</span>
+<span id="cb12-8"><a href=""></a>  <span class="fu">c</span>(<span class="at">root =</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">iter =</span> k)</span>
+<span id="cb12-9"><a href=""></a>}</span>
+<span id="cb12-10"><a href=""></a><span class="fu">golden</span>(<span class="cf">function</span>(l) <span class="sc">-</span><span class="fu">ll</span>(l), <span class="fl">0.1</span>, <span class="dv">10</span>)      <span class="co"># R equivalent: optimize(function(l) -ll(l), c(0.1, 10))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     root      iter 
+ 1.469493 44.000000 </code></pre>
+</div>
+</div>
+</section>
+<section id="newtonraphson-derivation" class="slide level2">
+<h2>Newton–Raphson: Derivation</h2>
+<p>Approximate the score by its tangent line at the current point <span class="math inline">\theta_k</span> and solve for where the tangent hits zero: <span class="math display">S(\theta) \approx S(\theta_k) + S'(\theta_k)(\theta - \theta_k) = 0
+\quad\Longrightarrow\quad
+\theta_{k+1} = \theta_k - \frac{S(\theta_k)}{S'(\theta_k)} = \theta_k - \frac{\ell'(\theta_k)}{\ell''(\theta_k)} .</span></p>
 
-<img data-src="Lec%2005%20MLE_images/p36.png" class="r-stretch"><p>To the left of the minimum, <span class="math inline">Df &lt; 0</span>; to the right, <span class="math inline">Df &gt; 0</span> — the derivative’s sign tells us which direction decreases the function.</p>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-9-1.png" width="672" class="r-stretch"></section>
+<section id="newtonraphson-interpretation-as-a-quadratic-model" class="slide level2">
+<h2>Newton–Raphson: Interpretation as a Quadratic Model</h2>
+<p>Equivalently, approximate <span class="math inline">\ell</span> by its second-order Taylor expansion at <span class="math inline">\theta_k</span> and maximize that quadratic: <span class="math display">\ell(\theta) \approx \ell(\theta_k) + \ell'(\theta_k)(\theta - \theta_k) + \tfrac12 \ell''(\theta_k)(\theta - \theta_k)^2 .</span></p>
+<p>For a quadratic <span class="math inline">\ell(\theta) = -a(\theta - u)^2 + C</span> with <span class="math inline">a &gt; 0</span>: <span class="math inline">\ell' = -2a(\theta - u)</span>, <span class="math inline">\ell'' = -2a</span>, so <span class="math display">\theta_{k+1} = \theta_k - \frac{-2a(\theta_k - u)}{-2a} = u \quad\text{in one step}.</span></p>
+<ul>
+<li><span class="math inline">-\ell''(\theta_k)^{-1}</span> is the <strong>perfect step size</strong> for slope <span class="math inline">\ell'(\theta_k)</span> when <span class="math inline">\ell</span> is quadratic.</li>
+<li>Log-likelihoods are approximately quadratic near the MLE (this is what asymptotic normality says), so Newton’s method is extremely fast there.</li>
+<li>The normal-mean example is exactly quadratic: Newton converges in one step from anywhere.</li>
+</ul>
 </section>
-<section id="gradient-directions-on-a-contour-plot" class="slide level2">
-<h2>Gradient Directions on a Contour Plot</h2>
+<section id="newtonraphson-in-r" class="slide level2">
+<h2>Newton–Raphson in R</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a>newton <span class="ot">&lt;-</span> <span class="cf">function</span>(S, dS, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">100</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb14-2"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb14-3"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">-</span> <span class="fu">S</span>(x0) <span class="sc">/</span> <span class="fu">dS</span>(x0)</span>
+<span id="cb14-4"><a href=""></a>    <span class="cf">if</span> (trace) <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"iter %2d: %.10f</span><span class="sc">\n</span><span class="st">"</span>, k, x1))</span>
+<span id="cb14-5"><a href=""></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.finite</span>(x1)) <span class="fu">stop</span>(<span class="st">"diverged"</span>)</span>
+<span id="cb14-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k))</span>
+<span id="cb14-7"><a href=""></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb14-8"><a href=""></a>  <span class="fu">stop</span>(<span class="st">"not converged"</span>)</span>
+<span id="cb14-9"><a href=""></a>}</span>
+<span id="cb14-10"><a href=""></a><span class="fu">newton</span>(S, dS, <span class="at">x0 =</span> <span class="fu">mean</span>(x), <span class="at">trace =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>iter  1: 1.3636086724
+iter  2: 1.4627922360
+iter  3: 1.4694663017
+iter  4: 1.4694927255
+iter  5: 1.4694927259</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    root     iter 
+1.469493 5.000000 </code></pre>
+</div>
+</div>
+<p>Compare iteration counts: fixed point 22, bisection 30, golden 40, Newton just a handful.</p>
+</section>
+<section id="convergence-rate-of-newtonraphson" class="slide level2">
+<h2>Convergence Rate of Newton–Raphson</h2>
+<p>Let <span class="math inline">e_k = \theta_k - \hat\theta</span>. Expanding <span class="math inline">S(\hat\theta) = 0</span> around <span class="math inline">\theta_k</span>: <span class="math display">0 = S(\theta_k) - S'(\theta_k)e_k + \tfrac12 S''(\xi)e_k^2
+\quad\Longrightarrow\quad
+e_{k+1} = e_k - \frac{S(\theta_k)}{S'(\theta_k)} = \frac{S''(\xi)}{2S'(\theta_k)}\,e_k^2 .</span></p>
+<p><strong>Quadratic convergence</strong>: the error is squared each step, so the number of correct digits roughly <strong>doubles</strong>. Linear methods (bisection, fixed point) gain a fixed number of digits per step.</p>
 
-<img data-src="Lec%2005%20MLE_images/p37.png" class="r-stretch"><p>Gradient vectors (green) point outward, perpendicular to the elliptical contour lines, always pointing toward higher function values.</p>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-11-1.png" width="672" class="r-stretch"></section>
+<section id="when-newtonraphson-fails" class="slide level2">
+<h2>When Newton–Raphson Fails</h2>
+<p>Newton uses only <strong>local</strong> information, so it can misbehave:</p>
+<ul>
+<li><strong>Wrong curvature</strong>: if <span class="math inline">\ell''(\theta_k) &gt; 0</span> (a convex region), the step moves toward a <em>minimum</em> or diverges.</li>
+<li><strong>Overshooting</strong>: a flat score (<span class="math inline">S'(\theta_k) \approx 0</span>) gives a huge step.</li>
+<li><strong>Multiple roots</strong>: it converges to whichever root is nearest the start, possibly a local maximum.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a>Sc  <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="dv">2</span> <span class="sc">*</span> (x_c <span class="sc">-</span> t) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span>))       <span class="co"># Cauchy score</span></span>
+<span id="cb17-2"><a href=""></a>dSc <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="dv">2</span> <span class="sc">*</span> ((x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb17-3"><a href=""></a>x_c <span class="ot">&lt;-</span> <span class="fu">rcauchy</span>(<span class="dv">8</span>, <span class="dv">3</span>)</span>
+<span id="cb17-4"><a href=""></a>starts <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>, <span class="fu">median</span>(x_c), <span class="dv">8</span>)</span>
+<span id="cb17-5"><a href=""></a><span class="fu">sapply</span>(starts, <span class="cf">function</span>(s) <span class="fu">tryCatch</span>(<span class="fu">newton</span>(Sc, dSc, s)[<span class="st">"root"</span>], <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NA</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                      root     root 
+      NA       NA 3.639364 9.881167 </code></pre>
+</div>
+</div>
+<p>Even the well-behaved truncated Poisson overshoots from a poor start: at <span class="math inline">\lambda_0 = 3.5</span> the score is flat, the step is huge, and the iterate goes negative.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a><span class="fu">c</span>(<span class="at">step_from_3.5 =</span> <span class="fl">3.5</span> <span class="sc">-</span> <span class="fu">S</span>(<span class="fl">3.5</span>) <span class="sc">/</span> <span class="fu">dS</span>(<span class="fl">3.5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>step_from_3.5 
+   -0.4278426 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a><span class="fu">tryCatch</span>(<span class="fu">newton</span>(S, dS, <span class="fl">3.5</span>), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">conditionMessage</span>(e))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "diverged"</code></pre>
+</div>
+</div>
+<p>Safeguards: start from a robust estimate (median for Cauchy), <strong>halve the step</strong> until <span class="math inline">\ell</span> increases, or fall back to bisection/golden section, which only need a bracket.</p>
 </section>
-<section id="the-hessian-matrix" class="slide level2">
-<h2>The Hessian Matrix</h2>
-<p><span class="math display">
-\text{Hessian:}\qquad \nabla^2 f = \begin{pmatrix}
-\dfrac{\partial^2 f}{\partial x_1\partial x_1} &amp; \dfrac{\partial^2 f}{\partial x_1\partial x_2} &amp; \cdots &amp; \dfrac{\partial^2 f}{\partial x_1\partial x_p} \\[8pt]
-\dfrac{\partial^2 f}{\partial x_2\partial x_1} &amp; \dfrac{\partial^2 f}{\partial x_2\partial x_2} &amp; \cdots &amp; \dfrac{\partial^2 f}{\partial x_2\partial x_p} \\[8pt]
-\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\[4pt]
-\dfrac{\partial^2 f}{\partial x_p\partial x_1} &amp; \dfrac{\partial^2 f}{\partial x_p\partial x_2} &amp; \cdots &amp; \dfrac{\partial^2 f}{\partial x_p\partial x_p}
-\end{pmatrix}_{p\times p}
-</span></p>
-<p><span class="math display">
-x = (x_1, x_2, \ldots, x_p)
-</span></p>
-<p>Compare with the univariate quadratic form: <span class="math inline">(x-u)'A(x-u) + C \quad\longleftrightarrow\quad ax^2+bx+c</span></p>
+<section id="univariate-fisher-scoring" class="slide level2">
+<h2>Univariate Fisher Scoring</h2>
+<p>Replace the observed curvature <span class="math inline">-\ell''(\theta_k)</span> by its expectation <span class="math inline">nI(\theta_k)</span>: <span class="math display">\theta_{k+1} = \theta_k + \frac{S(\theta_k)}{n I(\theta_k)} .</span></p>
+<ul>
+<li><span class="math inline">nI(\theta) &gt; 0</span> always, so the step is always in an ascent direction — more robust than Newton far from the optimum.</li>
+<li>Near the MLE <span class="math inline">nI(\hat\theta) \approx -\ell''(\hat\theta)</span>, so the two methods behave alike.</li>
+<li>Requires the expectation in closed form; for the truncated Poisson it is (7.30).</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a>fisher_scoring <span class="ot">&lt;-</span> <span class="cf">function</span>(S, nI, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">100</span>) {</span>
+<span id="cb23-2"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) { x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> <span class="fu">S</span>(x0) <span class="sc">/</span> <span class="fu">nI</span>(x0); <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k)); x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb23-3"><a href=""></a>}</span>
+<span id="cb23-4"><a href=""></a><span class="fu">rbind</span>(<span class="at">newton =</span> <span class="fu">newton</span>(S, dS, <span class="dv">3</span>), <span class="at">fisher =</span> <span class="fu">fisher_scoring</span>(S, nI, <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           root iter
+newton 1.469493    8
+fisher 1.469493    5</code></pre>
+</div>
+</div>
 </section>
-<section id="newtonraphson-iteration-in-multiple-dimensions" class="slide level2">
-<h2>Newton–Raphson Iteration in Multiple Dimensions</h2>
-<p><span class="math display">
-x_{n+1} = \underbrace{x_n}_{p\times 1} - \underbrace{\nabla^2 f(x_n)^{-1}}_{p\times p}\, \underbrace{\nabla f(x_n)}_{p\times 1}
-</span></p>
-<p>Compare with the univariate version: <span class="math display">
-x_{n+1} = x_n - \frac{S(x_n)}{S'(x_n)}
-</span></p>
+<section id="standard-error-from-the-curvature" class="slide level2">
+<h2>Standard Error from the Curvature</h2>
+<p>At the MLE <span class="math inline">\hat\lambda</span>, the observed information <span class="math inline">J(\hat\lambda) = -\ell''(\hat\lambda) = -S'(\hat\lambda)</span> and the expected information <span class="math inline">nI(\hat\lambda)</span> both estimate the precision:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a>lhat <span class="ot">&lt;-</span> <span class="fu">newton</span>(S, dS, <span class="fu">mean</span>(x))[<span class="st">"root"</span>]</span>
+<span id="cb25-2"><a href=""></a><span class="fu">c</span>(<span class="at">mle =</span> lhat, <span class="at">se_observed =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="sc">-</span><span class="fu">dS</span>(lhat)), <span class="at">se_expected =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">nI</span>(lhat)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        mle.root se_observed.root se_expected.root 
+       1.4694927        0.1108998        0.1108998 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a>lhat <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.96</span>, <span class="fl">1.96</span>) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="sc">-</span><span class="fu">dS</span>(lhat))    <span class="co"># 95% Wald interval</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.252129 1.686856</code></pre>
+</div>
+</div>
 </section>
-<section id="simple-linear-regression-setup" class="slide level2">
-<h2>Simple Linear Regression Setup</h2>
+<section id="numerical-derivatives" class="slide level2">
+<h2>Numerical Derivatives</h2>
+<p>When <span class="math inline">S</span> or <span class="math inline">S'</span> is tedious to derive, approximate by finite differences: <span class="math display">\ell'(\theta) \approx \frac{\ell(\theta + h) - \ell(\theta - h)}{2h}, \qquad
+\ell''(\theta) \approx \frac{\ell(\theta + h) - 2\ell(\theta) + \ell(\theta - h)}{h^2}.</span></p>
+<ul>
+<li><span class="math inline">h</span> too large: truncation error; <span class="math inline">h</span> too small: roundoff error (large − large). Typical choice <span class="math inline">h \approx \sqrt{\epsilon}\,(1 + |\theta|) \approx 10^{-8}</span> for the first derivative, <span class="math inline">\epsilon^{1/3}</span> for the second.</li>
+<li>R’s <code>nlm()</code> and <code>optim(method = "BFGS")</code> use numerical gradients unless you supply analytic ones; <code>numDeriv::grad()</code> and <code>hessian()</code> are more accurate.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a>h <span class="ot">&lt;-</span> <span class="fl">1e-5</span></span>
+<span id="cb29-2"><a href=""></a><span class="fu">c</span>(<span class="at">analytic =</span> <span class="fu">dS</span>(lhat), <span class="at">numeric =</span> (<span class="fu">ll</span>(lhat <span class="sc">+</span> h) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">ll</span>(lhat) <span class="sc">+</span> <span class="fu">ll</span>(lhat <span class="sc">-</span> h)) <span class="sc">/</span> h<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>analytic.root  numeric.root 
+    -81.30895     -81.30911 </code></pre>
+</div>
+</div>
+</section></section>
+<section>
+<section id="multivariate-newtonraphson-and-fisher-scoring" class="title-slide slide level1 center" data-number="3">
+<h1><span class="header-section-number">3</span> Multivariate Newton–Raphson and Fisher Scoring</h1>
 
-<img data-src="Lec%2005%20MLE_images/p40.png" class="r-stretch"><p><span class="math display">
-y_i = x_i\beta + \varepsilon_i \qquad\text{or}\qquad y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
-</span></p>
-<p><span class="math display">
-u_i = \beta_0 + \beta_1 x_i
-</span></p>
-<p><span class="math display">
-y_1\mid x_1, \ldots, y_n\mid x_n \sim N(u_i, \sigma^2), \qquad u_i = u(x_i)
-</span></p>
 </section>
-<section id="bernoulli-random-variable-and-logistic-regression" class="slide level2">
-<h2>Bernoulli Random Variable and Logistic Regression</h2>
-<p><strong>Bernoulli R.V.:</strong> <span class="math inline">y_1, y_2, \ldots, y_n \sim \mathrm{Bern}(p)</span></p>
-<p><span class="math display">
-P(y_i) = p^{y_i}(1-p)^{1-y_i} = \begin{cases} p, &amp; \text{if } y_i = 1 \\ 1-p, &amp; \text{if } y_i = 0 \end{cases}
-</span></p>
-<p><strong>Logistic Regression:</strong> <span class="math inline">y_i \mid x_i \sim \mathrm{Bern}(\pi_i)</span>, <span class="math inline">\pi_i = \pi(x_i)</span></p>
-</section>
-<section id="the-logistic-function" class="slide level2">
-<h2>The Logistic Function</h2>
+<section id="gradient-and-hessian" class="slide level2">
+<h2>Gradient and Hessian</h2>
+<p>For <span class="math inline">\theta = (\theta_1, \ldots, \theta_p)'</span>, the <strong>gradient</strong> (score vector) and <strong>Hessian</strong> are <span class="math display">\nabla\ell(\theta) = \begin{pmatrix}\partial\ell/\partial\theta_1 \\ \vdots \\ \partial\ell/\partial\theta_p\end{pmatrix}, \qquad
+\nabla^2\ell(\theta) = \left(\frac{\partial^2\ell}{\partial\theta_i\,\partial\theta_j}\right)_{p\times p} .</span></p>
+<ul>
+<li><span class="math inline">\nabla\ell</span> points in the direction of <strong>steepest ascent</strong> and is perpendicular to the contour through <span class="math inline">\theta</span>.</li>
+<li><span class="math inline">\nabla^2\ell</span> describes the local curvature; at a maximum it is negative definite.</li>
+<li>A quadratic in <span class="math inline">p</span> dimensions: <span class="math inline">\ell(\theta) = -\tfrac12(\theta - u)'A(\theta - u) + C</span> with <span class="math inline">A</span> positive definite, <span class="math inline">\nabla\ell = -A(\theta - u)</span>, <span class="math inline">\nabla^2\ell = -A</span>.</li>
+</ul>
 
-<img data-src="Lec%2005%20MLE_images/p42.png" class="r-stretch"><p><span class="math display">
-\pi_i = \pi(x_i) = \frac{\exp(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip})}{1 + \exp(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip})}
-</span></p>
-<p>As the linear predictor <span class="math inline">x_i'\beta</span> increases, <span class="math inline">\pi_i</span> approaches 1; as it decreases, <span class="math inline">\pi_i</span> approaches 0 — this gives the characteristic S-shaped (sigmoid) curve.</p>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-17-1.png" width="672" class="r-stretch"></section>
+<section id="multivariate-newtonraphson" class="slide level2">
+<h2>Multivariate Newton–Raphson</h2>
+<p>Second-order Taylor expansion at <span class="math inline">\theta_k</span>, maximized exactly: <span class="math display">\ell(\theta) \approx \ell(\theta_k) + \nabla\ell(\theta_k)'(\theta - \theta_k) + \tfrac12(\theta - \theta_k)'\nabla^2\ell(\theta_k)(\theta - \theta_k)</span> <span class="math display">\Longrightarrow\quad
+\underbrace{\theta_{k+1}}_{p\times1} = \theta_k - \underbrace{\big[\nabla^2\ell(\theta_k)\big]^{-1}}_{p\times p}\underbrace{\nabla\ell(\theta_k)}_{p\times1}.</span></p>
+<p>Compare with the univariate <span class="math inline">\theta_{k+1} = \theta_k - \ell'(\theta_k)/\ell''(\theta_k)</span>: division becomes multiplication by the inverse Hessian.</p>
+<p><strong>Fisher scoring</strong> replaces <span class="math inline">-\nabla^2\ell(\theta_k)</span> by the expected information <span class="math inline">nI(\theta_k)</span>: <span class="math display">\theta_{k+1} = \theta_k + \big[nI(\theta_k)\big]^{-1}\nabla\ell(\theta_k).</span></p>
+<p>Each iteration costs one <span class="math inline">p \times p</span> linear solve — <span class="math inline">O(p^3)</span> — fine for <span class="math inline">p</span> in the hundreds, expensive for <span class="math inline">p</span> in the millions.</p>
 </section>
-<section id="an-algebraic-identity-for-the-logistic-function" class="slide level2">
-<h2>An Algebraic Identity for the Logistic Function</h2>
-<p><span class="math display">
-\frac{e^x}{1+e^x} = \frac{1}{1-e^{-x}}
-</span></p>
+<section id="example-logistic-regression" class="slide level2">
+<h2>Example: Logistic Regression</h2>
+<p><span class="math inline">y_i \mid x_i \sim \mathrm{Bern}(\pi_i)</span> with <span class="math inline">\pi_i = \dfrac{e^{\eta_i}}{1 + e^{\eta_i}} = \dfrac{1}{1 + e^{-\eta_i}}</span>, <span class="math inline">\eta_i = x_i'\beta</span>, <span class="math inline">x_i = (1, x_{i1}, \ldots, x_{ip})'</span>.</p>
+<p><span class="math display">L(\beta) = \prod_{i=1}^n \pi_i^{y_i}(1-\pi_i)^{1-y_i}
+= \prod_{i=1}^n \frac{e^{y_i\eta_i}}{1 + e^{\eta_i}}</span> <span class="math display">\ell(\beta) = \sum_{i=1}^n \big[y_i\,x_i'\beta - \log(1 + e^{x_i'\beta})\big]</span></p>
+<p>Using <span class="math inline">\dfrac{\partial}{\partial\beta}\log(1 + e^{x_i'\beta}) = \pi_i x_i</span> and <span class="math inline">\dfrac{\partial\pi_i}{\partial\beta} = \pi_i(1-\pi_i)x_i</span>: <span class="math display">\nabla\ell(\beta) = \sum_{i=1}^n (y_i - \pi_i)\,x_i = X'(y - \pi), \qquad
+\nabla^2\ell(\beta) = -\sum_{i=1}^n \pi_i(1-\pi_i)\,x_i x_i' = -X'WX,</span> with <span class="math inline">W = \mathrm{diag}\big(\pi_i(1-\pi_i)\big)</span>.</p>
 </section>
-<section id="likelihood-function-for-logistic-regression" class="slide level2">
-<h2>Likelihood Function for Logistic Regression</h2>
-<p><span class="math display">
-f(y_1,\ldots,y_n \mid x_1,\ldots,x_n,\beta) = \prod_{i=1}^n f(y_i\mid x_i,\beta)
-</span></p>
-<p><span class="math display">
-= \prod_{i=1}^n \pi_i^{y_i}(1-\pi_i)^{1-y_i}
-</span></p>
-<p><span class="math display">
-= \prod_{i=1}^n \left(\frac{e^{x_i\beta}}{1+e^{x_i\beta}}\right)^{y_i}\left(\frac{1}{1+e^{x_i\beta}}\right)^{1-y_i}
-</span></p>
-<p><span class="math display">
-= \frac{e^{\sum_{i=1}^n y_i x_i\beta}}{\prod_{i=1}^n (1+e^{x_i\beta})}
-</span></p>
+<section id="logistic-regression-newton-fisher-scoring-irls" class="slide level2">
+<h2>Logistic Regression: Newton = Fisher Scoring = IRLS</h2>
+<ul>
+<li><span class="math inline">-\nabla^2\ell = X'WX</span> is positive semi-definite, so <span class="math inline">\ell</span> is <strong>concave</strong>: any stationary point is the global maximum.</li>
+<li>The Hessian does not involve <span class="math inline">y</span>, so its expectation equals itself: <strong>Newton–Raphson and Fisher scoring coincide</strong>.</li>
+<li>The update <span class="math display">\beta_{k+1} = \beta_k + (X'W_kX)^{-1}X'(y - \pi_k) = (X'W_kX)^{-1}X'W_k z_k, \qquad z_k = X\beta_k + W_k^{-1}(y - \pi_k),</span> is a weighted least squares fit of the <em>working response</em> <span class="math inline">z_k</span>: <strong>iteratively reweighted least squares (IRLS)</strong>, which is how <code>glm()</code> fits all generalized linear models.</li>
+<li>Caveat: if the classes are perfectly separable, <span class="math inline">\ell</span> increases forever and the MLE does not exist (<span class="math inline">\|\hat\beta\| \to \infty</span>).</li>
+</ul>
 </section>
-<section id="log-likelihood-function-for-logistic-regression" class="slide level2">
-<h2>Log-Likelihood Function for Logistic Regression</h2>
-<p><span class="math display">
-\ell(\beta; y, x) = \sum_{i=1}^n y_i(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}) - \sum_{i=1}^n \log\!\left(1 + e^{\beta_0+\beta_1 x_{i1}+\cdots+\beta_p x_{ip}}\right)
-</span></p>
-</section>
-<section id="score-equations-for-logistic-regression" class="slide level2">
-<h2>Score Equations for Logistic Regression</h2>
-<p><span class="math display">
-\frac{\partial \ell}{\partial \beta_0} = \sum_{i=1}^n y_i - \sum_{i=1}^n \frac{e^{x_i\beta}\cdot 1}{1+e^{x_i\beta}} = \sum_{i=1}^n (y_i - \pi_i)
-</span></p>
-<p><span class="math display">
-\frac{\partial \ell}{\partial \beta_1} = \sum_{i=1}^n y_i x_{i1} - \sum_{i=1}^n \frac{e^{x_i\beta}\cdot x_{i1}}{1+e^{x_i\beta}} = \sum_{i=1}^n (y_i - \pi_i)\,x_{i1}
-</span></p>
-</section>
-<section id="note-log-likelihood-may-not-be-concave" class="slide level2">
-<h2>Note: Log-Likelihood May Not Be Concave</h2>
-
-<img data-src="Lec%2005%20MLE_images/p47.png" class="r-stretch"><p>It isn’t positive-definite (in general, the Hessian of the logistic log-likelihood need not be negative-definite everywhere, unlike the well-behaved examples seen earlier).</p>
-</section>
-<section id="gradient-vector-for-logistic-regression" class="slide level2">
-<h2>Gradient Vector for Logistic Regression</h2>
-<p><span class="math display">
-\nabla \ell = \begin{pmatrix} \dfrac{\partial \ell}{\partial \beta_0} \\[8pt] \dfrac{\partial \ell}{\partial \beta_1} \\[4pt] \vdots \\[4pt] \dfrac{\partial \ell}{\partial \beta_p} \end{pmatrix}
-</span></p>
-</section>
-<section id="hessian-matrix-for-logistic-regression" class="slide level2">
-<h2>Hessian Matrix for Logistic Regression</h2>
-<p><span class="math display">
-\nabla^2 \ell = \begin{pmatrix}
-\dfrac{\partial^2 \ell}{\partial \beta_0 \partial \beta_0} &amp; \cdots &amp; \dfrac{\partial^2 \ell}{\partial \beta_0 \partial \beta_p} \\[8pt]
-\vdots &amp; \ddots &amp; \vdots \\[4pt]
-\dfrac{\partial^2 \ell}{\partial \beta_p \partial \beta_0} &amp; \cdots &amp; \dfrac{\partial^2 \ell}{\partial \beta_p \partial \beta_p}
-\end{pmatrix}
-</span></p>
+<section id="logistic-regression-in-r" class="slide level2">
+<h2>Logistic Regression in R</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">500</span>; X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">rnorm</span>(n), <span class="fu">rnorm</span>(n)); beta_true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb31-2"><a href=""></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(X <span class="sc">%*%</span> beta_true))</span>
+<span id="cb31-3"><a href=""></a>loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="fu">sum</span>(y <span class="sc">*</span> (X <span class="sc">%*%</span> b) <span class="sc">-</span> <span class="fu">log1p</span>(<span class="fu">exp</span>(X <span class="sc">%*%</span> b)))</span>
+<span id="cb31-4"><a href=""></a>grad   <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="fu">crossprod</span>(X, y <span class="sc">-</span> <span class="fu">plogis</span>(X <span class="sc">%*%</span> b))</span>
+<span id="cb31-5"><a href=""></a>hess   <span class="ot">&lt;-</span> <span class="cf">function</span>(b) { p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(X <span class="sc">%*%</span> b); <span class="sc">-</span><span class="fu">crossprod</span>(X, X <span class="sc">*</span> <span class="fu">drop</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))) }</span>
+<span id="cb31-6"><a href=""></a></span>
+<span id="cb31-7"><a href=""></a>newton_mv <span class="ot">&lt;-</span> <span class="cf">function</span>(grad, hess, b0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">50</span>) {</span>
+<span id="cb31-8"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb31-9"><a href=""></a>    b1 <span class="ot">&lt;-</span> b0 <span class="sc">-</span> <span class="fu">solve</span>(<span class="fu">hess</span>(b0), <span class="fu">grad</span>(b0))</span>
+<span id="cb31-10"><a href=""></a>    <span class="cf">if</span> (<span class="fu">max</span>(<span class="fu">abs</span>(b1 <span class="sc">-</span> b0)) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b1), <span class="at">iter =</span> k, <span class="at">se =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(<span class="sc">-</span><span class="fu">hess</span>(b1))))))</span>
+<span id="cb31-11"><a href=""></a>    b0 <span class="ot">&lt;-</span> b1 }</span>
+<span id="cb31-12"><a href=""></a>}</span>
+<span id="cb31-13"><a href=""></a>fit <span class="ot">&lt;-</span> <span class="fu">newton_mv</span>(grad, hess, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>)); fit<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 7</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href=""></a><span class="fu">rbind</span>(<span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">glm =</span> <span class="fu">coef</span>(<span class="fu">glm</span>(y <span class="sc">~</span> X[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">family =</span> binomial)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       (Intercept) X[, -1]1  X[, -1]2
+newton  -0.5431413 1.080382 -2.453254
+glm     -0.5431413 1.080382 -2.453254</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href=""></a><span class="fu">rbind</span>(<span class="at">newton =</span> fit<span class="sc">$</span>se, <span class="at">glm =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(<span class="fu">glm</span>(y <span class="sc">~</span> X[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">family =</span> binomial)))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       (Intercept)  X[, -1]1  X[, -1]2
+newton   0.1337429 0.1511637 0.2228005
+glm      0.1337429 0.1511637 0.2228005</code></pre>
+</div>
+</div>
 </section>
 <section id="variance-of-the-mle-hatbeta" class="slide level2">
 <h2>Variance of the MLE <span class="math inline">\hat\beta</span></h2>
-<p><span class="math display">
-V(\hat\beta) = \left[n\cdot I(\beta)\right]^{-1} \approx \left[-\nabla^2 \ell(\hat\beta)\right]^{-1}
-</span></p>
-<p><span class="math display">
-\hat V(\hat\beta) = \begin{pmatrix} \hat\sigma_{11}^2 &amp; \hat\sigma_{12} &amp; \cdots &amp; \hat\sigma_{1p} \\ \hat\sigma_{p1} &amp; \hat\sigma_{p2} &amp; \cdots &amp; \hat\sigma_{pp}^2 \end{pmatrix}, \qquad \sqrt{\mathrm{diag}\big(\hat V(\hat\beta)\big)} = \widehat{SD}(\hat\beta)
-</span></p>
-</section>
-<section id="gradient-descent-path-example" class="slide level2">
-<h2>Gradient Descent Path Example</h2>
+<p><span class="math display">\widehat{\mathrm{Var}}(\hat\beta) = \big[-\nabla^2\ell(\hat\beta)\big]^{-1} = (X'\hat WX)^{-1}
+= \begin{pmatrix}\hat\sigma_{00} &amp; \cdots &amp; \hat\sigma_{0p} \\ \vdots &amp; \ddots &amp; \vdots \\ \hat\sigma_{p0} &amp; \cdots &amp; \hat\sigma_{pp}\end{pmatrix},
+\qquad \widehat{SE}(\hat\beta_j) = \sqrt{\hat\sigma_{jj}} .</span></p>
+<p>Wald tests and confidence intervals follow directly: <span class="math display">z_j = \frac{\hat\beta_j}{\widehat{SE}(\hat\beta_j)} \;\dot\sim\; N(0,1) \text{ under } H_0: \beta_j = 0, \qquad \hat\beta_j \pm 1.96\,\widehat{SE}(\hat\beta_j).</span></p>
+<p>This is the <code>summary(glm(...))</code> table. The variance comes from the same Hessian that drove the Newton iterations.</p>
+</section></section>
+<section>
+<section id="other-multivariate-methods" class="title-slide slide level1 center" data-number="4">
+<h1><span class="header-section-number">4</span> Other Multivariate Methods</h1>
 
-<img data-src="Lec%2005%20MLE_images/p51.png" class="r-stretch"><p><span class="math display">
-f(x,y) = x^2+y^2
-</span></p>
-<p>Following the (negative) gradient direction repeatedly produces a zig-zagging path toward the minimum of the circular contours.</p>
 </section>
-<section id="q-conjugate-directions" class="slide level2">
-<h2>Q-Conjugate Directions</h2>
-
-<img data-src="Lec%2005%20MLE_images/p52.png" class="r-stretch"><p><span class="math display">
-f(x) = x'Qx
-</span></p>
-<p>Using <strong>Q-conjugate</strong> search directions on elliptical contours reaches the minimum much more directly than the zig-zagging gradient path.</p>
+<section id="beyond-newton-what-if-the-hessian-is-unavailable-or-too-big" class="slide level2">
+<h2>Beyond Newton: What If the Hessian Is Unavailable or Too Big?</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">method</th>
+<th style="text-align: left;">uses</th>
+<th style="text-align: left;">per-iteration cost</th>
+<th style="text-align: left;">typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Nelder–Mead</td>
+<td style="text-align: left;"><span class="math inline">f</span> only</td>
+<td style="text-align: left;"><span class="math inline">O(p)</span> evaluations</td>
+<td style="text-align: left;">small <span class="math inline">p</span>, non-smooth or noisy <span class="math inline">f</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gradient descent + line search</td>
+<td style="text-align: left;"><span class="math inline">\nabla f</span></td>
+<td style="text-align: left;"><span class="math inline">O(p)</span> + line search</td>
+<td style="text-align: left;">large <span class="math inline">p</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">conjugate gradient</td>
+<td style="text-align: left;"><span class="math inline">\nabla f</span></td>
+<td style="text-align: left;"><span class="math inline">O(p)</span> + line search</td>
+<td style="text-align: left;">large <span class="math inline">p</span>, quadratic-like <span class="math inline">f</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">quasi-Newton (BFGS, L-BFGS)</td>
+<td style="text-align: left;"><span class="math inline">\nabla f</span>, builds <span class="math inline">\approx</span> Hessian</td>
+<td style="text-align: left;"><span class="math inline">O(p^2)</span> / <span class="math inline">O(mp)</span></td>
+<td style="text-align: left;">default general-purpose</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Newton / Fisher scoring</td>
+<td style="text-align: left;"><span class="math inline">\nabla f</span>, <span class="math inline">\nabla^2 f</span></td>
+<td style="text-align: left;"><span class="math inline">O(p^3)</span></td>
+<td style="text-align: left;">moderate <span class="math inline">p</span>, gives SEs</td>
+</tr>
+</tbody>
+</table>
+<p>All are available through <code>optim(par, fn, gr, method = ...)</code> in R. Convention below: <strong>minimize</strong> <span class="math inline">f(\theta) = -\ell(\theta)</span>.</p>
 </section>
-<section id="neural-network" class="slide level2">
-<h2>Neural Network</h2>
+<section id="neldermead-simplex-method" class="slide level2">
+<h2>Nelder–Mead (Simplex Method)</h2>
+<p>Maintains a <strong>simplex</strong> of <span class="math inline">p+1</span> points (a triangle in 2D) and moves it downhill using only function values:</p>
+<ol type="1">
+<li>Order the vertices <span class="math inline">f(\theta_{(1)}) \le \cdots \le f(\theta_{(p+1)})</span>; let <span class="math inline">\bar\theta</span> be the centroid of the best <span class="math inline">p</span>.</li>
+<li><strong>Reflect</strong> the worst vertex through <span class="math inline">\bar\theta</span>; if the reflected point is the new best, try <strong>expanding</strong> further.</li>
+<li>If reflection is poor, <strong>contract</strong> toward <span class="math inline">\bar\theta</span>; if that also fails, <strong>shrink</strong> all vertices toward the best.</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href=""></a>rosen <span class="ot">&lt;-</span> <span class="cf">function</span>(v) (<span class="dv">1</span> <span class="sc">-</span> v[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">100</span> <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> v[<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>       <span class="co"># Rosenbrock "banana", min at (1, 1)</span></span>
+<span id="cb37-2"><a href=""></a>nm <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.2</span>, <span class="dv">1</span>), rosen, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>); <span class="fu">c</span>(nm<span class="sc">$</span>par, <span class="at">evals =</span> nm<span class="sc">$</span>counts[<span class="st">"function"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              evals.function 
+      1.000260       1.000506     195.000000 </code></pre>
+</div>
+</div>
+<p>Robust and derivative-free (R’s <code>optim</code> default), but slow in high dimensions and offers no standard errors.</p>
+</section>
+<section id="gradient-descent-with-line-search" class="slide level2">
+<h2>Gradient Descent with Line Search</h2>
+<p>Move in the direction of steepest descent <span class="math inline">d_k = -\nabla f(\theta_k)</span>, choosing the step length <span class="math inline">\alpha_k</span> by a <strong>line search</strong>: <span class="math display">\theta_{k+1} = \theta_k + \alpha_k d_k, \qquad \alpha_k = \arg\min_{\alpha &gt; 0} f(\theta_k + \alpha d_k) .</span></p>
+<ul>
+<li>Exact line search: a univariate minimization (golden section / <code>optimize</code>) along the ray.</li>
+<li>Inexact (<strong>backtracking, Armijo</strong>): start with <span class="math inline">\alpha = 1</span> and halve until <span class="math inline">f(\theta_k + \alpha d_k) \le f(\theta_k) + c\,\alpha\,\nabla f(\theta_k)'d_k</span> (a “sufficient decrease”).</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a>grad_descent <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb39-2"><a href=""></a>  path <span class="ot">&lt;-</span> x0</span>
+<span id="cb39-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb39-4"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">gr</span>(x0); a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum   <span class="co"># exact line search</span></span>
+<span id="cb39-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
+<span id="cb39-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>((x1 <span class="sc">-</span> x0)<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
+<span id="cb39-7"><a href=""></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb39-8"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
+<span id="cb39-9"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="why-gradient-descent-zig-zags" class="slide level2">
+<h2>Why Gradient Descent Zig-Zags</h2>
+<p>With exact line search, consecutive directions are <strong>orthogonal</strong> (<span class="math inline">\nabla f(\theta_{k+1})'d_k = 0</span>), so on elongated contours the path zig-zags across the valley:</p>
 
-<img data-src="Lec%2005%20MLE_images/p53.png" class="r-stretch"><p>A neural network can be viewed as a composition of layers: inputs <span class="math inline">x_1,\ldots,x_p</span> feed (via weights <span class="math inline">W</span>) into hidden units <span class="math inline">h_1,\ldots,h_{k_1}</span>, and so on through further layers of sizes <span class="math inline">p \times k_1 \times k_2 \times \cdots \times k_T</span> — the same MLE / gradient-based optimization ideas extend to fitting such models.</p>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-21-1.png" width="672" class="r-stretch"><p>The number of iterations grows with the <strong>condition number</strong> of the Hessian (ratio of largest to smallest eigenvalue).</p>
+</section>
+<section id="conjugate-gradient" class="slide level2">
+<h2>Conjugate Gradient</h2>
+<p>Fix the zig-zag by making each new direction <strong>conjugate</strong> to the previous ones with respect to the Hessian <span class="math inline">Q</span>: <span class="math inline">d_i'Qd_j = 0</span> for <span class="math inline">i \ne j</span>. For a quadratic <span class="math inline">f(\theta) = \tfrac12\theta'Q\theta - b'\theta</span>, minimizing along <span class="math inline">p</span> such directions reaches the exact minimum in <strong>at most <span class="math inline">p</span> steps</strong>.</p>
+<p>The nonlinear version builds directions from gradients only: <span class="math display">d_0 = -g_0, \qquad d_{k+1} = -g_{k+1} + \beta_k d_k, \qquad
+\beta_k^{FR} = \frac{g_{k+1}'g_{k+1}}{g_k'g_k}\ \text{(Fletcher–Reeves)}, \quad
+\beta_k^{PR} = \frac{g_{k+1}'(g_{k+1} - g_k)}{g_k'g_k}\ \text{(Polak–Ribière)},</span> with <span class="math inline">\theta_{k+1} = \theta_k + \alpha_k d_k</span> from a line search and <span class="math inline">g_k = \nabla f(\theta_k)</span>.</p>
+<ul>
+<li>Memory: only two vectors. No matrix ever formed. Ideal for very large <span class="math inline">p</span>.</li>
+<li>Restart with <span class="math inline">d = -g</span> every <span class="math inline">p</span> iterations, since conjugacy degrades on non-quadratic <span class="math inline">f</span>.</li>
+</ul>
+</section>
+<section id="conjugate-gradient-in-r" class="slide level2">
+<h2>Conjugate Gradient in R</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href=""></a>conj_grad <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">restart =</span> <span class="fu">length</span>(x0)) {</span>
+<span id="cb40-2"><a href=""></a>  g0 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x0); d <span class="ot">&lt;-</span> <span class="sc">-</span>g0; path <span class="ot">&lt;-</span> x0</span>
+<span id="cb40-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb40-4"><a href=""></a>    a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum</span>
+<span id="cb40-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; g1 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x1); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
+<span id="cb40-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>(g1<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
+<span id="cb40-7"><a href=""></a>    beta <span class="ot">&lt;-</span> <span class="cf">if</span> (k <span class="sc">%%</span> restart <span class="sc">==</span> <span class="dv">0</span>) <span class="dv">0</span> <span class="cf">else</span> <span class="fu">max</span>(<span class="dv">0</span>, <span class="fu">sum</span>(g1 <span class="sc">*</span> (g1 <span class="sc">-</span> g0)) <span class="sc">/</span> <span class="fu">sum</span>(g0<span class="sc">^</span><span class="dv">2</span>))   <span class="co"># Polak-Ribiere+</span></span>
+<span id="cb40-8"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span>g1 <span class="sc">+</span> beta <span class="sc">*</span> d; x0 <span class="ot">&lt;-</span> x1; g0 <span class="ot">&lt;-</span> g1 }</span>
+<span id="cb40-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
+<span id="cb40-10"><a href=""></a>}</span>
+<span id="cb40-11"><a href=""></a>cg <span class="ot">&lt;-</span> <span class="fu">conj_grad</span>(fq, gq, <span class="fu">c</span>(<span class="dv">2</span>, <span class="sc">-</span><span class="fl">1.8</span>))</span>
+<span id="cb40-12"><a href=""></a><span class="fu">par</span>(<span class="at">pty =</span> <span class="st">"s"</span>, <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>)); <span class="fu">contour</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="sc">-</span>z, <span class="at">nlevels =</span> <span class="dv">15</span>, <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"conjugate gradient, %d iterations"</span>, cg<span class="sc">$</span>iter))</span>
+<span id="cb40-13"><a href=""></a><span class="fu">lines</span>(gd<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>); <span class="fu">lines</span>(cg<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb40-14"><a href=""></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"gradient descent"</span>, <span class="st">"conjugate gradient"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-22-1.png" width="672" class="r-stretch"></section>
+<section id="quasi-newton-bfgs" class="slide level2">
+<h2>Quasi-Newton: BFGS</h2>
+<p>Between gradient methods and Newton: build an approximation <span class="math inline">B_k \approx \nabla^2 f</span> from successive gradient differences <span class="math inline">s_k = \theta_{k+1} - \theta_k</span>, <span class="math inline">y_k = g_{k+1} - g_k</span>, via a rank-two update that keeps <span class="math inline">B_k</span> positive definite. Steps are <span class="math inline">d_k = -B_k^{-1}g_k</span> with a line search.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a>negll <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">loglik</span>(b); neggr <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">drop</span>(<span class="fu">grad</span>(b))</span>
+<span id="cb41-2"><a href=""></a>fits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NM =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>),</span>
+<span id="cb41-3"><a href=""></a>             <span class="at">CG =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"CG"</span>),</span>
+<span id="cb41-4"><a href=""></a>             <span class="at">BFGS =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"BFGS"</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb41-5"><a href=""></a><span class="fu">t</span>(<span class="fu">sapply</span>(fits, <span class="cf">function</span>(f) <span class="fu">c</span>(f<span class="sc">$</span>par, <span class="at">f_evals =</span> f<span class="sc">$</span>counts[<span class="dv">1</span>], <span class="at">g_evals =</span> f<span class="sc">$</span>counts[<span class="dv">2</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                   f_evals.function g_evals.gradient
+NM   -0.5430514 1.080459 -2.453567              130               NA
+CG   -0.5431413 1.080382 -2.453254               61               22
+BFGS -0.5431413 1.080382 -2.453255               36               13</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(fits<span class="sc">$</span>BFGS<span class="sc">$</span>hessian)))     <span class="co"># SEs from the numerically computed Hessian at the optimum</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1337429 0.1511637 0.2228005</code></pre>
+</div>
+</div>
+<p><code>optim(..., hessian = TRUE)</code> returns a finite-difference Hessian at the solution, so standard errors are available even for gradient-only methods.</p>
+</section></section>
+<section>
+<section id="classic-stochastic-gradient-descent" class="title-slide slide level1 center" data-number="5">
+<h1><span class="header-section-number">5</span> Classic Stochastic Gradient Descent</h1>
+
+</section>
+<section id="motivation-large-n" class="slide level2">
+<h2>Motivation: Large <span class="math inline">n</span></h2>
+<p>For iid data the log-likelihood and its gradient are <strong>sums over observations</strong>: <span class="math display">\ell(\theta) = \sum_{i=1}^n \ell_i(\theta), \qquad \nabla\ell(\theta) = \sum_{i=1}^n \nabla\ell_i(\theta).</span></p>
+<p>Every method so far needs the <strong>full</strong> gradient, an <span class="math inline">O(np)</span> pass through all data, per iteration (and Newton needs <span class="math inline">O(np^2)</span> for the Hessian). With <span class="math inline">n</span> in the millions and <span class="math inline">p</span> in the millions (neural networks), even one full gradient is expensive.</p>
+<p><strong>Idea.</strong> <span class="math inline">\nabla\ell_i(\theta)</span> for a randomly chosen <span class="math inline">i</span> is an <strong>unbiased estimate</strong> of the average gradient: <span class="math display">E_i\big[\nabla\ell_i(\theta)\big] = \frac{1}{n}\nabla\ell(\theta).</span></p>
+<p>A noisy but cheap gradient estimate is enough to make progress — a Monte Carlo idea applied to optimization.</p>
+</section>
+<section id="the-sgd-algorithm" class="slide level2">
+<h2>The SGD Algorithm</h2>
+<p>For <span class="math inline">t = 1, 2, \ldots</span>:</p>
+<ol type="1">
+<li>Sample an index <span class="math inline">i_t</span> uniformly from <span class="math inline">\{1, \ldots, n\}</span> (or shuffle the data and cycle through it; one pass is an <strong>epoch</strong>).</li>
+<li>Update in the ascent direction of that single observation’s log-likelihood: <span class="math display">\theta_{t+1} = \theta_t + \gamma_t\,\nabla\ell_{i_t}(\theta_t).</span></li>
+</ol>
+<p><strong>Mini-batch SGD</strong> averages the gradient over a batch <span class="math inline">B_t</span> of <span class="math inline">m</span> observations (<span class="math inline">m = 32</span>–<span class="math inline">512</span> typical): <span class="math display">\theta_{t+1} = \theta_t + \gamma_t\,\frac{1}{m}\sum_{i\in B_t}\nabla\ell_i(\theta_t),</span> reducing the variance by <span class="math inline">1/m</span> at <span class="math inline">m</span> times the cost, and using vectorized/GPU arithmetic.</p>
+<p>The <strong>learning rate</strong> <span class="math inline">\gamma_t</span> replaces the line search (a line search would need full-data evaluations).</p>
+</section>
+<section id="learning-rate-and-convergence" class="slide level2">
+<h2>Learning Rate and Convergence</h2>
+<p>Because the gradient is noisy, a constant <span class="math inline">\gamma</span> makes <span class="math inline">\theta_t</span> <strong>bounce around</strong> the optimum with variance <span class="math inline">\propto \gamma</span>. Robbins–Monro (1951): convergence to the optimum is guaranteed if <span class="math display">\sum_t \gamma_t = \infty \quad\text{and}\quad \sum_t \gamma_t^2 &lt; \infty, \qquad\text{e.g. } \gamma_t = \frac{\gamma_0}{1 + t/t_0} .</span></p>
+<ul>
+<li><span class="math inline">\gamma</span> too large: divergence or persistent noise. <span class="math inline">\gamma</span> too small: painfully slow.</li>
+<li>Convergence is only <strong>sublinear</strong>, far slower than Newton <em>per iteration</em> — but each iteration costs <span class="math inline">O(p)</span> instead of <span class="math inline">O(np)</span>, and early progress is fast.</li>
+<li>Common refinements: <strong>momentum</strong> (average past gradients), <strong>Adam</strong> (per-coordinate adaptive rates), <strong>averaging</strong> the iterates <span class="math inline">\bar\theta_T = \frac1T\sum_t\theta_t</span> (Polyak–Ruppert), which restores the <span class="math inline">\sqrt n</span>-efficiency of the MLE.</li>
+</ul>
+</section>
+<section id="sgd-for-logistic-regression-in-r" class="slide level2">
+<h2>SGD for Logistic Regression in R</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a>sgd <span class="ot">&lt;-</span> <span class="cf">function</span>(X, y, b0, <span class="at">gamma0 =</span> <span class="fl">0.05</span>, <span class="at">t0 =</span> <span class="dv">200</span>, <span class="at">epochs =</span> <span class="dv">5</span>, <span class="at">batch =</span> <span class="dv">10</span>) {</span>
+<span id="cb45-2"><a href=""></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X); b <span class="ot">&lt;-</span> b0; t <span class="ot">&lt;-</span> <span class="dv">0</span>; path <span class="ot">&lt;-</span> b0</span>
+<span id="cb45-3"><a href=""></a>  <span class="cf">for</span> (e <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
+<span id="cb45-4"><a href=""></a>    idx <span class="ot">&lt;-</span> <span class="fu">sample</span>(n)</span>
+<span id="cb45-5"><a href=""></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n, <span class="at">by =</span> batch)) {</span>
+<span id="cb45-6"><a href=""></a>      i <span class="ot">&lt;-</span> idx[s<span class="sc">:</span><span class="fu">min</span>(s <span class="sc">+</span> batch <span class="sc">-</span> <span class="dv">1</span>, n)]; t <span class="ot">&lt;-</span> t <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb45-7"><a href=""></a>      g <span class="ot">&lt;-</span> <span class="fu">crossprod</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>], y[i] <span class="sc">-</span> <span class="fu">plogis</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">%*%</span> b)) <span class="sc">/</span> <span class="fu">length</span>(i)</span>
+<span id="cb45-8"><a href=""></a>      b <span class="ot">&lt;-</span> b <span class="sc">+</span> gamma0 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> t <span class="sc">/</span> t0) <span class="sc">*</span> g; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b)) } }</span>
+<span id="cb45-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b), <span class="at">path =</span> path)</span>
+<span id="cb45-10"><a href=""></a>}</span>
+<span id="cb45-11"><a href=""></a>sg <span class="ot">&lt;-</span> <span class="fu">sgd</span>(X, y, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>))</span>
+<span id="cb45-12"><a href=""></a><span class="fu">rbind</span>(<span class="at">sgd =</span> sg<span class="sc">$</span>est, <span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">truth =</span> beta_true)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             [,1]      [,2]      [,3]
+sgd    -0.2569113 0.5378873 -1.217143
+newton -0.5431413 1.0803821 -2.453254
+truth  -0.5000000 1.0000000 -2.000000</code></pre>
+</div>
+</div>
+</section>
+<section id="sgd-trajectory-vs.-newton" class="slide level2">
+<h2>SGD Trajectory vs.&nbsp;Newton</h2>
+
+<img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-25-1.png" width="672" class="r-stretch"><ul>
+<li>Newton needed 7 full-data iterations; SGD made 250 cheap updates over 5 epochs and lands near the MLE with residual noise.</li>
+<li>For <span class="math inline">n = 500</span> this is no gain — SGD earns its keep when a single full gradient is prohibitively expensive.</li>
+</ul>
+</section>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">needs</th>
+<th style="text-align: left;">strength</th>
+<th style="text-align: left;">weakness</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">bisection / golden section</td>
+<td style="text-align: left;">bracket</td>
+<td style="text-align: left;">always converges</td>
+<td style="text-align: left;">1-D only, linear</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Newton–Raphson</td>
+<td style="text-align: left;"><span class="math inline">\nabla\ell</span>, <span class="math inline">\nabla^2\ell</span></td>
+<td style="text-align: left;">quadratic convergence, SEs from Hessian</td>
+<td style="text-align: left;">can diverge; <span class="math inline">O(p^3)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Fisher scoring / IRLS</td>
+<td style="text-align: left;"><span class="math inline">\nabla\ell</span>, <span class="math inline">I(\theta)</span></td>
+<td style="text-align: left;">positive-definite steps; GLMs</td>
+<td style="text-align: left;">needs expectations</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nelder–Mead</td>
+<td style="text-align: left;"><span class="math inline">\ell</span></td>
+<td style="text-align: left;">derivative-free</td>
+<td style="text-align: left;">slow, small <span class="math inline">p</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gradient descent / CG / BFGS</td>
+<td style="text-align: left;"><span class="math inline">\nabla\ell</span></td>
+<td style="text-align: left;">scales to large <span class="math inline">p</span></td>
+<td style="text-align: left;">line search; ill-conditioning</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SGD</td>
+<td style="text-align: left;"><span class="math inline">\nabla\ell_i</span></td>
+<td style="text-align: left;">scales to large <span class="math inline">n</span> and <span class="math inline">p</span></td>
+<td style="text-align: left;">noisy, tuning of <span class="math inline">\gamma_t</span></td>
+</tr>
+</tbody>
+</table>
+<p>The log-likelihood is approximately quadratic near the MLE (asymptotic normality); every method above exploits that, and its curvature at the optimum delivers the standard errors.</p>
 
 </section></section>
     </div>
@@ -939,6 +1234,44 @@ f(x) = x'Qx
         }, 200); 
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
