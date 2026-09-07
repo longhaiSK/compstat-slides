@@ -35,16 +35,11 @@ We work with the **log-likelihood** $\ell(\theta)$ to avoid underflow of the pro
 
 ## Maximum Likelihood Estimator
 $$
-\hat\theta_{\mathrm{MLE}} = \arg\max_\theta L(\theta; D) = \arg\max_\theta \ell(\theta).
+\hat\theta_{MLE} = \arg\max_\theta L(\theta; D) = \arg\max_\theta \ell(\theta).
 $$
 
-**Example:** 
+**Example.** $Y_1, Y_2, Y_3 \overset{iid}{\sim} \mathrm{Bern}(\theta)$, observed $y = (1, 1, 0)$.
 
-$Y_1, Y_2, Y_3 \overset{iid}{\sim} \mathrm{Bern}(\theta)$, observed $y = (1, 1, 0)$.
-
-:::: {.columns}
-
-::: {.column width="50%"}
 | $\theta$ | $P(1, 1, 0 \mid \theta) = \theta^2(1-\theta)$ |
 |:---:|:---|
 | $0$ | $0$ |
@@ -52,16 +47,10 @@ $Y_1, Y_2, Y_3 \overset{iid}{\sim} \mathrm{Bern}(\theta)$, observed $y = (1, 1, 
 | $2/3$ | $4/27 = 0.1481$ **(max)** |
 | $3/4$ | $9/64 = 0.1406$ |
 | $1$ | $0$ |
-:::
 
-::: {.column width="50%"}
 ```{r}
-#| echo: false
 curve(x^2 * (1 - x), 0, 1, xlab = expression(theta), ylab = "likelihood", lwd = 2); abline(v = 2/3, col = 2, lty = 2)
 ```
-:::
-
-::::
 
 ## Example: iid Bernoulli
 
@@ -130,11 +119,11 @@ This is why we need **numerical optimization**.
 
 Under regularity conditions (satisfied by most models in practice), for iid data with true parameter $\theta_*$:
 
-1. **Consistency**: $\hat\theta_{\mathrm{MLE}} \to \theta_*$ as $n \to \infty$.
+1. **Consistency**: $\hat\theta_{MLE} \to \theta_*$ as $n \to \infty$.
 
 2. **Asymptotic normality**:
 $$
-\hat\theta_{\mathrm{MLE}} \;\dot\sim\; N\!\big(\theta_*,\ [n I(\theta_*)]^{-1}\big), \qquad
+\hat\theta_{MLE} \;\dot\sim\; N\!\big(\theta_*,\ [n I(\theta_*)]^{-1}\big), \qquad
 I(\theta) = -E_X\!\left[\frac{\partial^2}{\partial\theta\,\partial\theta'}\log f(X \mid \theta)\right],
 $$
 the **expected Fisher information** per observation ($p \times p$ for a $p$-dimensional $\theta$).
@@ -153,7 +142,7 @@ $\theta_*$ is unknown, so the variance $[nI(\theta_*)]^{-1}$ is estimated by plu
 
 By the LLN, $J(\hat\theta)/n \approx I(\hat\theta)$. Both give
 $$
-\widehat{\mathrm{Var}}(\hat\theta) \approx J(\hat\theta)^{-1} \quad\text{or}\quad [nI(\hat\theta)]^{-1}, \qquad \widehat{\mathrm{SE}}(\hat\theta_j) = \sqrt{\big[\widehat{\mathrm{Var}}(\hat\theta)\big]_{jj}} .
+\widehat{\mathrm{Var}}(\hat\theta) \approx J(\hat\theta)^{-1} \quad\text{or}\quad [nI(\hat\theta)]^{-1}, \qquad \widehat{SE}(\hat\theta_j) = \sqrt{\big[\widehat{\mathrm{Var}}(\hat\theta)\big]_{jj}} .
 $$
 
 **Computational consequence**: the Hessian of $\ell$ at the optimum, which Newton-type optimizers compute anyway, gives the standard errors for free.
@@ -520,12 +509,12 @@ rbind(newton = fit$se, glm = sqrt(diag(vcov(glm(y ~ X[, -1], family = binomial))
 $$
 \widehat{\mathrm{Var}}(\hat\beta) = \big[-\nabla^2\ell(\hat\beta)\big]^{-1} = (X'\hat WX)^{-1}
 = \begin{pmatrix}\hat\sigma_{00} & \cdots & \hat\sigma_{0p} \\ \vdots & \ddots & \vdots \\ \hat\sigma_{p0} & \cdots & \hat\sigma_{pp}\end{pmatrix},
-\qquad \widehat{\mathrm{SE}}(\hat\beta_j) = \sqrt{\hat\sigma_{jj}} .
+\qquad \widehat{SE}(\hat\beta_j) = \sqrt{\hat\sigma_{jj}} .
 $$
 
 Wald tests and confidence intervals follow directly:
 $$
-z_j = \frac{\hat\beta_j}{\widehat{\mathrm{SE}}(\hat\beta_j)} \;\dot\sim\; N(0,1) \text{ under } H_0: \beta_j = 0, \qquad \hat\beta_j \pm 1.96\,\widehat{\mathrm{SE}}(\hat\beta_j).
+z_j = \frac{\hat\beta_j}{\widehat{SE}(\hat\beta_j)} \;\dot\sim\; N(0,1) \text{ under } H_0: \beta_j = 0, \qquad \hat\beta_j \pm 1.96\,\widehat{SE}(\hat\beta_j).
 $$
 
 This is the `summary(glm(...))` table. The variance comes from the same Hessian that drove the Newton iterations.

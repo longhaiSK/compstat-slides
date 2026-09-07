@@ -1,5 +1,4 @@
 ---
-title: "STAT 812/420"
 subtitle: "Random Numbers and Elementary Monte Carlo"
 author: "Longhai Li"
 format: banner_slides-revealjs
