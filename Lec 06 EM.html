@@ -162,27 +162,22 @@ Longhai Li
 
 </section>
 <section>
-<section id="overview-of-em" class="title-slide slide level1 center" data-number="1">
-<h1><span class="header-section-number">1</span> 1. Overview of EM</h1>
+<section id="overview-of-em" class="title-slide slide level1 center">
+<h1>1. Overview of EM</h1>
 
 </section>
 <section id="setup-and-motivation" class="slide level2">
 <h2>Setup and Motivation</h2>
 <ul>
 <li>Observed data <span class="math inline">Y</span>; parameter <span class="math inline">\theta</span>; likelihood <span class="math inline">L(\theta) = P(Y\mid\theta)</span></li>
-<li>In many models <span class="math inline">P(Y\mid\theta)</span> is an integral (or sum) over hidden, latent, or missing data <span class="math inline">Z</span>: <span class="math display">P(Y\mid\theta) = \int P(Y,Z\mid\theta)\,dZ</span></li>
+<li>In many models <span class="math inline">P(Y\mid\theta)</span> is an integral (or sum) over latent or missing data <span class="math inline">Z</span>: <span class="math display">P(Y\mid\theta) = \int P(Y,Z\mid\theta)\,dZ</span></li>
 </ul>
-<p><strong>Why EM?</strong></p>
-<ol type="1">
-<li>Avoid the integral inside the optimization</li>
-<li>Reuse analytical optimization results for the complete-data model</li>
-</ol>
 <p><strong>Terminology</strong></p>
 <table class="caption-top">
 <colgroup>
+<col style="width: 20%">
 <col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 46%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -213,61 +208,95 @@ Longhai Li
 <p>Iterate until <span class="math inline">\hat\theta^{(t)}</span> converges.</p>
 <p><strong>Caution</strong>: <span class="math inline">Q</span> is an average of <span class="math inline">\ell_{\text{comp}}(\theta;Y,Z)</span> over <span class="math inline">P(Z\mid Y,\hat\theta^{(t)})</span>; it is <strong>not</strong> <span class="math inline">\ell_{\text{comp}}\big(\theta;Y,E(Z\mid Y,\hat\theta^{(t)})\big)</span>.</p>
 </section>
-<section id="q-functions-in-em" class="slide level2">
-<h2>Q functions in EM</h2>
-<p><img data-src="Lec%2006%20EM_images/p04-Q-curves.png" height="220"></p>
-</section>
+<section id="q-as-an-average-of-complete-log-likelihoods" class="slide level2">
+<h2><span class="math inline">Q</span> as an Average of Complete Log-Likelihoods</h2>
+<p>Fix <span class="math inline">\hat\theta^{(t)}</span>. Each draw <span class="math inline">Z^{(s)}\sim P(Z\mid Y,\hat\theta^{(t)})</span> gives one curve <span class="math inline">\ell_{\text{comp}}(\theta;Y,Z^{(s)})</span>; <span class="math inline">Q(\theta\mid\hat\theta^{(t)})</span> is their expectation (illustrated with the censored Poisson example of Section 3, <span class="math inline">\lambda^{(t)} = 1.5</span>):</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
+<section id="q-functions-as-tangent-lower-bounds" class="slide level2">
+<h2><span class="math inline">Q</span> Functions as Tangent Lower Bounds</h2>
+<p>Each <span class="math inline">Q(\cdot\mid\hat\theta^{(t)})</span>, shifted by a constant, lies <strong>below</strong> <span class="math inline">\ell_{\text{obs}}</span> and <strong>touches</strong> it at <span class="math inline">\hat\theta^{(t)}</span>; maximizing it moves uphill on <span class="math inline">\ell_{\text{obs}}</span>.</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
 <section id="ascending-property-of-em" class="slide level2">
 <h2>Ascending Property of EM</h2>
 <p>Write <span class="math inline">h(Y,Z\mid\theta) = P(Y,Z\mid\theta)</span>, <span class="math inline">\;g(Y\mid\theta) = \int h\,dZ</span>, <span class="math inline">\;K(Z\mid Y,\theta) = h/g</span>.</p>
 <p><strong>Theorem.</strong> <span class="math inline">\;\ell_{\text{obs}}(\hat\theta^{(t+1)}) \ \ge\ \ell_{\text{obs}}(\hat\theta^{(t)})</span>.</p>
-<p><strong>Key identity.</strong> Since <span class="math inline">\log g(Y\mid\theta) = \log h(Y,Z\mid\theta) - \log K(Z\mid Y,\theta)</span> for every <span class="math inline">Z</span>, taking <span class="math inline">E_{Z\mid Y,\theta_0}</span> of both sides gives, for any <span class="math inline">\theta_0</span>, <span class="math display">\ell_{\text{obs}}(\theta) = \underbrace{E_{Z\mid Y,\theta_0}\big[\log h(Y,Z\mid\theta)\big]}_{Q(\theta\mid\theta_0)} - \underbrace{E_{Z\mid Y,\theta_0}\big[\log K(Z\mid Y,\theta)\big]}_{H(\theta\mid\theta_0)}</span></p>
-<p><strong>Proof.</strong> Set <span class="math inline">\theta_0 = \hat\theta^{(t)}</span> and subtract the identity at <span class="math inline">\theta = \hat\theta^{(t)}</span> from the identity at <span class="math inline">\theta = \hat\theta^{(t+1)}</span>: <span class="math display">\ell_{\text{obs}}(\hat\theta^{(t+1)}) - \ell_{\text{obs}}(\hat\theta^{(t)}) = \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}} - \underbrace{\big[H(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - H(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\le 0 \text{ (next slide)}}</span></p>
+<p><strong>Key identity.</strong> Since <span class="math inline">\log g(Y\mid\theta) = \log h(Y,Z\mid\theta) - \log K(Z\mid Y,\theta)</span> for every <span class="math inline">Z</span>, taking <span class="math inline">E_{Z\mid Y,\theta_0}</span> of both sides gives, for any <span class="math inline">\theta_0</span>, <span class="math display">
+\ell_{\text{obs}}(\theta) = \underbrace{E_{Z\mid Y,\theta_0}\big[\log h(Y,Z\mid\theta)\big]}_{Q(\theta\mid\theta_0)}
+- \underbrace{E_{Z\mid Y,\theta_0}\big[\log K(Z\mid Y,\theta)\big]}_{H(\theta\mid\theta_0)}
+</span></p>
+<p><strong>Proof.</strong> Set <span class="math inline">\theta_0 = \hat\theta^{(t)}</span> and subtract the identity at <span class="math inline">\theta = \hat\theta^{(t)}</span> from that at <span class="math inline">\theta = \hat\theta^{(t+1)}</span>: <span class="math display">
+\begin{aligned}
+\ell_{\text{obs}}(\hat\theta^{(t+1)}) - \ell_{\text{obs}}(\hat\theta^{(t)})
+&amp;= \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}} \\
+&amp;\quad - \underbrace{\big[H(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - H(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\le 0 \text{ (next slide)}}
+\end{aligned}
+</span></p>
 </section>
 <section id="proof-the-h-term-via-jensens-inequality" class="slide level2">
 <h2>Proof: The <span class="math inline">H</span> Term via Jensen’s Inequality</h2>
 <p>Need: <span class="math inline">H(\theta\mid\hat\theta^{(t)}) \le H(\hat\theta^{(t)}\mid\hat\theta^{(t)})</span> for every <span class="math inline">\theta</span>, i.e. <span class="math display">E_{Z\mid Y,\hat\theta^{(t)}}\left[\log\frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\right] \le 0</span></p>
-<p><strong>Jensen</strong>: <span class="math inline">\log</span> is concave, so <span class="math inline">E[\log W] \le \log E[W]</span>. Hence <span class="math display">E_{Z\mid Y,\hat\theta^{(t)}}\left[\log\frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\right]
-\le \log \int \frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\,K(Z\mid Y,\hat\theta^{(t)})\,dZ = \log 1 = 0.\qquad\blacksquare</span></p>
+<p><strong>Jensen</strong>: <span class="math inline">\log</span> is concave, so <span class="math inline">E[\log W] \le \log E[W]</span>. Hence <span class="math display">
+\begin{aligned}
+E_{Z\mid Y,\hat\theta^{(t)}}\left[\log\frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\right]
+&amp;\le \log \int \frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\,K(Z\mid Y,\hat\theta^{(t)})\,dZ \\
+&amp;= \log \int K(Z\mid Y,\theta)\,dZ = \log 1 = 0. \qquad\blacksquare
+\end{aligned}
+</span></p>
 <ul>
 <li>The quantity on the left is <span class="math inline">-KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\theta)\big)</span></li>
 <li>EM never decreases the observed likelihood, but it may converge to a local maximum or a saddle point</li>
 </ul>
 </section>
-<section id="em-as-alternating-optimization" class="slide level2">
+<section id="em-as-alternating-optimization" class="slide level2 smaller">
 <h2>EM as Alternating Optimization</h2>
 <p>Let <span class="math inline">\tilde P(\cdot)</span> be any distribution on the hidden data <span class="math inline">Z</span> and define <span class="math display">F\big(\tilde P,\theta\big) = \int \tilde P(z)\log P(Y,z\mid\theta)\,dz - \int \tilde P(z)\log\tilde P(z)\,dz</span></p>
-<p>Using <span class="math inline">P(Y,z\mid\theta) = P(Y\mid\theta)P(z\mid Y,\theta)</span>, <span class="math display">F(\tilde P,\theta) = \ell_{\text{obs}}(\theta) - KL\big(\tilde P\,\|\,P(\cdot\mid Y,\theta)\big),
-\qquad KL(P\|q) = \int P\log\frac{P}{q} \ \ge 0</span></p>
+<p>Using <span class="math inline">P(Y,z\mid\theta) = P(Y\mid\theta)P(z\mid Y,\theta)</span>, <span class="math display">
+\begin{aligned}
+F(\tilde P,\theta) &amp;= \ell_{\text{obs}}(\theta) - KL\big(\tilde P\,\|\,P(\cdot\mid Y,\theta)\big), \\
+KL(P\|q) &amp;= \int P\log\frac{P}{q} \ \ge 0
+\end{aligned}
+</span></p>
 <ul>
 <li><strong>E-step</strong> = maximize <span class="math inline">F</span> over <span class="math inline">\tilde P</span> with <span class="math inline">\theta = \hat\theta^{(t)}</span> fixed: <span class="math inline">KL \ge 0</span> with equality iff <span class="math inline">\tilde P = P(\cdot\mid Y,\hat\theta^{(t)})</span>, so the E-step sets <span class="math inline">\tilde P</span> to the conditional distribution of <span class="math inline">Z</span></li>
 <li><strong>M-step</strong> = maximize <span class="math inline">F</span> over <span class="math inline">\theta</span> with <span class="math inline">\tilde P</span> fixed: the second term of <span class="math inline">F</span> is free of <span class="math inline">\theta</span>, so this is <span class="math inline">\arg\max_\theta Q(\theta\mid\hat\theta^{(t)})</span></li>
 </ul>
-<p><span class="math inline">KL \ge 0</span> follows from <span class="math inline">\log x \le x - 1</span>: <span class="math inline">\;KL(P\|q) = -\int P\log\frac{q}{P} \ge -\int P\big(\frac{q}{P}-1\big) = -\int(q-P) = 0</span>.</p>
+<p><strong>Remark</strong>: <span class="math inline">KL \ge 0</span> follows from <span class="math inline">\log x \le x - 1</span>: <span class="math inline">KL(P\|q) = -\int P\log\frac{q}{P} \ge -\int P\big(\frac{q}{P}-1\big) = -\int(q-P) = 0</span>.</p>
 </section></section>
 <section>
-<section id="example-1-two-component-normal-mixture" class="title-slide slide level1 center" data-number="2">
-<h1><span class="header-section-number">2</span> 2. Example 1: Two-Component Normal Mixture</h1>
+<section id="example-1-two-component-normal-mixture" class="title-slide slide level1 center">
+<h1>2. Example 1: Two-Component Normal Mixture</h1>
 
 </section>
 <section id="model-and-likelihoods" class="slide level2">
 <h2>Model and Likelihoods</h2>
-<p><img data-src="Lec%2006%20EM_images/p02-mixture-setup.png" height="160"></p>
 <p><span class="math display">Z_i \sim \text{Bern}(p), \qquad Y_i\mid Z_i = 1 \sim N(\mu_1,1), \qquad Y_i\mid Z_i = 0 \sim N(\mu_0,1)</span></p>
 <p>Observed: <span class="math inline">y_1,\ldots,y_n</span>. Hidden: <span class="math inline">z_1,\ldots,z_n</span>. Parameter <span class="math inline">\theta = (\mu_0,\mu_1,p)</span>.</p>
-<p><strong>Complete likelihood</strong> <span class="math display">P(y,z\mid\theta) = \prod_{i=1}^n P(y_i\mid z_i,\theta)P(z_i\mid\theta) = \prod_{i=1}^n \varphi(y_i\mid\mu_{z_i},1)\,p^{z_i}(1-p)^{1-z_i}</span></p>
+<p><strong>Complete likelihood</strong> <span class="math display">P(y,z\mid\theta) = \prod_{i=1}^n P(y_i\mid z_i,\theta)\,P(z_i\mid\theta) = \prod_{i=1}^n \varphi(y_i\mid\mu_{z_i},1)\,p^{z_i}(1-p)^{1-z_i}</span></p>
 <p><strong>Observed likelihood</strong> (sum out each <span class="math inline">z_i</span>) <span class="math display">P(y\mid\theta) = \prod_{i=1}^n\Big[\varphi(y_i\mid\mu_1,1)\,p + \varphi(y_i\mid\mu_0,1)(1-p)\Big]</span></p>
 </section>
+<section id="model-and-likelihoods-continued" class="slide level2">
+<h2>Model and Likelihoods (Continued)</h2>
+<p>The observed likelihood is a product of <strong>mixture densities</strong>, each the sum of two weighted normal components:</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
 <section id="the-mixture-density" class="slide level2">
 <h2>The Mixture Density</h2>
-<p>Each <span class="math inline">y_i</span> is drawn from <span class="math inline">N(\mu_1,1)</span> with probability <span class="math inline">p</span> or from <span class="math inline">N(\mu_0,1)</span> with probability <span class="math inline">1-p</span>, giving a (possibly bimodal) marginal density <span class="math inline">f(y\mid\mu_0,\mu_1,p)</span>:</p>
-<p><img data-src="Lec%2006%20EM_images/p03-density-sketches.png" height="300"></p>
-<p>Maximizing <span class="math inline">\prod_i f(y_i\mid\theta)</span> directly is awkward because of the sum inside the product; EM works with the complete likelihood instead.</p>
+<p>The marginal density <span class="math inline">f(y\mid\mu_0,\mu_1,p)</span> can be bimodal or unimodal depending on <span class="math inline">p</span> and <span class="math inline">|\mu_1-\mu_0|</span>:</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Maximizing <span class="math inline">\prod_i f(y_i\mid\theta)</span> directly is awkward because of the sum inside the product; EM works with the complete likelihood instead.</p>
 </section>
 <section id="complete-log-likelihood" class="slide level2">
 <h2>Complete Log-Likelihood</h2>
-<p>With <span class="math inline">\log\varphi(y\mid\mu,1) = -\tfrac12(y-\mu)^2 - \log\sqrt{2\pi}</span>, <span class="math display">\ell_{\text{comp}}(\theta;y,z) = \sum_{i=1}^n\Big[z_i\log p + (1-z_i)\log(1-p) - \tfrac12(y_i-\mu_{z_i})^2\Big] + C</span></p>
-<p><span class="math display">= \Big(\sum_{i=1}^n z_i\Big)\log\frac{p}{1-p} + n\log(1-p) - \frac12\sum_{i=1}^n\Big[z_i(y_i-\mu_1)^2 + (1-z_i)(y_i-\mu_0)^2\Big] + C</span></p>
+<p>With <span class="math inline">\log\varphi(y\mid\mu,1) = -\tfrac12(y-\mu)^2 - \log\sqrt{2\pi}</span>, <span class="math display">
+\begin{aligned}
+\ell_{\text{comp}}(\theta;y,z)
+&amp;= \sum_{i=1}^n\Big[z_i\log p + (1-z_i)\log(1-p) - \tfrac12(y_i-\mu_{z_i})^2\Big] + C \\
+&amp;= \Big(\sum_{i=1}^n z_i\Big)\log\frac{p}{1-p} + n\log(1-p) \\
+&amp;\quad - \frac12\sum_{i=1}^n\Big[z_i(y_i-\mu_1)^2 + (1-z_i)(y_i-\mu_0)^2\Big] + C
+\end{aligned}
+</span></p>
 <ul>
 <li>Linear in each <span class="math inline">z_i</span>, so the E-step only needs <span class="math inline">E(Z_i\mid y_i,\hat\theta^{(t)})</span></li>
 <li>Given <span class="math inline">z</span>, the parameters separate: <span class="math inline">p</span> is a Bernoulli proportion, <span class="math inline">\mu_1,\mu_0</span> are group means</li>
@@ -275,81 +304,70 @@ Longhai Li
 </section>
 <section id="e-step-soft-classification" class="slide level2">
 <h2>E-Step: Soft Classification</h2>
-<p>Given <span class="math inline">\hat\theta^{(t)} = (\hat\mu_0^{(t)},\hat\mu_1^{(t)},\hat p^{(t)})</span>, Bayes’ rule gives</p>
-<p><span class="math display">\hat p_i^{(t)} \equiv P(Z_i=1\mid y_i,\hat\theta^{(t)}) = \frac{\varphi(y_i\mid\hat\mu_1^{(t)},1)\,\hat p^{(t)}}{\varphi(y_i\mid\hat\mu_0^{(t)},1)(1-\hat p^{(t)}) + \varphi(y_i\mid\hat\mu_1^{(t)},1)\,\hat p^{(t)}}</span></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<p><img data-src="Lec%2006%20EM_images/p06-estep-diagram.png" height="230"></p>
-</div><div class="column" style="width:50%;">
+<p>Given <span class="math inline">\hat\theta^{(t)} = (\hat\mu_0^{(t)},\hat\mu_1^{(t)},\hat p^{(t)})</span>, Bayes’ rule gives <span class="math display">
+\hat p_i^{(t)} \equiv P(Z_i=1\mid y_i,\hat\theta^{(t)})
+= \frac{\varphi(y_i\mid\hat\mu_1^{(t)},1)\,\hat p^{(t)}}
+       {\varphi(y_i\mid\hat\mu_0^{(t)},1)(1-\hat p^{(t)}) + \varphi(y_i\mid\hat\mu_1^{(t)},1)\,\hat p^{(t)}}
+</span></p>
+<p>Then <span class="math display">
+\begin{aligned}
+Q(\theta\mid\hat\theta^{(t)}) &amp;= \Big(\sum_i \hat p_i^{(t)}\Big)\log\frac{p}{1-p} + n\log(1-p) \\
+&amp;\quad - \frac12\sum_i\Big[\hat p_i^{(t)}(y_i-\mu_1)^2 + (1-\hat p_i^{(t)})(y_i-\mu_0)^2\Big]
+\end{aligned}
+</span></p>
+</section>
+<section id="e-step-soft-classification-continued" class="slide level2">
+<h2>E-Step: Soft Classification (Continued)</h2>
+<p>Left: at each <span class="math inline">y_i</span>, <span class="math inline">\hat p_i^{(t)}</span> is the red share of the total height. Right: <span class="math inline">\hat p_i^{(t)}</span> as a function of <span class="math inline">y_i</span>.</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="m-step-weighted-proportions-and-means" class="slide level2 smaller">
+<h2>M-Step: Weighted Proportions and Means</h2>
+<p><span class="math inline">Q</span> separates into a term in <span class="math inline">p</span> and terms in <span class="math inline">\mu_1</span>, <span class="math inline">\mu_0</span>.</p>
 <table class="caption-top">
 <colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
+<col style="width: 27%">
+<col style="width: 72%">
 </colgroup>
 <thead>
 <tr class="header">
-<th><span class="math inline">i</span></th>
-<th><span class="math inline">\varphi_0(y_i)(1-\hat p^{(t)})</span></th>
-<th><span class="math inline">\varphi_1(y_i)\hat p^{(t)}</span></th>
-<th><span class="math inline">\hat p_i^{(t)}</span></th>
+<th>Update</th>
+<th>Stationary equation <span class="math inline">\;\Longrightarrow\;</span> solution</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>1</td>
-<td>20</td>
-<td>25</td>
-<td><span class="math inline">25/45</span></td>
+<td><span class="math inline">p</span></td>
+<td><span class="math inline">\dfrac{\partial Q}{\partial p} = \dfrac{\sum_i \hat p_i^{(t)}}{p(1-p)} - \dfrac{n}{1-p} = 0 \;\Longrightarrow\; \hat p^{(t+1)} = \dfrac1n\sum_{i=1}^n \hat p_i^{(t)}</span></td>
 </tr>
 <tr class="even">
-<td>2</td>
-<td><span class="math inline">\cdots</span></td>
-<td><span class="math inline">\cdots</span></td>
-<td>0.2</td>
+<td><span class="math inline">\mu_1</span></td>
+<td><span class="math inline">\dfrac{\partial Q}{\partial \mu_1} = \sum_i \hat p_i^{(t)}(y_i-\mu_1) = 0 \;\Longrightarrow\; \hat\mu_1^{(t+1)} = \dfrac{\sum_i \hat p_i^{(t)}\,y_i}{\sum_i \hat p_i^{(t)}}</span></td>
 </tr>
 <tr class="odd">
-<td>3</td>
-<td><span class="math inline">\cdots</span></td>
-<td><span class="math inline">\cdots</span></td>
-<td>0.9</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\vdots</span></td>
-<td></td>
-<td></td>
-<td><span class="math inline">\vdots</span></td>
+<td><span class="math inline">\mu_0</span> (weights <span class="math inline">1-\hat p_i^{(t)}</span>)</td>
+<td><span class="math inline">\hat\mu_0^{(t+1)} = \dfrac{\sum_i (1-\hat p_i^{(t)})\,y_i}{\sum_i (1-\hat p_i^{(t)})}</span></td>
 </tr>
 </tbody>
 </table>
-</div></div>
-<p>Then <span class="math display">Q(\theta\mid\hat\theta^{(t)}) = \Big(\sum_i \hat p_i^{(t)}\Big)\log\frac{p}{1-p} + n\log(1-p) - \frac12\sum_i\Big[\hat p_i^{(t)}(y_i-\mu_1)^2 + (1-\hat p_i^{(t)})(y_i-\mu_0)^2\Big]</span></p>
-</section>
-<section id="m-step-weighted-proportions-and-means" class="slide level2">
-<h2>M-Step: Weighted Proportions and Means</h2>
-<p><span class="math inline">Q</span> separates into a term in <span class="math inline">p</span> and terms in <span class="math inline">\mu_1</span>, <span class="math inline">\mu_0</span>.</p>
-<p><strong>Update <span class="math inline">p</span></strong>: <span class="math inline">\displaystyle \frac{\partial Q}{\partial p} = \frac{\sum_i \hat p_i^{(t)}}{p(1-p)} - \frac{n}{1-p} = 0
-\;\Longrightarrow\; \hat p^{(t+1)} = \frac1n\sum_{i=1}^n \hat p_i^{(t)}</span></p>
-<p><strong>Update <span class="math inline">\mu_1</span></strong>: <span class="math inline">\displaystyle \frac{\partial Q}{\partial \mu_1} = \sum_i \hat p_i^{(t)}(y_i-\mu_1) = 0
-\;\Longrightarrow\; \hat\mu_1^{(t+1)} = \frac{\sum_i \hat p_i^{(t)}\,y_i}{\sum_i \hat p_i^{(t)}}</span></p>
-<p><strong>Update <span class="math inline">\mu_0</span></strong> (weights <span class="math inline">1-\hat p_i^{(t)}</span>): <span class="math inline">\displaystyle \hat\mu_0^{(t+1)} = \frac{\sum_i (1-\hat p_i^{(t)})\,y_i}{\sum_i (1-\hat p_i^{(t)})}</span></p>
 <p>Return to the E-step with <span class="math inline">\hat\theta^{(t+1)}</span> and recompute <span class="math inline">\hat p_i^{(t+1)}</span>.</p>
 <p><strong>Interpretation</strong>: the M-step is the complete-data MLE with each observation split between the two groups according to its soft classification.</p>
 </section></section>
 <section>
-<section id="example-2-censored-poisson-data" class="title-slide slide level1 center" data-number="3">
-<h1><span class="header-section-number">3</span> 3. Example 2: Censored Poisson Data</h1>
+<section id="example-2-censored-poisson-data" class="title-slide slide level1 center">
+<h1>3. Example 2: Censored Poisson Data</h1>
 
 </section>
 <section id="truncated-distributions-in-brief" class="slide level2">
 <h2>Truncated Distributions in Brief</h2>
-<p>Let <span class="math inline">X\sim f(x)</span> and <span class="math inline">Y = I(X&gt;c)</span>. Then <span class="math inline">Y\sim\text{Bern}\big(P(X&gt;c)\big)</span>, and the conditional distribution of <span class="math inline">X</span> given <span class="math inline">Y</span> is <span class="math inline">f</span> restricted to one side of <span class="math inline">c</span> and renormalized:</p>
-<p><span class="math display">f(x\mid Y=1) = \frac{f(x)\,I(x&gt;c)}{\int_c^\infty f}, \qquad
+<p>Let <span class="math inline">X\sim f(x)</span> and <span class="math inline">Y = I(X&gt;c)</span>. Then <span class="math inline">Y\sim\text{Bern}\big(P(X&gt;c)\big)</span>, and the conditional distribution of <span class="math inline">X</span> given <span class="math inline">Y</span> is <span class="math inline">f</span> restricted to one side of <span class="math inline">c</span> and renormalized: <span class="math display">f(x\mid Y=1) = \frac{f(x)\,I(x&gt;c)}{\int_c^\infty f}, \qquad
 f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f}</span></p>
-<p><img data-src="Lec%2006%20EM_images/p11-truncated-picture.png" height="260"></p>
 <p>For discrete <span class="math inline">X</span> the integrals are sums. This is exactly the distribution the E-step needs when an observation is only known to lie on one side of <span class="math inline">c</span>.</p>
 </section>
+<section id="truncated-distributions-in-brief-continued" class="slide level2">
+<h2>Truncated Distributions in Brief (Continued)</h2>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="censored-poisson-data-and-likelihoods" class="slide level2">
 <h2>Censored Poisson: Data and Likelihoods</h2>
 <p><span class="math inline">y_i \overset{iid}{\sim}\text{Pois}(\lambda)</span>, <span class="math inline">i=1,\ldots,n</span>. The first <span class="math inline">m</span> values are observed exactly; for <span class="math inline">i&gt;m</span> we only know <span class="math inline">y_i&lt;2</span>, recorded as <span class="math inline">x_i = I(y_i&lt;2) = 1</span>.</p>
@@ -361,12 +379,19 @@ f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f}</span></p>
 </section>
 <section id="e-step" class="slide level2">
 <h2>E-Step</h2>
-<p><span class="math display">\ell_{\text{comp}}(\lambda) = -n\lambda + (\log\lambda)\sum_{i=1}^m y_i + (\log\lambda)\underbrace{\sum_{i=m+1}^n y_i}_{\text{missing}} - \sum_{i=1}^n\log(y_i!)</span></p>
+<p><span class="math display">
+\ell_{\text{comp}}(\lambda) = -n\lambda + (\log\lambda)\sum_{i=1}^m y_i
++ (\log\lambda)\underbrace{\sum_{i=m+1}^n y_i}_{\text{missing}} - \sum_{i=1}^n\log(y_i!)
+</span></p>
 <p>For <span class="math inline">i&gt;m</span>, <span class="math inline">y_i\in\{0,1\}</span>, and the truncated Poisson given <span class="math inline">\lambda^{(t)}</span> is <span class="math display">P(y_i=0\mid x_i=1) = \frac{1}{1+\lambda^{(t)}}, \qquad P(y_i=1\mid x_i=1) = \frac{\lambda^{(t)}}{1+\lambda^{(t)}}</span></p>
-<p><img data-src="Lec%2006%20EM_images/p13-poisson-bars.png" height="150"></p>
 <p><span class="math display">\hat y_i^{(t)} \equiv E(y_i\mid x_i=1,\lambda^{(t)}) = \frac{\lambda^{(t)}}{1+\lambda^{(t)}}</span></p>
 <p>Since <span class="math inline">y_i! = 1</span> for <span class="math inline">y_i\in\{0,1\}</span>, the <span class="math inline">\log(y_i!)</span> term is a known constant and no further expectation is needed.</p>
 </section>
+<section id="e-step-continued" class="slide level2">
+<h2>E-Step (Continued)</h2>
+<p>The conditional distribution of a censored <span class="math inline">y_i</span> is the Poisson pmf restricted to <span class="math inline">\{0,1\}</span> and renormalized:</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="m-step-and-the-em-update" class="slide level2">
 <h2>M-Step and the EM Update</h2>
 <p><span class="math display">Q(\lambda\mid\lambda^{(t)}) = -n\lambda + (\log\lambda)\Big[\sum_{i=1}^m y_i + (n-m)\,\hat y^{(t)}\Big] + C^{(t)}</span></p>
@@ -378,32 +403,37 @@ f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f}</span></p>
 </ul>
 </section></section>
 <section>
-<section id="more-complex-applications" class="title-slide slide level1 center" data-number="4">
-<h1><span class="header-section-number">4</span> 4. More Complex Applications</h1>
+<section id="more-complex-applications" class="title-slide slide level1 center">
+<h1>4. More Complex Applications</h1>
 
 </section>
-<section id="where-em-is-used" class="slide level2">
-<h2>Where EM Is Used</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<p><strong>Model-based clustering</strong> <span class="math display">Z_i\sim\text{Categorical}(\pi_1,\ldots,\pi_K), \qquad Y_i\mid Z_i=k\sim N(\mu_k,\Sigma_k)</span> Multivariate generalization of Example 1; E-step gives soft cluster memberships.</p>
-<p><strong>Hidden Markov models</strong> <span class="math display">P(y_{1:n}\mid h_{1:n},\theta) = \prod_{i=1}^n P(y_i\mid h_i,\theta), \qquad h_1\to h_2\to\cdots\to h_n</span> Hidden states form a Markov chain; the E-step (forward–backward) computes <span class="math inline">P(h_i\mid y_{1:n},\hat\theta^{(t)})</span>.</p>
-<p><strong>Factor analysis</strong> <span class="math display">y_i = \Gamma x_i + \varepsilon_i, \qquad x_i \text{ hidden}</span> E-step: <span class="math inline">x_i\mid y_i,\hat\theta^{(t)}</span> is normal with closed-form moments.</p>
-</div><div class="column" style="width:45%;">
-<p><img data-src="Lec%2006%20EM_images/p23-clustering-cartoon.png" height="260"></p>
-<p><strong>Common pattern</strong></p>
+<section id="model-based-clustering" class="slide level2">
+<h2>Model-Based Clustering</h2>
+<p><span class="math display">Z_i\sim\text{Categorical}(\pi_1,\ldots,\pi_K), \qquad Y_i\mid Z_i=k\sim N_d(\mu_k,\Sigma_k)</span></p>
+<p>Multivariate, <span class="math inline">K</span>-component generalization of Example 1. E-step: soft cluster memberships <span class="math inline">P(Z_i=k\mid y_i,\hat\theta^{(t)})</span>; M-step: weighted means, covariances, and proportions.</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center r-stretch" width="576"></section>
+<section id="hidden-markov-models" class="slide level2">
+<h2>Hidden Markov Models</h2>
+<p>Hidden states <span class="math inline">h_1\to h_2\to\cdots\to h_n</span> form a Markov chain; each observation depends only on its own state: <span class="math display">P(y_{1:n}\mid h_{1:n},\theta) = \prod_{i=1}^n P(y_i\mid h_i,\theta)</span></p>
+<p>E-step: the forward–backward algorithm computes <span class="math inline">P(h_i\mid y_{1:n},\hat\theta^{(t)})</span> and <span class="math inline">P(h_i,h_{i+1}\mid y_{1:n},\hat\theta^{(t)})</span> without enumerating all <span class="math inline">K^n</span> state sequences. M-step: weighted transition and emission estimates (Baum–Welch).</p>
+
+<img data-src="Lec-06-EM_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="factor-analysis-and-the-common-pattern" class="slide level2">
+<h2>Factor Analysis and the Common Pattern</h2>
+<p><strong>Factor analysis</strong> <span class="math display">y_i = \Gamma x_i + \varepsilon_i, \qquad x_i\sim N_q(0,I) \text{ hidden}, \quad \varepsilon_i\sim N_d(0,\Psi)</span> E-step: <span class="math inline">x_i\mid y_i,\hat\theta^{(t)}</span> is normal with closed-form mean and covariance. M-step: regression of <span class="math inline">y</span> on the expected factors.</p>
+<p><strong>Common pattern across applications</strong></p>
 <ol type="1">
-<li>Hidden variable makes the complete model tractable</li>
-<li>E-step: conditional distribution of hidden data</li>
-<li>M-step: complete-data MLE with expected sufficient statistics</li>
+<li>Introduce a hidden variable that makes the complete-data model tractable</li>
+<li>E-step: compute the conditional distribution (or expected sufficient statistics) of the hidden data</li>
+<li>M-step: complete-data MLE with the hidden data replaced by expected sufficient statistics</li>
 </ol>
-</div></div>
 </section>
 <section id="summary" class="slide level2">
 <h2>Summary</h2>
 <ul>
 <li>EM maximizes <span class="math inline">\ell_{\text{obs}}</span> by alternating between <span class="math inline">Q(\theta\mid\hat\theta^{(t)}) = E_{Z\mid Y,\hat\theta^{(t)}}[\ell_{\text{comp}}]</span> and its maximizer</li>
-<li>Every iteration weakly increases <span class="math inline">\ell_{\text{obs}}</span>; equivalently, EM is coordinate ascent on <span class="math inline">F(\tilde P,\theta) = \ell_{\text{obs}}(\theta) - KL(\tilde P\,\|\,P(Z\mid Y,\theta))</span></li>
+<li>Every iteration weakly increases <span class="math inline">\ell_{\text{obs}}</span>; equivalently, EM is coordinate ascent on <span class="math display">F(\tilde P,\theta) = \ell_{\text{obs}}(\theta) - KL\big(\tilde P\,\|\,P(Z\mid Y,\theta)\big)</span></li>
 <li>When <span class="math inline">\ell_{\text{comp}}</span> is linear in sufficient statistics of <span class="math inline">Z</span>, the E-step reduces to computing their conditional expectations</li>
 <li>Convergence is linear (often slow) and only to a stationary point; run from several starting values</li>
 </ul>
@@ -674,6 +704,44 @@ f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f}</span></p>
         }, 200); 
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
