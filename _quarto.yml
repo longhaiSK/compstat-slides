@@ -1,34 +1,16 @@
 project:
   type: website
   output-dir: "."
+  render:
+    - index.qmd
+    - "Lec_*.qmd"
 
 website:
-  title: "Course Lectures"
-  description: "Lecture slides and course materials"
-  
-  sidebar:
-    style: "docked"
-    search: true
-    collapse-level: 1
-    contents:
-      - index.qmd
-      - section: "Course Slides"
-        contents:
-          - Lec_01_intro-course.qmd
-          - Lec_03_arithmetics.qmd
-          - Lec_04_Monte_Carlo.qmd
-          - Lec_05_MLE.qmd
-          - Lec_06_EM.qmd
-          - Lec_06_EM_-_supp.qmd
-          - Lec_07_bayesian_inference.qmd
-          - Lec_08_numerical_quadrature.qmd
-          - Lec_09_laplace_approximation.qmd
-          - Lec_10_Rejection_sampling.qmd
-          - Lec_11_Importance_Sampling.qmd
-          - Lec_12_mcmc.qmd
+  title: "Elements of Statistical Computation"
+  description: "Lecture slides"
 
 format:
   html:
     theme: cosmo
     css: styles.css
-    toc: true
+    toc: false

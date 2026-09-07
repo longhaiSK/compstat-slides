@@ -2,12 +2,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Course Lectures",
+    "title": "Elements of Statistical Computation",
     "section": "",
-    "text": "Welcome to the course materials.\nPlease select a lecture from the sidebar to view the slides.",
-    "crumbs": [
-      "Course Lectures"
-    ]
+    "text": "Welcome to the course materials for STAT 420/812, Computational Statistics. Each chapter below opens its slides in a new window."
   },
   {
     "objectID": "Lec_06_EM_-_supp.html",
@@ -654,8 +651,7 @@
     "section": "Statistical Inference: The Setup",
     "text": "Statistical Inference: The Setup\n\nData: x_1, \\ldots, x_n observed\nModel: x_i \\overset{iid}{\\sim} f(x \\mid \\theta), with \\theta unknown\nThree basic tasks:\n\nPoint estimation: find a single value \\hat\\theta close to \\theta\nHypothesis testing: decide whether the data are compatible with H_0\nBayesian inference: describe uncertainty about \\theta via a distribution",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -665,8 +661,7 @@
     "section": "Point Estimation",
     "text": "Point Estimation\nAn estimator is a function of the data: \n\\hat\\theta = \\hat\\theta(x_1, \\ldots, x_n)\n\nFamiliar examples:\n\nSample mean \\hat\\mu = \\bar x = \\frac{1}{n}\\sum_{i=1}^n x_i\nSample variance \\hat\\sigma^2 = S^2 = \\frac{1}{n-1}\\sum_{i=1}^n (x_i - \\bar x)^2\nLeast squares in regression \\hat\\beta = (X'X)^{-1} X' y",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -676,8 +671,7 @@
     "section": "Evaluating an Estimator",
     "text": "Evaluating an Estimator\nSince \\hat\\theta depends on random data, it has a sampling distribution.\n\n\nBias E(\\hat\\theta) - \\theta, variance V(\\hat\\theta), and \\text{MSE}(\\hat\\theta) = E(\\hat\\theta - \\theta)^2 = \\text{Bias}^2 + V(\\hat\\theta)\nComparing \\hat\\theta^{(1)} and \\hat\\theta^{(2)} requires knowing (or approximating) both sampling distributions",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -687,8 +681,7 @@
     "section": "Maximum Likelihood Estimation",
     "text": "Maximum Likelihood Estimation\nThe log-likelihood of \\theta: \n\\ell(\\theta) = \\log f(x_1, \\ldots, x_n \\mid \\theta) = \\log \\prod_{i=1}^n f(x_i \\mid \\theta) = \\sum_{i=1}^n \\log f(x_i \\mid \\theta)\n\nThe MLE is the maximizer: \n\\hat\\theta_{\\text{MLE}} = \\arg\\max_\\theta \\ell(\\theta)\n\n\nClosed form exists in simple models (normal mean, binomial proportion)\nIn most models (GLMs, mixed models, survival models) there is no closed form",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -698,8 +691,7 @@
     "section": "Hypothesis Testing",
     "text": "Hypothesis Testing\nTest H_0: \\mu = \\mu_0 against H_1: \\mu \\neq \\mu_0 using \nT = \\frac{\\bar x - \\mu_0}{S/\\sqrt{n}}\n\n\nNeed the null distribution of T (distribution of T when H_0 is true)\nFor normal data, T \\sim t_{n-1} exactly; for other data, the null distribution is known only approximately or not at all",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -709,8 +701,7 @@
     "section": "p-value, Type I Error, and Power",
     "text": "p-value, Type I Error, and Power\n\n\np-value = P_{H_0}(T \\ge t_{\\text{obs}}): tail area of the null distribution beyond the observed statistic\nType I error \\alpha = P_{H_0}(T \\ge t_\\alpha): null tail area beyond the critical value\nPower = P_{H_1}(T \\ge t_\\alpha): alternative tail area beyond the critical value\n\nAll three are tail probabilities of a distribution that is often unknown in closed form.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -720,8 +711,7 @@
     "section": "Bayesian Inference",
     "text": "Bayesian Inference\nCombine a prior \\pi(\\theta) with the likelihood f(x \\mid \\theta): \np(\\theta \\mid x) = \\frac{f(x \\mid \\theta)\\,\\pi(\\theta)}{\\int f(x \\mid \\theta)\\,\\pi(\\theta)\\, d\\theta}\n\nThe denominator is an integral over \\theta; for most models it has no closed form.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -731,8 +721,7 @@
     "section": "Prior, Likelihood, and Posterior",
     "text": "Prior, Likelihood, and Posterior\n\n\nA vague prior lets the likelihood dominate; the posterior is slightly narrower and pulled toward the prior mean\nInference uses posterior summaries: E(\\theta \\mid x), V(\\theta \\mid x), credible intervals, P(H_0 \\mid x)\nEach summary is again an integral over \\theta",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -742,8 +731,7 @@
     "section": "Summary of the Three Tasks",
     "text": "Summary of the Three Tasks\n\n\n\n\n\n\n\n\nTask\nObject needed\nTypical difficulty\n\n\n\n\nPoint estimation\nSampling distribution of \\hat\\theta; maximizer of \\ell(\\theta)\nNo closed form\n\n\nHypothesis testing\nNull distribution of T\nUnknown for general data\n\n\nBayesian inference\n\\int f(x\\mid\\theta)\\pi(\\theta)\\,d\\theta; E(\\theta \\mid x)\nHigh-dimensional integral\n\n\n\nEach task reduces to a computational problem: calculating, simulating, optimizing, or integrating.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -753,8 +741,7 @@
     "section": "1. Manipulating Numbers",
     "text": "1. Manipulating Numbers\nEven simple calculations are not trivial on a computer:\n\n1.1 + 2.1 + \\cdots + 100.1\nS^2 = \\sum_{i=1}^n (x_i - \\bar x)^2 / (n-1)\n\\prod_{i=1}^n f(x_i \\mid \\theta) for large n\n\nComputers store numbers with finite precision, which leads to\n\nOverflow: result too large to represent\nUnderflow: result too small, rounded to zero\nRounding error: accumulated loss of digits",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -764,8 +751,7 @@
     "section": "Example: Rounding Error",
     "text": "Example: Rounding Error\n\nx &lt;- c(1e10 + 1, 1e10 + 2, 1e10 + 3)\nvar(x)                                    # correct answer: 1\n\n[1] 1\n\nsum(x^2)/2 - 3 * mean(x)^2 / 2           # textbook formula\n\n[1] 0\n\n\n\nprod(dnorm(rnorm(1000)))                  # likelihood underflows to 0\n\n[1] 0\n\nsum(dnorm(rnorm(1000), log = TRUE))       # log-likelihood is fine\n\n[1] -1373.279\n\n\nLecture on computer arithmetic: how numbers are stored and how to avoid these errors.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -775,8 +761,7 @@
     "section": "2. Simulation with Random Numbers",
     "text": "2. Simulation with Random Numbers\nMonte Carlo: replace a probability calculation with repeated random experiments.\nGenerate X_1, X_2 \\overset{iid}{\\sim} \\text{Unif}(0,1). What is the distribution of X_1 + X_2?\n\nz &lt;- runif(10000) + runif(10000)\nhist(z, breaks = 40, freq = FALSE, main = \"\", xlab = \"X1 + X2\")",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -786,8 +771,7 @@
     "section": "Monte Carlo for Sampling Distributions",
     "text": "Monte Carlo for Sampling Distributions\nRepeat many times: draw x_1, \\ldots, x_n, compute the statistic.\n\n\\sum_i x_i, \\qquad \\sum_i (x_i - \\bar x)^2, \\qquad T = \\frac{\\bar x - \\mu_0}{S/\\sqrt n}\n\nThis gives empirical approximations to\n\nThe sampling distribution of \\hat\\mu^{(1)} vs \\hat\\mu^{(2)} (bias, variance, MSE)\nThe null distribution of T for non-normal data\nCoverage of confidence intervals\n\nLecture on random numbers and Monte Carlo: pseudo-random generation, transformations, LLN/CLT, evaluating estimators and tests.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -797,8 +781,7 @@
     "section": "3. Optimization",
     "text": "3. Optimization\nFind x_0 = \\arg\\max_x f(x).\n\nFor MLE, f = \\ell(\\theta); there is no closed form, so the maximum is found by iterative search.\nLecture on MLE and optimization: Newton–Raphson, Fisher scoring, Nelder–Mead, gradient methods, stochastic gradient descent.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -808,8 +791,7 @@
     "section": "4. Advanced Simulation and Integration",
     "text": "4. Advanced Simulation and Integration\nQuantities of interest are integrals: \nE(X) = \\int x f(x)\\,dx, \\qquad V(X), \\qquad \\int f(x\\mid\\theta)\\pi(\\theta)\\,d\\theta\n\nTwo approaches:\n\nNumerical quadrature: approximate the area under the curve by rectangles or trapezoids; works well in low dimension\nMonte Carlo integration: draw from f and average; the only practical route in high dimension\n\nFor the posterior p(\\theta \\mid x), direct sampling is impossible, so Markov chain Monte Carlo is used.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -819,8 +801,7 @@
     "section": "Numerical Quadrature",
     "text": "Numerical Quadrature\n\n\n\\int_a^b f(x)\\,dx \\approx \\sum_{j=1}^k f(m_j)\\,\\Delta x",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -830,8 +811,7 @@
     "section": "Course Roadmap",
     "text": "Course Roadmap\n\n\n\n\n\n\n\nTopic\nStatistical task\n\n\n\n\nComputer arithmetic\nReliable calculation of likelihoods and variances\n\n\nRandom numbers and Monte Carlo\nSampling distributions, evaluating estimators and tests\n\n\nMLE and optimization\nPoint estimation without closed forms\n\n\nNumerical integration and MCMC\nBayesian inference\n\n\n\nThroughout: R programming, vectorization, and efficient code.",
     "crumbs": [
-      "Course Slides",
-      "Elements of Statistical Computation"
+      "01. Intro Course"
     ]
   },
   {
@@ -2012,7 +1992,6 @@
     "section": "Four Steps",
     "text": "Four Steps\n\nSpecify a prior \\pi(\\theta): rough knowledge about \\theta, treated as a random variable\nSpecify a probability model for the data: P(y_1,\\ldots,y_n\\mid\\theta)\nFind the posterior by Bayes’ rule P(\\theta\\mid y_1,\\ldots,y_n) = \\frac{P(y_1,\\ldots,y_n\\mid\\theta)\\,\\pi(\\theta)}{\\displaystyle\\int P(y_1,\\ldots,y_n\\mid\\theta)\\,\\pi(\\theta)\\,d\\theta}\nInterpret the posterior: summarize \\theta, make predictions\n\nWriting L(\\theta) = P(y_{1:n}\\mid\\theta) for the likelihood, P(\\theta\\mid y_{1:n}) \\propto L(\\theta)\\,\\pi(\\theta)\nThe denominator P(y_{1:n}) = \\int L(\\theta)\\pi(\\theta)\\,d\\theta is the marginal likelihood; it does not depend on \\theta and is usually the hard part to compute.",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2023,7 +2002,6 @@
     "section": "Four Steps (Continued)",
     "text": "Four Steps (Continued)\nLeft: a flat prior and the likelihood. Right: the posterior \\propto L(\\theta)\\pi(\\theta), with a (1-\\alpha) credible interval (\\theta_{\\alpha/2},\\theta_{1-\\alpha/2}) cutting off \\alpha/2 in each tail.",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2034,7 +2012,6 @@
     "section": "Summarizing \\theta: Point Estimates from Loss Functions",
     "text": "Summarizing \\theta: Point Estimates from Loss Functions\nThe Bayes estimate minimizes the posterior expected loss: \\hat\\theta = \\arg\\min_{\\hat\\theta}\\; E\\big[L(\\theta,\\hat\\theta)\\mid y_{1:n}\\big]\n\n\n\n\n\n\n\nLoss L(\\theta,\\hat\\theta)\nBayes estimate \\hat\\theta\n\n\n\n\n(\\theta-\\hat\\theta)^2 (squared error)\nposterior mean E(\\theta\\mid y_{1:n})\n\n\n\\lvert\\theta-\\hat\\theta\\rvert (absolute error)\nposterior median\n\n\nI(\\theta\\ne\\hat\\theta) (0–1 loss)\nposterior mode (MAP)\n\n\n\nInterval estimate: a (1-\\alpha) credible interval (\\theta_{\\alpha/2},\\theta_{1-\\alpha/2}) contains \\theta with posterior probability 1-\\alpha, a direct probability statement about \\theta (unlike a confidence interval).\nAll of these are integrals or optimizations over the posterior, which is why Bayesian inference is computational.",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2045,7 +2022,6 @@
     "section": "Prediction",
     "text": "Prediction\nThe posterior predictive distribution of a new observation: P(y_{n+1}\\mid y_{1:n}) = \\frac{\\int P(y_{n+1},y_{1:n}\\mid\\theta)\\,\\pi(\\theta)\\,d\\theta}{\\int P(y_{1:n}\\mid\\theta)\\,\\pi(\\theta)\\,d\\theta}\nIf y_1,\\ldots,y_n,y_{n+1} are conditionally independent given \\theta, this simplifies to P(y_{n+1}\\mid y_{1:n}) = \\int P(y_{n+1}\\mid\\theta)\\,P(\\theta\\mid y_{1:n})\\,d\\theta\nan average of the sampling density over the posterior. With posterior draws \\theta_1,\\ldots,\\theta_J\\sim P(\\theta\\mid y_{1:n}), P(y_{n+1}\\mid y_{1:n}) \\approx \\frac1J\\sum_{j=1}^J P(y_{n+1}\\mid\\theta_j)\nThe predictive distribution is wider than any single P(y_{n+1}\\mid\\theta_j): it carries both sampling variability and posterior uncertainty about \\theta.",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2056,7 +2032,6 @@
     "section": "Prediction (Continued)",
     "text": "Prediction (Continued)\nRed: P(y_{n+1}\\mid\\theta_j) for ten posterior draws \\theta_j. Black: their average, the posterior predictive density.",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2067,7 +2042,6 @@
     "section": "Prior",
     "text": "Prior\ny_1,\\ldots,y_n\\mid\\theta \\overset{iid}{\\sim}\\text{Bern}(\\theta), with \\theta\\sim\\text{Beta}(\\alpha_1,\\alpha_0), \\alpha_1,\\alpha_0&gt;0 given: \\pi(\\theta) = \\frac{\\Gamma(\\alpha_0+\\alpha_1)}{\\Gamma(\\alpha_0)\\Gamma(\\alpha_1)}\\,\\theta^{\\alpha_1-1}(1-\\theta)^{\\alpha_0-1}, \\qquad 0&lt;\\theta&lt;1\nE(\\theta) = \\frac{\\alpha_1}{\\alpha_0+\\alpha_1}, \\qquad\nV(\\theta) = \\frac{\\alpha_0\\alpha_1}{(\\alpha_0+\\alpha_1)^2(\\alpha_0+\\alpha_1+1)}\n\n\\alpha_1 acts like a prior count of successes, \\alpha_0 of failures; \\alpha_0+\\alpha_1 is the prior “sample size”\n\\text{Beta}(1,1) = \\text{Unif}(0,1); \\text{Beta}(2,1) has density 2\\theta, favouring large \\theta\nSmall \\alpha’s give U-shaped or flat priors (vague); large \\alpha’s concentrate the prior",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2078,7 +2052,6 @@
     "section": "Prior (Continued)",
     "text": "Prior (Continued)",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2089,7 +2062,6 @@
     "section": "Likelihood and Posterior",
     "text": "Likelihood and Posterior\nLikelihood: with P(y_i\\mid\\theta) = \\theta^{y_i}(1-\\theta)^{1-y_i} and \\mathbf y = (y_1,\\ldots,y_n), P(\\mathbf y\\mid\\theta) = \\prod_{i=1}^n \\theta^{y_i}(1-\\theta)^{1-y_i} = \\theta^{n_1}(1-\\theta)^{n_0},\n\\qquad n_1 = \\sum_i y_i,\\ \\ n_0 = n - n_1\nPosterior: \n\\begin{aligned}\nP(\\theta\\mid\\mathbf y) &= \\frac{\\pi(\\theta)\\,P(\\mathbf y\\mid\\theta)}{P(\\mathbf y)}\n\\;\\propto\\; \\theta^{\\alpha_1-1}(1-\\theta)^{\\alpha_0-1}\\cdot\\theta^{n_1}(1-\\theta)^{n_0} \\\\\n&= \\theta^{(\\alpha_1+n_1)-1}(1-\\theta)^{(\\alpha_0+n_0)-1}\n\\end{aligned}\n\nThis is the Beta kernel with updated parameters \\alpha_1' = \\alpha_1+n_1, \\alpha_0' = \\alpha_0+n_0: \\theta\\mid\\mathbf y \\sim \\text{Beta}(\\alpha_1+n_1,\\ \\alpha_0+n_0)\nThe Beta prior is conjugate to the Bernoulli likelihood: the posterior has the same form, and the normalizing constant P(\\mathbf y) never has to be computed explicitly.",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2100,7 +2072,6 @@
     "section": "Posterior Summaries",
     "text": "Posterior Summaries\nE(\\theta\\mid\\mathbf y) = \\frac{\\alpha_1+n_1}{\\alpha_0+\\alpha_1+n}\n= \\underbrace{\\frac{\\alpha_0+\\alpha_1}{\\alpha_0+\\alpha_1+n}}_{w}\\cdot\\frac{\\alpha_1}{\\alpha_0+\\alpha_1}\n+ (1-w)\\cdot\\underbrace{\\frac{n_1}{n}}_{\\hat\\theta_{\\text{MLE}}}\na weighted average of the prior mean and the MLE; the data weight 1-w\\to1 as n\\to\\infty.\nV(\\theta\\mid\\mathbf y) = \\frac{(\\alpha_1+n_1)(\\alpha_0+n_0)}{(n+\\alpha_0+\\alpha_1)^2(n+\\alpha_0+\\alpha_1+1)} = O\\!\\left(\\frac1n\\right)\n\nThe posterior variance shrinks to zero: the posterior concentrates at the true \\theta as n\\to\\infty\nCompare with the sampling distribution of the MLE, \\hat\\theta_{\\text{MLE}}\\ \\dot\\sim\\ N\\big(\\theta_0,\\,1/(nI(\\theta_0))\\big), whose variance is also O(1/n); for large n the two approaches agree, with the prior’s influence vanishing",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2111,7 +2082,6 @@
     "section": "Posterior Summaries (Continued)",
     "text": "Posterior Summaries (Continued)\nPrior \\text{Beta}(2,2) and posteriors after n = 10, 50, 200 observations with \\bar y = 0.7. The posterior narrows at rate 1/\\sqrt n and centres on the MLE.",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
   },
@@ -2122,8 +2092,35 @@
     "section": "Where Computation Enters",
     "text": "Where Computation Enters\nFor the Beta–Bernoulli model everything is closed-form. In general:\n\n\n\n\n\n\n\nQuantity\nRequires\n\n\n\n\nNormalizing constant P(\\mathbf y) = \\int L(\\theta)\\pi(\\theta)\\,d\\theta\nintegration over \\theta\n\n\nPosterior mean, variance, probabilities\nintegration over \\theta\n\n\nPosterior mode\noptimization\n\n\nPosterior predictive \\int P(y_{n+1}\\mid\\theta)P(\\theta\\mid\\mathbf y)\\,d\\theta\nintegration over \\theta\n\n\nCredible intervals\nposterior quantiles\n\n\n\n\nOne-dimensional \\theta: numerical quadrature\nMulti-dimensional \\theta: Monte Carlo with posterior draws \\theta_1,\\ldots,\\theta_J, obtained by Markov chain Monte Carlo (next lectures), turning every integral into a sample average",
     "crumbs": [
-      "Course Slides",
       "Elements of Statistical Computation"
     ]
+  },
+  {
+    "objectID": "index.html#about-the-slides",
+    "href": "index.html#about-the-slides",
+    "title": "Elements of Statistical Computation",
+    "section": "About the slides",
+    "text": "About the slides\nThe slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it."
+  },
+  {
+    "objectID": "index.html#topics",
+    "href": "index.html#topics",
+    "title": "Elements of Statistical Computation",
+    "section": "Topics",
+    "text": "Topics\nThe course is organized around four computational tasks that recur throughout statistics.\n\nCalculation\n\nWhy statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as computational problems\nComputer arithmetic: floating-point representation, overflow, underflow, rounding error, and stable formulas for variances and log-likelihoods\n\n\n\nSimulation\n\nRandom number generation and elementary Monte Carlo: sampling distributions, evaluating estimators and tests by simulation\nRejection sampling: envelope functions, the uniform-under-the-curve view, adaptive rejection sampling for log-concave targets\nImportance sampling: importance weights, self-normalized estimators, effective sample size and its limitations, applications to free energy and Bayesian cross-validation\n\n\n\nOptimization\n\nMaximum likelihood and numerical optimization: gradients and Hessians, Newton-type and gradient-based methods, visualizing curvature\nThe EM algorithm: the \\(Q\\) function, the ascending property, EM as alternating optimization, mixture models, censored data, and extensions to clustering, hidden Markov models, and factor analysis\n\n\n\nIntegration\n\nBayesian inference: prior, likelihood, posterior, posterior summaries as Bayes estimates under loss, prediction, the Beta–Bernoulli example\nNumerical quadrature: midpoint, trapezoidal, and Simpson’s rules, transformations for infinite ranges, computing marginal likelihoods on the log scale, and the limits of quadrature in higher dimensions\nLaplace approximation: Gaussian approximation at the posterior mode, the marginal likelihood and BIC, approximating posterior expectations\nMarkov chain Monte Carlo: Markov chains, invariance, detailed balance, Gibbs sampling and data augmentation, Metropolis–Hastings and step-size tuning, Metropolis-within-Gibbs, and an introduction to Hamiltonian Monte Carlo"
+  },
+  {
+    "objectID": "index.html#software",
+    "href": "index.html#software",
+    "title": "Elements of Statistical Computation",
+    "section": "Software",
+    "text": "Software\nAll computation is in base R. The only additional package used in the slides is latex2exp, for mathematical notation in figures."
+  },
+  {
+    "objectID": "index.html#chapters",
+    "href": "index.html#chapters",
+    "title": "Elements of Statistical Computation",
+    "section": "Chapters",
+    "text": "Chapters\n\nIntroduction — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration\nComputer Arithmetic — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas\nMonte Carlo — random number generation, sampling distributions, and evaluating estimators and tests by simulation\nMaximum Likelihood — gradients, Hessians, and numerical optimization of likelihoods\nEM Algorithm — the \\(Q\\) function, the ascending property, mixture models, censored data, and extensions\nBayesian Inference — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example\nNumerical Quadrature — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality\nLaplace Approximation — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC\nRejection Sampling — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling\nImportance Sampling — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation\nMCMC — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo"
   }
 ]

@@ -8,7 +8,7 @@
 
 <meta name="author" content="Longhai Li">
 
-<title>Course Lectures</title>
+<title>Elements of Statistical Computation</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -28,7 +28,6 @@ ul.task-list li input[type="checkbox"] {
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -43,7 +42,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-a2a938b4dd5711f7a799c87bd16ba44c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -72,147 +71,53 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar docked quarto-light">
+<body class="fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Course Lectures</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
-</header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-    <div class="sidebar-title mb-0 py-0">
-      <a href="./">Course Lectures</a> 
-    </div>
-      </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Course Lectures</span></a>
-  </div>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
- <span class="menu-text">Course Slides</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_01_intro-course.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_03_arithmetics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_04_Monte_Carlo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_05_MLE.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_06_EM.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_06_EM_-_supp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture Notes for Computational Statistics</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_07_bayesian_inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_08_numerical_quadrature.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_09_laplace_approximation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_10_Rejection_sampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_11_Importance_Sampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./Lec_12_mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Elements of Statistical Computation</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Course Lectures</h1>
+<h1 class="title">Elements of Statistical Computation</h1>
 </div>
 
 
@@ -235,10 +140,33 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Welcome to the course materials.</p>
-<p>Please select a lecture from the sidebar to view the slides.</p>
+<p>Welcome to the course materials for STAT 420/812, Computational Statistics. Each chapter below opens its slides in a new window.</p>
+<section id="chapters" class="level2">
+<h2 class="anchored" data-anchor-id="chapters">Chapters</h2>
+<ol type="1">
+<li><a href="Lec_01_intro-course.html" target="_blank">Introduction</a> — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration</li>
+<li><a href="Lec_03_arithmetics.html" target="_blank">Computer Arithmetic</a> — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas</li>
+<li><a href="Lec_04_Monte_Carlo.html" target="_blank">Monte Carlo</a> — random number generation, sampling distributions, and evaluating estimators and tests by simulation</li>
+<li><a href="Lec_05_MLE.html" target="_blank">Maximum Likelihood</a> — gradients, Hessians, and numerical optimization of likelihoods</li>
+<li><a href="Lec_06_EM.html" target="_blank">EM Algorithm</a> — the <span class="math inline">\(Q\)</span> function, the ascending property, mixture models, censored data, and extensions</li>
+<li><a href="Lec_07_bayesian_inference.html" target="_blank">Bayesian Inference</a> — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example</li>
+<li><a href="Lec_08_numerical_quadrature.html" target="_blank">Numerical Quadrature</a> — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality</li>
+<li><a href="Lec_09_laplace_approximation.html" target="_blank">Laplace Approximation</a> — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC</li>
+<li><a href="Lec_10_Rejection_sampling.html" target="_blank">Rejection Sampling</a> — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling</li>
+<li><a href="Lec_11_Importance_Sampling.html" target="_blank">Importance Sampling</a> — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation</li>
+<li><a href="Lec_12_mcmc.html" target="_blank">MCMC</a> — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo</li>
+</ol>
+</section>
+<section id="about-the-slides" class="level2">
+<h2 class="anchored" data-anchor-id="about-the-slides">About the slides</h2>
+<p>The slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it.</p>
+</section>
+<section id="software" class="level2">
+<h2 class="anchored" data-anchor-id="software">Software</h2>
+<p>All computation is in base R. The only additional package used in the slides is <code>latex2exp</code>, for mathematical notation in figures.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
