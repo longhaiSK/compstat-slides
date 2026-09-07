@@ -13,6 +13,12 @@
   color: var(--link-color);
 }
 
+/* Quarto's built-in theme shrinks .smaller to 0.7em; bump it up to 0.9em. */
+.reveal .slides section.smaller,
+.reveal.smaller .slides section {
+  font-size: 0.9em !important;
+}
+
 /* 3. Your Custom Rules */
 
 /* Brute-force blue headers */

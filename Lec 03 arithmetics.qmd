@@ -1,211 +1,428 @@
 ---
-title: "STAT 812/420"
-subtitle: "Computational Statistics"
+title: "Elements of Statistical Computation"
+subtitle: "Computer Arithmetic"
 author: "Longhai Li"
 format: banner_slides-revealjs
+code-fold: show
+execute:
+  echo: true
+include-in-header:
+  text: |
+    <style>
+    .pv table { border-collapse: collapse; margin: 0.4em auto; font-family: monospace; }
+    .pv td, .pv th { border: 2px solid #555; min-width: 2em; height: 1.5em;
+                     text-align: center; padding: 0 0.3em; font-size: 0.8em; }
+    .pv th { border: none; font-size: 0.55em; color: #666; font-weight: normal; }
+    .pv td.s { background: #fbe4ec; }   /* sign */
+    .pv td.m { background: #e3eefb; }   /* mantissa / digits */
+    .pv td.e { background: #e7f6e0; }   /* exponent */
+    .pv td.x { background: #ffd6d6; color: #b00000; font-weight: bold; } /* lost / invalid */
+    .pv td.p { border: none; padding: 0; min-width: 0; font-weight: bold; } /* punctuation */
+    .pv .cap { font-size: 0.6em; color: #444; text-align: center; margin-top: -0.3em; }
+    </style>
 ---
 
-## Number Representation: Place Value in Different Bases
+# Representations of Numbers in Computer
 
-![](Lec%2003%20arithmetics_images/p02.png)
+## Place Value
 
-Base-10 place value:
-$$1348 = 1\times10^3 + 3\times10^2 + 4\times10^1 + 8\times10^0$$
+Every number is a string of digits in boxes; each box has a **place value**.
 
-Binary (base-2) place value and the binary-to-decimal correspondence for 3-bit patterns:
+::: {.pv}
+<table>
+<tr><th>10³</th><th>10²</th><th>10¹</th><th>10⁰</th></tr>
+<tr><td class="m">1</td><td class="m">3</td><td class="m">4</td><td class="m">8</td></tr>
+</table>
+<p class="cap">$1348 = 1\times10^3 + 3\times10^2 + 4\times10^1 + 8\times10^0$</p>
+:::
 
-| binary | decimal |
-|:---:|:---:|
-| 000 | 0 |
-| 001 | 1 |
-| 010 | 2 |
-| 011 | 3 |
-| 100 | 4 |
+A computer uses base 2, so each box (a **bit**) holds 0 or 1:
 
-## Integer Representation
+::: {.pv}
+<table>
+<tr><th>2³</th><th>2²</th><th>2¹</th><th>2⁰</th></tr>
+<tr><td class="m">1</td><td class="m">1</td><td class="m">0</td><td class="m">1</td></tr>
+</table>
+<p class="cap">$1101_2 = 1\times2^3 + 1\times2^2 + 0\times2^1 + 1\times2^0 = 13$</p>
+:::
 
-![](Lec%2003%20arithmetics_images/p03.png)
+## Integers: Fixed Number of Boxes
 
-- Integers are stored as a fixed-length sequence of bits (e.g., 32 bits), each bit is 0 or 1.
-- With $p$ bits, the largest representable unsigned integer satisfies
-$$\sum_{i=0}^{p-1} 2^i = 2^p - 1$$
-- A 3-bit example: patterns `000, 001, 010, 011` represent decimal `0, 1, 2, 3`.
+An integer is stored in a **fixed** number of bits, e.g. 32 or 64. With $p$ bits the largest unsigned value is
+$$\sum_{i=0}^{p-1} 2^i = 2^p - 1 .$$
 
-## Floating Point Representation
+A 4-bit example: the largest storable integer is $1111_2 = 15$.
 
-![](Lec%2003%20arithmetics_images/p04.png)
+::: {.pv}
+<table>
+<tr><th>2⁴</th><th>2³</th><th>2²</th><th>2¹</th><th>2⁰</th></tr>
+<tr><td class="x">1</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td></tr>
+</table>
+<p class="cap">$15 + 1 = 16 = 10000_2$ needs a fifth box that does not exist → **integer overflow**</p>
+:::
 
-A floating point number is stored as **sign**, **mantissa**, and **exponent**:
-$$(-1)^s \times (\text{mantissa}) \times 2^{\text{exp}}$$
+R integers use 32 bits with one sign bit, so the largest is $2^{31}-1$:
 
-- Sign: 1 bit
-- Mantissa: 52 bits (double precision)
-- Exponent: 11 bits
-- Example mantissa bit pattern shown: $0.0101011 \times 2^{\dots}$
+```{r}
+.Machine$integer.max
+.Machine$integer.max + 1L
+```
 
-## A Model for Understanding Floating Point Numbers
+## Floating Point Numbers: Scientific Notation in Boxes
 
-![](Lec%2003%20arithmetics_images/p05.png)
+A real number is stored as **sign**, **mantissa** (significant digits) and **exponent**:
+$$x = (-1)^{s} \times 1.d_1 d_2 \cdots d_p \times 2^{\,e}$$
 
-Floating point numbers are not evenly spaced: near 0 the representable values are packed closely together, while as magnitude grows (moving from $10$, to $100$, to $1000$, ...) the gaps between representable numbers grow as well.
+::: {.pv}
+<table>
+<tr><th>sign</th><th colspan="4">mantissa (fixed number of digits)</th><th></th><th colspan="2">exponent</th></tr>
+<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">d₁</td><td class="m">d₂ … d<sub>p</sub></td><td class="p">×2^</td><td class="s">±</td><td class="e">e</td></tr>
+</table>
+:::
 
-## Overflow and Underflow
+Double precision (`double` in R) uses 64 bits:
 
-![](Lec%2003%20arithmetics_images/p06.png)
+| part | bits | consequence |
+|:---|:---:|:---|
+| sign | 1 | |
+| mantissa | 52 | about 16 significant decimal digits |
+| exponent | 11 | $e \in [-1022,\ 1023]$, i.e. magnitudes from $10^{-308}$ to $10^{308}$ |
 
-- **Underflow**: numbers too small in magnitude collapse to $0$. The smallest positive representable double is about
-$$2^{-1074} \approx 10^{-300}$$
-- **Overflow**: numbers too large in magnitude become non-representable (`Inf`). The largest representable double is about
-$$2^{1023} \approx 10^{300}$$
-- Any value smaller than roughly $2^{-2000}$ underflows to exactly $0$.
+## A Toy Floating Point System
+
+To see what goes wrong, use a **decimal** toy computer with a **4-digit mantissa** and a **1-digit exponent** ($e\in[-9,9]$):
+
+::: {.pv}
+<table>
+<tr><th>sign</th><th>1</th><th></th><th>10⁻¹</th><th>10⁻²</th><th>10⁻³</th><th></th><th>exp</th></tr>
+<tr><td class="s">+</td><td class="m">3</td><td class="p">.</td><td class="m">1</td><td class="m">4</td><td class="m">2</td><td class="p">×10^</td><td class="e">0</td></tr>
+</table>
+<p class="cap">$3.142\times10^{0}$ — the closest storable value to $\pi$</p>
+:::
+
+Three things can go wrong, all caused by the boxes being finite:
+
+1. **Overflow**: the exponent box is too small for a *large* number.
+2. **Underflow**: the exponent box is too small for a *tiny* number.
+3. **Roundoff**: the mantissa boxes are too few for all the digits.
+
+## Floating Point Numbers Are Not Evenly Spaced
+
+In the toy system, consecutive storable numbers differ in the last mantissa box:
+
+::: {.pv}
+<table>
+<tr><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">0</td>
+<td class="p" style="padding:0 1em">→ next:</td>
+<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">×10^</td><td class="e">0</td></tr>
+</table>
+<p class="cap">gap $= 0.001$ near $1$</p>
+<table>
+<tr><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">3</td>
+<td class="p" style="padding:0 1em">→ next:</td>
+<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">×10^</td><td class="e">3</td></tr>
+</table>
+<p class="cap">gap $= 1$ near $1000$</p>
+:::
+
+- The **absolute** gap grows with the magnitude; the **relative** gap is roughly constant.
+- The relative gap near 1 is the **machine epsilon** $\epsilon$: the smallest $\epsilon$ with $1+\epsilon \neq 1$ on the computer.
+
+```{r}
+.Machine$double.eps      # 2^-52
+1 + 1e-16 == 1
+```
+
+## Overflow
+
+The largest toy number fills every box with 9:
+
+::: {.pv}
+<table>
+<tr><td class="s">+</td><td class="m">9</td><td class="p">.</td><td class="m">9</td><td class="m">9</td><td class="m">9</td><td class="p">×10^</td><td class="e">9</td></tr>
+</table>
+<p class="cap">$9.999\times10^{9}$</p>
+<table>
+<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="x">10</td></tr>
+</table>
+<p class="cap">$10^{10}$: the exponent "10" needs two boxes → **overflow**, stored as `Inf`</p>
+:::
+
+For doubles the largest value is $\approx 1.8\times10^{308}$:
+
+```{r}
+.Machine$double.xmax
+2^1024
+```
+
+## Underflow
+
+The smallest positive toy number:
+
+::: {.pv}
+<table>
+<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">-9</td></tr>
+</table>
+<p class="cap">$10^{-9}$</p>
+<table>
+<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="x">-10</td></tr>
+</table>
+<p class="cap">$10^{-10}$: the exponent needs two boxes → **underflow**, stored as `0`</p>
+:::
+
+For doubles the smallest positive value is $2^{-1074}\approx 4.9\times10^{-324}$ (the smallest with full precision is $2^{-1022}\approx 2.2\times10^{-308}$):
+
+```{r}
+.Machine$double.xmin
+2^-1075
+```
 
 ## Roundoff Error
 
-![](Lec%2003%20arithmetics_images/p07.png)
+Compute $1 + 0.0001$ in the toy system. The exact answer $1.0001$ needs a fifth mantissa box:
 
-- The mantissa can only hold a finite number of digits, so arithmetic results must be **rounded** to fit back into the representable grid.
-- Example: adding a small perturbation to `1.121` can push the true result past what the mantissa can store, so it gets rounded back to the nearest representable number, e.g. `1.121` again — the update is silently lost.
-- Consequence: $a + b$ computed in floating point may not equal the mathematically exact sum; e.g. `0.0001` added to a much larger number may not change the stored value at all (`0.0000 \ne 0.0001`, i.e. the tiny addend was rounded away).
+::: {.pv}
+<table>
+<tr><th></th><th>1</th><th></th><th>10⁻¹</th><th>10⁻²</th><th>10⁻³</th><th>10⁻⁴</th><th></th><th>exp</th></tr>
+<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">×10^</td><td class="e">0</td></tr>
+</table>
+<p class="cap">The red digit does not fit → rounded away → the stored result is exactly $1.000$</p>
+:::
 
-## Example: Machine Epsilon (1)
+- The stored result of $a+b$ (or $a\times b$, …) is the **nearest representable number** to the exact result.
+- Each operation has relative error up to about $\epsilon$; the concern is when these errors **accumulate** or are **amplified**.
+- Two patterns amplify roundoff error: adding a **large + small** number, and subtracting **large − large** nearly equal numbers (**catastrophic cancellation**).
 
-![](Lec%2003%20arithmetics_images/p08.png)
+# Rounding Error and Methods for Preventing It
 
-Working through $1 + 2^{-40}$: the mantissa has a fixed number of bits, so whether adding $2^{-40}$ to $1$ changes the stored value depends on whether $2^{-40}$ is small enough, relative to $1$, to fall entirely below the precision of the mantissa.
+## Computing Sum: Avoiding Large + Small
 
-## Example: Machine Epsilon (2)
+Compute $1 + 0.0001 + 0.0001$ in the toy system (4 digits).
 
-![](Lec%2003%20arithmetics_images/p09.png)
+**Left to right**, $(1 + 0.0001) + 0.0001$:
 
-Continuing the machine-epsilon example: once the added term is smaller than the smallest increment the mantissa can represent next to $1$, the computed sum rounds back down to exactly the original number.
+::: {.pv}
+<table>
+<tr><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">→</td>
+<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td>
+<td class="p" style="padding:0 0.6em">then + 0.0001 →</td>
+<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td></tr>
+</table>
+<p class="cap">Result $1.000$; both small terms are lost.</p>
+:::
 
-## Example: Adding Numbers of Different Magnitudes
+**Small terms first**, $1 + (0.0001 + 0.0001)$:
 
-![](Lec%2003%20arithmetics_images/p10.png)
+::: {.pv}
+<table>
+<tr><td class="m">2</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">-4</td>
+<td class="p" style="padding:0 0.6em">then 1 + 0.0002 →</td>
+<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="x">0</td><td class="m">2</td></tr>
+</table>
+<p class="cap">Result $1.000$ again — but the error is now one roundoff, not an accumulating one.</p>
+:::
 
-With 4 significant (decimal) digits available:
-$$1.000 + 0.0001 + 0.0001$$
-$$= 1.000\times10^0 + 1.000\times10^{-4} + 1.000\times10^{-4}$$
-$$= 1.000 + 2.000\times10^{-4}$$
+## Computing Sum: Why Order Matters
 
-Adding two numbers of the same small magnitude first, then adding the result to the large number, keeps more information than adding them one at a time when precision is limited.
+Summing $n$ terms in a loop `s <- s + x[i]`: once `s` is large, every small `x[i]` is partly or wholly rounded away, and the errors accumulate over $n$ additions.
 
-## Example: Taylor Series for $e^x$
+**Rules for accurate summation**
 
-Using the Taylor series to approximate $e^x$:
-$$e^x \approx 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots + \frac{x^k}{k!}$$
+- Add numbers of **similar magnitude** together; add the smallest terms first (sort ascending).
+- **Pairwise summation**: sum halves recursively, so partial sums stay of similar size (used by R's `sum()`).
+- **Kahan compensated summation**: carry the rounded-away part to the next step.
 
-- For $x < 0$, the terms alternate in sign:
-$$+,\ -,\ +,\ -,\ +,\ -,\ \dots$$
-- Summing terms of alternating sign that are individually much larger than the final result causes **catastrophic cancellation** and loss of precision.
+```{r}
+x <- c(1, rep(1e-16, 1e4))
+s <- 0; for (v in x) s <- s + v      # naive loop
+c(loop = s - 1, sorted = sum(sort(x)) - 1, exact = 1e-12)
+```
 
-## Avoiding Cancellation: $e^{-x} = 1/e^{x}$
+## Computing $e^x$: Avoiding Large − Large
 
-For $x > 0$:
-$$e^{-x} = \frac{1}{e^{x}}$$
+Taylor series:
+$$e^x \approx \sum_{k=0}^{K}\frac{x^k}{k!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$$
 
-- Rather than evaluating the alternating Taylor series directly for a negative argument, compute $e^{x}$ for the corresponding **positive** argument (all terms positive, no cancellation), then take the reciprocal.
+For $x = -20$ the terms alternate in sign and are huge relative to the answer $e^{-20}\approx 2\times10^{-9}$:
 
-## Example: Sum of Squared Deviations
+| $k$ | 0 | 1 | 2 | … | 20 | … |
+|:--|:--:|:--:|:--:|:--:|:--:|:--:|
+| $x^k/k!$ | $1$ | $-20$ | $200$ | … | $4.3\times10^{7}$ | … |
 
-$$\sum_{i=1}^{n}(x_i - \bar{x})^2 = \sum_{i=1}^{n} x_i^2 - n\bar{x}^2 = \sum_i x_i^2 - \frac{\left(\sum_i x_i\right)^2}{n}$$
+Each term carries roundoff of relative size $\epsilon \approx 10^{-16}$, i.e. absolute size $\approx 4\times10^{-9}$ for the largest terms — **as large as the answer itself**. Subtracting nearly equal large numbers leaves only their errors: **catastrophic cancellation**.
 
-- The right-hand ("computational") formula needs only $\sum x_i$ and $\sum x_i^2$, so it can be computed in a single pass over the data.
-- However, when the $x_i$ are large in magnitude but close together, $\sum x_i^2$ and $\left(\sum x_i\right)^2/n$ are both huge and nearly equal — subtracting them causes catastrophic cancellation.
+## Computing $e^x$: Fix by Reformulating
 
-## Example: Catastrophic Cancellation (Large Numbers)
+For $x>0$ all terms are positive, so no cancellation occurs. Therefore compute
+$$e^{-x} = \frac{1}{e^{x}}, \qquad x > 0 .$$
 
-![](Lec%2003%20arithmetics_images/p14.png)
+```{r}
+taylor_exp <- function(x, K = 100) sum(x^(0:K) / factorial(0:K))
+c(naive = taylor_exp(-20), reciprocal = 1 / taylor_exp(20), true = exp(-20))
+```
 
-- Take $x_1, x_2, x_3$ to be $1, 2, 3$: then $\sum (x_i - \bar{x})^2 = 2$.
-- Now shift all three points by a large constant $M$: $x_1, x_2, x_3 = 2M+1,\, 2M+2,\, 2M+3$. The true value of $\sum(x_i-\bar x)^2$ is unchanged, still $2$.
-- But $\left(\sum x_i\right)^2 = (6M+6)^2 \approx 12M^2$, which for large $M$ can be as large as $10^{12}$ or more — computing the difference of two such large, nearly-equal quantities in floating point destroys the small true answer.
+**General principle**: rearrange a formula so that quantities of similar magnitude and **the same sign** are combined; avoid computing a small result as the difference of two large numbers.
 
-## Example: Catastrophic Cancellation (cont'd)
+## Computing Variance: Avoiding Large − Large
 
-![](Lec%2003%20arithmetics_images/p15.png)
+Two algebraically identical formulas for the sum of squared deviations:
+$$\underbrace{\sum_{i=1}^{n}(x_i - \bar{x})^2}_{\text{two-pass}}
+\;=\;
+\underbrace{\sum_{i=1}^{n} x_i^2 - \frac{\left(\sum_i x_i\right)^2}{n}}_{\text{one-pass}}$$
 
-- On the original scale, $x_i - \bar{x}$ takes the well-separated values $-1, 0, 1$.
-- After shifting by $2B$ (i.e. $x_i = 2B+1, 2B+2, 2B+3$), the *deviations* $x_i - \bar{x}$ are exactly the same ($-1, 0, 1$) — but computing them via the naive sum-of-squares formula requires first computing and subtracting huge, nearly equal numbers, which is numerically unstable.
+- The one-pass formula needs only $\sum x_i$ and $\sum x_i^2$, computed in a single sweep of the data.
+- When the $x_i$ are large but close together, $\sum x_i^2$ and $(\sum x_i)^2/n$ are both huge and nearly equal: **large − large**.
 
-## Example: The Sigmoid Function
+## Computing Variance: Cancellation Illustrated
 
-![](Lec%2003%20arithmetics_images/p16.png)
+$x = (1, 2, 3)$: deviations $(-1, 0, 1)$, so $\sum(x_i-\bar x)^2 = 2$.
 
-The sigmoid function can be written two equivalent ways:
-$$\frac{e^{x}}{1+e^{x}} = \frac{1}{1+e^{-x}}$$
+Shift by $M = 10^{8}$: $x = (M+1, M+2, M+3)$. The deviations and the answer are **unchanged**, but the one-pass formula computes
 
-- Naive form $\dfrac{e^x}{1+e^x}$: for large positive $x$, $e^x$ **overflows** to `Inf`, giving $\text{Inf}/\text{Inf} = \text{NaN}$; for very negative $x$, $e^x$ **underflows** to $0$, giving $0/(1+0) = 0$ (this case is actually fine).
-- Stable form $\dfrac{1}{1+e^{-x}}$: for large positive $x$, $e^{-x} \to 0$ so the result correctly $\to 1$; for very negative $x$, $e^{-x}$ overflows to `Inf`, so the result correctly $\to 0$.
-- The stable form avoids ever dividing `Inf` by `Inf`.
+$$\sum x_i^2 \approx 3\times10^{16}, \qquad \frac{(\sum x_i)^2}{n} \approx 3\times10^{16}, \qquad \text{difference} = 2.$$
 
-## Motivating Example: Overflow and Underflow in Products
+With 16 significant digits, $3\times10^{16}$ is stored with a gap of about $4$ between neighbours:
 
-We need to handle underflow and overflow when multiplying many numbers.
+::: {.pv}
+<table>
+<tr><th colspan="16">16 mantissa digits</th><th>lost</th></tr>
+<tr><td class="m">3</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">1</td><td class="m">2</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">1</td><td class="x">4</td><td class="p">×10^16</td></tr>
+</table>
+<p class="cap">The true answer, $2$, lives entirely in the lost digits.</p>
+:::
 
-- Product of many small probabilities:
-$$\prod_{i=1}^{2000} p(x_i) = \left(\frac12\right)\cdots\left(\frac12\right) = \left(\frac12\right)^{2000} = \frac{1}{2^{2000}}$$
-$$(10^{-1})^{1000} = 10^{-1000} \quad \text{underflow}$$
+```{r}
+x <- c(1, 2, 3) + 1e8
+c(one_pass = sum(x^2) - sum(x)^2 / 3, two_pass = sum((x - mean(x))^2))
+```
 
-- Product of many large numbers (factorial):
-$$1000! = 1000 \times 999 \times \cdots \times 1 \approx 1000^{1000} = 10^{3000} \quad \text{overflow}$$
-$$n! \approx n^{\,n-\frac12}\ (\text{Stirling-type approximation})$$
+## Computing Variance: Fixes
+
+- **Two-pass**: compute $\bar x$ first, then $\sum (x_i - \bar x)^2$. Deviations are small and of similar size, so no cancellation.
+- **Shifted one-pass**: subtract any convenient constant $c \approx \bar x$ (e.g. $c = x_1$) before applying the one-pass formula:
+$$\sum (x_i-\bar x)^2 = \sum (x_i - c)^2 - \frac{\left(\sum (x_i - c)\right)^2}{n}$$
+- **Welford's online algorithm** updates $\bar x_k$ and $\sum_{i\le k}(x_i - \bar x_k)^2$ one observation at a time; use it for streaming data.
+
+# Methods for Mitigating Overflow and Underflow Errors
+
+## Overflow and Underflow in Statistical Computing
+
+Likelihoods are **products of many probabilities**; normalizing constants involve **factorials** or **exponentials**.
+
+$$\prod_{i=1}^{2000} p(x_i) = \left(\tfrac12\right)^{2000} \approx 10^{-602} \quad\to\quad \text{underflow to } 0$$
+
+$$1000! \approx 4\times10^{2567} \quad\to\quad \text{overflow to } \infty$$
+
+$$\text{logistic: } \frac{e^{x}}{1+e^{x}} \text{ at } x = 1000 \quad\to\quad \frac{\infty}{\infty} = \texttt{NaN}$$
+
+Two remedies: (1) **change the algebraic expression**; (2) **work on the log scale**.
+
+## Changing Algebraic Expression: The Sigmoid Function
+
+Two equivalent forms:
+$$\sigma(x) = \frac{e^{x}}{1+e^{x}} = \frac{1}{1+e^{-x}}$$
+
+| $x$ | $e^{x}/(1+e^{x})$ | $1/(1+e^{-x})$ |
+|:--:|:--|:--|
+| $+1000$ | $e^{x}=\infty$, $\infty/\infty = $ `NaN` ✗ | $e^{-x}=0$, $1/1 = 1$ ✓ |
+| $-1000$ | $e^{x}=0$, $0/1 = 0$ ✓ | $e^{-x}=\infty$, $1/\infty = 0$ ✓ |
+
+The second form never divides $\infty$ by $\infty$. Equivalently, pick the form where the exponential has a **non-positive** argument:
+$$\sigma(x) = \begin{cases} 1/(1+e^{-x}) & x \ge 0\\ e^{x}/(1+e^{x}) & x < 0\end{cases}$$
+
+```{r}
+x <- 1000
+c(naive = exp(x) / (1 + exp(x)), stable = 1 / (1 + exp(-x)))
+```
+
+## Changing Algebraic Expression: Built-in Functions {.smaller}
+
+Software provides functions written specifically to avoid cancellation and overflow.
+
+| instead of | use | reason |
+|:--|:--|:--|
+| `log(1 + x)` | `log1p(x)` | for tiny $x$, `1 + x` rounds to 1 |
+| `exp(x) - 1` | `expm1(x)` | for tiny $x$, `exp(x)` rounds to 1 |
+| `log(factorial(n))` | `lfactorial(n)`, `lgamma(n + 1)` | `factorial(n)` overflows |
+| `log(choose(n, k))` | `lchoose(n, k)` | overflow |
+| `log(dnorm(x))` | `dnorm(x, log = TRUE)` | `dnorm(x)` underflows |
+| `log(pnorm(x))` | `pnorm(x, log.p = TRUE)` | underflow |
+
+```{r}
+c(log(1 + 1e-20), log1p(1e-20))
+c(log(factorial(1000)), lfactorial(1000))
+```
 
 ## Representing Numbers in Logarithmic Form
 
-Represent a number $x$ by its logarithm $\ell_x = \log_e(x)$:
+Represent a positive number $x$ by $\ell_x = \log x$:
+$$x = e^{2000} \iff \ell_x = 2000, \qquad x = e^{-2000} \iff \ell_x = -2000 .$$
 
-$$x = e^{2000} \iff \ell_x = 2000 \qquad\qquad x = e^{-2000} \iff \ell_x = -2000$$
+Numbers that overflow or underflow in ordinary form are ordinary numbers on the log scale.
 
-- Numbers that would overflow or underflow in ordinary form can be represented compactly and safely as their logarithm.
-- Given $\ell_x = \log(x)$, define the operation on the log scale that returns $\log\big(f(e^{\ell_x})\big)$:
-$$x_1, \ldots, x_n \xrightarrow{f} y \qquad\Longleftrightarrow\qquad \ell_1, \ldots, \ell_n \xrightarrow{f} \ell_y$$
+We then need each operation $f$ **translated** to the log scale:
+$$x_1,\dots,x_n \xrightarrow{\;f\;} y \qquad\Longleftrightarrow\qquad \ell_1,\dots,\ell_n \xrightarrow{\;\tilde f\;} \ell_y = \log f(e^{\ell_1},\dots,e^{\ell_n})$$
 
-## Computing Products and Quotients in Log Domain
+## Products and Quotients on the Log Scale
 
-Computing $\log(e^{\ell_1}\cdot e^{\ell_2})$:
-$$\log(x_1 \cdot x_2) = \log x_1 + \log x_2 = \ell_1 + \ell_2$$
-$$\log\left(\prod_{i=1}^{n} x_i\right) = \sum_{i=1}^{n}\log x_i = \sum_{i=1}^{n}\ell_i$$
+$$\log(x_1 x_2) = \ell_1 + \ell_2, \qquad \log\left(\prod_{i=1}^{n} x_i\right) = \sum_{i=1}^{n} \ell_i, \qquad \log\frac{x_1}{x_2} = \ell_1 - \ell_2$$
 
-**Example:** $\log(n!) = \log(n) + \log(n-1) + \cdots + \log(1)$ (implemented as `lfactorial(1000)` in R).
+**Log-likelihood**: $\log \prod_i p(x_i) = \sum_i \log p(x_i)$ — always compute the log-likelihood, never the likelihood.
 
-Computing $\log(e^{\ell_1}/e^{\ell_2})$:
-$$\log\left(\frac{x_1}{x_2}\right) = \log x_1 - \log x_2 = \ell_1 - \ell_2$$
+**Example**: $x_1 = 2^{2000}$, $x_2 = 2^{2001}$ both overflow, but
+$$\log\frac{x_1}{x_2} = 2000\log 2 - 2001\log 2 = -\log 2 .$$
 
-**Example:** $x_1 = 2^{2000},\ x_2 = 2^{2001}$, so $\log(x_1/x_2) = \log\!\left(\tfrac12\right)$.
+```{r}
+c(direct = 2^2000 / 2^2001, log_scale = exp(2000 * log(2) - 2001 * log(2)))
+```
 
 ## The Log-Sum-Exp Trick
 
-Computing $\log\sum_i e^{\ell_i}$ where $\ell_i = \log x_i$:
-$$\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right) \qquad [\text{log-sum-exp}]$$
+Sums are the hard case: $\log(x_1 + x_2) \neq \ell_1 + \ell_2$. We need
+$$\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right),$$
+but the $e^{\ell_i}$ may overflow or underflow. Let $m = \max_i \ell_i$ and factor it out:
+$$\log\left(\sum_{i=1}^{n} e^{\ell_i}\right)
+= \log\left(e^{m}\sum_{i=1}^{n} e^{\ell_i - m}\right)
+= m + \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\right)$$
 
-Rewriting to avoid overflow, with $m = \max_i \ell_i$:
-$$\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\cdot e^{m}\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\right) + m$$
+- Every $\ell_i - m \le 0$, so $e^{\ell_i - m} \in (0, 1]$: **no overflow**.
+- The largest term is $e^{0} = 1$, so the sum is at least 1: **no underflow** of the total.
 
-## Log-Sum-Exp: Numerical Stability Illustration
+## Log-Sum-Exp: Illustration
 
-![](Lec%2003%20arithmetics_images/p22.png)
+$x_i = e^{2000}, e^{2001}, e^{2002}$ — each overflows to `Inf`, so $\sum x_i$ computed directly is `Inf`.
 
-- If $x_i = e^{2000}, e^{2001}, e^{2002}$, each individually **overflows** to `Inf`, so $\sum x_i$ computed directly is `Inf`.
-- Working on the log scale instead, $\ell_i = 2000, 2001, 2002$ are ordinary numbers.
-- Subtracting off $m = \max_i \ell_i$ gives $\ell_i - m = -2, -1, 0$, so $e^{\ell_i-m} = e^{-2}, e^{-1}, e^{0}$ — all safely representable.
-- The final answer is recovered as $\log\left(\sum_i e^{\ell_i-m}\right) + m$, which never overflows.
+| | $i=1$ | $i=2$ | $i=3$ |
+|:--|:--:|:--:|:--:|
+| $\ell_i$ | 2000 | 2001 | 2002 |
+| $\ell_i - m$ ($m = 2002$) | $-2$ | $-1$ | $0$ |
+| $e^{\ell_i - m}$ | $0.135$ | $0.368$ | $1$ |
 
-## Computing $\log(e^{\ell_x} - e^{\ell_y})$
+$$\log\sum_i x_i = 2002 + \log(0.135 + 0.368 + 1) = 2002.408$$
 
-Suppose $x > y > 0$, with $\ell_x = \log x$ and $\ell_y = \log y$:
-$$\log(x - y) = \log\left(e^{\ell_x} - e^{\ell_y}\right)$$
-$$= \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right)$$
-$$= \ell_x + \log\left(1 - e^{\ell_y-\ell_x}\right)$$
+```{r}
+log_sum_exp <- function(l) { m <- max(l); m + log(sum(exp(l - m))) }
+c(direct = log(sum(exp(c(2000, 2001, 2002)))), lse = log_sum_exp(c(2000, 2001, 2002)))
+```
 
-- Since $x > y$, we have $\ell_y - \ell_x < 0$, so $e^{\ell_y-\ell_x} \in (0,1)$ and the expression is numerically stable.
+Applications: marginal likelihoods $\log\sum_k \pi_k p_k(x)$ in mixtures, posterior normalizing constants, softmax.
+
+## Difference on the Log Scale
+
+For $x > y > 0$ with $\ell_x = \log x$, $\ell_y = \log y$:
+$$\log(x - y) = \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right) = \ell_x + \log\left(1 - e^{\ell_y - \ell_x}\right)$$
+
+- Since $\ell_y - \ell_x < 0$, $e^{\ell_y-\ell_x}\in(0,1)$: no overflow.
+- When $x \approx y$, use `log1p(-exp(ly - lx))` to avoid the cancellation in $1 - e^{\ell_y-\ell_x}$.
 
 ## Practice Questions
 
-**Question 1:** How do you compute
+**Question 1.** How do you compute
 $$\log\left(\frac{1}{1+e^{-x}}\right)$$
-so as to avoid overflow and underflow of $e^{x}$?
+so as to avoid overflow and underflow of $e^{-x}$, for both large positive and large negative $x$?
 
-**Question 2:** Softmax. How do you compute
-$$\log\left(\frac{e^{x_k}}{\displaystyle\sum_{k=1}^{K} e^{x_k}}\right)$$
-so as to avoid underflow and overflow of $e^{x_k}$?
+**Question 2 (log-softmax).** How do you compute
+$$\log\left(\frac{e^{x_k}}{\sum_{j=1}^{K} e^{x_j}}\right)$$
+so as to avoid underflow and overflow of $e^{x_j}$?
+
+**Question 3.** The one-pass variance formula fails for $x = (M+1, M+2, M+3)$ with $M = 10^{8}$. Predict the smallest $M$ (a power of 10) at which the one-pass result in R first differs from $2$, then verify.

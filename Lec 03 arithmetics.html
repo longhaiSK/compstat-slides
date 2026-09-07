@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <title>STAT 812/420</title>
+  <title>Elements of Statistical Computation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -31,6 +31,72 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="Lec 03 arithmetics_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
   <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
@@ -143,14 +209,26 @@
       margin-right: 0; 
     }
   </style>
+  <style>
+  .pv table { border-collapse: collapse; margin: 0.4em auto; font-family: monospace; }
+  .pv td, .pv th { border: 2px solid #555; min-width: 2em; height: 1.5em;
+                   text-align: center; padding: 0 0.3em; font-size: 0.8em; }
+  .pv th { border: none; font-size: 0.55em; color: #666; font-weight: normal; }
+  .pv td.s { background: #fbe4ec; }   /* sign */
+  .pv td.m { background: #e3eefb; }   /* mantissa / digits */
+  .pv td.e { background: #e7f6e0; }   /* exponent */
+  .pv td.x { background: #ffd6d6; color: #b00000; font-weight: bold; } /* lost / invalid */
+  .pv td.p { border: none; padding: 0; min-width: 0; font-weight: bold; } /* punctuation */
+  .pv .cap { font-size: 0.6em; color: #444; text-align: center; margin-top: -0.3em; }
+  </style>
 </head>
 <body class="quarto-light">
   <div class="reveal">
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">STAT 812/420</h1>
-  <p class="subtitle">Computational Statistics</p>
+  <h1 class="title">Elements of Statistical Computation</h1>
+  <p class="subtitle">Computer Arithmetic</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -161,203 +239,1181 @@ Longhai Li
 </div>
 
 </section>
-<section id="number-representation-place-value-in-different-bases" class="slide level2">
-<h2>Number Representation: Place Value in Different Bases</h2>
+<section>
+<section id="representations-of-numbers-in-computer" class="title-slide slide level1 center" data-number="1">
+<h1><span class="header-section-number">1</span> Representations of Numbers in Computer</h1>
 
-<img data-src="Lec%2003%20arithmetics_images/p02.png" class="r-stretch"><p>Base-10 place value: <span class="math display">1348 = 1\times10^3 + 3\times10^2 + 4\times10^1 + 8\times10^0</span></p>
-<p>Binary (base-2) place value and the binary-to-decimal correspondence for 3-bit patterns:</p>
+</section>
+<section id="place-value" class="slide level2">
+<h2>Place Value</h2>
+<p>Every number is a string of digits in boxes; each box has a <strong>place value</strong>.</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<th>
+10³
+</th>
+<th>
+10²
+</th>
+<th>
+10¹
+</th>
+<th>
+10⁰
+</th>
+</tr>
+<tr>
+<td class="m">
+1
+</td>
+<td class="m">
+3
+</td>
+<td class="m">
+4
+</td>
+<td class="m">
+8
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">1348 = 1\times10^3 + 3\times10^2 + 4\times10^1 + 8\times10^0</span>
+</p>
+</div>
+<p>A computer uses base 2, so each box (a <strong>bit</strong>) holds 0 or 1:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<th>
+2³
+</th>
+<th>
+2²
+</th>
+<th>
+2¹
+</th>
+<th>
+2⁰
+</th>
+</tr>
+<tr>
+<td class="m">
+1
+</td>
+<td class="m">
+1
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+1
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">1101_2 = 1\times2^3 + 1\times2^2 + 0\times2^1 + 1\times2^0 = 13</span>
+</p>
+</div>
+</section>
+<section id="integers-fixed-number-of-boxes" class="slide level2">
+<h2>Integers: Fixed Number of Boxes</h2>
+<p>An integer is stored in a <strong>fixed</strong> number of bits, e.g.&nbsp;32 or 64. With <span class="math inline">p</span> bits the largest unsigned value is <span class="math display">\sum_{i=0}^{p-1} 2^i = 2^p - 1 .</span></p>
+<p>A 4-bit example: the largest storable integer is <span class="math inline">1111_2 = 15</span>.</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<th>
+2⁴
+</th>
+<th>
+2³
+</th>
+<th>
+2²
+</th>
+<th>
+2¹
+</th>
+<th>
+2⁰
+</th>
+</tr>
+<tr>
+<td class="x">
+1
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">15 + 1 = 16 = 10000_2</span> needs a fifth box that does not exist → <strong>integer overflow</strong>
+</p>
+</div>
+<p>R integers use 32 bits with one sign bit, so the largest is <span class="math inline">2^{31}-1</span>:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>.Machine<span class="sc">$</span>integer.max</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2147483647</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>.Machine<span class="sc">$</span>integer.max <span class="sc">+</span> <span class="dv">1</span>L</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] NA</code></pre>
+</div>
+</div>
+</section>
+<section id="floating-point-numbers-scientific-notation-in-boxes" class="slide level2">
+<h2>Floating Point Numbers: Scientific Notation in Boxes</h2>
+<p>A real number is stored as <strong>sign</strong>, <strong>mantissa</strong> (significant digits) and <strong>exponent</strong>: <span class="math display">x = (-1)^{s} \times 1.d_1 d_2 \cdots d_p \times 2^{\,e}</span></p>
+<div class="pv">
+<table>
+<tbody><tr>
+<th>
+sign
+</th>
+<th colspan="4">
+mantissa (fixed number of digits)
+</th>
+<th>
+</th>
+<th colspan="2">
+exponent
+</th>
+</tr>
+<tr>
+<td class="s">
++
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+d₁
+</td>
+<td class="m">
+d₂ … d<sub>p</sub>
+</td>
+<td class="p">
+×2^
+</td>
+<td class="s">
+±
+</td>
+<td class="e">
+e
+</td>
+</tr>
+</tbody></table>
+</div>
+<p>Double precision (<code>double</code> in R) uses 64 bits:</p>
 <table class="caption-top">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 38%">
+<col style="width: 30%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: center;">binary</th>
-<th style="text-align: center;">decimal</th>
+<th style="text-align: left;">part</th>
+<th style="text-align: center;">bits</th>
+<th style="text-align: left;">consequence</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">000</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">001</td>
+<td style="text-align: left;">sign</td>
 <td style="text-align: center;">1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">010</td>
-<td style="text-align: center;">2</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">011</td>
-<td style="text-align: center;">3</td>
+<td style="text-align: left;">mantissa</td>
+<td style="text-align: center;">52</td>
+<td style="text-align: left;">about 16 significant decimal digits</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">100</td>
-<td style="text-align: center;">4</td>
+<td style="text-align: left;">exponent</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: left;"><span class="math inline">e \in [-1022,\ 1023]</span>, i.e.&nbsp;magnitudes from <span class="math inline">10^{-308}</span> to <span class="math inline">10^{308}</span></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="integer-representation" class="slide level2">
-<h2>Integer Representation</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p03.png" class="r-stretch"><ul>
-<li>Integers are stored as a fixed-length sequence of bits (e.g., 32 bits), each bit is 0 or 1.</li>
-<li>With <span class="math inline">p</span> bits, the largest representable unsigned integer satisfies <span class="math display">\sum_{i=0}^{p-1} 2^i = 2^p - 1</span></li>
-<li>A 3-bit example: patterns <code>000, 001, 010, 011</code> represent decimal <code>0, 1, 2, 3</code>.</li>
-</ul>
+<section id="a-toy-floating-point-system" class="slide level2">
+<h2>A Toy Floating Point System</h2>
+<p>To see what goes wrong, use a <strong>decimal</strong> toy computer with a <strong>4-digit mantissa</strong> and a <strong>1-digit exponent</strong> (<span class="math inline">e\in[-9,9]</span>):</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<th>
+sign
+</th>
+<th>
+1
+</th>
+<th>
+</th>
+<th>
+10⁻¹
+</th>
+<th>
+10⁻²
+</th>
+<th>
+10⁻³
+</th>
+<th>
+</th>
+<th>
+exp
+</th>
+</tr>
+<tr>
+<td class="s">
++
+</td>
+<td class="m">
+3
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+1
+</td>
+<td class="m">
+4
+</td>
+<td class="m">
+2
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+0
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">3.142\times10^{0}</span> — the closest storable value to <span class="math inline">\pi</span>
+</p>
+</div>
+<p>Three things can go wrong, all caused by the boxes being finite:</p>
+<ol type="1">
+<li><strong>Overflow</strong>: the exponent box is too small for a <em>large</em> number.</li>
+<li><strong>Underflow</strong>: the exponent box is too small for a <em>tiny</em> number.</li>
+<li><strong>Roundoff</strong>: the mantissa boxes are too few for all the digits.</li>
+</ol>
 </section>
-<section id="floating-point-representation" class="slide level2">
-<h2>Floating Point Representation</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p04.png" class="r-stretch"><p>A floating point number is stored as <strong>sign</strong>, <strong>mantissa</strong>, and <strong>exponent</strong>: <span class="math display">(-1)^s \times (\text{mantissa}) \times 2^{\text{exp}}</span></p>
+<section id="floating-point-numbers-are-not-evenly-spaced" class="slide level2">
+<h2>Floating Point Numbers Are Not Evenly Spaced</h2>
+<p>In the toy system, consecutive storable numbers differ in the last mantissa box:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+0
+</td>
+<td class="p" style="padding:0 1em">
+→ next:
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="x">
+1
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+0
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+gap <span class="math inline">= 0.001</span> near <span class="math inline">1</span>
+</p>
+<table>
+<tbody><tr>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+3
+</td>
+<td class="p" style="padding:0 1em">
+→ next:
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="x">
+1
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+3
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+gap <span class="math inline">= 1</span> near <span class="math inline">1000</span>
+</p>
+</div>
 <ul>
-<li>Sign: 1 bit</li>
-<li>Mantissa: 52 bits (double precision)</li>
-<li>Exponent: 11 bits</li>
-<li>Example mantissa bit pattern shown: <span class="math inline">0.0101011 \times 2^{\dots}</span></li>
+<li>The <strong>absolute</strong> gap grows with the magnitude; the <strong>relative</strong> gap is roughly constant.</li>
+<li>The relative gap near 1 is the <strong>machine epsilon</strong> <span class="math inline">\epsilon</span>: the smallest <span class="math inline">\epsilon</span> with <span class="math inline">1+\epsilon \neq 1</span> on the computer.</li>
 </ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>.Machine<span class="sc">$</span>double.eps      <span class="co"># 2^-52</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.220446e-16</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-16</span> <span class="sc">==</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
 </section>
-<section id="a-model-for-understanding-floating-point-numbers" class="slide level2">
-<h2>A Model for Understanding Floating Point Numbers</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p05.png" class="r-stretch"><p>Floating point numbers are not evenly spaced: near 0 the representable values are packed closely together, while as magnitude grows (moving from <span class="math inline">10</span>, to <span class="math inline">100</span>, to <span class="math inline">1000</span>, …) the gaps between representable numbers grow as well.</p>
+<section id="overflow" class="slide level2">
+<h2>Overflow</h2>
+<p>The largest toy number fills every box with 9:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<td class="s">
++
+</td>
+<td class="m">
+9
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+9
+</td>
+<td class="m">
+9
+</td>
+<td class="m">
+9
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+9
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">9.999\times10^{9}</span>
+</p>
+<table>
+<tbody><tr>
+<td class="s">
++
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="p">
+×10^
+</td>
+<td class="x">
+10
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">10^{10}</span>: the exponent “10” needs two boxes → <strong>overflow</strong>, stored as <code>Inf</code>
+</p>
+</div>
+<p>For doubles the largest value is <span class="math inline">\approx 1.8\times10^{308}</span>:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>.Machine<span class="sc">$</span>double.xmax</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.797693e+308</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="dv">2</span><span class="sc">^</span><span class="dv">1024</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] Inf</code></pre>
+</div>
+</div>
 </section>
-<section id="overflow-and-underflow" class="slide level2">
-<h2>Overflow and Underflow</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p06.png" class="r-stretch"><ul>
-<li><strong>Underflow</strong>: numbers too small in magnitude collapse to <span class="math inline">0</span>. The smallest positive representable double is about <span class="math display">2^{-1074} \approx 10^{-300}</span></li>
-<li><strong>Overflow</strong>: numbers too large in magnitude become non-representable (<code>Inf</code>). The largest representable double is about <span class="math display">2^{1023} \approx 10^{300}</span></li>
-<li>Any value smaller than roughly <span class="math inline">2^{-2000}</span> underflows to exactly <span class="math inline">0</span>.</li>
-</ul>
+<section id="underflow" class="slide level2">
+<h2>Underflow</h2>
+<p>The smallest positive toy number:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<td class="s">
++
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+-9
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">10^{-9}</span>
+</p>
+<table>
+<tbody><tr>
+<td class="s">
++
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="p">
+×10^
+</td>
+<td class="x">
+-10
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+<span class="math inline">10^{-10}</span>: the exponent needs two boxes → <strong>underflow</strong>, stored as <code>0</code>
+</p>
+</div>
+<p>For doubles the smallest positive value is <span class="math inline">2^{-1074}\approx 4.9\times10^{-324}</span> (the smallest with full precision is <span class="math inline">2^{-1022}\approx 2.2\times10^{-308}</span>):</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href=""></a>.Machine<span class="sc">$</span>double.xmin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.225074e-308</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a><span class="dv">2</span><span class="sc">^-</span><span class="dv">1075</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
 </section>
 <section id="roundoff-error" class="slide level2">
 <h2>Roundoff Error</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p07.png" class="r-stretch"><ul>
-<li>The mantissa can only hold a finite number of digits, so arithmetic results must be <strong>rounded</strong> to fit back into the representable grid.</li>
-<li>Example: adding a small perturbation to <code>1.121</code> can push the true result past what the mantissa can store, so it gets rounded back to the nearest representable number, e.g.&nbsp;<code>1.121</code> again — the update is silently lost.</li>
-<li>Consequence: <span class="math inline">a + b</span> computed in floating point may not equal the mathematically exact sum; e.g.&nbsp;<code>0.0001</code> added to a much larger number may not change the stored value at all (<code>0.0000 \ne 0.0001</code>, i.e.&nbsp;the tiny addend was rounded away).</li>
-</ul>
-</section>
-<section id="example-machine-epsilon-1" class="slide level2">
-<h2>Example: Machine Epsilon (1)</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p08.png" class="r-stretch"><p>Working through <span class="math inline">1 + 2^{-40}</span>: the mantissa has a fixed number of bits, so whether adding <span class="math inline">2^{-40}</span> to <span class="math inline">1</span> changes the stored value depends on whether <span class="math inline">2^{-40}</span> is small enough, relative to <span class="math inline">1</span>, to fall entirely below the precision of the mantissa.</p>
-</section>
-<section id="example-machine-epsilon-2" class="slide level2">
-<h2>Example: Machine Epsilon (2)</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p09.png" class="r-stretch"><p>Continuing the machine-epsilon example: once the added term is smaller than the smallest increment the mantissa can represent next to <span class="math inline">1</span>, the computed sum rounds back down to exactly the original number.</p>
-</section>
-<section id="example-adding-numbers-of-different-magnitudes" class="slide level2">
-<h2>Example: Adding Numbers of Different Magnitudes</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p10.png" class="r-stretch"><p>With 4 significant (decimal) digits available: <span class="math display">1.000 + 0.0001 + 0.0001</span> <span class="math display">= 1.000\times10^0 + 1.000\times10^{-4} + 1.000\times10^{-4}</span> <span class="math display">= 1.000 + 2.000\times10^{-4}</span></p>
-<p>Adding two numbers of the same small magnitude first, then adding the result to the large number, keeps more information than adding them one at a time when precision is limited.</p>
-</section>
-<section id="example-taylor-series-for-ex" class="slide level2">
-<h2>Example: Taylor Series for <span class="math inline">e^x</span></h2>
-<p>Using the Taylor series to approximate <span class="math inline">e^x</span>: <span class="math display">e^x \approx 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots + \frac{x^k}{k!}</span></p>
+<p>Compute <span class="math inline">1 + 0.0001</span> in the toy system. The exact answer <span class="math inline">1.0001</span> needs a fifth mantissa box:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<th>
+</th>
+<th>
+1
+</th>
+<th>
+</th>
+<th>
+10⁻¹
+</th>
+<th>
+10⁻²
+</th>
+<th>
+10⁻³
+</th>
+<th>
+10⁻⁴
+</th>
+<th>
+</th>
+<th>
+exp
+</th>
+</tr>
+<tr>
+<td class="s">
++
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="x">
+1
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+0
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+The red digit does not fit → rounded away → the stored result is exactly <span class="math inline">1.000</span>
+</p>
+</div>
 <ul>
-<li>For <span class="math inline">x &lt; 0</span>, the terms alternate in sign: <span class="math display">+,\ -,\ +,\ -,\ +,\ -,\ \dots</span></li>
-<li>Summing terms of alternating sign that are individually much larger than the final result causes <strong>catastrophic cancellation</strong> and loss of precision.</li>
+<li>The stored result of <span class="math inline">a+b</span> (or <span class="math inline">a\times b</span>, …) is the <strong>nearest representable number</strong> to the exact result.</li>
+<li>Each operation has relative error up to about <span class="math inline">\epsilon</span>; the concern is when these errors <strong>accumulate</strong> or are <strong>amplified</strong>.</li>
+<li>Two patterns amplify roundoff error: adding a <strong>large + small</strong> number, and subtracting <strong>large − large</strong> nearly equal numbers (<strong>catastrophic cancellation</strong>).</li>
 </ul>
-</section>
-<section id="avoiding-cancellation-e-x-1ex" class="slide level2">
-<h2>Avoiding Cancellation: <span class="math inline">e^{-x} = 1/e^{x}</span></h2>
-<p>For <span class="math inline">x &gt; 0</span>: <span class="math display">e^{-x} = \frac{1}{e^{x}}</span></p>
-<ul>
-<li>Rather than evaluating the alternating Taylor series directly for a negative argument, compute <span class="math inline">e^{x}</span> for the corresponding <strong>positive</strong> argument (all terms positive, no cancellation), then take the reciprocal.</li>
-</ul>
-</section>
-<section id="example-sum-of-squared-deviations" class="slide level2">
-<h2>Example: Sum of Squared Deviations</h2>
-<p><span class="math display">\sum_{i=1}^{n}(x_i - \bar{x})^2 = \sum_{i=1}^{n} x_i^2 - n\bar{x}^2 = \sum_i x_i^2 - \frac{\left(\sum_i x_i\right)^2}{n}</span></p>
-<ul>
-<li>The right-hand (“computational”) formula needs only <span class="math inline">\sum x_i</span> and <span class="math inline">\sum x_i^2</span>, so it can be computed in a single pass over the data.</li>
-<li>However, when the <span class="math inline">x_i</span> are large in magnitude but close together, <span class="math inline">\sum x_i^2</span> and <span class="math inline">\left(\sum x_i\right)^2/n</span> are both huge and nearly equal — subtracting them causes catastrophic cancellation.</li>
-</ul>
-</section>
-<section id="example-catastrophic-cancellation-large-numbers" class="slide level2">
-<h2>Example: Catastrophic Cancellation (Large Numbers)</h2>
+</section></section>
+<section>
+<section id="rounding-error-and-methods-for-preventing-it" class="title-slide slide level1 center" data-number="2">
+<h1><span class="header-section-number">2</span> Rounding Error and Methods for Preventing It</h1>
 
-<img data-src="Lec%2003%20arithmetics_images/p14.png" class="r-stretch"><ul>
-<li>Take <span class="math inline">x_1, x_2, x_3</span> to be <span class="math inline">1, 2, 3</span>: then <span class="math inline">\sum (x_i - \bar{x})^2 = 2</span>.</li>
-<li>Now shift all three points by a large constant <span class="math inline">M</span>: <span class="math inline">x_1, x_2, x_3 = 2M+1,\, 2M+2,\, 2M+3</span>. The true value of <span class="math inline">\sum(x_i-\bar x)^2</span> is unchanged, still <span class="math inline">2</span>.</li>
-<li>But <span class="math inline">\left(\sum x_i\right)^2 = (6M+6)^2 \approx 12M^2</span>, which for large <span class="math inline">M</span> can be as large as <span class="math inline">10^{12}</span> or more — computing the difference of two such large, nearly-equal quantities in floating point destroys the small true answer.</li>
-</ul>
 </section>
-<section id="example-catastrophic-cancellation-contd" class="slide level2">
-<h2>Example: Catastrophic Cancellation (cont’d)</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p15.png" class="r-stretch"><ul>
-<li>On the original scale, <span class="math inline">x_i - \bar{x}</span> takes the well-separated values <span class="math inline">-1, 0, 1</span>.</li>
-<li>After shifting by <span class="math inline">2B</span> (i.e.&nbsp;<span class="math inline">x_i = 2B+1, 2B+2, 2B+3</span>), the <em>deviations</em> <span class="math inline">x_i - \bar{x}</span> are exactly the same (<span class="math inline">-1, 0, 1</span>) — but computing them via the naive sum-of-squares formula requires first computing and subtracting huge, nearly equal numbers, which is numerically unstable.</li>
-</ul>
+<section id="computing-sum-avoiding-large-small" class="slide level2">
+<h2>Computing Sum: Avoiding Large + Small</h2>
+<p>Compute <span class="math inline">1 + 0.0001 + 0.0001</span> in the toy system (4 digits).</p>
+<p><strong>Left to right</strong>, <span class="math inline">(1 + 0.0001) + 0.0001</span>:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="x">
+1
+</td>
+<td class="p">
+→
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="p" style="padding:0 0.6em">
+then + 0.0001 →
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+Result <span class="math inline">1.000</span>; both small terms are lost.
+</p>
+</div>
+<p><strong>Small terms first</strong>, <span class="math inline">1 + (0.0001 + 0.0001)</span>:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<td class="m">
+2
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="p">
+×10^
+</td>
+<td class="e">
+-4
+</td>
+<td class="p" style="padding:0 0.6em">
+then 1 + 0.0002 →
+</td>
+<td class="m">
+1
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="x">
+0
+</td>
+<td class="m">
+2
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+Result <span class="math inline">1.000</span> again — but the error is now one roundoff, not an accumulating one.
+</p>
+</div>
 </section>
-<section id="example-the-sigmoid-function" class="slide level2">
-<h2>Example: The Sigmoid Function</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p16.png" class="r-stretch"><p>The sigmoid function can be written two equivalent ways: <span class="math display">\frac{e^{x}}{1+e^{x}} = \frac{1}{1+e^{-x}}</span></p>
+<section id="computing-sum-why-order-matters" class="slide level2">
+<h2>Computing Sum: Why Order Matters</h2>
+<p>Summing <span class="math inline">n</span> terms in a loop <code>s &lt;- s + x[i]</code>: once <code>s</code> is large, every small <code>x[i]</code> is partly or wholly rounded away, and the errors accumulate over <span class="math inline">n</span> additions.</p>
+<p><strong>Rules for accurate summation</strong></p>
 <ul>
-<li>Naive form <span class="math inline">\dfrac{e^x}{1+e^x}</span>: for large positive <span class="math inline">x</span>, <span class="math inline">e^x</span> <strong>overflows</strong> to <code>Inf</code>, giving <span class="math inline">\text{Inf}/\text{Inf} = \text{NaN}</span>; for very negative <span class="math inline">x</span>, <span class="math inline">e^x</span> <strong>underflows</strong> to <span class="math inline">0</span>, giving <span class="math inline">0/(1+0) = 0</span> (this case is actually fine).</li>
-<li>Stable form <span class="math inline">\dfrac{1}{1+e^{-x}}</span>: for large positive <span class="math inline">x</span>, <span class="math inline">e^{-x} \to 0</span> so the result correctly <span class="math inline">\to 1</span>; for very negative <span class="math inline">x</span>, <span class="math inline">e^{-x}</span> overflows to <code>Inf</code>, so the result correctly <span class="math inline">\to 0</span>.</li>
-<li>The stable form avoids ever dividing <code>Inf</code> by <code>Inf</code>.</li>
+<li>Add numbers of <strong>similar magnitude</strong> together; add the smallest terms first (sort ascending).</li>
+<li><strong>Pairwise summation</strong>: sum halves recursively, so partial sums stay of similar size (used by R’s <code>sum()</code>).</li>
+<li><strong>Kahan compensated summation</strong>: carry the rounded-away part to the next step.</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fl">1e-16</span>, <span class="fl">1e4</span>))</span>
+<span id="cb19-2"><a href=""></a>s <span class="ot">&lt;-</span> <span class="dv">0</span>; <span class="cf">for</span> (v <span class="cf">in</span> x) s <span class="ot">&lt;-</span> s <span class="sc">+</span> v      <span class="co"># naive loop</span></span>
+<span id="cb19-3"><a href=""></a><span class="fu">c</span>(<span class="at">loop =</span> s <span class="sc">-</span> <span class="dv">1</span>, <span class="at">sorted =</span> <span class="fu">sum</span>(<span class="fu">sort</span>(x)) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">exact =</span> <span class="fl">1e-12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>        loop       sorted        exact 
+0.000000e+00 1.000089e-12 1.000000e-12 </code></pre>
+</div>
+</div>
+</section>
+<section id="computing-ex-avoiding-large-large" class="slide level2">
+<h2>Computing <span class="math inline">e^x</span>: Avoiding Large − Large</h2>
+<p>Taylor series: <span class="math display">e^x \approx \sum_{k=0}^{K}\frac{x^k}{k!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots</span></p>
+<p>For <span class="math inline">x = -20</span> the terms alternate in sign and are huge relative to the answer <span class="math inline">e^{-20}\approx 2\times10^{-9}</span>:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">k</span></th>
+<th style="text-align: center;">0</th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">…</th>
+<th style="text-align: center;">20</th>
+<th style="text-align: center;">…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">x^k/k!</span></td>
+<td style="text-align: center;"><span class="math inline">1</span></td>
+<td style="text-align: center;"><span class="math inline">-20</span></td>
+<td style="text-align: center;"><span class="math inline">200</span></td>
+<td style="text-align: center;">…</td>
+<td style="text-align: center;"><span class="math inline">4.3\times10^{7}</span></td>
+<td style="text-align: center;">…</td>
+</tr>
+</tbody>
+</table>
+<p>Each term carries roundoff of relative size <span class="math inline">\epsilon \approx 10^{-16}</span>, i.e.&nbsp;absolute size <span class="math inline">\approx 4\times10^{-9}</span> for the largest terms — <strong>as large as the answer itself</strong>. Subtracting nearly equal large numbers leaves only their errors: <strong>catastrophic cancellation</strong>.</p>
+</section>
+<section id="computing-ex-fix-by-reformulating" class="slide level2">
+<h2>Computing <span class="math inline">e^x</span>: Fix by Reformulating</h2>
+<p>For <span class="math inline">x&gt;0</span> all terms are positive, so no cancellation occurs. Therefore compute <span class="math display">e^{-x} = \frac{1}{e^{x}}, \qquad x &gt; 0 .</span></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a>taylor_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">K =</span> <span class="dv">100</span>) <span class="fu">sum</span>(x<span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span>K) <span class="sc">/</span> <span class="fu">factorial</span>(<span class="dv">0</span><span class="sc">:</span>K))</span>
+<span id="cb21-2"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">taylor_exp</span>(<span class="sc">-</span><span class="dv">20</span>), <span class="at">reciprocal =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">taylor_exp</span>(<span class="dv">20</span>), <span class="at">true =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       naive   reciprocal         true 
+4.992704e-09 2.061154e-09 2.061154e-09 </code></pre>
+</div>
+</div>
+<p><strong>General principle</strong>: rearrange a formula so that quantities of similar magnitude and <strong>the same sign</strong> are combined; avoid computing a small result as the difference of two large numbers.</p>
+</section>
+<section id="computing-variance-avoiding-large-large" class="slide level2">
+<h2>Computing Variance: Avoiding Large − Large</h2>
+<p>Two algebraically identical formulas for the sum of squared deviations: <span class="math display">\underbrace{\sum_{i=1}^{n}(x_i - \bar{x})^2}_{\text{two-pass}}
+\;=\;
+\underbrace{\sum_{i=1}^{n} x_i^2 - \frac{\left(\sum_i x_i\right)^2}{n}}_{\text{one-pass}}</span></p>
+<ul>
+<li>The one-pass formula needs only <span class="math inline">\sum x_i</span> and <span class="math inline">\sum x_i^2</span>, computed in a single sweep of the data.</li>
+<li>When the <span class="math inline">x_i</span> are large but close together, <span class="math inline">\sum x_i^2</span> and <span class="math inline">(\sum x_i)^2/n</span> are both huge and nearly equal: <strong>large − large</strong>.</li>
 </ul>
 </section>
-<section id="motivating-example-overflow-and-underflow-in-products" class="slide level2">
-<h2>Motivating Example: Overflow and Underflow in Products</h2>
-<p>We need to handle underflow and overflow when multiplying many numbers.</p>
+<section id="computing-variance-cancellation-illustrated" class="slide level2">
+<h2>Computing Variance: Cancellation Illustrated</h2>
+<p><span class="math inline">x = (1, 2, 3)</span>: deviations <span class="math inline">(-1, 0, 1)</span>, so <span class="math inline">\sum(x_i-\bar x)^2 = 2</span>.</p>
+<p>Shift by <span class="math inline">M = 10^{8}</span>: <span class="math inline">x = (M+1, M+2, M+3)</span>. The deviations and the answer are <strong>unchanged</strong>, but the one-pass formula computes</p>
+<p><span class="math display">\sum x_i^2 \approx 3\times10^{16}, \qquad \frac{(\sum x_i)^2}{n} \approx 3\times10^{16}, \qquad \text{difference} = 2.</span></p>
+<p>With 16 significant digits, <span class="math inline">3\times10^{16}</span> is stored with a gap of about <span class="math inline">4</span> between neighbours:</p>
+<div class="pv">
+<table>
+<tbody><tr>
+<th colspan="16">
+16 mantissa digits
+</th>
+<th>
+lost
+</th>
+</tr>
+<tr>
+<td class="m">
+3
+</td>
+<td class="p">
+.
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+1
+</td>
+<td class="m">
+2
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+0
+</td>
+<td class="m">
+1
+</td>
+<td class="x">
+4
+</td>
+<td class="p">
+×10^16
+</td>
+</tr>
+</tbody></table>
+<p class="cap">
+The true answer, <span class="math inline">2</span>, lives entirely in the lost digits.
+</p>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fl">1e8</span></span>
+<span id="cb23-2"><a href=""></a><span class="fu">c</span>(<span class="at">one_pass =</span> <span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">sum</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>, <span class="at">two_pass =</span> <span class="fu">sum</span>((x <span class="sc">-</span> <span class="fu">mean</span>(x))<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>one_pass two_pass 
+       0        2 </code></pre>
+</div>
+</div>
+</section>
+<section id="computing-variance-fixes" class="slide level2">
+<h2>Computing Variance: Fixes</h2>
 <ul>
-<li><p>Product of many small probabilities: <span class="math display">\prod_{i=1}^{2000} p(x_i) = \left(\frac12\right)\cdots\left(\frac12\right) = \left(\frac12\right)^{2000} = \frac{1}{2^{2000}}</span> <span class="math display">(10^{-1})^{1000} = 10^{-1000} \quad \text{underflow}</span></p></li>
-<li><p>Product of many large numbers (factorial): <span class="math display">1000! = 1000 \times 999 \times \cdots \times 1 \approx 1000^{1000} = 10^{3000} \quad \text{overflow}</span> <span class="math display">n! \approx n^{\,n-\frac12}\ (\text{Stirling-type approximation})</span></p></li>
+<li><strong>Two-pass</strong>: compute <span class="math inline">\bar x</span> first, then <span class="math inline">\sum (x_i - \bar x)^2</span>. Deviations are small and of similar size, so no cancellation.</li>
+<li><strong>Shifted one-pass</strong>: subtract any convenient constant <span class="math inline">c \approx \bar x</span> (e.g.&nbsp;<span class="math inline">c = x_1</span>) before applying the one-pass formula: <span class="math display">\sum (x_i-\bar x)^2 = \sum (x_i - c)^2 - \frac{\left(\sum (x_i - c)\right)^2}{n}</span></li>
+<li><strong>Welford’s online algorithm</strong> updates <span class="math inline">\bar x_k</span> and <span class="math inline">\sum_{i\le k}(x_i - \bar x_k)^2</span> one observation at a time; use it for streaming data.</li>
 </ul>
+</section></section>
+<section>
+<section id="methods-for-mitigating-overflow-and-underflow-errors" class="title-slide slide level1 center" data-number="3">
+<h1><span class="header-section-number">3</span> Methods for Mitigating Overflow and Underflow Errors</h1>
+
+</section>
+<section id="overflow-and-underflow-in-statistical-computing" class="slide level2">
+<h2>Overflow and Underflow in Statistical Computing</h2>
+<p>Likelihoods are <strong>products of many probabilities</strong>; normalizing constants involve <strong>factorials</strong> or <strong>exponentials</strong>.</p>
+<p><span class="math display">\prod_{i=1}^{2000} p(x_i) = \left(\tfrac12\right)^{2000} \approx 10^{-602} \quad\to\quad \text{underflow to } 0</span></p>
+<p><span class="math display">1000! \approx 4\times10^{2567} \quad\to\quad \text{overflow to } \infty</span></p>
+<p><span class="math display">\text{logistic: } \frac{e^{x}}{1+e^{x}} \text{ at } x = 1000 \quad\to\quad \frac{\infty}{\infty} = \texttt{NaN}</span></p>
+<p>Two remedies: (1) <strong>change the algebraic expression</strong>; (2) <strong>work on the log scale</strong>.</p>
+</section>
+<section id="changing-algebraic-expression-the-sigmoid-function" class="slide level2">
+<h2>Changing Algebraic Expression: The Sigmoid Function</h2>
+<p>Two equivalent forms: <span class="math display">\sigma(x) = \frac{e^{x}}{1+e^{x}} = \frac{1}{1+e^{-x}}</span></p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 40%">
+<col style="width: 30%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><span class="math inline">x</span></th>
+<th style="text-align: left;"><span class="math inline">e^{x}/(1+e^{x})</span></th>
+<th style="text-align: left;"><span class="math inline">1/(1+e^{-x})</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">+1000</span></td>
+<td style="text-align: left;"><span class="math inline">e^{x}=\infty</span>, $/= $ <code>NaN</code> ✗</td>
+<td style="text-align: left;"><span class="math inline">e^{-x}=0</span>, <span class="math inline">1/1 = 1</span> ✓</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">-1000</span></td>
+<td style="text-align: left;"><span class="math inline">e^{x}=0</span>, <span class="math inline">0/1 = 0</span> ✓</td>
+<td style="text-align: left;"><span class="math inline">e^{-x}=\infty</span>, <span class="math inline">1/\infty = 0</span> ✓</td>
+</tr>
+</tbody>
+</table>
+<p>The second form never divides <span class="math inline">\infty</span> by <span class="math inline">\infty</span>. Equivalently, pick the form where the exponential has a <strong>non-positive</strong> argument: <span class="math display">\sigma(x) = \begin{cases} 1/(1+e^{-x}) &amp; x \ge 0\\ e^{x}/(1+e^{x}) &amp; x &lt; 0\end{cases}</span></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb25-2"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">exp</span>(x) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x)), <span class="at">stable =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> naive stable 
+   NaN      1 </code></pre>
+</div>
+</div>
+</section>
+<section id="changing-algebraic-expression-built-in-functions" class="slide level2 smaller">
+<h2>Changing Algebraic Expression: Built-in Functions</h2>
+<p>Software provides functions written specifically to avoid cancellation and overflow.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">instead of</th>
+<th style="text-align: left;">use</th>
+<th style="text-align: left;">reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>log(1 + x)</code></td>
+<td style="text-align: left;"><code>log1p(x)</code></td>
+<td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>1 + x</code> rounds to 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>exp(x) - 1</code></td>
+<td style="text-align: left;"><code>expm1(x)</code></td>
+<td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>exp(x)</code> rounds to 1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>log(factorial(n))</code></td>
+<td style="text-align: left;"><code>lfactorial(n)</code>, <code>lgamma(n + 1)</code></td>
+<td style="text-align: left;"><code>factorial(n)</code> overflows</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>log(choose(n, k))</code></td>
+<td style="text-align: left;"><code>lchoose(n, k)</code></td>
+<td style="text-align: left;">overflow</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>log(dnorm(x))</code></td>
+<td style="text-align: left;"><code>dnorm(x, log = TRUE)</code></td>
+<td style="text-align: left;"><code>dnorm(x)</code> underflows</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>log(pnorm(x))</code></td>
+<td style="text-align: left;"><code>pnorm(x, log.p = TRUE)</code></td>
+<td style="text-align: left;">underflow</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-20</span>), <span class="fu">log1p</span>(<span class="fl">1e-20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0e+00 1e-20</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="fu">factorial</span>(<span class="dv">1000</span>)), <span class="fu">lfactorial</span>(<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]      Inf 5912.128</code></pre>
+</div>
+</div>
 </section>
 <section id="representing-numbers-in-logarithmic-form" class="slide level2">
 <h2>Representing Numbers in Logarithmic Form</h2>
-<p>Represent a number <span class="math inline">x</span> by its logarithm <span class="math inline">\ell_x = \log_e(x)</span>:</p>
-<p><span class="math display">x = e^{2000} \iff \ell_x = 2000 \qquad\qquad x = e^{-2000} \iff \ell_x = -2000</span></p>
-<ul>
-<li>Numbers that would overflow or underflow in ordinary form can be represented compactly and safely as their logarithm.</li>
-<li>Given <span class="math inline">\ell_x = \log(x)</span>, define the operation on the log scale that returns <span class="math inline">\log\big(f(e^{\ell_x})\big)</span>: <span class="math display">x_1, \ldots, x_n \xrightarrow{f} y \qquad\Longleftrightarrow\qquad \ell_1, \ldots, \ell_n \xrightarrow{f} \ell_y</span></li>
-</ul>
+<p>Represent a positive number <span class="math inline">x</span> by <span class="math inline">\ell_x = \log x</span>: <span class="math display">x = e^{2000} \iff \ell_x = 2000, \qquad x = e^{-2000} \iff \ell_x = -2000 .</span></p>
+<p>Numbers that overflow or underflow in ordinary form are ordinary numbers on the log scale.</p>
+<p>We then need each operation <span class="math inline">f</span> <strong>translated</strong> to the log scale: <span class="math display">x_1,\dots,x_n \xrightarrow{\;f\;} y \qquad\Longleftrightarrow\qquad \ell_1,\dots,\ell_n \xrightarrow{\;\tilde f\;} \ell_y = \log f(e^{\ell_1},\dots,e^{\ell_n})</span></p>
 </section>
-<section id="computing-products-and-quotients-in-log-domain" class="slide level2">
-<h2>Computing Products and Quotients in Log Domain</h2>
-<p>Computing <span class="math inline">\log(e^{\ell_1}\cdot e^{\ell_2})</span>: <span class="math display">\log(x_1 \cdot x_2) = \log x_1 + \log x_2 = \ell_1 + \ell_2</span> <span class="math display">\log\left(\prod_{i=1}^{n} x_i\right) = \sum_{i=1}^{n}\log x_i = \sum_{i=1}^{n}\ell_i</span></p>
-<p><strong>Example:</strong> <span class="math inline">\log(n!) = \log(n) + \log(n-1) + \cdots + \log(1)</span> (implemented as <code>lfactorial(1000)</code> in R).</p>
-<p>Computing <span class="math inline">\log(e^{\ell_1}/e^{\ell_2})</span>: <span class="math display">\log\left(\frac{x_1}{x_2}\right) = \log x_1 - \log x_2 = \ell_1 - \ell_2</span></p>
-<p><strong>Example:</strong> <span class="math inline">x_1 = 2^{2000},\ x_2 = 2^{2001}</span>, so <span class="math inline">\log(x_1/x_2) = \log\!\left(\tfrac12\right)</span>.</p>
+<section id="products-and-quotients-on-the-log-scale" class="slide level2">
+<h2>Products and Quotients on the Log Scale</h2>
+<p><span class="math display">\log(x_1 x_2) = \ell_1 + \ell_2, \qquad \log\left(\prod_{i=1}^{n} x_i\right) = \sum_{i=1}^{n} \ell_i, \qquad \log\frac{x_1}{x_2} = \ell_1 - \ell_2</span></p>
+<p><strong>Log-likelihood</strong>: <span class="math inline">\log \prod_i p(x_i) = \sum_i \log p(x_i)</span> — always compute the log-likelihood, never the likelihood.</p>
+<p><strong>Example</strong>: <span class="math inline">x_1 = 2^{2000}</span>, <span class="math inline">x_2 = 2^{2001}</span> both overflow, but <span class="math display">\log\frac{x_1}{x_2} = 2000\log 2 - 2001\log 2 = -\log 2 .</span></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2000</span> <span class="sc">/</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2001</span>, <span class="at">log_scale =</span> <span class="fu">exp</span>(<span class="dv">2000</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="dv">2001</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   direct log_scale 
+      NaN       0.5 </code></pre>
+</div>
+</div>
 </section>
 <section id="the-log-sum-exp-trick" class="slide level2">
 <h2>The Log-Sum-Exp Trick</h2>
-<p>Computing <span class="math inline">\log\sum_i e^{\ell_i}</span> where <span class="math inline">\ell_i = \log x_i</span>: <span class="math display">\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right) \qquad [\text{log-sum-exp}]</span></p>
-<p>Rewriting to avoid overflow, with <span class="math inline">m = \max_i \ell_i</span>: <span class="math display">\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\cdot e^{m}\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\right) + m</span></p>
-</section>
-<section id="log-sum-exp-numerical-stability-illustration" class="slide level2">
-<h2>Log-Sum-Exp: Numerical Stability Illustration</h2>
-
-<img data-src="Lec%2003%20arithmetics_images/p22.png" class="r-stretch"><ul>
-<li>If <span class="math inline">x_i = e^{2000}, e^{2001}, e^{2002}</span>, each individually <strong>overflows</strong> to <code>Inf</code>, so <span class="math inline">\sum x_i</span> computed directly is <code>Inf</code>.</li>
-<li>Working on the log scale instead, <span class="math inline">\ell_i = 2000, 2001, 2002</span> are ordinary numbers.</li>
-<li>Subtracting off <span class="math inline">m = \max_i \ell_i</span> gives <span class="math inline">\ell_i - m = -2, -1, 0</span>, so <span class="math inline">e^{\ell_i-m} = e^{-2}, e^{-1}, e^{0}</span> — all safely representable.</li>
-<li>The final answer is recovered as <span class="math inline">\log\left(\sum_i e^{\ell_i-m}\right) + m</span>, which never overflows.</li>
+<p>Sums are the hard case: <span class="math inline">\log(x_1 + x_2) \neq \ell_1 + \ell_2</span>. We need <span class="math display">\log\left(\sum_{i=1}^{n} x_i\right) = \log\left(\sum_{i=1}^{n} e^{\ell_i}\right),</span> but the <span class="math inline">e^{\ell_i}</span> may overflow or underflow. Let <span class="math inline">m = \max_i \ell_i</span> and factor it out: <span class="math display">\log\left(\sum_{i=1}^{n} e^{\ell_i}\right)
+= \log\left(e^{m}\sum_{i=1}^{n} e^{\ell_i - m}\right)
+= m + \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\right)</span></p>
+<ul>
+<li>Every <span class="math inline">\ell_i - m \le 0</span>, so <span class="math inline">e^{\ell_i - m} \in (0, 1]</span>: <strong>no overflow</strong>.</li>
+<li>The largest term is <span class="math inline">e^{0} = 1</span>, so the sum is at least 1: <strong>no underflow</strong> of the total.</li>
 </ul>
 </section>
-<section id="computing-logeell_x---eell_y" class="slide level2">
-<h2>Computing <span class="math inline">\log(e^{\ell_x} - e^{\ell_y})</span></h2>
-<p>Suppose <span class="math inline">x &gt; y &gt; 0</span>, with <span class="math inline">\ell_x = \log x</span> and <span class="math inline">\ell_y = \log y</span>: <span class="math display">\log(x - y) = \log\left(e^{\ell_x} - e^{\ell_y}\right)</span> <span class="math display">= \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right)</span> <span class="math display">= \ell_x + \log\left(1 - e^{\ell_y-\ell_x}\right)</span></p>
+<section id="log-sum-exp-illustration" class="slide level2">
+<h2>Log-Sum-Exp: Illustration</h2>
+<p><span class="math inline">x_i = e^{2000}, e^{2001}, e^{2002}</span> — each overflows to <code>Inf</code>, so <span class="math inline">\sum x_i</span> computed directly is <code>Inf</code>.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;"><span class="math inline">i=1</span></th>
+<th style="text-align: center;"><span class="math inline">i=2</span></th>
+<th style="text-align: center;"><span class="math inline">i=3</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\ell_i</span></td>
+<td style="text-align: center;">2000</td>
+<td style="text-align: center;">2001</td>
+<td style="text-align: center;">2002</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\ell_i - m</span> (<span class="math inline">m = 2002</span>)</td>
+<td style="text-align: center;"><span class="math inline">-2</span></td>
+<td style="text-align: center;"><span class="math inline">-1</span></td>
+<td style="text-align: center;"><span class="math inline">0</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">e^{\ell_i - m}</span></td>
+<td style="text-align: center;"><span class="math inline">0.135</span></td>
+<td style="text-align: center;"><span class="math inline">0.368</span></td>
+<td style="text-align: center;"><span class="math inline">1</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\log\sum_i x_i = 2002 + \log(0.135 + 0.368 + 1) = 2002.408</span></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href=""></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { m <span class="ot">&lt;-</span> <span class="fu">max</span>(l); m <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> m))) }</span>
+<span id="cb33-2"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))), <span class="at">lse =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  direct      lse 
+     Inf 2002.408 </code></pre>
+</div>
+</div>
+<p>Applications: marginal likelihoods <span class="math inline">\log\sum_k \pi_k p_k(x)</span> in mixtures, posterior normalizing constants, softmax.</p>
+</section>
+<section id="difference-on-the-log-scale" class="slide level2">
+<h2>Difference on the Log Scale</h2>
+<p>For <span class="math inline">x &gt; y &gt; 0</span> with <span class="math inline">\ell_x = \log x</span>, <span class="math inline">\ell_y = \log y</span>: <span class="math display">\log(x - y) = \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right) = \ell_x + \log\left(1 - e^{\ell_y - \ell_x}\right)</span></p>
 <ul>
-<li>Since <span class="math inline">x &gt; y</span>, we have <span class="math inline">\ell_y - \ell_x &lt; 0</span>, so <span class="math inline">e^{\ell_y-\ell_x} \in (0,1)</span> and the expression is numerically stable.</li>
+<li>Since <span class="math inline">\ell_y - \ell_x &lt; 0</span>, <span class="math inline">e^{\ell_y-\ell_x}\in(0,1)</span>: no overflow.</li>
+<li>When <span class="math inline">x \approx y</span>, use <code>log1p(-exp(ly - lx))</code> to avoid the cancellation in <span class="math inline">1 - e^{\ell_y-\ell_x}</span>.</li>
 </ul>
 </section>
 <section id="practice-questions" class="slide level2">
 <h2>Practice Questions</h2>
-<p><strong>Question 1:</strong> How do you compute <span class="math display">\log\left(\frac{1}{1+e^{-x}}\right)</span> so as to avoid overflow and underflow of <span class="math inline">e^{x}</span>?</p>
-<p><strong>Question 2:</strong> Softmax. How do you compute <span class="math display">\log\left(\frac{e^{x_k}}{\displaystyle\sum_{k=1}^{K} e^{x_k}}\right)</span> so as to avoid underflow and overflow of <span class="math inline">e^{x_k}</span>?</p>
+<p><strong>Question 1.</strong> How do you compute <span class="math display">\log\left(\frac{1}{1+e^{-x}}\right)</span> so as to avoid overflow and underflow of <span class="math inline">e^{-x}</span>, for both large positive and large negative <span class="math inline">x</span>?</p>
+<p><strong>Question 2 (log-softmax).</strong> How do you compute <span class="math display">\log\left(\frac{e^{x_k}}{\sum_{j=1}^{K} e^{x_j}}\right)</span> so as to avoid underflow and overflow of <span class="math inline">e^{x_j}</span>?</p>
+<p><strong>Question 3.</strong> The one-pass variance formula fails for <span class="math inline">x = (M+1, M+2, M+3)</span> with <span class="math inline">M = 10^{8}</span>. Predict the smallest <span class="math inline">M</span> (a power of 10) at which the one-pass result in R first differs from <span class="math inline">2</span>, then verify.</p>
 
-</section>
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -623,6 +1679,44 @@ Longhai Li
         }, 200); 
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
