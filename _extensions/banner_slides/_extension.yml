@@ -12,6 +12,7 @@ contributes:
       css: slides.css
       width: 1600
       height: 1000
+      margin: 0.04
       slide-number: true
       transition: slide
       center: false

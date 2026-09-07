@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_07_bayesian_inference_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Lec_09_laplace_approximation_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Lec_09_laplace_approximation_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Lec_09_laplace_approximation_files/libs/quarto-html/popper.min.js"></script>
+<script src="Lec_09_laplace_approximation_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Lec_09_laplace_approximation_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Lec_09_laplace_approximation_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Lec_09_laplace_approximation_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
@@ -14,8 +14,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Lec_09_laplace_approximation_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Lec_09_laplace_approximation_files/libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -31,8 +31,74 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="Lec_09_laplace_approximation_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
   <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -50,12 +116,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -150,7 +216,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Elements of Statistical Computation</h1>
-  <p class="subtitle">Bayesian Inference: A Brief Introduction</p>
+  <p class="subtitle">Laplace Approximation</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -162,161 +228,158 @@ Longhai Li
 
 </section>
 <section>
-<section id="the-bayesian-framework" class="title-slide slide level1 center">
-<h1>1. The Bayesian Framework</h1>
+<section id="goal-and-idea" class="title-slide slide level1 center">
+<h1>1. Goal and Idea</h1>
 
 </section>
-<section id="four-steps" class="slide level2">
-<h2>Four Steps</h2>
-<ol type="1">
-<li><strong>Specify a prior</strong> <span class="math inline">\pi(\theta)</span>: rough knowledge about <span class="math inline">\theta</span>, treated as a random variable</li>
-<li><strong>Specify a probability model</strong> for the data: <span class="math inline">P(y_1,\ldots,y_n\mid\theta)</span></li>
-<li><strong>Find the posterior</strong> by Bayes’ rule <span class="math display">P(\theta\mid y_1,\ldots,y_n) = \frac{P(y_1,\ldots,y_n\mid\theta)\,\pi(\theta)}{\displaystyle\int P(y_1,\ldots,y_n\mid\theta)\,\pi(\theta)\,d\theta}</span></li>
-<li><strong>Interpret</strong> the posterior: summarize <span class="math inline">\theta</span>, make predictions</li>
-</ol>
-<p>Writing <span class="math inline">L(\theta) = P(y_{1:n}\mid\theta)</span> for the likelihood, <span class="math display">P(\theta\mid y_{1:n}) \propto L(\theta)\,\pi(\theta)</span></p>
-<p>The denominator <span class="math inline">P(y_{1:n}) = \int L(\theta)\pi(\theta)\,d\theta</span> is the <strong>marginal likelihood</strong>; it does not depend on <span class="math inline">\theta</span> and is usually the hard part to compute.</p>
-</section>
-<section id="four-steps-continued" class="slide level2">
-<h2>Four Steps (Continued)</h2>
-<p>Left: a flat prior and the likelihood. Right: the posterior <span class="math inline">\propto L(\theta)\pi(\theta)</span>, with a <span class="math inline">(1-\alpha)</span> credible interval <span class="math inline">(\theta_{\alpha/2},\theta_{1-\alpha/2})</span> cutting off <span class="math inline">\alpha/2</span> in each tail.</p>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="summarizing-theta-point-estimates-from-loss-functions" class="slide level2">
-<h2>Summarizing <span class="math inline">\theta</span>: Point Estimates from Loss Functions</h2>
-<p>The Bayes estimate minimizes the posterior expected loss: <span class="math display">\hat\theta = \arg\min_{\hat\theta}\; E\big[L(\theta,\hat\theta)\mid y_{1:n}\big]</span></p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Loss <span class="math inline">L(\theta,\hat\theta)</span></th>
-<th>Bayes estimate <span class="math inline">\hat\theta</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><span class="math inline">(\theta-\hat\theta)^2</span> (squared error)</td>
-<td>posterior mean <span class="math inline">E(\theta\mid y_{1:n})</span></td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\lvert\theta-\hat\theta\rvert</span> (absolute error)</td>
-<td>posterior median</td>
-</tr>
-<tr class="odd">
-<td><span class="math inline">I(\theta\ne\hat\theta)</span> (0–1 loss)</td>
-<td>posterior mode (MAP)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Interval estimate</strong>: a <span class="math inline">(1-\alpha)</span> credible interval <span class="math inline">(\theta_{\alpha/2},\theta_{1-\alpha/2})</span> contains <span class="math inline">\theta</span> with posterior probability <span class="math inline">1-\alpha</span>, a direct probability statement about <span class="math inline">\theta</span> (unlike a confidence interval).</p>
-<p>All of these are integrals or optimizations over the posterior, which is why Bayesian inference is computational.</p>
-</section>
-<section id="prediction" class="slide level2 smaller">
-<h2>Prediction</h2>
-<p>The <strong>posterior predictive distribution</strong> of a new observation: <span class="math display">P(y_{n+1}\mid y_{1:n}) = \frac{\int P(y_{n+1},y_{1:n}\mid\theta)\,\pi(\theta)\,d\theta}{\int P(y_{1:n}\mid\theta)\,\pi(\theta)\,d\theta}</span></p>
-<p>If <span class="math inline">y_1,\ldots,y_n,y_{n+1}</span> are conditionally independent given <span class="math inline">\theta</span>, this simplifies to <span class="math display">P(y_{n+1}\mid y_{1:n}) = \int P(y_{n+1}\mid\theta)\,P(\theta\mid y_{1:n})\,d\theta</span></p>
-<p>an average of the sampling density over the posterior. With posterior draws <span class="math inline">\theta_1,\ldots,\theta_J\sim P(\theta\mid y_{1:n})</span>, <span class="math display">P(y_{n+1}\mid y_{1:n}) \approx \frac1J\sum_{j=1}^J P(y_{n+1}\mid\theta_j)</span></p>
-<p>The predictive distribution is wider than any single <span class="math inline">P(y_{n+1}\mid\theta_j)</span>: it carries both sampling variability and posterior uncertainty about <span class="math inline">\theta</span>.</p>
-</section>
-<section id="prediction-continued" class="slide level2">
-<h2>Prediction (Continued)</h2>
-<p>Red: <span class="math inline">P(y_{n+1}\mid\theta_j)</span> for ten posterior draws <span class="math inline">\theta_j</span>. Black: their average, the posterior predictive density.</p>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section></section>
-<section>
-<section id="example-bernoulli-data-with-a-beta-prior" class="title-slide slide level1 center">
-<h1>2. Example: Bernoulli Data with a Beta Prior</h1>
-
-</section>
-<section id="prior" class="slide level2">
-<h2>Prior</h2>
-<p><span class="math inline">y_1,\ldots,y_n\mid\theta \overset{iid}{\sim}\text{Bern}(\theta)</span>, with <span class="math inline">\theta\sim\text{Beta}(\alpha_1,\alpha_0)</span>, <span class="math inline">\alpha_1,\alpha_0&gt;0</span> given: <span class="math display">\pi(\theta) = \frac{\Gamma(\alpha_0+\alpha_1)}{\Gamma(\alpha_0)\Gamma(\alpha_1)}\,\theta^{\alpha_1-1}(1-\theta)^{\alpha_0-1}, \qquad 0&lt;\theta&lt;1</span></p>
-<p><span class="math display">E(\theta) = \frac{\alpha_1}{\alpha_0+\alpha_1}, \qquad
-V(\theta) = \frac{\alpha_0\alpha_1}{(\alpha_0+\alpha_1)^2(\alpha_0+\alpha_1+1)}</span></p>
+<section id="the-goal" class="slide level2">
+<h2>The Goal</h2>
+<p>Compute posterior expectations <span class="math display">E_f\big[a(\theta)\big] = \frac{\int a(\theta)\,f(\theta)\,d\theta}{\int f(\theta)\,d\theta}</span></p>
+<p>where</p>
 <ul>
-<li><span class="math inline">\alpha_1</span> acts like a prior count of successes, <span class="math inline">\alpha_0</span> of failures; <span class="math inline">\alpha_0+\alpha_1</span> is the prior “sample size”</li>
-<li><span class="math inline">\text{Beta}(1,1) = \text{Unif}(0,1)</span>; <span class="math inline">\text{Beta}(2,1)</span> has density <span class="math inline">2\theta</span>, favouring large <span class="math inline">\theta</span></li>
-<li>Small <span class="math inline">\alpha</span>’s give U-shaped or flat priors (vague); large <span class="math inline">\alpha</span>’s concentrate the prior</li>
+<li><span class="math inline">a(\theta)</span> is a function of <span class="math inline">\theta\in\mathbb R^p</span> (a parameter, a prediction, an indicator)</li>
+<li><span class="math inline">f(\theta)</span> is the <strong>unnormalized posterior</strong>, e.g.&nbsp;<span class="math inline">f(\theta) = L(\theta)\,\pi(\theta)</span>, or a penalized likelihood</li>
+<li>both numerator and denominator are <span class="math inline">p</span>-dimensional integrals</li>
+</ul>
+<p>Quadrature works only for small <span class="math inline">p</span>; Monte Carlo needs a sampler. The <strong>Laplace approximation</strong> replaces the integrals by a closed-form Gaussian integral, exploiting the fact that for large <span class="math inline">n</span> the posterior is nearly normal.</p>
+</section>
+<section id="the-idea" class="slide level2">
+<h2>The Idea</h2>
+<p>Write the negative log unnormalized posterior <span class="math display">h(\theta) = -\log f(\theta), \qquad f(\theta) = e^{-h(\theta)}</span></p>
+<ul>
+<li><span class="math inline">h</span> is (up to a constant) the negative log-likelihood plus the negative log-prior: a sum of <span class="math inline">n</span> terms, so it grows like <span class="math inline">n</span> and becomes sharply curved at its minimum</li>
+<li>When <span class="math inline">n</span> is large, <span class="math display">\theta\mid\text{data} \ \approx\ N\big(\hat\theta_0,\ \hat\Sigma_0\big)</span> with <span class="math inline">\hat\theta_0</span> the posterior mode and <span class="math inline">\hat\Sigma_0</span> determined by the curvature of <span class="math inline">h</span> there</li>
+</ul>
+<p>The approximation is obtained by expanding <span class="math inline">h</span> to second order around its minimum and integrating the resulting Gaussian exactly.</p>
+</section></section>
+<section>
+<section id="derivation" class="title-slide slide level1 center">
+<h1>2. Derivation</h1>
+
+</section>
+<section id="second-order-taylor-expansion" class="slide level2">
+<h2>Second-Order Taylor Expansion</h2>
+<p>Let <span class="math inline">\theta_0 = \arg\min_\theta h(\theta)</span> (the posterior mode), found by optimization. Expand <span class="math inline">h</span> around <span class="math inline">\theta_0</span>: <span class="math display">
+h(\theta) = h(\theta_0) + \underbrace{\nabla h(\theta_0)^\top}_{=\,0 \text{ at the minimum}}(\theta-\theta_0)
++ \tfrac12(\theta-\theta_0)^\top\nabla^2 h(\theta_0)(\theta-\theta_0) + O\big(\|\theta-\theta_0\|^3\big)
+</span></p>
+<p>Keeping terms up to second order, <span class="math display">h(\theta)\ \approx\ \tilde h(\theta) = h(\theta_0) + \tfrac12(\theta-\theta_0)^\top H\,(\theta-\theta_0),
+\qquad H = \nabla^2 h(\theta_0)</span></p>
+<ul>
+<li><span class="math inline">H</span> is the Hessian of <span class="math inline">-\log f</span> at the mode; it is positive definite at a strict minimum</li>
+<li>For <span class="math inline">f = L\pi</span>, <span class="math inline">H</span> is the <strong>observed information</strong> plus the prior curvature</li>
 </ul>
 </section>
-<section id="prior-continued" class="slide level2">
-<h2>Prior (Continued)</h2>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
-<section id="likelihood-and-posterior" class="slide level2">
-<h2>Likelihood and Posterior</h2>
-<p><strong>Likelihood</strong>: with <span class="math inline">P(y_i\mid\theta) = \theta^{y_i}(1-\theta)^{1-y_i}</span> and <span class="math inline">\mathbf y = (y_1,\ldots,y_n)</span>, <span class="math display">P(\mathbf y\mid\theta) = \prod_{i=1}^n \theta^{y_i}(1-\theta)^{1-y_i} = \theta^{n_1}(1-\theta)^{n_0},
-\qquad n_1 = \sum_i y_i,\ \ n_0 = n - n_1</span></p>
-<p><strong>Posterior</strong>: <span class="math display">
+<section id="from-tilde-h-to-a-gaussian" class="slide level2">
+<h2>From <span class="math inline">\tilde h</span> to a Gaussian</h2>
+<p><span class="math display">
 \begin{aligned}
-P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\mathbf y)}
-\;\propto\; \theta^{\alpha_1-1}(1-\theta)^{\alpha_0-1}\cdot\theta^{n_1}(1-\theta)^{n_0} \\
-&amp;= \theta^{(\alpha_1+n_1)-1}(1-\theta)^{(\alpha_0+n_0)-1}
+f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
+= e^{-h(\theta_0)}\cdot\exp\Big\{-\tfrac12(\theta-\theta_0)^\top H(\theta-\theta_0)\Big\} \\[4pt]
+&amp;= \underbrace{f(\theta_0)\,(2\pi)^{p/2}\,|H|^{-1/2}}_{\text{constant}}
+\cdot\underbrace{(2\pi)^{-p/2}\,|H|^{1/2}\exp\Big\{-\tfrac12(\theta-\theta_0)^\top H(\theta-\theta_0)\Big\}}_{N_p(\theta_0,\,H^{-1})\text{ density, integrates to }1}
 \end{aligned}
 </span></p>
-<p>This is the Beta kernel with updated parameters <span class="math inline">\alpha_1' = \alpha_1+n_1</span>, <span class="math inline">\alpha_0' = \alpha_0+n_0</span>: <span class="math display">\theta\mid\mathbf y \sim \text{Beta}(\alpha_1+n_1,\ \alpha_0+n_0)</span></p>
-<p>The Beta prior is <strong>conjugate</strong> to the Bernoulli likelihood: the posterior has the same form, and the normalizing constant <span class="math inline">P(\mathbf y)</span> never has to be computed explicitly.</p>
+<p><strong>Review</strong>: if <span class="math inline">X\sim N_p(\mu,\Sigma)</span>, then <span class="math inline">p(x) = (2\pi)^{-p/2}|\Sigma|^{-1/2}\exp\{-\tfrac12(x-\mu)^\top\Sigma^{-1}(x-\mu)\}</span>. Here <span class="math inline">\Sigma = H^{-1}</span>, so <span class="math inline">|\Sigma|^{-1/2} = |H|^{1/2}</span>.</p>
 </section>
-<section id="posterior-summaries" class="slide level2">
-<h2>Posterior Summaries</h2>
-<p><span class="math display">E(\theta\mid\mathbf y) = \frac{\alpha_1+n_1}{\alpha_0+\alpha_1+n}
-= \underbrace{\frac{\alpha_0+\alpha_1}{\alpha_0+\alpha_1+n}}_{w}\cdot\frac{\alpha_1}{\alpha_0+\alpha_1}
-+ (1-w)\cdot\underbrace{\frac{n_1}{n}}_{\hat\theta_{\text{MLE}}}</span></p>
-<p>a weighted average of the prior mean and the MLE; the data weight <span class="math inline">1-w\to1</span> as <span class="math inline">n\to\infty</span>.</p>
-<p><span class="math display">V(\theta\mid\mathbf y) = \frac{(\alpha_1+n_1)(\alpha_0+n_0)}{(n+\alpha_0+\alpha_1)^2(n+\alpha_0+\alpha_1+1)} = O\!\left(\frac1n\right)</span></p>
+<section id="the-two-results" class="slide level2">
+<h2>The Two Results</h2>
+<ol type="1">
+<li><p><strong>Posterior approximation</strong> <span class="math display">\theta\mid\text{data}\ \approx\ N_p\Big(\theta_0,\ \big[\nabla^2 h(\theta_0)\big]^{-1}\Big)</span></p></li>
+<li><p><strong>Normalizing constant (marginal likelihood)</strong> <span class="math display">\int f(\theta)\,d\theta\ \approx\ f(\theta_0)\,(2\pi)^{p/2}\,\big|\nabla^2 h(\theta_0)\big|^{-1/2}</span></p></li>
+</ol>
+<p>Only two ingredients are needed: the mode <span class="math inline">\theta_0</span> and the Hessian of <span class="math inline">-\log f</span> at the mode, both available from a numerical optimizer (<code>optim(..., hessian = TRUE)</code> in R).</p>
+<p>The relative error of (2) is <span class="math inline">O(1/n)</span> for regular models; the error of (1) is driven by the skewness of the true posterior.</p>
+</section>
+<section id="the-two-results-continued" class="slide level2">
+<h2>The Two Results (Continued)</h2>
+<p>Red: unnormalized posterior <span class="math inline">f(\theta)</span>. Green: the Gaussian <span class="math inline">\tilde f(\theta)</span> matching height and curvature at the mode. The shaded rectangle-like region has area <span class="math inline">f(\theta_0)(2\pi)^{p/2}|H|^{-1/2}</span>, the Laplace estimate of <span class="math inline">\int f</span>.</p>
+
+<img data-src="Lec_09_laplace_approximation_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section></section>
+<section>
+<section id="applications" class="title-slide slide level1 center">
+<h1>3. Applications</h1>
+
+</section>
+<section id="application-1-marginal-likelihood-and-bic" class="slide level2">
+<h2>Application 1: Marginal Likelihood and BIC</h2>
+<p>With <span class="math inline">f(\theta) = L(\theta;D)\,\pi(\theta)</span>, the marginal likelihood <span class="math inline">P(D) = \int L(\theta;D)\pi(\theta)\,d\theta</span> satisfies <span class="math display">\log P(D)\ \approx\ \log\big[P(D\mid\theta_0)\,\pi(\theta_0)\big] + \frac p2\log(2\pi) - \frac12\log\big|\nabla^2 h(\theta_0)\big|</span></p>
+<p><strong>Simplification for large <span class="math inline">n</span>.</strong> The Hessian is dominated by the likelihood: <span class="math inline">\nabla^2 h(\theta_0)\approx n\,I(\theta_0)</span> with <span class="math inline">I</span> the per-observation Fisher information, so <span class="math inline">|\nabla^2 h(\theta_0)| \approx n^p\,|I(\theta_0)|</span> and <span class="math display">\log P(D) \approx \log P(D\mid\theta_0) - \frac p2\log n + \underbrace{\log\pi(\theta_0) + \frac p2\log(2\pi) - \frac12\log|I(\theta_0)|}_{O(1),\ \text{dropped}}</span></p>
+<p>Multiplying by <span class="math inline">-2</span> and replacing the posterior mode by the MLE gives the <strong>Bayesian information criterion</strong>: <span class="math display">\text{BIC} = -2\log L(\hat\theta_{\text{MLE}}) + p\log n</span></p>
+<p>Compare <span class="math inline">\text{AIC} = -2\log L(\hat\theta_{\text{MLE}}) + 2p</span>: BIC penalizes parameters more heavily once <span class="math inline">n &gt; e^2\approx 7.4</span>, and is (approximately) <span class="math inline">-2\log</span> of the marginal likelihood, so BIC differences approximate <span class="math inline">-2\log</span> Bayes factors.</p>
+</section>
+<section id="application-2-linear-functions-of-theta" class="slide level2">
+<h2>Application 2: Linear Functions of <span class="math inline">\theta</span></h2>
+<p>If <span class="math inline">a(\theta) = A^\top\theta + a_0</span> is linear, replace <span class="math inline">f</span> by its Gaussian approximation: <span class="math display">E_f\big[a(\theta)\big]\ \approx\ E_{\tilde f}\big[a(\theta)\big] = A^\top E_{\tilde f}(\theta) + a_0 = A^\top\theta_0 + a_0</span></p>
 <ul>
-<li>The posterior variance shrinks to zero: the posterior concentrates at the true <span class="math inline">\theta</span> as <span class="math inline">n\to\infty</span></li>
-<li>Compare with the sampling distribution of the MLE, <span class="math inline">\hat\theta_{\text{MLE}}\ \dot\sim\ N\big(\theta_0,\,1/(nI(\theta_0))\big)</span>, whose variance is also <span class="math inline">O(1/n)</span>; for large <span class="math inline">n</span> the two approaches agree, with the prior’s influence vanishing</li>
+<li>The posterior mean is approximated by the posterior mode</li>
+<li>Posterior variances and covariances come from <span class="math inline">H^{-1}</span>: <span class="math inline">\text{Var}_{\tilde f}(A^\top\theta) = A^\top H^{-1}A</span></li>
+<li>Credible intervals: <span class="math inline">\theta_{0j}\pm z_{\alpha/2}\sqrt{(H^{-1})_{jj}}</span></li>
+</ul>
+<p>This is exactly the Bayesian counterpart of MLE plus Wald standard errors.</p>
+</section>
+<section id="application-3-general-functions-of-theta" class="slide level2">
+<h2>Application 3: General Functions of <span class="math inline">\theta</span></h2>
+<p>For nonlinear <span class="math inline">a(\theta)</span> there are two options.</p>
+<p><strong>Simulate from the approximation.</strong> Draw <span class="math display">\theta_1,\ldots,\theta_N \overset{iid}{\sim} N_p\big(\theta_0,\ [\nabla^2 h(\theta_0)]^{-1}\big), \qquad
+\hat E\big[a(\theta)\big] = \frac1N\sum_{i=1}^N a(\theta_i)</span></p>
+<p>Cheap and general; inherits the error of the Gaussian approximation. The Gaussian can also serve as a proposal for importance sampling or as a starting point for MCMC, which removes that error.</p>
+<p><strong>Two Laplace approximations (Tierney–Kadane).</strong> For <span class="math inline">a(\theta)&gt;0</span>, apply the Laplace formula separately to numerator and denominator: <span class="math display">E_f\big[a(\theta)\big] = \frac{\int e^{-h^*(\theta)}\,d\theta}{\int e^{-h(\theta)}\,d\theta},
+\qquad h^*(\theta) = h(\theta) - \log a(\theta)</span></p>
+<p>Each integral is approximated at its own mode; the leading errors cancel, giving relative error <span class="math inline">O(1/n^2)</span>.</p>
+</section>
+<section id="example-poisson-rate-with-a-gamma-prior" class="slide level2">
+<h2>Example: Poisson Rate with a Gamma Prior</h2>
+<p><span class="math inline">y_1,\ldots,y_n\mid\lambda\sim\text{Pois}(\lambda)</span>, <span class="math inline">\lambda\sim\text{Gamma}(\alpha,\beta)</span>. The posterior is <span class="math inline">\text{Gamma}(\alpha+\sum y_i,\ \beta+n)</span> and <span class="math inline">P(y)</span> is available exactly, so we can measure the Laplace error.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>alpha <span class="ot">&lt;-</span> <span class="dv">2</span>; beta <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb3-2"><a href=""></a>laplace_ml <span class="ot">&lt;-</span> <span class="cf">function</span>(y) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(y); s <span class="ot">&lt;-</span> <span class="fu">sum</span>(y)</span>
+<span id="cb3-3"><a href=""></a>  h  <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>(<span class="fu">sum</span>(<span class="fu">dpois</span>(y, l, <span class="at">log =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span> <span class="fu">dgamma</span>(l, alpha, beta, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb3-4"><a href=""></a>  op <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">mean</span>(y) <span class="sc">+</span> <span class="fl">0.5</span>, h, <span class="at">method =</span> <span class="st">"L-BFGS-B"</span>, <span class="at">lower =</span> <span class="fl">1e-6</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-5"><a href=""></a>  <span class="fu">c</span>(<span class="at">mode =</span> op<span class="sc">$</span>par, <span class="at">log_ml =</span> <span class="sc">-</span>op<span class="sc">$</span>value <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(op<span class="sc">$</span>hessian[<span class="dv">1</span>, <span class="dv">1</span>])) }</span>
+<span id="cb3-6"><a href=""></a>exact_log_ml <span class="ot">&lt;-</span> <span class="cf">function</span>(y) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(y); s <span class="ot">&lt;-</span> <span class="fu">sum</span>(y)</span>
+<span id="cb3-7"><a href=""></a>  alpha <span class="sc">*</span> <span class="fu">log</span>(beta) <span class="sc">-</span> <span class="fu">lgamma</span>(alpha) <span class="sc">+</span> <span class="fu">lgamma</span>(alpha <span class="sc">+</span> s) <span class="sc">-</span> (alpha <span class="sc">+</span> s) <span class="sc">*</span> <span class="fu">log</span>(beta <span class="sc">+</span> n) <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">lfactorial</span>(y)) }</span>
+<span id="cb3-8"><a href=""></a>res <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">20</span>, <span class="dv">100</span>, <span class="dv">500</span>), <span class="cf">function</span>(n) { y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="dv">3</span>)</span>
+<span id="cb3-9"><a href=""></a>  <span class="fu">c</span>(<span class="at">n =</span> n, <span class="fu">laplace_ml</span>(y), <span class="at">exact =</span> <span class="fu">exact_log_ml</span>(y), <span class="at">post_mean =</span> (alpha <span class="sc">+</span> <span class="fu">sum</span>(y)) <span class="sc">/</span> (beta <span class="sc">+</span> n)) }))</span>
+<span id="cb3-10"><a href=""></a><span class="fu">round</span>(<span class="fu">cbind</span>(res, <span class="at">error =</span> res[, <span class="st">"log_ml"</span>] <span class="sc">-</span> res[, <span class="st">"exact"</span>]), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       n   mode    log_ml     exact post_mean   error
+[1,]   5 2.5000  -11.0017  -10.9962    2.6667 -0.0056
+[2,]  20 2.8095  -38.8421  -38.8407    2.8571 -0.0014
+[3,] 100 2.9802 -201.4952 -201.4950    2.9901 -0.0003
+[4,] 500 2.9321 -957.8226 -957.8225    2.9341 -0.0001</code></pre>
+</div>
+</div>
+<p>The error in <span class="math inline">\log P(y)</span> shrinks roughly like <span class="math inline">1/n</span>, and the mode approaches the posterior mean as the Gamma posterior becomes symmetric.</p>
+</section>
+<section id="example-continued" class="slide level2">
+<h2>Example (Continued)</h2>
+<p>Exact Gamma posterior (red) and the Laplace normal approximation (green) for <span class="math inline">n = 5</span> and <span class="math inline">n = 100</span>.</p>
+
+<img data-src="Lec_09_laplace_approximation_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="when-laplace-works-well-and-when-it-does-not" class="slide level2">
+<h2>When Laplace Works Well, and When It Does Not</h2>
+<p><strong>Works well</strong></p>
+<ul>
+<li>Large <span class="math inline">n</span> relative to <span class="math inline">p</span>, unimodal and roughly symmetric posterior</li>
+<li>Parameters on an unbounded scale: transform first (<span class="math inline">\log\sigma</span>, <span class="math inline">\text{logit}\,p</span>) so the Gaussian is not truncated at a boundary; the Jacobian must then be included in <span class="math inline">f</span></li>
+</ul>
+<p><strong>Problems</strong></p>
+<ul>
+<li>Skewed posteriors (small <span class="math inline">n</span>, parameters near a boundary): the mode is a poor centre and tails are wrong</li>
+<li>Multimodal posteriors: only the mode found is represented</li>
+<li>Hierarchical models with many parameters: <span class="math inline">p</span> grows with <span class="math inline">n</span>, so the <span class="math inline">O(1/n)</span> error does not vanish; nested Laplace (INLA) integrates out the high-dimensional part analytically</li>
 </ul>
 </section>
-<section id="posterior-summaries-continued" class="slide level2">
-<h2>Posterior Summaries (Continued)</h2>
-<p>Prior <span class="math inline">\text{Beta}(2,2)</span> and posteriors after <span class="math inline">n = 10</span>, <span class="math inline">50</span>, <span class="math inline">200</span> observations with <span class="math inline">\bar y = 0.7</span>. The posterior narrows at rate <span class="math inline">1/\sqrt n</span> and centres on the MLE.</p>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
-<section id="where-computation-enters" class="slide level2">
-<h2>Where Computation Enters</h2>
-<p>For the Beta–Bernoulli model everything is closed-form. In general:</p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Quantity</th>
-<th>Requires</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Normalizing constant <span class="math inline">P(\mathbf y) = \int L(\theta)\pi(\theta)\,d\theta</span></td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="even">
-<td>Posterior mean, variance, probabilities</td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="odd">
-<td>Posterior mode</td>
-<td>optimization</td>
-</tr>
-<tr class="even">
-<td>Posterior predictive <span class="math inline">\int P(y_{n+1}\mid\theta)P(\theta\mid\mathbf y)\,d\theta</span></td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="odd">
-<td>Credible intervals</td>
-<td>posterior quantiles</td>
-</tr>
-</tbody>
-</table>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
 <ul>
-<li>One-dimensional <span class="math inline">\theta</span>: numerical quadrature</li>
-<li>Multi-dimensional <span class="math inline">\theta</span>: Monte Carlo with posterior draws <span class="math inline">\theta_1,\ldots,\theta_J</span>, obtained by <strong>Markov chain Monte Carlo</strong> (next lectures), turning every integral into a sample average</li>
+<li>Laplace approximation: expand <span class="math inline">h = -\log f</span> to second order at its minimum <span class="math inline">\theta_0</span> and integrate the Gaussian exactly <span class="math display">\theta\mid\text{data}\approx N_p\big(\theta_0, [\nabla^2h(\theta_0)]^{-1}\big), \qquad
+\int f \approx f(\theta_0)(2\pi)^{p/2}|\nabla^2 h(\theta_0)|^{-1/2}</span></li>
+<li>Needs only an optimizer and a Hessian; cost does not grow with the number of integrals</li>
+<li>Gives BIC as a large-<span class="math inline">n</span> simplification of the marginal likelihood</li>
+<li>Linear <span class="math inline">a(\theta)</span>: mode and <span class="math inline">H^{-1}</span> suffice; general <span class="math inline">a(\theta)</span>: simulate from the Gaussian or use two Laplace approximations</li>
+<li>Deterministic, fast, and accurate to <span class="math inline">O(1/n)</span>, but blind to skewness and multimodality; Monte Carlo methods (next lectures) remove these limitations at higher computational cost</li>
 </ul>
 
 </section></section>
@@ -328,19 +391,19 @@ P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\math
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Lec_09_laplace_approximation_files/libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

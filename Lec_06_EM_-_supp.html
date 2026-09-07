@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_07_bayesian_inference_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Lec_06_EM_-_supp_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Lec_06_EM_-_supp_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Lec_06_EM_-_supp_files/libs/quarto-html/popper.min.js"></script>
+<script src="Lec_06_EM_-_supp_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Lec_06_EM_-_supp_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Lec_06_EM_-_supp_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Lec_06_EM_-_supp_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <title>Elements of Statistical Computation</title>
+  <title>Lecture Notes for Computational Statistics</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Lec_06_EM_-_supp_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Lec_06_EM_-_supp_files/libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -32,7 +32,7 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="Lec_06_EM_-_supp_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
   <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -50,12 +50,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="Lec_06_EM_-_supp_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Lec_06_EM_-_supp_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Lec_06_EM_-_supp_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Lec_06_EM_-_supp_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="Lec_06_EM_-_supp_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="Lec_06_EM_-_supp_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -149,8 +149,8 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Elements of Statistical Computation</h1>
-  <p class="subtitle">Bayesian Inference: A Brief Introduction</p>
+  <h1 class="title">Lecture Notes for Computational Statistics</h1>
+  <p class="subtitle">EM Algorithm</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -161,165 +161,42 @@ Longhai Li
 </div>
 
 </section>
-<section>
-<section id="the-bayesian-framework" class="title-slide slide level1 center">
-<h1>1. The Bayesian Framework</h1>
-
-</section>
-<section id="four-steps" class="slide level2">
-<h2>Four Steps</h2>
-<ol type="1">
-<li><strong>Specify a prior</strong> <span class="math inline">\pi(\theta)</span>: rough knowledge about <span class="math inline">\theta</span>, treated as a random variable</li>
-<li><strong>Specify a probability model</strong> for the data: <span class="math inline">P(y_1,\ldots,y_n\mid\theta)</span></li>
-<li><strong>Find the posterior</strong> by Bayes’ rule <span class="math display">P(\theta\mid y_1,\ldots,y_n) = \frac{P(y_1,\ldots,y_n\mid\theta)\,\pi(\theta)}{\displaystyle\int P(y_1,\ldots,y_n\mid\theta)\,\pi(\theta)\,d\theta}</span></li>
-<li><strong>Interpret</strong> the posterior: summarize <span class="math inline">\theta</span>, make predictions</li>
-</ol>
-<p>Writing <span class="math inline">L(\theta) = P(y_{1:n}\mid\theta)</span> for the likelihood, <span class="math display">P(\theta\mid y_{1:n}) \propto L(\theta)\,\pi(\theta)</span></p>
-<p>The denominator <span class="math inline">P(y_{1:n}) = \int L(\theta)\pi(\theta)\,d\theta</span> is the <strong>marginal likelihood</strong>; it does not depend on <span class="math inline">\theta</span> and is usually the hard part to compute.</p>
-</section>
-<section id="four-steps-continued" class="slide level2">
-<h2>Four Steps (Continued)</h2>
-<p>Left: a flat prior and the likelihood. Right: the posterior <span class="math inline">\propto L(\theta)\pi(\theta)</span>, with a <span class="math inline">(1-\alpha)</span> credible interval <span class="math inline">(\theta_{\alpha/2},\theta_{1-\alpha/2})</span> cutting off <span class="math inline">\alpha/2</span> in each tail.</p>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="summarizing-theta-point-estimates-from-loss-functions" class="slide level2">
-<h2>Summarizing <span class="math inline">\theta</span>: Point Estimates from Loss Functions</h2>
-<p>The Bayes estimate minimizes the posterior expected loss: <span class="math display">\hat\theta = \arg\min_{\hat\theta}\; E\big[L(\theta,\hat\theta)\mid y_{1:n}\big]</span></p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Loss <span class="math inline">L(\theta,\hat\theta)</span></th>
-<th>Bayes estimate <span class="math inline">\hat\theta</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><span class="math inline">(\theta-\hat\theta)^2</span> (squared error)</td>
-<td>posterior mean <span class="math inline">E(\theta\mid y_{1:n})</span></td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\lvert\theta-\hat\theta\rvert</span> (absolute error)</td>
-<td>posterior median</td>
-</tr>
-<tr class="odd">
-<td><span class="math inline">I(\theta\ne\hat\theta)</span> (0–1 loss)</td>
-<td>posterior mode (MAP)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Interval estimate</strong>: a <span class="math inline">(1-\alpha)</span> credible interval <span class="math inline">(\theta_{\alpha/2},\theta_{1-\alpha/2})</span> contains <span class="math inline">\theta</span> with posterior probability <span class="math inline">1-\alpha</span>, a direct probability statement about <span class="math inline">\theta</span> (unlike a confidence interval).</p>
-<p>All of these are integrals or optimizations over the posterior, which is why Bayesian inference is computational.</p>
-</section>
-<section id="prediction" class="slide level2 smaller">
-<h2>Prediction</h2>
-<p>The <strong>posterior predictive distribution</strong> of a new observation: <span class="math display">P(y_{n+1}\mid y_{1:n}) = \frac{\int P(y_{n+1},y_{1:n}\mid\theta)\,\pi(\theta)\,d\theta}{\int P(y_{1:n}\mid\theta)\,\pi(\theta)\,d\theta}</span></p>
-<p>If <span class="math inline">y_1,\ldots,y_n,y_{n+1}</span> are conditionally independent given <span class="math inline">\theta</span>, this simplifies to <span class="math display">P(y_{n+1}\mid y_{1:n}) = \int P(y_{n+1}\mid\theta)\,P(\theta\mid y_{1:n})\,d\theta</span></p>
-<p>an average of the sampling density over the posterior. With posterior draws <span class="math inline">\theta_1,\ldots,\theta_J\sim P(\theta\mid y_{1:n})</span>, <span class="math display">P(y_{n+1}\mid y_{1:n}) \approx \frac1J\sum_{j=1}^J P(y_{n+1}\mid\theta_j)</span></p>
-<p>The predictive distribution is wider than any single <span class="math inline">P(y_{n+1}\mid\theta_j)</span>: it carries both sampling variability and posterior uncertainty about <span class="math inline">\theta</span>.</p>
-</section>
-<section id="prediction-continued" class="slide level2">
-<h2>Prediction (Continued)</h2>
-<p>Red: <span class="math inline">P(y_{n+1}\mid\theta_j)</span> for ten posterior draws <span class="math inline">\theta_j</span>. Black: their average, the posterior predictive density.</p>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section></section>
-<section>
-<section id="example-bernoulli-data-with-a-beta-prior" class="title-slide slide level1 center">
-<h1>2. Example: Bernoulli Data with a Beta Prior</h1>
-
-</section>
-<section id="prior" class="slide level2">
-<h2>Prior</h2>
-<p><span class="math inline">y_1,\ldots,y_n\mid\theta \overset{iid}{\sim}\text{Bern}(\theta)</span>, with <span class="math inline">\theta\sim\text{Beta}(\alpha_1,\alpha_0)</span>, <span class="math inline">\alpha_1,\alpha_0&gt;0</span> given: <span class="math display">\pi(\theta) = \frac{\Gamma(\alpha_0+\alpha_1)}{\Gamma(\alpha_0)\Gamma(\alpha_1)}\,\theta^{\alpha_1-1}(1-\theta)^{\alpha_0-1}, \qquad 0&lt;\theta&lt;1</span></p>
-<p><span class="math display">E(\theta) = \frac{\alpha_1}{\alpha_0+\alpha_1}, \qquad
-V(\theta) = \frac{\alpha_0\alpha_1}{(\alpha_0+\alpha_1)^2(\alpha_0+\alpha_1+1)}</span></p>
+<section id="overview" class="slide level2">
+<h2>Overview</h2>
 <ul>
-<li><span class="math inline">\alpha_1</span> acts like a prior count of successes, <span class="math inline">\alpha_0</span> of failures; <span class="math inline">\alpha_0+\alpha_1</span> is the prior “sample size”</li>
-<li><span class="math inline">\text{Beta}(1,1) = \text{Unif}(0,1)</span>; <span class="math inline">\text{Beta}(2,1)</span> has density <span class="math inline">2\theta</span>, favouring large <span class="math inline">\theta</span></li>
-<li>Small <span class="math inline">\alpha</span>’s give U-shaped or flat priors (vague); large <span class="math inline">\alpha</span>’s concentrate the prior</li>
+<li>Fitting Mixture Models</li>
+<li>Fitting Censored Data Models</li>
 </ul>
 </section>
-<section id="prior-continued" class="slide level2">
-<h2>Prior (Continued)</h2>
+<section id="e-step-finding-soft-classification-probabilities-p_in-for-fitting-mixture-distribution-with-em" class="slide level2">
+<h2>E-Step: finding soft classification probabilities <span class="math inline">p_i^{(n)}</span> for fitting mixture distribution with EM</h2>
 
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
-<section id="likelihood-and-posterior" class="slide level2">
-<h2>Likelihood and Posterior</h2>
-<p><strong>Likelihood</strong>: with <span class="math inline">P(y_i\mid\theta) = \theta^{y_i}(1-\theta)^{1-y_i}</span> and <span class="math inline">\mathbf y = (y_1,\ldots,y_n)</span>, <span class="math display">P(\mathbf y\mid\theta) = \prod_{i=1}^n \theta^{y_i}(1-\theta)^{1-y_i} = \theta^{n_1}(1-\theta)^{n_0},
-\qquad n_1 = \sum_i y_i,\ \ n_0 = n - n_1</span></p>
-<p><strong>Posterior</strong>: <span class="math display">
-\begin{aligned}
-P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\mathbf y)}
-\;\propto\; \theta^{\alpha_1-1}(1-\theta)^{\alpha_0-1}\cdot\theta^{n_1}(1-\theta)^{n_0} \\
-&amp;= \theta^{(\alpha_1+n_1)-1}(1-\theta)^{(\alpha_0+n_0)-1}
-\end{aligned}
-</span></p>
-<p>This is the Beta kernel with updated parameters <span class="math inline">\alpha_1' = \alpha_1+n_1</span>, <span class="math inline">\alpha_0' = \alpha_0+n_0</span>: <span class="math display">\theta\mid\mathbf y \sim \text{Beta}(\alpha_1+n_1,\ \alpha_0+n_0)</span></p>
-<p>The Beta prior is <strong>conjugate</strong> to the Bernoulli likelihood: the posterior has the same form, and the normalizing constant <span class="math inline">P(\mathbf y)</span> never has to be computed explicitly.</p>
-</section>
-<section id="posterior-summaries" class="slide level2">
-<h2>Posterior Summaries</h2>
-<p><span class="math display">E(\theta\mid\mathbf y) = \frac{\alpha_1+n_1}{\alpha_0+\alpha_1+n}
-= \underbrace{\frac{\alpha_0+\alpha_1}{\alpha_0+\alpha_1+n}}_{w}\cdot\frac{\alpha_1}{\alpha_0+\alpha_1}
-+ (1-w)\cdot\underbrace{\frac{n_1}{n}}_{\hat\theta_{\text{MLE}}}</span></p>
-<p>a weighted average of the prior mean and the MLE; the data weight <span class="math inline">1-w\to1</span> as <span class="math inline">n\to\infty</span>.</p>
-<p><span class="math display">V(\theta\mid\mathbf y) = \frac{(\alpha_1+n_1)(\alpha_0+n_0)}{(n+\alpha_0+\alpha_1)^2(n+\alpha_0+\alpha_1+1)} = O\!\left(\frac1n\right)</span></p>
-<ul>
-<li>The posterior variance shrinks to zero: the posterior concentrates at the true <span class="math inline">\theta</span> as <span class="math inline">n\to\infty</span></li>
-<li>Compare with the sampling distribution of the MLE, <span class="math inline">\hat\theta_{\text{MLE}}\ \dot\sim\ N\big(\theta_0,\,1/(nI(\theta_0))\big)</span>, whose variance is also <span class="math inline">O(1/n)</span>; for large <span class="math inline">n</span> the two approaches agree, with the prior’s influence vanishing</li>
-</ul>
-</section>
-<section id="posterior-summaries-continued" class="slide level2">
-<h2>Posterior Summaries (Continued)</h2>
-<p>Prior <span class="math inline">\text{Beta}(2,2)</span> and posteriors after <span class="math inline">n = 10</span>, <span class="math inline">50</span>, <span class="math inline">200</span> observations with <span class="math inline">\bar y = 0.7</span>. The posterior narrows at rate <span class="math inline">1/\sqrt n</span> and centres on the MLE.</p>
+<img data-src="Lec%2006%20EM%20-%20supp_images/p02-estep-mixture.png" class="r-stretch"></section>
+<section id="illustration-efy-neq-fey-case-lambda-1" class="slide level2">
+<h2>Illustration: <span class="math inline">E[f(Y)] \neq f(E[Y])</span> (case <span class="math inline">\lambda &gt; 1</span>)</h2>
 
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
-<section id="where-computation-enters" class="slide level2">
-<h2>Where Computation Enters</h2>
-<p>For the Beta–Bernoulli model everything is closed-form. In general:</p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Quantity</th>
-<th>Requires</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Normalizing constant <span class="math inline">P(\mathbf y) = \int L(\theta)\pi(\theta)\,d\theta</span></td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="even">
-<td>Posterior mean, variance, probabilities</td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="odd">
-<td>Posterior mode</td>
-<td>optimization</td>
-</tr>
-<tr class="even">
-<td>Posterior predictive <span class="math inline">\int P(y_{n+1}\mid\theta)P(\theta\mid\mathbf y)\,d\theta</span></td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="odd">
-<td>Credible intervals</td>
-<td>posterior quantiles</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>One-dimensional <span class="math inline">\theta</span>: numerical quadrature</li>
-<li>Multi-dimensional <span class="math inline">\theta</span>: Monte Carlo with posterior draws <span class="math inline">\theta_1,\ldots,\theta_J</span>, obtained by <strong>Markov chain Monte Carlo</strong> (next lectures), turning every integral into a sample average</li>
-</ul>
+<img data-src="Lec%2006%20EM%20-%20supp_images/p03-illustration-lambda-gt1.png" class="r-stretch"></section>
+<section id="illustration-efy-neq-fey-case-lambda-1-1" class="slide level2">
+<h2>Illustration: <span class="math inline">E[f(Y)] \neq f(E[Y])</span> (case <span class="math inline">\lambda &lt; 1</span>)</h2>
 
-</section></section>
+<img data-src="Lec%2006%20EM%20-%20supp_images/p04-illustration-lambda-lt1.png" class="r-stretch"></section>
+<section id="q2-of-a2-censored-normal-data-setup" class="slide level2">
+<h2>Q2 of A2: censored normal data setup</h2>
+
+<img data-src="Lec%2006%20EM%20-%20supp_images/p05-q2-a2-setup.png" class="r-stretch"></section>
+<section id="q2-of-a2-contd-complete-data-log-likelihood-and-e-step" class="slide level2">
+<h2>Q2 of A2 (cont’d): complete-data log-likelihood and E-step</h2>
+
+<img data-src="Lec%2006%20EM%20-%20supp_images/p06-q2-a2-loglik-estep.png" class="r-stretch"></section>
+<section id="q2.2-computing-py_i-mid-mu-sigma2-with-pnorm" class="slide level2">
+<h2>Q2.2: computing <span class="math inline">p(y_i \mid \mu, \sigma^2)</span> with <code>pnorm</code></h2>
+
+<img data-src="Lec%2006%20EM%20-%20supp_images/p07-q2-2-pnorm.png" class="r-stretch"></section>
+<section id="example-truncated-normal-data" class="slide level2">
+<h2>Example: truncated normal data</h2>
+
+
+<img data-src="Lec%2006%20EM%20-%20supp_images/p08-example-truncated.png" class="r-stretch"></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -328,19 +205,19 @@ P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\math
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Lec_06_EM_-_supp_files/libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
@@ -585,44 +462,6 @@ P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\math
         }, 200); 
       });
     </script>
-    
-    <script>
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-      // slide changes (different for each slide format).
-      (function () {
-        // dispatch for htmlwidgets
-        function fireSlideEnter() {
-          const event = window.document.createEvent("Event");
-          event.initEvent("slideenter", true, true);
-          window.document.dispatchEvent(event);
-        }
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-          fireSlideEnter();
-
-          // dispatch for shiny
-          if (window.jQuery) {
-            if (previousSlide) {
-              window.jQuery(previousSlide).trigger("hidden");
-            }
-            if (currentSlide) {
-              window.jQuery(currentSlide).trigger("shown");
-            }
-          }
-        }
-
-        // hookup for slidy
-        if (window.w3c_slidy) {
-          window.w3c_slidy.add_observer(function (slide_num) {
-            // slide_num starts at position 1
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-          });
-        }
-
-      })();
-    </script>
-
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")

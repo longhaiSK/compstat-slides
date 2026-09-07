@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_01_intro-course_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_01_intro-course_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_01_intro-course_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_01_intro-course_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_01_intro-course_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_01_intro-course_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_01_intro-course_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Lec_08_numerical_quadrature_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Lec_08_numerical_quadrature_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Lec_08_numerical_quadrature_files/libs/quarto-html/popper.min.js"></script>
+<script src="Lec_08_numerical_quadrature_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Lec_08_numerical_quadrature_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Lec_08_numerical_quadrature_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Lec_08_numerical_quadrature_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
@@ -14,8 +14,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_01_intro-course_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_01_intro-course_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Lec_08_numerical_quadrature_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Lec_08_numerical_quadrature_files/libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -98,7 +98,7 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="Lec_01_intro-course_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="Lec_08_numerical_quadrature_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
   <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -116,12 +116,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -216,7 +216,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Elements of Statistical Computation</h1>
-  <p class="subtitle">Introduction to Statistical Computation</p>
+  <p class="subtitle">Numerical Quadrature</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -228,256 +228,249 @@ Longhai Li
 
 </section>
 <section>
-<section id="review-of-basic-concepts" class="title-slide slide level1 center" data-number="1">
-<h1><span class="header-section-number">1</span> Review of Basic Concepts</h1>
+<section id="the-problem-and-transformations" class="title-slide slide level1 center">
+<h1>1. The Problem and Transformations</h1>
 
-</section>
-<section id="statistical-inference-the-setup" class="slide level2">
-<h2>Statistical Inference: The Setup</h2>
-<ul>
-<li>Data: <span class="math inline">x_1, \ldots, x_n</span> observed</li>
-<li>Model: <span class="math inline">x_i \overset{iid}{\sim} f(x \mid \theta)</span>, with <span class="math inline">\theta</span> unknown</li>
-<li>Three basic tasks:
-<ol type="1">
-<li><strong>Point estimation</strong>: find a single value <span class="math inline">\hat\theta</span> close to <span class="math inline">\theta</span></li>
-<li><strong>Hypothesis testing</strong>: decide whether the data are compatible with <span class="math inline">H_0</span></li>
-<li><strong>Bayesian inference</strong>: describe uncertainty about <span class="math inline">\theta</span> via a distribution</li>
-</ol></li>
-</ul>
-</section>
-<section id="point-estimation" class="slide level2">
-<h2>Point Estimation</h2>
-<p>An <strong>estimator</strong> is a function of the data: <span class="math display">
-\hat\theta = \hat\theta(x_1, \ldots, x_n)
-</span></p>
-<p>Familiar examples:</p>
-<ul>
-<li>Sample mean <span class="math inline">\hat\mu = \bar x = \frac{1}{n}\sum_{i=1}^n x_i</span></li>
-<li>Sample variance <span class="math inline">\hat\sigma^2 = S^2 = \frac{1}{n-1}\sum_{i=1}^n (x_i - \bar x)^2</span></li>
-<li>Least squares in regression <span class="math inline">\hat\beta = (X'X)^{-1} X' y</span></li>
-</ul>
-</section>
-<section id="evaluating-an-estimator" class="slide level2">
-<h2>Evaluating an Estimator</h2>
-<p>Since <span class="math inline">\hat\theta</span> depends on random data, it has a <strong>sampling distribution</strong>.</p>
-
-<img data-src="Lec_01_intro-course_files/figure-revealjs/unnamed-chunk-1-1.png" width="864" class="r-stretch"><ul>
-<li>Bias <span class="math inline">E(\hat\theta) - \theta</span>, variance <span class="math inline">V(\hat\theta)</span>, and <span class="math inline">\text{MSE}(\hat\theta) = E(\hat\theta - \theta)^2 = \text{Bias}^2 + V(\hat\theta)</span></li>
-<li>Comparing <span class="math inline">\hat\theta^{(1)}</span> and <span class="math inline">\hat\theta^{(2)}</span> requires knowing (or approximating) both sampling distributions</li>
-</ul>
-</section>
-<section id="maximum-likelihood-estimation" class="slide level2">
-<h2>Maximum Likelihood Estimation</h2>
-<p>The log-likelihood of <span class="math inline">\theta</span>: <span class="math display">
-\ell(\theta) = \log f(x_1, \ldots, x_n \mid \theta) = \log \prod_{i=1}^n f(x_i \mid \theta) = \sum_{i=1}^n \log f(x_i \mid \theta)
-</span></p>
-<p>The MLE is the maximizer: <span class="math display">
-\hat\theta_{\text{MLE}} = \arg\max_\theta \ell(\theta)
-</span></p>
-<ul>
-<li>Closed form exists in simple models (normal mean, binomial proportion)</li>
-<li>In most models (GLMs, mixed models, survival models) there is no closed form</li>
-</ul>
-</section>
-<section id="hypothesis-testing" class="slide level2">
-<h2>Hypothesis Testing</h2>
-<p>Test <span class="math inline">H_0: \mu = \mu_0</span> against <span class="math inline">H_1: \mu \neq \mu_0</span> using <span class="math display">
-T = \frac{\bar x - \mu_0}{S/\sqrt{n}}
-</span></p>
-<ul>
-<li>Need the <strong>null distribution</strong> of <span class="math inline">T</span> (distribution of <span class="math inline">T</span> when <span class="math inline">H_0</span> is true)</li>
-<li>For normal data, <span class="math inline">T \sim t_{n-1}</span> exactly; for other data, the null distribution is known only approximately or not at all</li>
-</ul>
-</section>
-<section id="p-value-type-i-error-and-power" class="slide level2">
-<h2><span class="math inline">p</span>-value, Type I Error, and Power</h2>
-
-<img data-src="Lec_01_intro-course_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"><ul>
-<li><span class="math inline">p</span>-value <span class="math inline">= P_{H_0}(T \ge t_{\text{obs}})</span>: tail area of the null distribution beyond the observed statistic</li>
-<li>Type I error <span class="math inline">\alpha = P_{H_0}(T \ge t_\alpha)</span>: null tail area beyond the critical value</li>
-<li>Power <span class="math inline">= P_{H_1}(T \ge t_\alpha)</span>: alternative tail area beyond the critical value</li>
-</ul>
-<p>All three are tail probabilities of a distribution that is often unknown in closed form.</p>
-</section>
-<section id="bayesian-inference" class="slide level2">
-<h2>Bayesian Inference</h2>
-<p>Combine a prior <span class="math inline">\pi(\theta)</span> with the likelihood <span class="math inline">f(x \mid \theta)</span>: <span class="math display">
-p(\theta \mid x) = \frac{f(x \mid \theta)\,\pi(\theta)}{\int f(x \mid \theta)\,\pi(\theta)\, d\theta}
-</span></p>
-<p>The denominator is an integral over <span class="math inline">\theta</span>; for most models it has no closed form.</p>
-</section>
-<section id="prior-likelihood-and-posterior" class="slide level2">
-<h2>Prior, Likelihood, and Posterior</h2>
-
-<img data-src="Lec_01_intro-course_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"><ul>
-<li>A vague prior lets the likelihood dominate; the posterior is slightly narrower and pulled toward the prior mean</li>
-<li>Inference uses posterior summaries: <span class="math inline">E(\theta \mid x)</span>, <span class="math inline">V(\theta \mid x)</span>, credible intervals, <span class="math inline">P(H_0 \mid x)</span></li>
-<li>Each summary is again an integral over <span class="math inline">\theta</span></li>
-</ul>
-</section>
-<section id="summary-of-the-three-tasks" class="slide level2">
-<h2>Summary of the Three Tasks</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Task</th>
-<th>Object needed</th>
-<th>Typical difficulty</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Point estimation</td>
-<td>Sampling distribution of <span class="math inline">\hat\theta</span>; maximizer of <span class="math inline">\ell(\theta)</span></td>
-<td>No closed form</td>
-</tr>
-<tr class="even">
-<td>Hypothesis testing</td>
-<td>Null distribution of <span class="math inline">T</span></td>
-<td>Unknown for general data</td>
-</tr>
-<tr class="odd">
-<td>Bayesian inference</td>
-<td><span class="math inline">\int f(x\mid\theta)\pi(\theta)\,d\theta</span>; <span class="math inline">E(\theta \mid x)</span></td>
-<td>High-dimensional integral</td>
-</tr>
-</tbody>
-</table>
-<p>Each task reduces to a computational problem: <strong>calculating</strong>, <strong>simulating</strong>, <strong>optimizing</strong>, or <strong>integrating</strong>.</p>
-</section></section>
-<section>
-<section id="the-use-of-computers-in-statistics" class="title-slide slide level1 center" data-number="2">
-<h1><span class="header-section-number">2</span> The Use of Computers in Statistics</h1>
-
-</section>
-<section id="manipulating-numbers" class="slide level2">
-<h2>1. Manipulating Numbers</h2>
-<p>Even simple calculations are not trivial on a computer:</p>
-<ul>
-<li><span class="math inline">1.1 + 2.1 + \cdots + 100.1</span></li>
-<li><span class="math inline">S^2 = \sum_{i=1}^n (x_i - \bar x)^2 / (n-1)</span></li>
-<li><span class="math inline">\prod_{i=1}^n f(x_i \mid \theta)</span> for large <span class="math inline">n</span></li>
-</ul>
-<p>Computers store numbers with finite precision, which leads to</p>
-<ul>
-<li><strong>Overflow</strong>: result too large to represent</li>
-<li><strong>Underflow</strong>: result too small, rounded to zero</li>
-<li><strong>Rounding error</strong>: accumulated loss of digits</li>
-</ul>
-</section>
-<section id="example-rounding-error" class="slide level2">
-<h2>Example: Rounding Error</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">1</span>, <span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">2</span>, <span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">3</span>)</span>
-<span id="cb3-2"><a href=""></a><span class="fu">var</span>(x)                                    <span class="co"># correct answer: 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">3</span> <span class="sc">*</span> <span class="fu">mean</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">2</span>           <span class="co"># textbook formula</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">prod</span>(<span class="fu">dnorm</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>)))                  <span class="co"># likelihood underflows to 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="fu">sum</span>(<span class="fu">dnorm</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>), <span class="at">log =</span> <span class="cn">TRUE</span>))       <span class="co"># log-likelihood is fine</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] -1373.279</code></pre>
-</div>
-</div>
-<p>Lecture on computer arithmetic: how numbers are stored and how to avoid these errors.</p>
-</section>
-<section id="simulation-with-random-numbers" class="slide level2">
-<h2>2. Simulation with Random Numbers</h2>
-<p><strong>Monte Carlo</strong>: replace a probability calculation with repeated random experiments.</p>
-<p>Generate <span class="math inline">X_1, X_2 \overset{iid}{\sim} \text{Unif}(0,1)</span>. What is the distribution of <span class="math inline">X_1 + X_2</span>?</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>z <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10000</span>) <span class="sc">+</span> <span class="fu">runif</span>(<span class="dv">10000</span>)</span>
-<span id="cb11-2"><a href=""></a><span class="fu">hist</span>(z, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">""</span>, <span class="at">xlab =</span> <span class="st">"X1 + X2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-
-</div>
-<img data-src="Lec_01_intro-course_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
-<section id="monte-carlo-for-sampling-distributions" class="slide level2">
-<h2>Monte Carlo for Sampling Distributions</h2>
-<p>Repeat many times: draw <span class="math inline">x_1, \ldots, x_n</span>, compute the statistic.</p>
-<p><span class="math display">
-\sum_i x_i, \qquad \sum_i (x_i - \bar x)^2, \qquad T = \frac{\bar x - \mu_0}{S/\sqrt n}
-</span></p>
-<p>This gives empirical approximations to</p>
-<ul>
-<li>The sampling distribution of <span class="math inline">\hat\mu^{(1)}</span> vs <span class="math inline">\hat\mu^{(2)}</span> (bias, variance, MSE)</li>
-<li>The null distribution of <span class="math inline">T</span> for non-normal data</li>
-<li>Coverage of confidence intervals</li>
-</ul>
-<p>Lecture on random numbers and Monte Carlo: pseudo-random generation, transformations, LLN/CLT, evaluating estimators and tests.</p>
-</section>
-<section id="optimization" class="slide level2">
-<h2>3. Optimization</h2>
-<p>Find <span class="math inline">x_0 = \arg\max_x f(x)</span>.</p>
-
-<img data-src="Lec_01_intro-course_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch"><p>For MLE, <span class="math inline">f = \ell(\theta)</span>; there is no closed form, so the maximum is found by iterative search.</p>
-<p>Lecture on MLE and optimization: Newton–Raphson, Fisher scoring, Nelder–Mead, gradient methods, stochastic gradient descent.</p>
-</section>
-<section id="advanced-simulation-and-integration" class="slide level2">
-<h2>4. Advanced Simulation and Integration</h2>
-<p>Quantities of interest are integrals: <span class="math display">
-E(X) = \int x f(x)\,dx, \qquad V(X), \qquad \int f(x\mid\theta)\pi(\theta)\,d\theta
-</span></p>
-<p>Two approaches:</p>
-<ul>
-<li><strong>Numerical quadrature</strong>: approximate the area under the curve by rectangles or trapezoids; works well in low dimension</li>
-<li><strong>Monte Carlo integration</strong>: draw from <span class="math inline">f</span> and average; the only practical route in high dimension</li>
-</ul>
-<p>For the posterior <span class="math inline">p(\theta \mid x)</span>, direct sampling is impossible, so <strong>Markov chain Monte Carlo</strong> is used.</p>
 </section>
 <section id="numerical-quadrature" class="slide level2">
 <h2>Numerical Quadrature</h2>
-
-<img data-src="Lec_01_intro-course_files/figure-revealjs/unnamed-chunk-8-1.png" width="960" class="r-stretch"><p><span class="math display">
-\int_a^b f(x)\,dx \approx \sum_{j=1}^k f(m_j)\,\Delta x
-</span></p>
+<p>Goal: approximate the area under a curve <span class="math display">A = \int_a^b f(x)\,dx, \qquad a,\ b \text{ finite}</span></p>
+<p>by evaluating <span class="math inline">f</span> at a finite set of points and forming a weighted sum: <span class="math display">\tilde A_n = \sum_{i=1}^n w_i\, f(x_i)</span></p>
+<ul>
+<li>Different rules differ in how the points <span class="math inline">x_i</span> and weights <span class="math inline">w_i</span> are chosen</li>
+<li>If <span class="math inline">a</span> or <span class="math inline">b</span> is infinite, first <strong>transform</strong> the variable so the range becomes finite</li>
+<li>Typical statistical uses: probabilities <span class="math inline">P(a&lt;X&lt;b)</span>, expectations, normalizing constants and marginal likelihoods in Bayesian inference</li>
+</ul>
 </section>
-<section id="course-roadmap" class="slide level2">
-<h2>Course Roadmap</h2>
+<section id="infinite-range-logistic-transformation" class="slide level2">
+<h2>Infinite Range: Logistic Transformation</h2>
+<p>Map <span class="math inline">x\in(-\infty,\infty)</span> to <span class="math inline">y\in(0,1)</span>: <span class="math display">y = \frac{1}{1+e^{-x}}, \qquad x = t(y) = \log\frac{y}{1-y}, \qquad t'(y) = \frac{1}{y(1-y)}</span></p>
+<p>Change of variable: <span class="math display">\int_{-\infty}^{\infty} f(x)\,dx = \int_0^1 f\big(t(y)\big)\,t'(y)\,dy = \int_0^1 g(y)\,dy,
+\qquad g(y) = \frac{f\big(\log\frac{y}{1-y}\big)}{y(1-y)}</span></p>
+<ul>
+<li>Any quadrature rule for a finite interval now applies to <span class="math inline">g</span> on <span class="math inline">(0,1)</span></li>
+<li>Equally spaced points in <span class="math inline">y</span> correspond to points in <span class="math inline">x</span> that are dense near <span class="math inline">0</span> and sparse in the tails</li>
+<li>For a half-line <span class="math inline">(0,\infty)</span> use <span class="math inline">x = -\log(1-y)</span> or <span class="math inline">x = y/(1-y)</span> instead</li>
+</ul>
+</section>
+<section id="infinite-range-logistic-transformation-continued" class="slide level2">
+<h2>Infinite Range: Logistic Transformation (Continued)</h2>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Equally spaced <span class="math inline">y</span> points (red ticks, right) map to unequally spaced <span class="math inline">x</span> points (red ticks, middle). The two shaded areas are equal.</p>
+</section>
+<section id="calculating-probabilities" class="slide level2">
+<h2>Calculating Probabilities</h2>
+<p>For <span class="math inline">X</span> with density <span class="math inline">\varphi(x)</span>, e.g.&nbsp;<span class="math inline">\varphi(x) = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}</span>, <span class="math display">P(a&lt;X&lt;b) = \int_a^b \varphi(x)\,dx = \int_{-\infty}^{\infty}\varphi^{(c)}(x)\,dx,
+\qquad \varphi^{(c)}(x) = \varphi(x)\,I(a&lt;x&lt;b)</span></p>
+<ul>
+<li>Either integrate <span class="math inline">\varphi</span> directly over the finite interval <span class="math inline">[a,b]</span>, or</li>
+<li>integrate the <strong>truncated</strong> function <span class="math inline">\varphi^{(c)}</span> over the whole line; the indicator does the cutting</li>
+</ul>
+<p>The second view matters when <span class="math inline">[a,b]</span> is not the natural range: the same machinery computes <span class="math inline">P(X\in S)</span> for any set <span class="math inline">S</span> and, more generally, <span class="math inline">E[h(X)] = \int h(x)\varphi(x)\,dx</span>.</p>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="768"></section></section>
+<section>
+<section id="quadrature-rules" class="title-slide slide level1 center">
+<h1>2. Quadrature Rules</h1>
+
+</section>
+<section id="midpoint-rule" class="slide level2">
+<h2>Midpoint Rule</h2>
+<p>Divide <span class="math inline">[a,b]</span> into <span class="math inline">n</span> panels of width <span class="math inline">h_n = (b-a)/n</span> and use the height of <span class="math inline">f</span> at the middle of each panel: <span class="math display">\tilde A_n = h_n\sum_{i=1}^n f\!\Big(a + \big(i-\tfrac12\big)h_n\Big)</span></p>
+<ul>
+<li>Each panel is approximated by a rectangle</li>
+<li>Error for smooth <span class="math inline">f</span>: <span class="math inline">\;A - \tilde A_n = \dfrac{(b-a)h_n^2}{24}\,f''(\xi) = O(h_n^2) = O(1/n^2)</span></li>
+<li>Does not evaluate <span class="math inline">f</span> at the endpoints, which is convenient when <span class="math inline">f</span> is singular or undefined there (e.g.&nbsp;<span class="math inline">g(y)</span> at <span class="math inline">y = 0, 1</span> after a logistic transform)</li>
+</ul>
+</section>
+<section id="trapezoidal-rule" class="slide level2">
+<h2>Trapezoidal Rule</h2>
+<p>Approximate <span class="math inline">f</span> on each panel <span class="math inline">[x_{i-1},x_i]</span> by the straight line through <span class="math inline">\big(x_{i-1},f(x_{i-1})\big)</span> and <span class="math inline">\big(x_i,f(x_i)\big)</span>; the panel area is a trapezoid: <span class="math display">\int_{x_0}^{x_1} f(x)\,dx \approx \tfrac12\big[f(x_0)+f(x_1)\big](x_1-x_0)</span></p>
+<p>Summing over <span class="math inline">n</span> panels with <span class="math inline">x_i = a + ih_n</span>, interior points are shared by two panels: <span class="math display">
+\begin{aligned}
+\tilde A_n &amp;= \tfrac12 h_n\Big[f(a) + f(a+h_n) + f(a+h_n) + \cdots + f\big(a+(n-1)h_n\big) + f(b)\Big] \\
+&amp;= \tfrac12 h_n\big[f(a) + f(b)\big] + h_n\sum_{i=1}^{n-1} f(a+ih_n)
+\end{aligned}
+</span></p>
+<ul>
+<li>Error: <span class="math inline">\;A - \tilde A_n = -\dfrac{(b-a)h_n^2}{12}\,f''(\xi) = O(1/n^2)</span>, twice the midpoint error and of opposite sign</li>
+<li>Exact for linear <span class="math inline">f</span></li>
+</ul>
+</section>
+<section id="simpsons-rule" class="slide level2">
+<h2>Simpson’s Rule</h2>
+<p>Take <span class="math inline">n = 2m</span> (even) and <span class="math inline">h_n = (b-a)/n</span>. On each <strong>pair</strong> of panels <span class="math inline">[x_0,x_1]</span> with <span class="math inline">x_1 - x_0 = 2h_n</span>, replace <span class="math inline">f</span> by the quadratic <span class="math inline">\tilde f</span> through <span class="math inline">f(x_0)</span>, <span class="math inline">f\big(\tfrac{x_0+x_1}{2}\big)</span>, <span class="math inline">f(x_1)</span>. Integrating the quadratic exactly gives <span class="math display">\int_{x_0}^{x_1}\tilde f(x)\,dx = \frac{x_1-x_0}{6}\Big[f(x_0) + 4f\big(\tfrac{x_0+x_1}{2}\big) + f(x_1)\Big]</span></p>
+<p>Summing over the <span class="math inline">m</span> pairs, each even interior point is shared by two pairs: <span class="math display">
+\begin{aligned}
+\tilde A_{2m} &amp;= \frac{2h_n}{6}\Big[f(a) + 4f(a+h_n) + f(a+2h_n) + f(a+2h_n) + 4f(a+3h_n) + \cdots + f(b)\Big] \\
+&amp;= \frac{h_n}{3}\Big[f(a) + f(b) + 4\sum_{i=1}^{m} f\big(a+(2i-1)h_n\big) + 2\sum_{i=1}^{m-1} f\big(a+2ih_n\big)\Big]
+\end{aligned}
+</span></p>
+<ul>
+<li>Error: <span class="math inline">\;A - \tilde A_{2m} = -\dfrac{(b-a)h_n^4}{180}\,f^{(4)}(\xi) = O(1/n^4)</span>; exact for cubics</li>
+<li>Simpson <span class="math inline">= \tfrac23\,\text{Midpoint} + \tfrac13\,\text{Trapezoid}</span> on the same pair of panels</li>
+</ul>
+</section>
+<section id="the-three-rules-on-one-panel-pair" class="slide level2">
+<h2>The Three Rules on One Panel Pair</h2>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Simpson uses the same three points as the trapezoid rule on two panels, but fits a parabola instead of two line segments.</p>
+</section>
+<section id="implementation-in-r" class="slide level2">
+<h2>Implementation in R</h2>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>midpoint <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; h <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">f</span>(a <span class="sc">+</span> (<span class="dv">1</span><span class="sc">:</span>n <span class="sc">-</span> <span class="fl">0.5</span>) <span class="sc">*</span> h)) }</span>
+<span id="cb3-2"><a href=""></a>trapezoid <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; x <span class="ot">&lt;-</span> a <span class="sc">+</span> (<span class="dv">0</span><span class="sc">:</span>n) <span class="sc">*</span> h</span>
+<span id="cb3-3"><a href=""></a>  h <span class="sc">*</span> (<span class="fu">sum</span>(<span class="fu">f</span>(x)) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> (<span class="fu">f</span>(a) <span class="sc">+</span> <span class="fu">f</span>(b))) }</span>
+<span id="cb3-4"><a href=""></a>simpson <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { <span class="fu">stopifnot</span>(n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>); h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; x <span class="ot">&lt;-</span> a <span class="sc">+</span> (<span class="dv">0</span><span class="sc">:</span>n) <span class="sc">*</span> h</span>
+<span id="cb3-5"><a href=""></a>  h <span class="sc">/</span> <span class="dv">3</span> <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">f</span>(x) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">2</span>), n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>), <span class="dv">4</span>, <span class="dv">1</span>)) }</span>
+<span id="cb3-6"><a href=""></a><span class="co"># P(0.5 &lt; Z &lt; 2) for Z ~ N(0, 1); exact value from pnorm</span></span>
+<span id="cb3-7"><a href=""></a>exact <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fl">0.5</span>)</span>
+<span id="cb3-8"><a href=""></a><span class="fu">sapply</span>(<span class="fu">c</span>(<span class="at">midpoint =</span> midpoint, <span class="at">trapezoid =</span> trapezoid, <span class="at">simpson =</span> simpson),</span>
+<span id="cb3-9"><a href=""></a>       <span class="cf">function</span>(rule) <span class="fu">rule</span>(dnorm, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="dv">10</span>) <span class="sc">-</span> exact)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     midpoint     trapezoid       simpson 
+-6.416299e-05  1.280126e-04 -1.689521e-06 </code></pre>
+</div>
+</div>
+<p>With only 10 panels Simpson’s rule is already accurate to about <span class="math inline">10^{-7}</span>.</p>
+</section>
+<section id="convergence-of-the-error" class="slide level2">
+<h2>Convergence of the Error</h2>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="768"><p>On the log–log scale the slopes are the exponents of <span class="math inline">1/n</span>: <span class="math inline">-2</span> for midpoint and trapezoid, <span class="math inline">-4</span> for Simpson, until rounding error dominates near <span class="math inline">10^{-15}</span>.</p>
+</section></section>
+<section>
+<section id="application-marginal-likelihood" class="title-slide slide level1 center">
+<h1>3. Application: Marginal Likelihood</h1>
+
+</section>
+<section id="the-marginal-likelihood" class="slide level2">
+<h2>The Marginal Likelihood</h2>
+<p>With likelihood <span class="math inline">L(\theta) = \prod_{i=1}^n P(y_i\mid\theta)</span> and prior <span class="math inline">\pi(\theta)</span>, the posterior is <span class="math display">P(\theta\mid y) = \frac{\prod_{i=1}^n P(y_i\mid\theta)\,\pi(\theta)}{P(y)}, \qquad
+P(y) = \int L(\theta)\,\pi(\theta)\,d\theta = E_\pi\big[L(\theta)\big]</span></p>
+<ul>
+<li><span class="math inline">P(y)</span> is the <strong>marginal likelihood</strong>: the likelihood averaged over the prior</li>
+<li>It is the normalizing constant of the posterior and the basis of Bayes factors for comparing models</li>
+<li>Its value depends strongly on the prior: a prior far from where <span class="math inline">L(\theta)</span> is large, or a very diffuse prior, gives a small <span class="math inline">P(y)</span></li>
+</ul>
+</section>
+<section id="the-marginal-likelihood-continued" class="slide level2">
+<h2>The Marginal Likelihood (Continued)</h2>
+<p>The same likelihood (red) with three priors: one concentrated near the likelihood, one far away, and one vague. <span class="math inline">P(y)</span> is the area under <span class="math inline">L(\theta)\pi(\theta)</span> (shaded).</p>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="example-normal-data-with-unknown-mean-and-variance" class="slide level2">
+<h2>Example: Normal Data with Unknown Mean and Variance</h2>
+<p>Data <span class="math inline">y_1,\ldots,y_n\mid\mu,\sigma^2 \overset{iid}{\sim} N(\mu,\sigma^2)</span>. Parametrize the variance by <span class="math inline">w = \log\sigma^2</span> so both parameters range over <span class="math inline">(-\infty,\infty)</span>, and assign normal priors: <span class="math display">\mu\sim N(\mu_0,\sigma_0^2), \qquad w = \log\sigma^2 \sim N(w_0,\sigma_w^2)</span></p>
+<p><span class="math display">L(\mu,w) = \prod_{i=1}^n \varphi\big(y_i;\ \mu,\ e^{w/2}\big), \qquad
+\pi(\mu,w) = \varphi(\mu;\mu_0,\sigma_0)\,\varphi(w;w_0,\sigma_w)</span></p>
+<p>Marginal likelihood: <span class="math display">P(y) = \int_{-\infty}^{\infty}\!\int_{-\infty}^{\infty} L(\mu,w)\,\pi(\mu,w)\,d\mu\,dw</span></p>
+<p>No closed form (the prior on <span class="math inline">w</span> is not conjugate), so we use two-dimensional quadrature.</p>
+</section>
+<section id="example-transform-and-apply-the-midpoint-rule" class="slide level2">
+<h2>Example: Transform and Apply the Midpoint Rule</h2>
+<p>Logistic transforms to <span class="math inline">(0,1)^2</span>: <span class="math display">\mu = \log\frac{u}{1-u}, \qquad w = \log\frac{v}{1-v}, \qquad
+d\mu\,dw = \frac{du}{u(1-u)}\,\frac{dv}{v(1-v)}</span></p>
+<p><span class="math display">P(y) = \int_0^1\!\int_0^1 L\big(\mu(u),w(v)\big)\,\pi\big(\mu(u),w(v)\big)\,\frac{1}{u(1-u)}\,\frac{1}{v(1-v)}\,du\,dv</span></p>
+<p>Product midpoint rule on an <span class="math inline">n\times n</span> grid with <span class="math inline">h = 1/n</span>, <span class="math inline">u_j = (j-\tfrac12)h</span>, <span class="math inline">v_k = (k-\tfrac12)h</span>: <span class="math display">P(y) \approx h^2\sum_{j=1}^n\sum_{k=1}^n g(u_j,v_k), \qquad g(u,v) = \frac{L\big(\mu(u),w(v)\big)\,\pi\big(\mu(u),w(v)\big)}{u(1-u)\,v(1-v)}</span></p>
+<p>Midpoint avoids the boundary, where <span class="math inline">1/(u(1-u))\to\infty</span>.</p>
+</section>
+<section id="example-transform-and-apply-the-midpoint-rule-continued" class="slide level2">
+<h2>Example: Transform and Apply the Midpoint Rule (Continued)</h2>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="computing-on-the-log-scale" class="slide level2">
+<h2>Computing on the Log Scale</h2>
+<p><span class="math inline">L(\theta)</span> underflows for moderate <span class="math inline">n</span> (a product of <span class="math inline">n</span> densities), so store <span class="math inline">\log g</span> at each grid point and combine with <strong>log-sum-exp</strong>: <span class="math display">\log\sum_{i} e^{\ell_i} = M + \log\sum_i e^{\ell_i - M}, \qquad M = \max_i \ell_i</span></p>
+<p>The largest term becomes <span class="math inline">e^0 = 1</span> and nothing overflows; terms far below <span class="math inline">M</span> underflow to <span class="math inline">0</span> harmlessly.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { M <span class="ot">&lt;-</span> <span class="fu">max</span>(l); M <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> M))) }</span>
+<span id="cb5-2"><a href=""></a>log_ml <span class="ot">&lt;-</span> <span class="fu">log_sum_exp</span>(G) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(h)          <span class="co"># log P(y) = log( h^2 * sum exp(log g) )</span></span>
+<span id="cb5-3"><a href=""></a><span class="fu">c</span>(<span class="at">log_marginal_likelihood =</span> log_ml, <span class="at">direct_sum =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(G))) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(h))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log_marginal_likelihood              direct_sum 
+              -48.09731               -48.09731 </code></pre>
+</div>
+</div>
+<p>Here <code>G</code> is the <span class="math inline">n\times n</span> matrix of <span class="math inline">\log g(u_j,v_k)</span>; the direct sum agrees for this small example but would return <code>-Inf</code> for large <span class="math inline">n</span> or extreme data.</p>
+</section></section>
+<section>
+<section id="difficulties-of-numerical-quadrature" class="title-slide slide level1 center">
+<h1>4. Difficulties of Numerical Quadrature</h1>
+
+</section>
+<section id="peaked-integrands" class="slide level2">
+<h2>Peaked Integrands</h2>
+<p>A grid of fixed width <span class="math inline">h_n</span> can <strong>miss</strong> a narrow spike entirely, or place one or two points on it and badly over- or underestimate its area.</p>
+<ul>
+<li>The posterior <span class="math inline">L(\theta)\pi(\theta)</span> becomes sharper as <span class="math inline">n</span> grows (width <span class="math inline">O(1/\sqrt n)</span>), so a grid that was fine for <span class="math inline">n=10</span> can be useless for <span class="math inline">n=10^4</span></li>
+<li>Remedies: locate the mode first (optimization), centre and scale the grid around it, or use an adaptive rule that refines where <span class="math inline">f</span> varies fast</li>
+</ul>
+</section>
+<section id="peaked-integrands-continued" class="slide level2">
+<h2>Peaked Integrands (Continued)</h2>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Same rule, same grid: the wide density integrates correctly; the spike is almost invisible to the grid.</p>
+</section>
+<section id="transformed-integrands-near-the-boundary" class="slide level2">
+<h2>Transformed Integrands Near the Boundary</h2>
+<p>After a logistic transform, a posterior located at large <span class="math inline">|\theta|</span> is squeezed against <span class="math inline">y = 0</span> or <span class="math inline">y = 1</span>. If <span class="math inline">\theta\approx 50</span>, then <span class="math inline">y = 1/(1+e^{-50}) \approx 1 - 2\times10^{-22}</span>: the entire mass of <span class="math inline">g(y)</span> sits in a sliver a uniform grid cannot resolve.</p>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Remedy: centre the transform on an estimate of the location, <span class="math inline">y = 1/(1+e^{-(\theta-\hat\theta)/s})</span>, so the bulk of the posterior maps to the middle of <span class="math inline">(0,1)</span>.</p>
+</section>
+<section id="the-curse-of-dimensionality" class="slide level2">
+<h2>The Curse of Dimensionality</h2>
+<p>With <span class="math inline">n</span> points per axis, a product rule in <span class="math inline">d</span> dimensions needs <span class="math inline">n^d</span> function evaluations:</p>
 <table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Topic</th>
-<th>Statistical task</th>
+<th><span class="math inline">d</span></th>
+<th><span class="math inline">n = 20</span></th>
+<th><span class="math inline">n = 50</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Computer arithmetic</td>
-<td>Reliable calculation of likelihoods and variances</td>
+<td>1</td>
+<td>20</td>
+<td>50</td>
 </tr>
 <tr class="even">
-<td>Random numbers and Monte Carlo</td>
-<td>Sampling distributions, evaluating estimators and tests</td>
+<td>2</td>
+<td>400</td>
+<td>2,500</td>
 </tr>
 <tr class="odd">
-<td>MLE and optimization</td>
-<td>Point estimation without closed forms</td>
+<td>5</td>
+<td><span class="math inline">3.2\times10^6</span></td>
+<td><span class="math inline">3.1\times10^8</span></td>
 </tr>
 <tr class="even">
-<td>Numerical integration and MCMC</td>
-<td>Bayesian inference</td>
+<td>10</td>
+<td><span class="math inline">1.0\times10^{13}</span></td>
+<td><span class="math inline">9.8\times10^{16}</span></td>
 </tr>
 </tbody>
 </table>
-<p>Throughout: R programming, vectorization, and efficient code.</p>
+<ul>
+<li>Meanwhile the posterior occupies a tiny, often tilted, ellipsoid inside the grid; almost all evaluations are wasted on regions where <span class="math inline">f\approx0</span></li>
+<li>Error of the product rule degrades to <span class="math inline">O(n^{-2/d})</span> in terms of total evaluations <span class="math inline">N = n^d</span></li>
+</ul>
+<p><strong>Conclusion</strong>: quadrature is the tool of choice for <span class="math inline">d\le 3</span> or so. Beyond that, Monte Carlo methods, whose error is <span class="math inline">O(N^{-1/2})</span> regardless of <span class="math inline">d</span>, take over (next lectures).</p>
+</section>
+<section id="the-curse-of-dimensionality-continued" class="slide level2">
+<h2>The Curse of Dimensionality (Continued)</h2>
+
+<img data-src="Lec_08_numerical_quadrature_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
+<ul>
+<li>Quadrature approximates <span class="math inline">\int_a^b f</span> by a weighted sum of <span class="math inline">f</span> at grid points; infinite ranges are handled by a change of variable such as the logistic transform, with the Jacobian <span class="math inline">t'(y)</span> included</li>
+<li>Midpoint and trapezoid rules have <span class="math inline">O(1/n^2)</span> error, Simpson’s rule <span class="math inline">O(1/n^4)</span>; all are cheap and reliable in one dimension</li>
+<li>Statistical uses: probabilities <span class="math inline">\int\varphi(x)I(a&lt;x&lt;b)\,dx</span>, expectations, and the marginal likelihood <span class="math inline">P(y) = \int L(\theta)\pi(\theta)\,d\theta</span>; always compute on the log scale with log-sum-exp</li>
+<li>Limitations: peaked integrands need a grid adapted to the mode and scale; product grids cost <span class="math inline">n^d</span> evaluations, so quadrature is practical only in low dimension</li>
+</ul>
 
 </section></section>
     </div>
@@ -488,19 +481,19 @@ E(X) = \int x f(x)\,dx, \qquad V(X), \qquad \int f(x\mid\theta)\pi(\theta)\,d\th
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

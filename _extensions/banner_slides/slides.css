@@ -42,6 +42,7 @@
    so it stays proportional if --r-heading1-size ever changes. */
 .reveal .subtitle {
   font-size: calc(var(--r-heading1-size) * 0.8) !important;
+  color: darkblue !important;
 }
 
 /* Brute-force blue headers */

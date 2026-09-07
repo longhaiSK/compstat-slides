@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_07_bayesian_inference_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_07_bayesian_inference_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_07_bayesian_inference_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Lec_11_Importance_Sampling_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-html/popper.min.js"></script>
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <title>Elements of Statistical Computation</title>
+  <title>Importance Sampling (Reweighting)</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Lec_11_Importance_Sampling_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Lec_11_Importance_Sampling_files/libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -32,7 +32,7 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="Lec_07_bayesian_inference_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="Lec_11_Importance_Sampling_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
   <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -50,12 +50,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -149,8 +149,8 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Elements of Statistical Computation</h1>
-  <p class="subtitle">Bayesian Inference: A Brief Introduction</p>
+  <h1 class="title">Importance Sampling (Reweighting)</h1>
+  <p class="subtitle">Reject, Reweight, Repeat</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -161,165 +161,273 @@ Longhai Li
 </div>
 
 </section>
-<section>
-<section id="the-bayesian-framework" class="title-slide slide level1 center">
-<h1>1. The Bayesian Framework</h1>
-
-</section>
-<section id="four-steps" class="slide level2">
-<h2>Four Steps</h2>
-<ol type="1">
-<li><strong>Specify a prior</strong> <span class="math inline">\pi(\theta)</span>: rough knowledge about <span class="math inline">\theta</span>, treated as a random variable</li>
-<li><strong>Specify a probability model</strong> for the data: <span class="math inline">P(y_1,\ldots,y_n\mid\theta)</span></li>
-<li><strong>Find the posterior</strong> by Bayes’ rule <span class="math display">P(\theta\mid y_1,\ldots,y_n) = \frac{P(y_1,\ldots,y_n\mid\theta)\,\pi(\theta)}{\displaystyle\int P(y_1,\ldots,y_n\mid\theta)\,\pi(\theta)\,d\theta}</span></li>
-<li><strong>Interpret</strong> the posterior: summarize <span class="math inline">\theta</span>, make predictions</li>
-</ol>
-<p>Writing <span class="math inline">L(\theta) = P(y_{1:n}\mid\theta)</span> for the likelihood, <span class="math display">P(\theta\mid y_{1:n}) \propto L(\theta)\,\pi(\theta)</span></p>
-<p>The denominator <span class="math inline">P(y_{1:n}) = \int L(\theta)\pi(\theta)\,d\theta</span> is the <strong>marginal likelihood</strong>; it does not depend on <span class="math inline">\theta</span> and is usually the hard part to compute.</p>
-</section>
-<section id="four-steps-continued" class="slide level2">
-<h2>Four Steps (Continued)</h2>
-<p>Left: a flat prior and the likelihood. Right: the posterior <span class="math inline">\propto L(\theta)\pi(\theta)</span>, with a <span class="math inline">(1-\alpha)</span> credible interval <span class="math inline">(\theta_{\alpha/2},\theta_{1-\alpha/2})</span> cutting off <span class="math inline">\alpha/2</span> in each tail.</p>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="summarizing-theta-point-estimates-from-loss-functions" class="slide level2">
-<h2>Summarizing <span class="math inline">\theta</span>: Point Estimates from Loss Functions</h2>
-<p>The Bayes estimate minimizes the posterior expected loss: <span class="math display">\hat\theta = \arg\min_{\hat\theta}\; E\big[L(\theta,\hat\theta)\mid y_{1:n}\big]</span></p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Loss <span class="math inline">L(\theta,\hat\theta)</span></th>
-<th>Bayes estimate <span class="math inline">\hat\theta</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><span class="math inline">(\theta-\hat\theta)^2</span> (squared error)</td>
-<td>posterior mean <span class="math inline">E(\theta\mid y_{1:n})</span></td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\lvert\theta-\hat\theta\rvert</span> (absolute error)</td>
-<td>posterior median</td>
-</tr>
-<tr class="odd">
-<td><span class="math inline">I(\theta\ne\hat\theta)</span> (0–1 loss)</td>
-<td>posterior mode (MAP)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Interval estimate</strong>: a <span class="math inline">(1-\alpha)</span> credible interval <span class="math inline">(\theta_{\alpha/2},\theta_{1-\alpha/2})</span> contains <span class="math inline">\theta</span> with posterior probability <span class="math inline">1-\alpha</span>, a direct probability statement about <span class="math inline">\theta</span> (unlike a confidence interval).</p>
-<p>All of these are integrals or optimizations over the posterior, which is why Bayesian inference is computational.</p>
-</section>
-<section id="prediction" class="slide level2 smaller">
-<h2>Prediction</h2>
-<p>The <strong>posterior predictive distribution</strong> of a new observation: <span class="math display">P(y_{n+1}\mid y_{1:n}) = \frac{\int P(y_{n+1},y_{1:n}\mid\theta)\,\pi(\theta)\,d\theta}{\int P(y_{1:n}\mid\theta)\,\pi(\theta)\,d\theta}</span></p>
-<p>If <span class="math inline">y_1,\ldots,y_n,y_{n+1}</span> are conditionally independent given <span class="math inline">\theta</span>, this simplifies to <span class="math display">P(y_{n+1}\mid y_{1:n}) = \int P(y_{n+1}\mid\theta)\,P(\theta\mid y_{1:n})\,d\theta</span></p>
-<p>an average of the sampling density over the posterior. With posterior draws <span class="math inline">\theta_1,\ldots,\theta_J\sim P(\theta\mid y_{1:n})</span>, <span class="math display">P(y_{n+1}\mid y_{1:n}) \approx \frac1J\sum_{j=1}^J P(y_{n+1}\mid\theta_j)</span></p>
-<p>The predictive distribution is wider than any single <span class="math inline">P(y_{n+1}\mid\theta_j)</span>: it carries both sampling variability and posterior uncertainty about <span class="math inline">\theta</span>.</p>
-</section>
-<section id="prediction-continued" class="slide level2">
-<h2>Prediction (Continued)</h2>
-<p>Red: <span class="math inline">P(y_{n+1}\mid\theta_j)</span> for ten posterior draws <span class="math inline">\theta_j</span>. Black: their average, the posterior predictive density.</p>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section></section>
-<section>
-<section id="example-bernoulli-data-with-a-beta-prior" class="title-slide slide level1 center">
-<h1>2. Example: Bernoulli Data with a Beta Prior</h1>
-
-</section>
-<section id="prior" class="slide level2">
-<h2>Prior</h2>
-<p><span class="math inline">y_1,\ldots,y_n\mid\theta \overset{iid}{\sim}\text{Bern}(\theta)</span>, with <span class="math inline">\theta\sim\text{Beta}(\alpha_1,\alpha_0)</span>, <span class="math inline">\alpha_1,\alpha_0&gt;0</span> given: <span class="math display">\pi(\theta) = \frac{\Gamma(\alpha_0+\alpha_1)}{\Gamma(\alpha_0)\Gamma(\alpha_1)}\,\theta^{\alpha_1-1}(1-\theta)^{\alpha_0-1}, \qquad 0&lt;\theta&lt;1</span></p>
-<p><span class="math display">E(\theta) = \frac{\alpha_1}{\alpha_0+\alpha_1}, \qquad
-V(\theta) = \frac{\alpha_0\alpha_1}{(\alpha_0+\alpha_1)^2(\alpha_0+\alpha_1+1)}</span></p>
-<ul>
-<li><span class="math inline">\alpha_1</span> acts like a prior count of successes, <span class="math inline">\alpha_0</span> of failures; <span class="math inline">\alpha_0+\alpha_1</span> is the prior “sample size”</li>
-<li><span class="math inline">\text{Beta}(1,1) = \text{Unif}(0,1)</span>; <span class="math inline">\text{Beta}(2,1)</span> has density <span class="math inline">2\theta</span>, favouring large <span class="math inline">\theta</span></li>
-<li>Small <span class="math inline">\alpha</span>’s give U-shaped or flat priors (vague); large <span class="math inline">\alpha</span>’s concentrate the prior</li>
-</ul>
-</section>
-<section id="prior-continued" class="slide level2">
-<h2>Prior (Continued)</h2>
-
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
-<section id="likelihood-and-posterior" class="slide level2">
-<h2>Likelihood and Posterior</h2>
-<p><strong>Likelihood</strong>: with <span class="math inline">P(y_i\mid\theta) = \theta^{y_i}(1-\theta)^{1-y_i}</span> and <span class="math inline">\mathbf y = (y_1,\ldots,y_n)</span>, <span class="math display">P(\mathbf y\mid\theta) = \prod_{i=1}^n \theta^{y_i}(1-\theta)^{1-y_i} = \theta^{n_1}(1-\theta)^{n_0},
-\qquad n_1 = \sum_i y_i,\ \ n_0 = n - n_1</span></p>
-<p><strong>Posterior</strong>: <span class="math display">
-\begin{aligned}
-P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\mathbf y)}
-\;\propto\; \theta^{\alpha_1-1}(1-\theta)^{\alpha_0-1}\cdot\theta^{n_1}(1-\theta)^{n_0} \\
-&amp;= \theta^{(\alpha_1+n_1)-1}(1-\theta)^{(\alpha_0+n_0)-1}
-\end{aligned}
+<section id="goal-and-setup" class="slide level2">
+<h2>Goal and Setup</h2>
+<p><strong>Goal:</strong> find the integral</p>
+<p><span class="math display">
+A = \frac{\int a(\theta) f(\theta)\, d\theta}{\int f(\theta)\, d\theta} = E(a(\theta)), \quad \text{where } \theta \sim \frac{f(\theta)}{\int f(\theta)\, d\theta}
 </span></p>
-<p>This is the Beta kernel with updated parameters <span class="math inline">\alpha_1' = \alpha_1+n_1</span>, <span class="math inline">\alpha_0' = \alpha_0+n_0</span>: <span class="math display">\theta\mid\mathbf y \sim \text{Beta}(\alpha_1+n_1,\ \alpha_0+n_0)</span></p>
-<p>The Beta prior is <strong>conjugate</strong> to the Bernoulli likelihood: the posterior has the same form, and the normalizing constant <span class="math inline">P(\mathbf y)</span> never has to be computed explicitly.</p>
-</section>
-<section id="posterior-summaries" class="slide level2">
-<h2>Posterior Summaries</h2>
-<p><span class="math display">E(\theta\mid\mathbf y) = \frac{\alpha_1+n_1}{\alpha_0+\alpha_1+n}
-= \underbrace{\frac{\alpha_0+\alpha_1}{\alpha_0+\alpha_1+n}}_{w}\cdot\frac{\alpha_1}{\alpha_0+\alpha_1}
-+ (1-w)\cdot\underbrace{\frac{n_1}{n}}_{\hat\theta_{\text{MLE}}}</span></p>
-<p>a weighted average of the prior mean and the MLE; the data weight <span class="math inline">1-w\to1</span> as <span class="math inline">n\to\infty</span>.</p>
-<p><span class="math display">V(\theta\mid\mathbf y) = \frac{(\alpha_1+n_1)(\alpha_0+n_0)}{(n+\alpha_0+\alpha_1)^2(n+\alpha_0+\alpha_1+1)} = O\!\left(\frac1n\right)</span></p>
-<ul>
-<li>The posterior variance shrinks to zero: the posterior concentrates at the true <span class="math inline">\theta</span> as <span class="math inline">n\to\infty</span></li>
-<li>Compare with the sampling distribution of the MLE, <span class="math inline">\hat\theta_{\text{MLE}}\ \dot\sim\ N\big(\theta_0,\,1/(nI(\theta_0))\big)</span>, whose variance is also <span class="math inline">O(1/n)</span>; for large <span class="math inline">n</span> the two approaches agree, with the prior’s influence vanishing</li>
-</ul>
-</section>
-<section id="posterior-summaries-continued" class="slide level2">
-<h2>Posterior Summaries (Continued)</h2>
-<p>Prior <span class="math inline">\text{Beta}(2,2)</span> and posteriors after <span class="math inline">n = 10</span>, <span class="math inline">50</span>, <span class="math inline">200</span> observations with <span class="math inline">\bar y = 0.7</span>. The posterior narrows at rate <span class="math inline">1/\sqrt n</span> and centres on the MLE.</p>
+<p>where <span class="math inline">f(\theta)</span> is an <strong>unnormalized</strong> density,</p>
+<p><span class="math display">
+f(\theta) = \pi(\theta) p(x \mid \theta), \qquad C_f = \int f(\theta)\, d\theta
+</span></p>
+<p>(the shaded area under <span class="math inline">f</span> is <span class="math inline">C_f</span>).</p>
 
-<img data-src="Lec_07_bayesian_inference_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
-<section id="where-computation-enters" class="slide level2">
-<h2>Where Computation Enters</h2>
-<p>For the Beta–Bernoulli model everything is closed-form. In general:</p>
+<img data-src="Lec%2011%20Importance%20Sampling_images/p01-fdensity.png" style="width:45.0%" class="r-stretch quarto-figure-center"><p class="caption">Unnormalized density <span class="math inline">f(\theta)</span>; the shaded area is <span class="math inline">C_f=\int f(\theta)\,d\theta</span>.</p><p>We <strong>can’t draw</strong> <span class="math inline">\theta \sim f(x)</span> directly. Instead, we draw <span class="math inline">\theta \sim g(\theta)</span>, where <span class="math inline">g(\theta)</span> is another unnormalized function, and we hope</p>
+<p><span class="math display">
+\frac{f(\theta)}{g(\theta)} \approx a \ \ (\text{constant}).
+</span></p>
+<p><strong>Requirement for <span class="math inline">g(\theta)</span>:</strong></p>
+<p><span class="math display">
+\{\theta \mid g(\theta) &gt; 0\} \supseteq \{\theta \mid f(\theta) &gt; 0\}
+</span></p>
+</section>
+<section id="example-of-supports-of-g-and-f" class="slide level2">
+<h2>Example of Supports of g and f</h2>
+<p>Comparing <span class="math inline">(l_g, u_g)</span> vs.&nbsp;<span class="math inline">(l_f, u_f)</span>: if the support of <span class="math inline">g</span> does not cover the support of <span class="math inline">f</span>, importance sampling is <strong>not valid</strong>; if it does, it is <strong>valid</strong>.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p02-supports.png" style="width:95.0%" class="r-stretch quarto-figure-center"><p class="caption">Left: support of g does not cover support of f (not valid). Right: support of g covers support of f (valid).</p></section>
+<section id="importance-reweighting-formula" class="slide level2">
+<h2>Importance Reweighting Formula</h2>
+<ol type="1">
+<li><p>Draw <span class="math inline">\theta_1, \dots, \theta_n \sim g</span></p></li>
+<li><p><span class="math display">
+\frac{C_f}{C_g} = \sum_{i=1}^n \frac{f(\theta_i)}{g(\theta_i)} \Big/ n = \frac{\sum_{i=1}^n w(\theta_i)}{n}, \quad \text{where } w(\theta) = \frac{f(\theta)}{g(\theta)}
+</span></p></li>
+</ol>
+<p><span class="math display">
+\hat{A} = \frac{\sum_{i=1}^n a(\theta_i) \dfrac{f(\theta_i)}{g(\theta_i)}}{\sum_{i=1}^n w(\theta_i)} = \frac{\left[\sum_{i=1}^n a(\theta_i) w(\theta_i)\right]/n}{\left[\sum_{i=1}^n w(\theta_i)\right]/n}, \qquad w(\theta_i) = \frac{f(\theta_i)}{g(\theta_i)}
+</span></p>
+<p><span class="math display">
+\hat{A} = \sum_{i=1}^n a(\theta_i) \cdot \tilde{w}(\theta_i), \qquad \tilde{w}(\theta_i) = \frac{w(\theta_i)}{\sum_{i=1}^n w(\theta_i)}, \qquad \sum_{i=1}^n \tilde{w}(\theta_i) = 1
+</span></p>
+<p><strong>Example:</strong></p>
 <table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Quantity</th>
-<th>Requires</th>
+<th></th>
+<th><span class="math inline">\theta_1</span></th>
+<th><span class="math inline">\theta_2</span></th>
+<th><span class="math inline">\theta_3</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Normalizing constant <span class="math inline">P(\mathbf y) = \int L(\theta)\pi(\theta)\,d\theta</span></td>
-<td>integration over <span class="math inline">\theta</span></td>
+<td><span class="math inline">w(\theta)</span></td>
+<td>100</td>
+<td>40</td>
+<td>60</td>
 </tr>
 <tr class="even">
-<td>Posterior mean, variance, probabilities</td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="odd">
-<td>Posterior mode</td>
-<td>optimization</td>
-</tr>
-<tr class="even">
-<td>Posterior predictive <span class="math inline">\int P(y_{n+1}\mid\theta)P(\theta\mid\mathbf y)\,d\theta</span></td>
-<td>integration over <span class="math inline">\theta</span></td>
-</tr>
-<tr class="odd">
-<td>Credible intervals</td>
-<td>posterior quantiles</td>
+<td><span class="math inline">\tilde{w}(\theta)</span></td>
+<td>0.5</td>
+<td>0.2</td>
+<td>0.3</td>
 </tr>
 </tbody>
 </table>
-<ul>
-<li>One-dimensional <span class="math inline">\theta</span>: numerical quadrature</li>
-<li>Multi-dimensional <span class="math inline">\theta</span>: Monte Carlo with posterior draws <span class="math inline">\theta_1,\ldots,\theta_J</span>, obtained by <strong>Markov chain Monte Carlo</strong> (next lectures), turning every integral into a sample average</li>
-</ul>
+</section>
+<section id="derivation-of-importance-reweighting-formula" class="slide level2">
+<h2>Derivation of Importance Reweighting Formula</h2>
+<p><span class="math display">
+E_f(a(\theta)) = \int_{l_f}^{u_f} a(\theta) \frac{f(\theta)}{C_f}\, d\theta = \frac{1}{C_f} \int_{l_f}^{u_f} a(\theta) f(\theta)\, d\theta
+</span></p>
+<p><span class="math display">
+= \frac{C_g}{C_f} \int_{l_f}^{u_f} \left(a(\theta) \frac{f(\theta)}{g(\theta)}\right) \cdot \frac{g(\theta)}{C_g}\, d\theta = \frac{C_g}{C_f} \int_{l_g}^{u_g} a(\theta) \cdot \frac{f(\theta)}{g(\theta)} \cdot \frac{g(\theta)}{C_g}\, d\theta
+</span></p>
+<p>requiring <span class="math inline">\{\theta \mid g(\theta) &gt; 0\} \supseteq \{\theta \mid f(\theta) &gt; 0\}</span></p>
+<p><span class="math display">
+= E_g\!\left(a(\theta) \cdot \frac{f(\theta)}{g(\theta)}\right) \Big/ \left(\frac{C_f}{C_g}\right) = E_g\!\left(a(\theta) \cdot \frac{f(\theta)}{g(\theta)}\right) \Big/ \frac{C_f}{C_g}
+</span></p>
+<p><span class="math display">
+w(\theta) = \frac{f(\theta)}{g(\theta)} \text{ is called the importance weight.}
+</span></p>
+<p><span class="math display">
+\frac{C_f}{C_g} = \int \frac{f(\theta)}{g(\theta)} \cdot \frac{g(\theta)}{C_g}\, d\theta = \frac{\int f(\theta)\, d\theta}{\int g(\theta)\, d\theta} = E_g\!\left(\frac{f(\theta)}{g(\theta)}\right)
+</span></p>
+</section>
+<section id="example-1-non-overlapping-support-invalid-case" class="slide level2">
+<h2>Example 1: Non-overlapping Support (Invalid Case)</h2>
+<p><span class="math display">
+f(\theta) = I(0 \le \theta \le 1), \qquad g(\theta) = I(0 \le \theta \le 2)
+</span></p>
+<p>![f(θ)=I(0≤θ≤1), g(θ)=I(0≤θ≤2), with C_f=1, C_g=2. w(θ)=1 on [0,1], w(θ)=0 on (1,2].](Lec 11 Importance Sampling_images/p05-boxplot.png){width=42%}</p>
+<p>Support of <span class="math inline">g \supseteq</span> support of <span class="math inline">f</span>. We want to estimate <span class="math inline">\dfrac{C_f}{C_g}</span> (true <span class="math inline">= \tfrac{1}{2}</span>). Suppose <span class="math inline">\theta_s \sim g\,[\text{unif}([0,2])]</span>.</p>
+<p><span class="math display">
+w(\theta_s) = \frac{f(\theta_s)}{g(\theta_s)} =
+\begin{cases}
+1 &amp; \text{if } 0 \le \theta_s \le 1 \\
+0 &amp; \text{if } 1 &lt; \theta_s \le 2
+\end{cases}
+</span></p>
+<p><span class="math display">
+\left(\widehat{\frac{C_f}{C_g}}\right) = \sum_{s=1}^S w(\theta_s) \Big/ S \approx \frac{1}{2}
+</span></p>
 
-</section></section>
+<img data-src="Lec%2011%20Importance%20Sampling_images/p05-sampleplot.png" style="width:40.0%" class="r-stretch quarto-figure-center"><p class="caption">Flat f and g densities on [0,2] with w(θ)=1 on [0,1] and w(θ)=0 on [1,2].</p><p><span class="math display">
+\hat{A} = \frac{\sum_s a(\theta_s) w(\theta_s)}{\sum_s w(\theta_s)} = \frac{\sum_{0 &lt; \theta_s &lt; 1} a(\theta_s)}{\sum_s I(0 &lt; \theta_s &lt; 1)} = \frac{1}{n_E} \sum_{0 &lt; \theta_s &lt; 1} a(\theta_s), \quad \text{where } n_E = \#(0 &lt; \theta_s &lt; 1) \approx \frac{1}{2} S
+</span></p>
+</section>
+<section id="example-2-support-of-g-support-of-f" class="slide level2">
+<h2>Example 2: Support of g ⊂ Support of f</h2>
+<p><span class="math display">
+f(\theta) = I(0 \le \theta \le 2), \qquad g(\theta) = I(0 \le \theta \le 1)
+</span></p>
+<p>Support of <span class="math inline">g \subset</span> support of <span class="math inline">f</span> — <strong>importance sampling here is not generally valid</strong> since <span class="math inline">g</span> does not cover the support of <span class="math inline">f</span>.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p06-boxplot.png" style="width:42.0%" class="r-stretch quarto-figure-center"><p class="caption">f(θ)=I(0≤θ≤2) in red, g(θ)=I(0≤θ≤1) in blue; g’s support does not cover f’s support.</p><p>We want to estimate <span class="math inline">\dfrac{C_f}{C_g}</span> (true <span class="math inline">\le 2</span>). Suppose <span class="math inline">\theta_s \sim g\,[\text{unif}([0,1])]</span>.</p>
+<p><span class="math display">
+w(\theta_s) = \frac{f(\theta_s)}{g(\theta_s)} = 1
+</span></p>
+<p><span class="math display">
+\left(\widehat{\frac{C_f}{C_g}}\right) = \frac{\sum_{s=1}^S w(\theta_s)}{S} = 1 \ne 2 \quad (\text{true value})
+</span></p>
+</section>
+<section id="example-of-poor-importance-sampling" class="slide level2">
+<h2>Example of Poor Importance Sampling</h2>
+<p>When <span class="math inline">f</span> and <span class="math inline">g</span> have little overlap, only a few samples from <span class="math inline">g</span> fall where <span class="math inline">f</span> has appreciable mass (circled region), giving highly variable, unreliable weights.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p07-poorIS.png" style="width:85.0%" class="r-stretch quarto-figure-center"><p class="caption">f (red) concentrated to the left, g (black) concentrated to the right, with little overlap between the two densities — most g-samples receive negligible weight.</p></section>
+<section id="effective-sample-size" class="slide level2">
+<h2>Effective Sample Size</h2>
+<p><span class="math display">
+S_{\text{eff}} = \frac{1}{\sum_{s=1}^S \tilde{w}(\theta_s)^2}, \qquad \text{where } \tilde{w}(\theta_s) = \frac{w(\theta_s)}{\sum_{s=1}^S w(\theta_s)}
+</span></p>
+<p><strong>(Not reliable)</strong></p>
+<p><strong>A special case:</strong> If <span class="math inline">w(\theta_s) \approx c</span> (constant), then <span class="math inline">\tilde{w}(\theta_s) = \dfrac{c}{S \cdot c} = \dfrac{1}{S}</span></p>
+<p>then, <span class="math inline">S_{\text{eff}} = \dfrac{1}{\sum_{s=1}^S (1/S)^2} = \dfrac{1}{1/S} = S</span></p>
+<p><span class="math display">
+\text{Var}_f\!\left(\sum_{s=1}^S a(\theta_s)/S\right) = \frac{\text{Var}_f(a(\theta_s))}{S}
+</span></p>
+<p><span class="math display">
+\text{Var}_g\!\left(\frac{\sum_{s=1}^S a(\theta_s) w(\theta_s)}{\sum_{s=1}^S w(\theta_s)}\right) \approx \frac{\text{Var}(a(\theta_s))}{S_{\text{eff}}}
+</span></p>
+<p>But <span class="math inline">S_{\text{eff}}</span> is <strong>not reliable</strong>.</p>
+</section>
+<section id="example-3-equal-supports" class="slide level2">
+<h2>Example 3: Equal Supports</h2>
+<p><span class="math display">
+f(\theta) = I(0 \le \theta \le 2), \qquad g(\theta) = I(0 \le \theta \le 1)
+</span></p>
+<p>All <span class="math inline">\theta_s \sim \text{unif}([0,1])</span>. Here <span class="math inline">w(\theta_s) = 1</span>, so <span class="math inline">S_{\text{eff}} = S</span>.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p09-boxplot.png" style="width:40.0%" class="r-stretch quarto-figure-center"><p class="caption">f(θ)=I(0≤θ≤2), g(θ)=I(0≤θ≤1), overlapping boxes of height 1 from 0 to 1 (g) and 1 to 2 (f).</p></section>
+<section id="example-4-estimating-an-integral" class="slide level2">
+<h2>Example 4: Estimating an Integral</h2>
+<p>Estimate the integral <span class="math inline">\displaystyle\int_a^b \varphi(x)\, dx = I</span>, where <span class="math inline">\varphi = \text{dnorm}(x)</span>, <span class="math inline">X \sim N(0,1)</span>.</p>
+<p>Let <span class="math inline">f(x) = \varphi(x) \cdot I(a \le x \le b)</span>.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p10-bellcurve.png" style="width:55.0%" class="r-stretch quarto-figure-center"><p class="caption">φ(x) is the normal density; f(x)=φ(x)·I(a≤x≤b) is the red hatched region between a and b, with g(x) shown as the flat proposal under it.</p><p><span class="math display">
+A = \int_a^b a(x) \cdot \frac{\varphi(x)}{I}\, dx = E_f(a(x))
+</span></p>
+<p><span class="math display">
+C_f = \int_{-\infty}^{b} f(x)\, dx = P(a &lt; X &lt; b)
+</span></p>
+</section>
+<section id="example-4-option-1-uniform-proposal" class="slide level2">
+<h2>Example 4 — Option 1: Uniform Proposal</h2>
+<p><strong>Option 1:</strong> <span class="math inline">g(x) = I(a \le x \le b)</span>, <span class="math inline">C_g = b - a</span></p>
+<p>Suppose we have <span class="math inline">X_s \sim g\,(\text{unif}([a,b]))</span>:</p>
+<p><span class="math display">
+w(X_s) = \frac{f(X_s)}{g(X_s)} = \varphi(X_s)
+</span></p>
+<p><span class="math display">
+\left(\widehat{\frac{C_f}{C_g}}\right) = \frac{\sum_{s=1}^S w(X_s)}{S} = \frac{\sum_{s=1}^S \varphi(X_s)}{S}
+</span></p>
+<p><span class="math display">
+\hat{A} = \frac{\sum_{s=1}^S a(X_s)\varphi(X_s)}{\sum_{s=1}^S \varphi(X_s)}
+</span></p>
+<p>We know <span class="math inline">C_g = b - a</span>, so</p>
+<p><span class="math display">
+\hat{C}_f = \left(\widehat{\frac{C_f}{C_g}}\right)(b-a) = \frac{\sum_{s=1}^S \varphi(X_s)}{S}(b-a) = \sum_s \varphi(X_s) \cdot \frac{b-a}{S}
+</span></p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p11-midpoint.png" style="width:75.0%" class="r-stretch quarto-figure-center"><p class="caption">Density g (uniform on [a,b]) under f, with the hatched triangular region illustrating the randomised midpoint rule.</p><p>This is the <strong>randomised midpoint rule</strong>.</p>
+</section>
+<section id="example-4-option-2-using-φx-as-proposal" class="slide level2">
+<h2>Example 4 — Option 2: Using φ(x) as Proposal</h2>
+<p><strong>Option 2:</strong> using <span class="math inline">g(x) = \varphi(x)</span> to approximate <span class="math inline">f</span>.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p12-approxfx.png" style="width:60.0%" class="r-stretch quarto-figure-center"><p class="caption">g = φ(x) (black curve) used as the proposal, matching f (red) closely between a and b; sample points shown as dots on the x-axis with w(θ)=0 outside [a,b] and w(θ)=1 inside.</p><p>Draw <span class="math inline">\theta_1, \dots, \theta_n \sim g</span>, <span class="math inline">C_g = 1</span>:</p>
+<p><span class="math display">
+\left(\widehat{\frac{C_f}{C_g}}\right) = \frac{\sum w(\theta_i)}{n} = \frac{\#(a &lt; \theta_i &lt; b)}{n}
+</span></p>
+</section>
+<section id="more-choices-of-gx" class="slide level2">
+<h2>More Choices of g(x)</h2>
+<p>Using tangent lines to <span class="math inline">\log g(x)</span> at the boundary to build proposal densities:</p>
+<p><span class="math display">
+g_1(x) = e^{l_1(x)}, \qquad g_2(x) = e^{l_2(x)}
+</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="Lec%2011%20Importance%20Sampling_images/p13-loggx.png" style="width:70.0%"></p>
+<figcaption>log g(x) with two tangent-line approximations l1 and l2 near the boundary point b, defining g1(x)=e^{l1(x)} and g2(x)=e^{l2(x)}.</figcaption>
+</figure>
+</div>
+<p>Inverting the CDF of <span class="math inline">e^{l_1(t)}</span> on <span class="math inline">[a,b]</span> to sample <span class="math inline">x</span>:</p>
+<p><span class="math display">
+F(x) = \frac{\int_a^x e^{l_1(t)}\, dt}{\int_a^b e^{l_1(t)}\, dt}
+</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="Lec%2011%20Importance%20Sampling_images/p13-invertcdf.png" style="width:55.0%"></p>
+<figcaption>Density e^{l1(t)} on [a,b] with shaded area up to x, and the CDF formula F(x) used for inverting the CDF to sample.</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-quadratic-approximation-to-log-fx" class="slide level2">
+<h2>Example: Quadratic Approximation to log f(x)</h2>
+<p>Using a quadratic function (matching the curvature at <span class="math inline">\theta_0</span>) to approximate <span class="math inline">\log f(x)</span>, giving a Gaussian-shaped <span class="math inline">\log g(x)</span>.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p14-quadapprox.png" style="width:75.0%" class="r-stretch quarto-figure-center"><p class="caption">log f(x) in red vs.&nbsp;a quadratic approximation log g(x) in blue, matched at θ0.</p></section>
+<section id="advanced-examples-free-energy" class="slide level2">
+<h2>Advanced Examples: Free Energy</h2>
+<p>Consider a family of unnormalized densities indexed by <span class="math inline">\lambda</span>:</p>
+<p><span class="math display">
+f_\lambda(s) = e^{-E_\lambda(s)}
+</span></p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p15-freeenergy.png" style="width:60.0%" class="r-stretch quarto-figure-center"><p class="caption">Nested contour plot: outer contour is g, inner (red) contours represent f, illustrating a family of distributions f_λ(s) shrinking toward the target.</p><p><span class="math display">
+F(\lambda) = \int f_\lambda(s)\, ds
+</span></p>
+<p><span class="math display">
+f_0(s) = g(s) = e^{-E_0(s)}
+</span></p>
+<p><span class="math display">
+\frac{F(\lambda)}{F(0)} = \sum_s \frac{f_\lambda(s)}{f_0(s)} \Big/ n, \qquad \text{with } s \sim f_0(s) = g(s)
+</span></p>
+</section>
+<section id="advanced-examples-chaining-free-energy-ratios" class="slide level2">
+<h2>Advanced Examples: Chaining Free Energy Ratios</h2>
+<p>Chain a sequence of intermediate distributions <span class="math inline">f_0, f_1, f_2, \dots, f_{100}</span> from the proposal to the target, and estimate the ratio of normalizing constants as a product of successive ratios:</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p16-chaining.png" style="width:70.0%" class="r-stretch quarto-figure-center"><p class="caption">Nested contours from f0(s) (outermost, the proposal) through f1, f2, … down to f100(s) (innermost, the target), used to bridge a chain of importance-sampling ratios.</p><p><span class="math display">
+\frac{\widehat{F}_{100}}{\widehat{F}_0} = \frac{\widehat{F}_{100}}{\widehat{F}_{99}} \cdot \frac{\widehat{F}_{99}}{\widehat{F}_{98}} \cdots \frac{\widehat{F}_1}{\widehat{F}_0}
+</span></p>
+</section>
+<section id="a-toy-example-estimating-the-area-of-the-red-region" class="slide level2">
+<h2>A Toy Example: Estimating the Area of the Red Region</h2>
+<p>A nested sequence of regions <span class="math inline">f_1 \supset f_2 \supset \dots \supset f_{99} \supset f_{100}</span>, where <span class="math inline">f_{100}</span> (red) is the small target region whose area we want, bridged via the chain of intermediate regions.</p>
+
+<img data-src="Lec%2011%20Importance%20Sampling_images/p17-toyexample.png" style="width:55.0%" class="r-stretch quarto-figure-center"><p class="caption">Nested contours f1, f2, …, f99 with the small red irregular region f100 (target area) at the centre.</p></section>
+<section id="approximating-cross-validation" class="slide level2">
+<h2>Approximating Cross-Validation</h2>
+<p>Data <span class="math inline">y_1, \dots, y_i, \dots, y_n</span>.</p>
+<p><strong>Full data posterior:</strong></p>
+<p><span class="math display">
+f(\theta \mid y_1, \dots, y_n) \propto g(\theta) = \prod_{i=1}^n p(y_i \mid \theta) \cdot \pi(\theta)
+</span></p>
+<p><strong>Leave-one-out posterior:</strong></p>
+<p><span class="math display">
+f_{-i}(\theta \mid y_1, \dots, y_{i-1}, y_{i+1}, \dots, y_n) \propto f(\theta) = \prod_{j \ne i} p(y_j \mid \theta) \cdot \pi(\theta)
+</span></p>
+<p><strong>Importance weight:</strong></p>
+<p><span class="math display">
+w(\theta) = \frac{f(\theta)}{g(\theta)} = \frac{1}{p(y_i \mid \theta)}
+</span></p>
+
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -328,19 +436,19 @@ P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\math
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_07_bayesian_inference_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
@@ -585,44 +693,6 @@ P(\theta\mid\mathbf y) &amp;= \frac{\pi(\theta)\,P(\mathbf y\mid\theta)}{P(\math
         }, 200); 
       });
     </script>
-    
-    <script>
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-      // slide changes (different for each slide format).
-      (function () {
-        // dispatch for htmlwidgets
-        function fireSlideEnter() {
-          const event = window.document.createEvent("Event");
-          event.initEvent("slideenter", true, true);
-          window.document.dispatchEvent(event);
-        }
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-          fireSlideEnter();
-
-          // dispatch for shiny
-          if (window.jQuery) {
-            if (previousSlide) {
-              window.jQuery(previousSlide).trigger("hidden");
-            }
-            if (currentSlide) {
-              window.jQuery(currentSlide).trigger("shown");
-            }
-          }
-        }
-
-        // hookup for slidy
-        if (window.w3c_slidy) {
-          window.w3c_slidy.add_observer(function (slide_num) {
-            // slide_num starts at position 1
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-          });
-        }
-
-      })();
-    </script>
-
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
