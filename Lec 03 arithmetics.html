@@ -212,14 +212,14 @@
   <style>
   .pv table { border-collapse: collapse; margin: 0.4em auto; font-family: monospace; }
   .pv td, .pv th { border: 2px solid #555; min-width: 2em; height: 1.5em;
-                   text-align: center; padding: 0 0.3em; font-size: 0.8em; }
+                   text-align: center !important; padding: 0.3em 0.3em; font-size: 0.8em; }
   .pv th { border: none; font-size: 0.55em; color: #666; font-weight: normal; }
   .pv td.s { background: #fbe4ec; }   /* sign */
   .pv td.m { background: #e3eefb; }   /* mantissa / digits */
   .pv td.e { background: #e7f6e0; }   /* exponent */
   .pv td.x { background: #ffd6d6; color: #b00000; font-weight: bold; } /* lost / invalid */
   .pv td.p { border: none; padding: 0; min-width: 0; font-weight: bold; } /* punctuation */
-  .pv .cap { font-size: 0.6em; color: #444; text-align: center; margin-top: -0.3em; }
+  .pv .cap { font-size: 0.6em; color: #444; text-align: center !important; margin-top: -0.3em; }
   </style>
 </head>
 <body class="quarto-light">
@@ -433,9 +433,9 @@ e
 <p>Double precision (<code>double</code> in R) uses 64 bits:</p>
 <table class="caption-top">
 <colgroup>
-<col style="width: 30%">
-<col style="width: 38%">
-<col style="width: 30%">
+<col style="width: 12%">
+<col style="width: 18%">
+<col style="width: 68%">
 </colgroup>
 <thead>
 <tr class="header">

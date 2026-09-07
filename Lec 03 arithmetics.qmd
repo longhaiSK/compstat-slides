@@ -9,14 +9,14 @@ include-in-header:
     <style>
     .pv table { border-collapse: collapse; margin: 0.4em auto; font-family: monospace; }
     .pv td, .pv th { border: 2px solid #555; min-width: 2em; height: 1.5em;
-                     text-align: center; padding: 0 0.3em; font-size: 0.8em; }
+                     text-align: center !important; padding: 0.3em 0.3em; font-size: 0.8em; }
     .pv th { border: none; font-size: 0.55em; color: #666; font-weight: normal; }
     .pv td.s { background: #fbe4ec; }   /* sign */
     .pv td.m { background: #e3eefb; }   /* mantissa / digits */
     .pv td.e { background: #e7f6e0; }   /* exponent */
     .pv td.x { background: #ffd6d6; color: #b00000; font-weight: bold; } /* lost / invalid */
     .pv td.p { border: none; padding: 0; min-width: 0; font-weight: bold; } /* punctuation */
-    .pv .cap { font-size: 0.6em; color: #444; text-align: center; margin-top: -0.3em; }
+    .pv .cap { font-size: 0.6em; color: #444; text-align: center !important; margin-top: -0.3em; }
     </style>
 ---
 
@@ -83,7 +83,7 @@ $$x = (-1)^{s} \times 1.d_1 d_2 \cdots d_p \times 2^{\,e}$$
 Double precision (`double` in R) uses 64 bits:
 
 | part | bits | consequence |
-|:---|:---:|:---|
+|:-|:-:|:----------|
 | sign | 1 | |
 | mantissa | 52 | about 16 significant decimal digits |
 | exponent | 11 | $e \in [-1022,\ 1023]$, i.e. magnitudes from $10^{-308}$ to $10^{308}$ |
