@@ -257,20 +257,20 @@ Longhai Li
 <h1>2. Derivation</h1>
 
 </section>
-<section id="second-order-taylor-expansion" class="slide level2">
+<section id="second-order-taylor-expansion" class="slide level2 smaller">
 <h2>Second-Order Taylor Expansion</h2>
 <p>Let <span class="math inline">\theta_0 = \arg\min_\theta h(\theta)</span> (the posterior mode), found by optimization. Expand <span class="math inline">h</span> around <span class="math inline">\theta_0</span>: <span class="math display">
 h(\theta) = h(\theta_0) + \underbrace{\nabla h(\theta_0)^\top}_{=\,0 \text{ at the minimum}}(\theta-\theta_0)
 + \tfrac12(\theta-\theta_0)^\top\nabla^2 h(\theta_0)(\theta-\theta_0) + O\big(\|\theta-\theta_0\|^3\big)
 </span></p>
 <p>Keeping terms up to second order, <span class="math display">h(\theta)\ \approx\ \tilde h(\theta) = h(\theta_0) + \tfrac12(\theta-\theta_0)^\top H\,(\theta-\theta_0),
-\qquad H = \nabla^2 h(\theta_0)</span></p>
+H = \nabla^2 h(\theta_0)</span></p>
 <ul>
 <li><span class="math inline">H</span> is the Hessian of <span class="math inline">-\log f</span> at the mode; it is positive definite at a strict minimum</li>
 <li>For <span class="math inline">f = L\pi</span>, <span class="math inline">H</span> is the <strong>observed information</strong> plus the prior curvature</li>
 </ul>
 </section>
-<section id="from-tilde-h-to-a-gaussian" class="slide level2">
+<section id="from-tilde-h-to-a-gaussian" class="slide level2 smaller">
 <h2>From <span class="math inline">\tilde h</span> to a Gaussian</h2>
 <p><span class="math display">
 \begin{aligned}
@@ -293,7 +293,7 @@ f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
 </section>
 <section id="the-two-results-continued" class="slide level2">
 <h2>The Two Results (Continued)</h2>
-<p>Red: unnormalized posterior <span class="math inline">f(\theta)</span>. Green: the Gaussian <span class="math inline">\tilde f(\theta)</span> matching height and curvature at the mode. The shaded rectangle-like region has area <span class="math inline">f(\theta_0)(2\pi)^{p/2}|H|^{-1/2}</span>, the Laplace estimate of <span class="math inline">\int f</span>.</p>
+<p>Red: unnormalized posterior <span class="math inline">f(\theta)</span>. Green: the Gaussian <span class="math inline">\tilde f(\theta)</span> matching height and curvature at the mode. The shaded rectangle-like region has area <span class="math inline">f(\theta_0)(2\pi)^{p/2}|H|^{-1/2}</span>, the Laplace estimate of <span class="math inline">\int f(\theta)\,d\theta</span>.</p>
 
 <img data-src="Lec_09_laplace_approximation_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section></section>
 <section>
@@ -301,12 +301,11 @@ f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
 <h1>3. Applications</h1>
 
 </section>
-<section id="application-1-marginal-likelihood-and-bic" class="slide level2">
+<section id="application-1-marginal-likelihood-and-bic" class="slide level2 smaller">
 <h2>Application 1: Marginal Likelihood and BIC</h2>
 <p>With <span class="math inline">f(\theta) = L(\theta;D)\,\pi(\theta)</span>, the marginal likelihood <span class="math inline">P(D) = \int L(\theta;D)\pi(\theta)\,d\theta</span> satisfies <span class="math display">\log P(D)\ \approx\ \log\big[P(D\mid\theta_0)\,\pi(\theta_0)\big] + \frac p2\log(2\pi) - \frac12\log\big|\nabla^2 h(\theta_0)\big|</span></p>
 <p><strong>Simplification for large <span class="math inline">n</span>.</strong> The Hessian is dominated by the likelihood: <span class="math inline">\nabla^2 h(\theta_0)\approx n\,I(\theta_0)</span> with <span class="math inline">I</span> the per-observation Fisher information, so <span class="math inline">|\nabla^2 h(\theta_0)| \approx n^p\,|I(\theta_0)|</span> and <span class="math display">\log P(D) \approx \log P(D\mid\theta_0) - \frac p2\log n + \underbrace{\log\pi(\theta_0) + \frac p2\log(2\pi) - \frac12\log|I(\theta_0)|}_{O(1),\ \text{dropped}}</span></p>
 <p>Multiplying by <span class="math inline">-2</span> and replacing the posterior mode by the MLE gives the <strong>Bayesian information criterion</strong>: <span class="math display">\text{BIC} = -2\log L(\hat\theta_{\text{MLE}}) + p\log n</span></p>
-<p>Compare <span class="math inline">\text{AIC} = -2\log L(\hat\theta_{\text{MLE}}) + 2p</span>: BIC penalizes parameters more heavily once <span class="math inline">n &gt; e^2\approx 7.4</span>, and is (approximately) <span class="math inline">-2\log</span> of the marginal likelihood, so BIC differences approximate <span class="math inline">-2\log</span> Bayes factors.</p>
 </section>
 <section id="application-2-linear-functions-of-theta" class="slide level2">
 <h2>Application 2: Linear Functions of <span class="math inline">\theta</span></h2>
@@ -317,16 +316,6 @@ f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
 <li>Credible intervals: <span class="math inline">\theta_{0j}\pm z_{\alpha/2}\sqrt{(H^{-1})_{jj}}</span></li>
 </ul>
 <p>This is exactly the Bayesian counterpart of MLE plus Wald standard errors.</p>
-</section>
-<section id="application-3-general-functions-of-theta" class="slide level2">
-<h2>Application 3: General Functions of <span class="math inline">\theta</span></h2>
-<p>For nonlinear <span class="math inline">a(\theta)</span> there are two options.</p>
-<p><strong>Simulate from the approximation.</strong> Draw <span class="math display">\theta_1,\ldots,\theta_N \overset{iid}{\sim} N_p\big(\theta_0,\ [\nabla^2 h(\theta_0)]^{-1}\big), \qquad
-\hat E\big[a(\theta)\big] = \frac1N\sum_{i=1}^N a(\theta_i)</span></p>
-<p>Cheap and general; inherits the error of the Gaussian approximation. The Gaussian can also serve as a proposal for importance sampling or as a starting point for MCMC, which removes that error.</p>
-<p><strong>Two Laplace approximations (Tierney–Kadane).</strong> For <span class="math inline">a(\theta)&gt;0</span>, apply the Laplace formula separately to numerator and denominator: <span class="math display">E_f\big[a(\theta)\big] = \frac{\int e^{-h^*(\theta)}\,d\theta}{\int e^{-h(\theta)}\,d\theta},
-\qquad h^*(\theta) = h(\theta) - \log a(\theta)</span></p>
-<p>Each integral is approximated at its own mode; the leading errors cancel, giving relative error <span class="math inline">O(1/n^2)</span>.</p>
 </section>
 <section id="example-poisson-rate-with-a-gamma-prior" class="slide level2">
 <h2>Example: Poisson Rate with a Gamma Prior</h2>
@@ -374,8 +363,8 @@ f(\theta)\ \approx\ \tilde f(\theta) &amp;= e^{-\tilde h(\theta)}
 <section id="summary" class="slide level2">
 <h2>Summary</h2>
 <ul>
-<li>Laplace approximation: expand <span class="math inline">h = -\log f</span> to second order at its minimum <span class="math inline">\theta_0</span> and integrate the Gaussian exactly <span class="math display">\theta\mid\text{data}\approx N_p\big(\theta_0, [\nabla^2h(\theta_0)]^{-1}\big), \qquad
-\int f \approx f(\theta_0)(2\pi)^{p/2}|\nabla^2 h(\theta_0)|^{-1/2}</span></li>
+<li>Laplace approximation: expand <span class="math inline">h = -\log f</span> to second order at its minimum <span class="math inline">\theta_0</span> and integrate the Gaussian exactly <span class="math display">\theta\mid\text{data}\approx N_p\big(\theta_0, [\nabla^2h(\theta_0)]^{-1}\big),
+\int f(\theta)\,d\theta \approx f(\theta_0)(2\pi)^{p/2}|\nabla^2 h(\theta_0)|^{-1/2}</span></li>
 <li>Needs only an optimizer and a Hessian; cost does not grow with the number of integrals</li>
 <li>Gives BIC as a large-<span class="math inline">n</span> simplification of the marginal likelihood</li>
 <li>Linear <span class="math inline">a(\theta)</span>: mode and <span class="math inline">H^{-1}</span> suffice; general <span class="math inline">a(\theta)</span>: simulate from the Gaussian or use two Laplace approximations</li>

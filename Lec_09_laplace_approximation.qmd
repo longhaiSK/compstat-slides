@@ -41,7 +41,7 @@ The approximation is obtained by expanding $h$ to second order around its minimu
 
 # 2. Derivation
 
-## Second-Order Taylor Expansion
+## Second-Order Taylor Expansion {.smaller}
 
 Let $\theta_0 = \arg\min_\theta h(\theta)$ (the posterior mode), found by optimization. Expand $h$ around $\theta_0$:
 $$
@@ -51,12 +51,12 @@ $$
 
 Keeping terms up to second order,
 $$h(\theta)\ \approx\ \tilde h(\theta) = h(\theta_0) + \tfrac12(\theta-\theta_0)^\top H\,(\theta-\theta_0),
-\qquad H = \nabla^2 h(\theta_0)$$
+ H = \nabla^2 h(\theta_0)$$
 
 - $H$ is the Hessian of $-\log f$ at the mode; it is positive definite at a strict minimum
 - For $f = L\pi$, $H$ is the **observed information** plus the prior curvature
 
-## From $\tilde h$ to a Gaussian
+## From $\tilde h$ to a Gaussian {.smaller}
 
 $$
 \begin{aligned}
@@ -83,7 +83,7 @@ The relative error of (2) is $O(1/n)$ for regular models; the error of (1) is dr
 
 ## The Two Results (Continued)
 
-Red: unnormalized posterior $f(\theta)$. Green: the Gaussian $\tilde f(\theta)$ matching height and curvature at the mode. The shaded rectangle-like region has area $f(\theta_0)(2\pi)^{p/2}|H|^{-1/2}$, the Laplace estimate of $\int f$.
+Red: unnormalized posterior $f(\theta)$. Green: the Gaussian $\tilde f(\theta)$ matching height and curvature at the mode. The shaded rectangle-like region has area $f(\theta_0)(2\pi)^{p/2}|H|^{-1/2}$, the Laplace estimate of $\int f(\theta)\,d\theta$.
 
 ```{r}
 #| fig-width: 9
@@ -106,7 +106,7 @@ mtext(sprintf("exact integral = %.3f,  Laplace = %.3f", integrate(f, 0, Inf)$val
 
 # 3. Applications
 
-## Application 1: Marginal Likelihood and BIC
+## Application 1: Marginal Likelihood and BIC {.smaller}
 
 With $f(\theta) = L(\theta;D)\,\pi(\theta)$, the marginal likelihood $P(D) = \int L(\theta;D)\pi(\theta)\,d\theta$ satisfies
 $$\log P(D)\ \approx\ \log\big[P(D\mid\theta_0)\,\pi(\theta_0)\big] + \frac p2\log(2\pi) - \frac12\log\big|\nabla^2 h(\theta_0)\big|$$
@@ -117,7 +117,7 @@ $$\log P(D) \approx \log P(D\mid\theta_0) - \frac p2\log n + \underbrace{\log\pi
 Multiplying by $-2$ and replacing the posterior mode by the MLE gives the **Bayesian information criterion**:
 $$\text{BIC} = -2\log L(\hat\theta_{\text{MLE}}) + p\log n$$
 
-Compare $\text{AIC} = -2\log L(\hat\theta_{\text{MLE}}) + 2p$: BIC penalizes parameters more heavily once $n > e^2\approx 7.4$, and is (approximately) $-2\log$ of the marginal likelihood, so BIC differences approximate $-2\log$ Bayes factors.
+
 
 ## Application 2: Linear Functions of $\theta$
 
@@ -129,22 +129,6 @@ $$E_f\big[a(\theta)\big]\ \approx\ E_{\tilde f}\big[a(\theta)\big] = A^\top E_{\
 - Credible intervals: $\theta_{0j}\pm z_{\alpha/2}\sqrt{(H^{-1})_{jj}}$
 
 This is exactly the Bayesian counterpart of MLE plus Wald standard errors.
-
-## Application 3: General Functions of $\theta$
-
-For nonlinear $a(\theta)$ there are two options.
-
-**Simulate from the approximation.** Draw
-$$\theta_1,\ldots,\theta_N \overset{iid}{\sim} N_p\big(\theta_0,\ [\nabla^2 h(\theta_0)]^{-1}\big), \qquad
-\hat E\big[a(\theta)\big] = \frac1N\sum_{i=1}^N a(\theta_i)$$
-
-Cheap and general; inherits the error of the Gaussian approximation. The Gaussian can also serve as a proposal for importance sampling or as a starting point for MCMC, which removes that error.
-
-**Two Laplace approximations (Tierney–Kadane).** For $a(\theta)>0$, apply the Laplace formula separately to numerator and denominator:
-$$E_f\big[a(\theta)\big] = \frac{\int e^{-h^*(\theta)}\,d\theta}{\int e^{-h(\theta)}\,d\theta},
-\qquad h^*(\theta) = h(\theta) - \log a(\theta)$$
-
-Each integral is approximated at its own mode; the leading errors cancel, giving relative error $O(1/n^2)$.
 
 ## Example: Poisson Rate with a Gamma Prior
 
@@ -199,8 +183,8 @@ for (n in c(5, 100)) { y <- rpois(n, 3); a1 <- alpha + sum(y); b1 <- beta + n
 ## Summary
 
 - Laplace approximation: expand $h = -\log f$ to second order at its minimum $\theta_0$ and integrate the Gaussian exactly
-$$\theta\mid\text{data}\approx N_p\big(\theta_0, [\nabla^2h(\theta_0)]^{-1}\big), \qquad
-\int f \approx f(\theta_0)(2\pi)^{p/2}|\nabla^2 h(\theta_0)|^{-1/2}$$
+$$\theta\mid\text{data}\approx N_p\big(\theta_0, [\nabla^2h(\theta_0)]^{-1}\big), 
+\int f(\theta)\,d\theta \approx f(\theta_0)(2\pi)^{p/2}|\nabla^2 h(\theta_0)|^{-1/2}$$
 - Needs only an optimizer and a Hessian; cost does not grow with the number of integrals
 - Gives BIC as a large-$n$ simplification of the marginal likelihood
 - Linear $a(\theta)$: mode and $H^{-1}$ suffice; general $a(\theta)$: simulate from the Gaussian or use two Laplace approximations

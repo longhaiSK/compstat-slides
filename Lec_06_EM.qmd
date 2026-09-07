@@ -98,7 +98,7 @@ legend("bottomright", bty = "n", lwd = c(3, 2), lty = c(1, 2),
 
 ## Ascending Property of EM
 
-Write $h(Y,Z\mid\theta) = P(Y,Z\mid\theta)$, $\;g(Y\mid\theta) = \int h\,dZ$, $\;K(Z\mid Y,\theta) = h/g$.
+Write $h(Y,Z\mid\theta) = P(Y,Z\mid\theta)$, $\;g(Y\mid\theta) = \int h(Y,Z\mid\theta)\,dZ$, $\;K(Z\mid Y,\theta) = h/g$.
 
 **Theorem.** $\;\ell_{\text{obs}}(\hat\theta^{(t+1)}) \ \ge\ \ell_{\text{obs}}(\hat\theta^{(t)})$.
 
@@ -143,14 +143,15 @@ Using $P(Y,z\mid\theta) = P(Y\mid\theta)P(z\mid Y,\theta)$,
 $$
 \begin{aligned}
 F(\tilde P,\theta) &= \ell_{\text{obs}}(\theta) - KL\big(\tilde P\,\|\,P(\cdot\mid Y,\theta)\big), \\
-KL(P\|q) &= \int P\log\frac{P}{q} \ \ge 0
+KL(P\|q) &= \int P(z)\log\frac{P(z)}{q(z)}\,dz \ \ge 0
 \end{aligned}
 $$
 
 - **E-step** = maximize $F$ over $\tilde P$ with $\theta = \hat\theta^{(t)}$ fixed: $KL \ge 0$ with equality iff $\tilde P = P(\cdot\mid Y,\hat\theta^{(t)})$, so the E-step sets $\tilde P$ to the conditional distribution of $Z$
 - **M-step** = maximize $F$ over $\theta$ with $\tilde P$ fixed: the second term of $F$ is free of $\theta$, so this is $\arg\max_\theta Q(\theta\mid\hat\theta^{(t)})$
 
-**Remark**: $KL \ge 0$ follows from $\log x \le x - 1$: $KL(P\|q) = -\int P\log\frac{q}{P} \ge -\int P\big(\frac{q}{P}-1\big) = -\int(q-P) = 0$.
+**Remark**: $KL \ge 0$ follows from $\log x \le x - 1$:
+$$KL(P\|q) = -\int P(z)\log\frac{q(z)}{P(z)}\,dz \ \ge\ -\int P(z)\Big(\frac{q(z)}{P(z)}-1\Big)\,dz = -\int\big[q(z)-P(z)\big]\,dz = 0$$
 
 # 2. Example 1: Two-Component Normal Mixture
 
@@ -275,8 +276,8 @@ Return to the E-step with $\hat\theta^{(t+1)}$ and recompute $\hat p_i^{(t+1)}$.
 ## Truncated Distributions in Brief
 
 Let $X\sim f(x)$ and $Y = I(X>c)$. Then $Y\sim\text{Bern}\big(P(X>c)\big)$, and the conditional distribution of $X$ given $Y$ is $f$ restricted to one side of $c$ and renormalized:
-$$f(x\mid Y=1) = \frac{f(x)\,I(x>c)}{\int_c^\infty f}, \qquad
-f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f}$$
+$$f(x\mid Y=1) = \frac{f(x)\,I(x>c)}{\int_c^\infty f(t)\,dt}, \qquad
+f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f(t)\,dt}$$
 
 For discrete $X$ the integrals are sums. This is exactly the distribution the E-step needs when an observation is only known to lie on one side of $c$.
 

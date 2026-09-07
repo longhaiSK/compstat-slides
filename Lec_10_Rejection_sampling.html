@@ -262,7 +262,7 @@ Longhai Li
 </section>
 <section id="rejection-sampling" class="slide level2">
 <h2>Rejection Sampling</h2>
-<p><strong>Input</strong>: target <span class="math inline">f</span>, envelope <span class="math inline">g\ge f</span> with a sampler for <span class="math inline">g/\!\int g</span>.</p>
+<p><strong>Input</strong>: target <span class="math inline">f</span>, envelope <span class="math inline">g\ge f</span> with a sampler for <span class="math inline">g(x)\big/\!\int g(x)\,dx</span>.</p>
 <p>For <span class="math inline">i = 1,\ldots,n</span>, repeat until acceptance:</p>
 <ol type="1">
 <li>Draw <span class="math inline">x\sim g(x)\big/\!\int g(x)\,dx</span></li>
@@ -272,7 +272,7 @@ Longhai Li
 </ol>
 <p>Output: <span class="math inline">x_1,\ldots,x_n \overset{iid}{\sim} f(x)\big/\!\int f(x)\,dx</span>.</p>
 <ul>
-<li>The number of proposals per accepted draw is Geometric with mean <span class="math inline">\int g/\!\int f</span></li>
+<li>The number of proposals per accepted draw is Geometric with mean <span class="math inline">\int g(x)\,dx\big/\!\int f(x)\,dx</span></li>
 <li>Only ratios <span class="math inline">f/g</span> are needed, so unknown normalizing constants cancel as long as <span class="math inline">g\ge f</span> holds for the versions used</li>
 </ul>
 </section>
@@ -300,24 +300,24 @@ Longhai Li
 \begin{aligned}
 P(X\le t\mid \text{accept})
 &amp;= \frac{P(X\le t,\ U&lt;f(X)/g(X))}{P(U&lt;f(X)/g(X))} \\[4pt]
-&amp;= \frac{\displaystyle\int_{-\infty}^t \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g}\,dx}
-        {\displaystyle\int_{-\infty}^{\infty} \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g}\,dx}
+&amp;= \frac{\displaystyle\int_{-\infty}^t \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g(x)\,dx}\,dx}
+        {\displaystyle\int_{-\infty}^{\infty} \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g(x)\,dx}\,dx}
 = \frac{\int_{-\infty}^t f(x)\,dx}{\int_{-\infty}^{\infty} f(x)\,dx}
 \end{aligned}
 </span></p>
-<p>which is the distribution function of the normalized <span class="math inline">f</span>. The denominator, <span class="math inline">P(\text{accept}) = \int f/\!\int g</span>, is the acceptance rate stated earlier.</p>
+<p>which is the distribution function of the normalized <span class="math inline">f</span>. The denominator, <span class="math inline">P(\text{accept}) = \int f(x)\,dx\big/\!\int g(x)\,dx</span>, is the acceptance rate stated earlier.</p>
 </section>
 <section id="example-1-a-uniform-target" class="slide level2">
 <h2>Example 1: A Uniform Target</h2>
 <p><span class="math display">f(x) = 2\,I\big(0\le x\le\tfrac12\big), \qquad g(x) = 2\,I(0\le x\le1)</span></p>
 <p>Steps:</p>
 <ol type="1">
-<li><span class="math inline">X\sim\text{Unif}(0,1)</span> (the density <span class="math inline">g/\!\int g</span>)</li>
+<li><span class="math inline">X\sim\text{Unif}(0,1)</span> (the density <span class="math inline">g(x)\big/\!\int g(x)\,dx</span>)</li>
 <li><span class="math inline">U\sim\text{Unif}(0,1)</span></li>
 <li><span class="math inline">r = f(X)/g(X) = \begin{cases}1, &amp; X\le\tfrac12\\ 0, &amp; X&gt;\tfrac12\end{cases}</span>; accept if <span class="math inline">U&lt;r</span></li>
 </ol>
 <p>Since <span class="math inline">r\in\{0,1\}</span>, step 3 reduces to: <strong>accept if <span class="math inline">X\le\tfrac12</span>, otherwise redraw</strong>. The accepted draws are <span class="math inline">\text{Unif}(0,\tfrac12)</span>, as they should be.</p>
-<p>Acceptance rate: <span class="math inline">\dfrac{\int f}{\int g} = \dfrac{1}{2}</span>.</p>
+<p>Acceptance rate: <span class="math inline">\dfrac{\int f(x)\,dx}{\int g(x)\,dx} = \dfrac{1}{2}</span>.</p>
 <p>A looser envelope, e.g.&nbsp;<span class="math inline">g_2(x) = 2\,I(0\le x\le 2)</span>, still works but accepts only <span class="math inline">1/4</span> of the proposals.</p>
 </section>
 <section id="example-1-continued" class="slide level2">
@@ -327,7 +327,7 @@ P(X\le t\mid \text{accept})
 <section id="example-2-normal-from-a-double-exponential-envelope" class="slide level2">
 <h2>Example 2: Normal from a Double Exponential Envelope</h2>
 <p>Target <span class="math inline">f(x) = e^{-x^2/2}</span> (unnormalized <span class="math inline">N(0,1)</span>). Proposal density <span class="math inline">g_0(x) = \tfrac12 e^{-|x|}</span> (Laplace), easy to sample by inversion. Since <span class="math inline">e^{-x^2/2}\le e^{1/2 - |x|}</span> (equality at <span class="math inline">|x|=1</span>), the envelope <span class="math display">g(x) = 2e^{1/2}\,g_0(x) = e^{1/2-|x|} \ \ge\ f(x)</span></p>
-<p>works, with acceptance rate <span class="math inline">\int f/\!\int g = \sqrt{2\pi}\big/(2e^{1/2}) \approx 0.76</span>.</p>
+<p>works, with acceptance rate <span class="math inline">\int f(x)\,dx\big/\!\int g(x)\,dx = \sqrt{2\pi}\big/(2e^{1/2}) \approx 0.76</span>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>rlaplace <span class="ot">&lt;-</span> <span class="cf">function</span>(n) { u <span class="ot">&lt;-</span> <span class="fu">runif</span>(n); <span class="fu">ifelse</span>(u <span class="sc">&lt;</span> <span class="fl">0.5</span>, <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> u), <span class="sc">-</span><span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> u))) }</span>
 <span id="cb3-2"><a href=""></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">exp</span>(<span class="sc">-</span>x<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">2</span>); g <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">exp</span>(<span class="fl">0.5</span> <span class="sc">-</span> <span class="fu">abs</span>(x))</span>
@@ -366,8 +366,8 @@ P(X\le t\mid \text{accept})
 <section id="sampling-from-the-piecewise-exponential-envelope" class="slide level2">
 <h2>Sampling from the Piecewise-Exponential Envelope</h2>
 <p>On piece <span class="math inline">I_j = (z_{j-1}, z_j)</span> the envelope is <span class="math inline">g(x) = e^{a_j + b_j x}</span>, so its integral and CDF are closed-form: <span class="math display">\int_{z_{j-1}}^{z_j} e^{a_j+b_j t}\,dt = \frac{e^{a_j}}{b_j}\big(e^{b_j z_j} - e^{b_j z_{j-1}}\big),
-\qquad F_g(x) = \frac{1}{\int g}\int_{-\infty}^x g(t)\,dt</span></p>
-<p>Draw from <span class="math inline">g/\!\int g</span> by <strong>inverse CDF</strong>: pick a piece with probability proportional to its area, then invert the exponential CDF within the piece.</p>
+\qquad F_g(x) = \frac{\int_{-\infty}^x g(t)\,dt}{\int_{-\infty}^{\infty} g(t)\,dt}</span></p>
+<p>Draw from <span class="math inline">g(x)\big/\!\int g(x)\,dx</span> by <strong>inverse CDF</strong>: pick a piece with probability proportional to its area, then invert the exponential CDF within the piece.</p>
 <p><strong>Adaptive rejection sampling (Gilks &amp; Wild, 1992)</strong></p>
 <ol type="1">
 <li>Start with a few tangent points <span class="math inline">x_1&lt;\cdots&lt;x_k</span> (at least one on each side of the mode)</li>
@@ -381,7 +381,7 @@ P(X\le t\mid \text{accept})
 <ul>
 <li>Rejection sampling turns draws from an envelope <span class="math inline">g\ge f</span> into exact iid draws from <span class="math inline">f</span>, using only the ratio <span class="math inline">f/g</span>; normalizing constants are not needed</li>
 <li>Geometric view: uniform points under <span class="math inline">g</span>, keep those under <span class="math inline">f</span></li>
-<li>Efficiency <span class="math inline">=\int f/\!\int g</span>; the envelope should be as tight as possible while remaining easy to sample</li>
+<li>Efficiency <span class="math inline">=\int f(x)\,dx\big/\!\int g(x)\,dx</span>; the envelope should be as tight as possible while remaining easy to sample</li>
 <li>Adaptive rejection sampling builds and refines the envelope automatically for log-concave <span class="math inline">f</span></li>
 <li>Limitations: an envelope with a bounded ratio <span class="math inline">g/f</span> may not exist (heavier tails in <span class="math inline">f</span> than in <span class="math inline">g</span>); in high dimensions the acceptance rate typically decays exponentially with dimension. These limitations motivate importance sampling and Markov chain Monte Carlo (next lectures)</li>
 </ul>

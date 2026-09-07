@@ -66,7 +66,7 @@ At each $x$, the ratio $r = f(x)/g(x)\in[0,1]$ is the fraction of the green segm
 
 ## Rejection Sampling
 
-**Input**: target $f$, envelope $g\ge f$ with a sampler for $g/\!\int g$.
+**Input**: target $f$, envelope $g\ge f$ with a sampler for $g(x)\big/\!\int g(x)\,dx$.
 
 For $i = 1,\ldots,n$, repeat until acceptance:
 
@@ -77,7 +77,7 @@ For $i = 1,\ldots,n$, repeat until acceptance:
 
 Output: $x_1,\ldots,x_n \overset{iid}{\sim} f(x)\big/\!\int f(x)\,dx$.
 
-- The number of proposals per accepted draw is Geometric with mean $\int g/\!\int f$
+- The number of proposals per accepted draw is Geometric with mean $\int g(x)\,dx\big/\!\int f(x)\,dx$
 - Only ratios $f/g$ are needed, so unknown normalizing constants cancel as long as $g\ge f$ holds for the versions used
 
 ## Alternative Description: Points Under a Curve
@@ -123,13 +123,13 @@ $$
 \begin{aligned}
 P(X\le t\mid \text{accept})
 &= \frac{P(X\le t,\ U<f(X)/g(X))}{P(U<f(X)/g(X))} \\[4pt]
-&= \frac{\displaystyle\int_{-\infty}^t \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g}\,dx}
-        {\displaystyle\int_{-\infty}^{\infty} \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g}\,dx}
+&= \frac{\displaystyle\int_{-\infty}^t \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g(x)\,dx}\,dx}
+        {\displaystyle\int_{-\infty}^{\infty} \frac{f(x)}{g(x)}\cdot\frac{g(x)}{\int g(x)\,dx}\,dx}
 = \frac{\int_{-\infty}^t f(x)\,dx}{\int_{-\infty}^{\infty} f(x)\,dx}
 \end{aligned}
 $$
 
-which is the distribution function of the normalized $f$. The denominator, $P(\text{accept}) = \int f/\!\int g$, is the acceptance rate stated earlier.
+which is the distribution function of the normalized $f$. The denominator, $P(\text{accept}) = \int f(x)\,dx\big/\!\int g(x)\,dx$, is the acceptance rate stated earlier.
 
 ## Example 1: A Uniform Target
 
@@ -137,13 +137,13 @@ $$f(x) = 2\,I\big(0\le x\le\tfrac12\big), \qquad g(x) = 2\,I(0\le x\le1)$$
 
 Steps:
 
-1. $X\sim\text{Unif}(0,1)$ (the density $g/\!\int g$)
+1. $X\sim\text{Unif}(0,1)$ (the density $g(x)\big/\!\int g(x)\,dx$)
 2. $U\sim\text{Unif}(0,1)$
 3. $r = f(X)/g(X) = \begin{cases}1, & X\le\tfrac12\\ 0, & X>\tfrac12\end{cases}$; accept if $U<r$
 
 Since $r\in\{0,1\}$, step 3 reduces to: **accept if $X\le\tfrac12$, otherwise redraw**. The accepted draws are $\text{Unif}(0,\tfrac12)$, as they should be.
 
-Acceptance rate: $\dfrac{\int f}{\int g} = \dfrac{1}{2}$.
+Acceptance rate: $\dfrac{\int f(x)\,dx}{\int g(x)\,dx} = \dfrac{1}{2}$.
 
 A looser envelope, e.g. $g_2(x) = 2\,I(0\le x\le 2)$, still works but accepts only $1/4$ of the proposals.
 
@@ -168,7 +168,7 @@ legend("topright", bty = "n", lwd = c(3, 3, 2), col = c("firebrick", "steelblue"
 Target $f(x) = e^{-x^2/2}$ (unnormalized $N(0,1)$). Proposal density $g_0(x) = \tfrac12 e^{-|x|}$ (Laplace), easy to sample by inversion. Since $e^{-x^2/2}\le e^{1/2 - |x|}$ (equality at $|x|=1$), the envelope
 $$g(x) = 2e^{1/2}\,g_0(x) = e^{1/2-|x|} \ \ge\ f(x)$$
 
-works, with acceptance rate $\int f/\!\int g = \sqrt{2\pi}\big/(2e^{1/2}) \approx 0.76$.
+works, with acceptance rate $\int f(x)\,dx\big/\!\int g(x)\,dx = \sqrt{2\pi}\big/(2e^{1/2}) \approx 0.76$.
 
 ```{r}
 #| echo: true
@@ -234,9 +234,9 @@ Left: tangents at three points bound the concave $\log f$ from above. Right: exp
 
 On piece $I_j = (z_{j-1}, z_j)$ the envelope is $g(x) = e^{a_j + b_j x}$, so its integral and CDF are closed-form:
 $$\int_{z_{j-1}}^{z_j} e^{a_j+b_j t}\,dt = \frac{e^{a_j}}{b_j}\big(e^{b_j z_j} - e^{b_j z_{j-1}}\big),
-\qquad F_g(x) = \frac{1}{\int g}\int_{-\infty}^x g(t)\,dt$$
+\qquad F_g(x) = \frac{\int_{-\infty}^x g(t)\,dt}{\int_{-\infty}^{\infty} g(t)\,dt}$$
 
-Draw from $g/\!\int g$ by **inverse CDF**: pick a piece with probability proportional to its area, then invert the exponential CDF within the piece.
+Draw from $g(x)\big/\!\int g(x)\,dx$ by **inverse CDF**: pick a piece with probability proportional to its area, then invert the exponential CDF within the piece.
 
 **Adaptive rejection sampling (Gilks & Wild, 1992)**
 
@@ -250,6 +250,6 @@ Each rejection tightens the envelope where it was loose, so the acceptance rate 
 
 - Rejection sampling turns draws from an envelope $g\ge f$ into exact iid draws from $f$, using only the ratio $f/g$; normalizing constants are not needed
 - Geometric view: uniform points under $g$, keep those under $f$
-- Efficiency $=\int f/\!\int g$; the envelope should be as tight as possible while remaining easy to sample
+- Efficiency $=\int f(x)\,dx\big/\!\int g(x)\,dx$; the envelope should be as tight as possible while remaining easy to sample
 - Adaptive rejection sampling builds and refines the envelope automatically for log-concave $f$
 - Limitations: an envelope with a bounded ratio $g/f$ may not exist (heavier tails in $f$ than in $g$); in high dimensions the acceptance rate typically decays exponentially with dimension. These limitations motivate importance sampling and Markov chain Monte Carlo (next lectures)

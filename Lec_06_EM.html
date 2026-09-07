@@ -220,7 +220,7 @@ Longhai Li
 <img data-src="Lec_06_EM_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
 <section id="ascending-property-of-em" class="slide level2">
 <h2>Ascending Property of EM</h2>
-<p>Write <span class="math inline">h(Y,Z\mid\theta) = P(Y,Z\mid\theta)</span>, <span class="math inline">\;g(Y\mid\theta) = \int h\,dZ</span>, <span class="math inline">\;K(Z\mid Y,\theta) = h/g</span>.</p>
+<p>Write <span class="math inline">h(Y,Z\mid\theta) = P(Y,Z\mid\theta)</span>, <span class="math inline">\;g(Y\mid\theta) = \int h(Y,Z\mid\theta)\,dZ</span>, <span class="math inline">\;K(Z\mid Y,\theta) = h/g</span>.</p>
 <p><strong>Theorem.</strong> <span class="math inline">\;\ell_{\text{obs}}(\hat\theta^{(t+1)}) \ \ge\ \ell_{\text{obs}}(\hat\theta^{(t)})</span>.</p>
 <p><strong>Key identity.</strong> Since <span class="math inline">\log g(Y\mid\theta) = \log h(Y,Z\mid\theta) - \log K(Z\mid Y,\theta)</span> for every <span class="math inline">Z</span>, taking <span class="math inline">E_{Z\mid Y,\theta_0}</span> of both sides gives, for any <span class="math inline">\theta_0</span>, <span class="math display">
 \ell_{\text{obs}}(\theta) = \underbrace{E_{Z\mid Y,\theta_0}\big[\log h(Y,Z\mid\theta)\big]}_{Q(\theta\mid\theta_0)}
@@ -255,14 +255,14 @@ E_{Z\mid Y,\hat\theta^{(t)}}\left[\log\frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\th
 <p>Using <span class="math inline">P(Y,z\mid\theta) = P(Y\mid\theta)P(z\mid Y,\theta)</span>, <span class="math display">
 \begin{aligned}
 F(\tilde P,\theta) &amp;= \ell_{\text{obs}}(\theta) - KL\big(\tilde P\,\|\,P(\cdot\mid Y,\theta)\big), \\
-KL(P\|q) &amp;= \int P\log\frac{P}{q} \ \ge 0
+KL(P\|q) &amp;= \int P(z)\log\frac{P(z)}{q(z)}\,dz \ \ge 0
 \end{aligned}
 </span></p>
 <ul>
 <li><strong>E-step</strong> = maximize <span class="math inline">F</span> over <span class="math inline">\tilde P</span> with <span class="math inline">\theta = \hat\theta^{(t)}</span> fixed: <span class="math inline">KL \ge 0</span> with equality iff <span class="math inline">\tilde P = P(\cdot\mid Y,\hat\theta^{(t)})</span>, so the E-step sets <span class="math inline">\tilde P</span> to the conditional distribution of <span class="math inline">Z</span></li>
 <li><strong>M-step</strong> = maximize <span class="math inline">F</span> over <span class="math inline">\theta</span> with <span class="math inline">\tilde P</span> fixed: the second term of <span class="math inline">F</span> is free of <span class="math inline">\theta</span>, so this is <span class="math inline">\arg\max_\theta Q(\theta\mid\hat\theta^{(t)})</span></li>
 </ul>
-<p><strong>Remark</strong>: <span class="math inline">KL \ge 0</span> follows from <span class="math inline">\log x \le x - 1</span>: <span class="math inline">KL(P\|q) = -\int P\log\frac{q}{P} \ge -\int P\big(\frac{q}{P}-1\big) = -\int(q-P) = 0</span>.</p>
+<p><strong>Remark</strong>: <span class="math inline">KL \ge 0</span> follows from <span class="math inline">\log x \le x - 1</span>: <span class="math display">KL(P\|q) = -\int P(z)\log\frac{q(z)}{P(z)}\,dz \ \ge\ -\int P(z)\Big(\frac{q(z)}{P(z)}-1\Big)\,dz = -\int\big[q(z)-P(z)\big]\,dz = 0</span></p>
 </section></section>
 <section>
 <section id="example-1-two-component-normal-mixture" class="title-slide slide level1 center">
@@ -360,8 +360,8 @@ Q(\theta\mid\hat\theta^{(t)}) &amp;= \Big(\sum_i \hat p_i^{(t)}\Big)\log\frac{p}
 </section>
 <section id="truncated-distributions-in-brief" class="slide level2">
 <h2>Truncated Distributions in Brief</h2>
-<p>Let <span class="math inline">X\sim f(x)</span> and <span class="math inline">Y = I(X&gt;c)</span>. Then <span class="math inline">Y\sim\text{Bern}\big(P(X&gt;c)\big)</span>, and the conditional distribution of <span class="math inline">X</span> given <span class="math inline">Y</span> is <span class="math inline">f</span> restricted to one side of <span class="math inline">c</span> and renormalized: <span class="math display">f(x\mid Y=1) = \frac{f(x)\,I(x&gt;c)}{\int_c^\infty f}, \qquad
-f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f}</span></p>
+<p>Let <span class="math inline">X\sim f(x)</span> and <span class="math inline">Y = I(X&gt;c)</span>. Then <span class="math inline">Y\sim\text{Bern}\big(P(X&gt;c)\big)</span>, and the conditional distribution of <span class="math inline">X</span> given <span class="math inline">Y</span> is <span class="math inline">f</span> restricted to one side of <span class="math inline">c</span> and renormalized: <span class="math display">f(x\mid Y=1) = \frac{f(x)\,I(x&gt;c)}{\int_c^\infty f(t)\,dt}, \qquad
+f(x\mid Y=0) = \frac{f(x)\,I(x\le c)}{\int_{-\infty}^c f(t)\,dt}</span></p>
 <p>For discrete <span class="math inline">X</span> the integrals are sums. This is exactly the distribution the E-step needs when an observation is only known to lie on one side of <span class="math inline">c</span>.</p>
 </section>
 <section id="truncated-distributions-in-brief-continued" class="slide level2">
