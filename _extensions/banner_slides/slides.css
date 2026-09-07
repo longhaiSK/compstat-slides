@@ -38,6 +38,12 @@
 
 /* 3. Your Custom Rules */
 
+/* Title-slide subtitle: 0.8x the title (h1) size, tied to the same variable
+   so it stays proportional if --r-heading1-size ever changes. */
+.reveal .subtitle {
+  font-size: calc(var(--r-heading1-size) * 0.8) !important;
+}
+
 /* Brute-force blue headers */
 .reveal h2, 
 .reveal h3, 
