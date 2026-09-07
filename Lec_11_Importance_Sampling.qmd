@@ -1,316 +1,341 @@
 ---
-title: "Importance Sampling (Reweighting)"
-subtitle: "Reject, Reweight, Repeat"
+subtitle: "Importance Sampling"
 author: "Longhai Li"
 format: banner_slides-revealjs
+number-sections: false
 ---
 
-## Goal and Setup
+```{r}
+#| include: false
+set.seed(812)
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center")
+library(latex2exp)
+ess <- function(w) sum(w)^2 / sum(w^2)
+```
 
-**Goal:** find the integral
+# 1. Goal and Idea
 
+## The Goal
+
+Two integrals with respect to an **unnormalized** function $f(\theta)$, e.g. $f(\theta) = \pi(\theta)P(x\mid\theta)$:
+
+1. A posterior expectation
+$$A = \frac{\int a(\theta)\,f(\theta)\,d\theta}{\int f(\theta)\,d\theta} = E_f\big[a(\theta)\big], \qquad \theta\sim\frac{f(\theta)}{C_f}$$
+
+2. The normalizing constant (marginal likelihood)
+$$C_f = \int f(\theta)\,d\theta$$
+
+Plain Monte Carlo needs draws from $f/C_f$, which we cannot produce. Rejection sampling needs an envelope $g\ge f$, which may be hard to find or very wasteful.
+
+## The Idea: Reweighting
+
+*Reject, reweight, repeat.* Instead of rejecting proposals, keep all of them and **weight** each by how much $f$ favours it relative to the proposal.
+
+- Draw $\theta\sim g(\theta)/C_g$, where $g$ is another (possibly unnormalized) function we can sample from
+- Attach the **importance weight**
+$$w(\theta) = \frac{f(\theta)}{g(\theta)}$$
+- Hope that $w(\theta)\approx$ constant, i.e. $g$ has roughly the shape of $f$
+
+**Requirement on $g$**: wherever $f$ is positive, $g$ must be positive too,
+$$\{\theta: g(\theta)>0\}\ \supseteq\ \{\theta: f(\theta)>0\}$$
+
+Otherwise part of $f$ is never visited and the estimate is biased (Example 3).
+
+# 2. The Importance Reweighting Formula
+
+## Derivation
+
+Let $C_g = \int g(\theta)\,d\theta$. For any $a$,
 $$
-A = \frac{\int a(\theta) f(\theta)\, d\theta}{\int f(\theta)\, d\theta} = E(a(\theta)), \quad \text{where } \theta \sim \frac{f(\theta)}{\int f(\theta)\, d\theta}
-$$
-
-where $f(\theta)$ is an **unnormalized** density,
-
-$$
-f(\theta) = \pi(\theta) p(x \mid \theta), \qquad C_f = \int f(\theta)\, d\theta
-$$
-
-(the shaded area under $f$ is $C_f$).
-
-![Unnormalized density $f(\theta)$; the shaded area is $C_f=\int f(\theta)\,d\theta$.](Lec 11 Importance Sampling_images/p01-fdensity.png){width=45%}
-
-We **can't draw** $\theta \sim f(x)$ directly. Instead, we draw $\theta \sim g(\theta)$, where $g(\theta)$ is another unnormalized function, and we hope
-
-$$
-\frac{f(\theta)}{g(\theta)} \approx a \ \ (\text{constant}).
-$$
-
-**Requirement for $g(\theta)$:**
-
-$$
-\{\theta \mid g(\theta) > 0\} \supseteq \{\theta \mid f(\theta) > 0\}
-$$
-
-## Example of Supports of g and f
-
-Comparing $(l_g, u_g)$ vs. $(l_f, u_f)$: if the support of $g$ does not cover the support of $f$, importance sampling is **not valid**; if it does, it is **valid**.
-
-![Left: support of g does not cover support of f (not valid). Right: support of g covers support of f (valid).](Lec 11 Importance Sampling_images/p02-supports.png){width=95%}
-
-## Importance Reweighting Formula
-
-1) Draw $\theta_1, \dots, \theta_n \sim g$
-
-2)
-$$
-\frac{C_f}{C_g} = \sum_{i=1}^n \frac{f(\theta_i)}{g(\theta_i)} \Big/ n = \frac{\sum_{i=1}^n w(\theta_i)}{n}, \quad \text{where } w(\theta) = \frac{f(\theta)}{g(\theta)}
-$$
-
-$$
-\hat{A} = \frac{\sum_{i=1}^n a(\theta_i) \dfrac{f(\theta_i)}{g(\theta_i)}}{\sum_{i=1}^n w(\theta_i)} = \frac{\left[\sum_{i=1}^n a(\theta_i) w(\theta_i)\right]/n}{\left[\sum_{i=1}^n w(\theta_i)\right]/n}, \qquad w(\theta_i) = \frac{f(\theta_i)}{g(\theta_i)}
-$$
-
-$$
-\hat{A} = \sum_{i=1}^n a(\theta_i) \cdot \tilde{w}(\theta_i), \qquad \tilde{w}(\theta_i) = \frac{w(\theta_i)}{\sum_{i=1}^n w(\theta_i)}, \qquad \sum_{i=1}^n \tilde{w}(\theta_i) = 1
+\begin{aligned}
+E_f\big[a(\theta)\big] &= \int a(\theta)\,\frac{f(\theta)}{C_f}\,d\theta
+= \frac{C_g}{C_f}\int a(\theta)\,\frac{f(\theta)}{g(\theta)}\cdot\frac{g(\theta)}{C_g}\,d\theta \\[4pt]
+&= \frac{C_g}{C_f}\,E_g\big[a(\theta)\,w(\theta)\big], \qquad w(\theta) = \frac{f(\theta)}{g(\theta)}
+\end{aligned}
 $$
 
-**Example:**
+The division by $g$ is legitimate only on $\{g>0\}$, hence the support requirement.
 
-| | $\theta_1$ | $\theta_2$ | $\theta_3$ |
-|---|---|---|---|
-| $w(\theta)$ | 100 | 40 | 60 |
-| $\tilde{w}(\theta)$ | 0.5 | 0.2 | 0.3 |
+Taking $a\equiv1$,
+$$\frac{C_f}{C_g} = \int\frac{f(\theta)}{g(\theta)}\cdot\frac{g(\theta)}{C_g}\,d\theta = E_g\big[w(\theta)\big]
+= \frac{\int f(\theta)\,d\theta}{\int g(\theta)\,d\theta}$$
 
-## Derivation of Importance Reweighting Formula
+Combining,
+$$E_f\big[a(\theta)\big] = \frac{E_g\big[a(\theta)\,w(\theta)\big]}{E_g\big[w(\theta)\big]}$$
 
-$$
-E_f(a(\theta)) = \int_{l_f}^{u_f} a(\theta) \frac{f(\theta)}{C_f}\, d\theta = \frac{1}{C_f} \int_{l_f}^{u_f} a(\theta) f(\theta)\, d\theta
-$$
+## The Estimators
 
-$$
-= \frac{C_g}{C_f} \int_{l_f}^{u_f} \left(a(\theta) \frac{f(\theta)}{g(\theta)}\right) \cdot \frac{g(\theta)}{C_g}\, d\theta = \frac{C_g}{C_f} \int_{l_g}^{u_g} a(\theta) \cdot \frac{f(\theta)}{g(\theta)} \cdot \frac{g(\theta)}{C_g}\, d\theta
-$$
+Draw $\theta_1,\ldots,\theta_n \overset{iid}{\sim} g/C_g$ and compute $w_i = w(\theta_i) = f(\theta_i)/g(\theta_i)$.
 
-requiring $\{\theta \mid g(\theta) > 0\} \supseteq \{\theta \mid f(\theta) > 0\}$
+**Normalizing constant ratio**
+$$\widehat{\frac{C_f}{C_g}} = \frac1n\sum_{i=1}^n w_i$$
 
-$$
-= E_g\!\left(a(\theta) \cdot \frac{f(\theta)}{g(\theta)}\right) \Big/ \left(\frac{C_f}{C_g}\right) = E_g\!\left(a(\theta) \cdot \frac{f(\theta)}{g(\theta)}\right) \Big/ \frac{C_f}{C_g}
-$$
+If $g$ is a normalized density ($C_g = 1$), this estimates $C_f$ itself, e.g. the marginal likelihood.
 
-$$
-w(\theta) = \frac{f(\theta)}{g(\theta)} \text{ is called the importance weight.}
-$$
+**Expectation** (self-normalized importance sampling)
+$$\hat A = \frac{\frac1n\sum_{i=1}^n a(\theta_i)\,w_i}{\frac1n\sum_{i=1}^n w_i}
+= \sum_{i=1}^n a(\theta_i)\,\tilde w_i, \qquad
+\tilde w_i = \frac{w_i}{\sum_{j=1}^n w_j}, \quad \sum_{i=1}^n\tilde w_i = 1$$
 
-$$
-\frac{C_f}{C_g} = \int \frac{f(\theta)}{g(\theta)} \cdot \frac{g(\theta)}{C_g}\, d\theta = \frac{\int f(\theta)\, d\theta}{\int g(\theta)\, d\theta} = E_g\!\left(\frac{f(\theta)}{g(\theta)}\right)
-$$
+The normalized weights $\tilde w_i$ turn the proposal sample into a **weighted sample from $f$**; unknown constants in $f$ and $g$ cancel.
 
-## Example 1: Non-overlapping Support (Invalid Case)
+Example: $w = (100, 40, 60)$ gives $\tilde w = (0.5, 0.2, 0.3)$.
 
-$$
-f(\theta) = I(0 \le \theta \le 1), \qquad g(\theta) = I(0 \le \theta \le 2)
-$$
+## Interpretation and Properties
 
-![f(θ)=I(0≤θ≤1), g(θ)=I(0≤θ≤2), with C_f=1, C_g=2. w(θ)=1 on [0,1], w(θ)=0 on (1,2].](Lec 11 Importance Sampling_images/p05-boxplot.png){width=42%}
+- $\hat A$ is a weighted average of $a(\theta_i)$: draws in regions where $f\gg g$ count more, draws where $f\ll g$ count less
+- $\frac1n\sum_i w_i$ is unbiased for $C_f/C_g$; $\hat A$ is a ratio of two averages, so it is biased with bias $O(1/n)$ but consistent
+- Nothing is discarded, unlike rejection sampling; no envelope condition $g\ge f$ is needed
+- Everything hinges on the variance of the weights: if $w(\theta)$ varies wildly, a few draws dominate the sum
 
-Support of $g \supseteq$ support of $f$. We want to estimate $\dfrac{C_f}{C_g}$ (true $= \tfrac{1}{2}$). Suppose $\theta_s \sim g\,[\text{unif}([0,2])]$.
-
-$$
-w(\theta_s) = \frac{f(\theta_s)}{g(\theta_s)} =
-\begin{cases}
-1 & \text{if } 0 \le \theta_s \le 1 \\
-0 & \text{if } 1 < \theta_s \le 2
-\end{cases}
-$$
-
-$$
-\left(\widehat{\frac{C_f}{C_g}}\right) = \sum_{s=1}^S w(\theta_s) \Big/ S \approx \frac{1}{2}
-$$
-
-![Flat f and g densities on [0,2] with w(θ)=1 on [0,1] and w(θ)=0 on [1,2].](Lec 11 Importance Sampling_images/p05-sampleplot.png){width=40%}
-
-$$
-\hat{A} = \frac{\sum_s a(\theta_s) w(\theta_s)}{\sum_s w(\theta_s)} = \frac{\sum_{0 < \theta_s < 1} a(\theta_s)}{\sum_s I(0 < \theta_s < 1)} = \frac{1}{n_E} \sum_{0 < \theta_s < 1} a(\theta_s), \quad \text{where } n_E = \#(0 < \theta_s < 1) \approx \frac{1}{2} S
-$$
-
-## Example 2: Support of g ⊂ Support of f
-
-$$
-f(\theta) = I(0 \le \theta \le 2), \qquad g(\theta) = I(0 \le \theta \le 1)
-$$
-
-Support of $g \subset$ support of $f$ — **importance sampling here is not generally valid** since $g$ does not cover the support of $f$.
-
-![f(θ)=I(0≤θ≤2) in red, g(θ)=I(0≤θ≤1) in blue; g's support does not cover f's support.](Lec 11 Importance Sampling_images/p06-boxplot.png){width=42%}
-
-We want to estimate $\dfrac{C_f}{C_g}$ (true $\le 2$). Suppose $\theta_s \sim g\,[\text{unif}([0,1])]$.
-
-$$
-w(\theta_s) = \frac{f(\theta_s)}{g(\theta_s)} = 1
-$$
-
-$$
-\left(\widehat{\frac{C_f}{C_g}}\right) = \frac{\sum_{s=1}^S w(\theta_s)}{S} = 1 \ne 2 \quad (\text{true value})
-$$
-
-## Example of Poor Importance Sampling
-
-When $f$ and $g$ have little overlap, only a few samples from $g$ fall where $f$ has appreciable mass (circled region), giving highly variable, unreliable weights.
-
-![f (red) concentrated to the left, g (black) concentrated to the right, with little overlap between the two densities — most g-samples receive negligible weight.](Lec 11 Importance Sampling_images/p07-poorIS.png){width=85%}
+```{r}
+#| fig-width: 9
+#| fig-height: 3.4
+par(mar = c(4, 4, 1, 1))
+f <- function(t) dgamma(t, 4, 1.5); g <- function(t) dnorm(t, 2.5, 1.6)
+th <- rnorm(30, 2.5, 1.6); w <- f(th) / g(th); wt <- w / sum(w)
+curve(f, -1, 8, lwd = 3, col = "firebrick", ylab = "", xlab = TeX(r"($\theta$)"), ylim = c(0, 0.45))
+curve(g, add = TRUE, lwd = 3, col = "steelblue")
+points(th, rep(0, 30), pch = 19, col = adjustcolor("gray20", 0.6), cex = 0.6 + 12 * wt)
+legend("topright", bty = "n", lwd = 3, col = c("firebrick", "steelblue"), legend = TeX(c(r"(target $f$)", r"(proposal $g$)")))
+mtext(TeX(r"(dot size $\propto$ normalized weight $\tilde{w}_i$)"), side = 3, line = -1.2, adj = 0.02, cex = 0.9)
+```
 
 ## Effective Sample Size
 
-$$
-S_{\text{eff}} = \frac{1}{\sum_{s=1}^S \tilde{w}(\theta_s)^2}, \qquad \text{where } \tilde{w}(\theta_s) = \frac{w(\theta_s)}{\sum_{s=1}^S w(\theta_s)}
-$$
+How many "equally informative" draws is a weighted sample worth?
+$$S_{\text{eff}} = \frac{1}{\sum_{s=1}^S \tilde w(\theta_s)^2}, \qquad \tilde w(\theta_s) = \frac{w(\theta_s)}{\sum_{j=1}^S w(\theta_j)}$$
 
-**(Not reliable)**
+**Special case**: if $w(\theta_s)\approx c$ for all $s$ (proposal has the shape of the target), then $\tilde w(\theta_s) = 1/S$ and
+$$S_{\text{eff}} = \frac{1}{\sum_{s=1}^S (1/S)^2} = \frac{1}{1/S} = S$$
 
-**A special case:** If $w(\theta_s) \approx c$ (constant), then $\tilde{w}(\theta_s) = \dfrac{c}{S \cdot c} = \dfrac{1}{S}$
+At the other extreme, one dominant weight gives $S_{\text{eff}}\approx1$.
 
-then, $S_{\text{eff}} = \dfrac{1}{\sum_{s=1}^S (1/S)^2} = \dfrac{1}{1/S} = S$
+**Variance heuristic.** For iid draws from $f$, $\text{Var}_f\big(\tfrac1S\sum_s a(\theta_s)\big) = \text{Var}_f(a)/S$. For the importance estimator,
+$$\text{Var}_g\left(\frac{\sum_s a(\theta_s)w(\theta_s)}{\sum_s w(\theta_s)}\right)\ \approx\ \frac{\text{Var}_f\big(a(\theta)\big)}{S_{\text{eff}}}$$
 
-$$
-\text{Var}_f\!\left(\sum_{s=1}^S a(\theta_s)/S\right) = \frac{\text{Var}_f(a(\theta_s))}{S}
-$$
+We will see (Examples 2 and 3) that $S_{\text{eff}}$ is computed only from the weights **observed**, and can look excellent when the estimate is wrong.
 
-$$
-\text{Var}_g\!\left(\frac{\sum_{s=1}^S a(\theta_s) w(\theta_s)}{\sum_{s=1}^S w(\theta_s)}\right) \approx \frac{\text{Var}(a(\theta_s))}{S_{\text{eff}}}
-$$
+# 3. A Good Story
 
-But $S_{\text{eff}}$ is **not reliable**.
+## Example 1: Estimating a Normal Tail Probability
 
-## Example 3: Equal Supports
+Estimate
+$$I = \int_a^b \varphi(x)\,dx = P(a<X<b), \qquad X\sim N(0,1)$$
 
-$$
-f(\theta) = I(0 \le \theta \le 2), \qquad g(\theta) = I(0 \le \theta \le 1)
-$$
+and the conditional expectation $E\big[a(X)\mid a<X<b\big]$. Set the target to the **truncated** density
+$$f(x) = \varphi(x)\,I(a\le x\le b), \qquad C_f = \int_{-\infty}^{\infty}\varphi(x)\,I(a\le x\le b)\,dx = P(a<X<b)$$
 
-All $\theta_s \sim \text{unif}([0,1])$. Here $w(\theta_s) = 1$, so $S_{\text{eff}} = S$.
+so that
+$$E_f\big[a(x)\big] = \int_a^b a(x)\,\frac{\varphi(x)}{I}\,dx = E\big[a(X)\mid a<X<b\big]$$
 
-![f(θ)=I(0≤θ≤2), g(θ)=I(0≤θ≤1), overlapping boxes of height 1 from 0 to 1 (g) and 1 to 2 (f).](Lec 11 Importance Sampling_images/p09-boxplot.png){width=40%}
+For a far tail ($a = 4$), plain Monte Carlo from $N(0,1)$ almost never lands in $[a,b]$ (probability $\approx 3\times10^{-5}$), so both $C_f$ and $E_f[a]$ are hopeless without a proposal concentrated on $[a,b]$.
 
-## Example 4: Estimating an Integral
+## Example 1 (Continued): Choice of Proposal
 
-Estimate the integral $\displaystyle\int_a^b \varphi(x)\, dx = I$, where $\varphi = \text{dnorm}(x)$, $X \sim N(0,1)$.
+Any normalized $g$ supported on $[a,b]$ works, and then $\frac1n\sum_i w_i$ estimates $I$ directly:
 
-Let $f(x) = \varphi(x) \cdot I(a \le x \le b)$.
+- **Uniform** $g(x) = \dfrac{I(a\le x\le b)}{b-a}$: $\;w(x) = (b-a)\,\varphi(x)$, so $\hat I = (b-a)\,\frac1n\sum_i\varphi(x_i)$, the Monte Carlo version of the midpoint rule
+- **Shifted exponential** $g(x) = \dfrac{\lambda e^{-\lambda(x-a)}}{1-e^{-\lambda(b-a)}}\,I(a\le x\le b)$ with $\lambda\approx a$: matches the decay of $\varphi$ on the tail, so $w$ is nearly constant and $S_{\text{eff}}\approx n$
 
-![φ(x) is the normal density; f(x)=φ(x)·I(a≤x≤b) is the red hatched region between a and b, with g(x) shown as the flat proposal under it.](Lec 11 Importance Sampling_images/p10-bellcurve.png){width=55%}
+```{r}
+#| echo: true
+a <- 4; b <- 6; n <- 1e4; exact <- pnorm(b) - pnorm(a)
+x_u <- runif(n, a, b);  w_u <- (b - a) * dnorm(x_u)
+lam <- a; x_e <- a - log(1 - runif(n) * (1 - exp(-lam * (b - a)))) / lam       # inverse CDF
+g_e <- lam * exp(-lam * (x_e - a)) / (1 - exp(-lam * (b - a))); w_e <- dnorm(x_e) / g_e
+rbind(uniform = c(I_hat = mean(w_u), rel_error = mean(w_u) / exact - 1, S_eff = ess(w_u),
+                  E_X_given = sum(x_u * w_u) / sum(w_u)),
+      exponential = c(mean(w_e), mean(w_e) / exact - 1, ess(w_e), sum(x_e * w_e) / sum(w_e)))
+```
 
-$$
-A = \int_a^b a(x) \cdot \frac{\varphi(x)}{I}\, dx = E_f(a(x))
-$$
+## Example 1 (Continued)
 
-$$
-C_f = \int_{-\infty}^{b} f(x)\, dx = P(a < X < b)
-$$
+```{r}
+#| fig-width: 10
+#| fig-height: 4.2
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
+curve(dnorm, -4, 7, lwd = 3, xlab = "x", ylab = "", main = "target: truncated normal on [a, b]")
+xs <- seq(a, b, length.out = 100)
+polygon(c(xs, rev(xs)), c(dnorm(xs), rep(0, 100)), col = adjustcolor("firebrick", 0.5), border = NA)
+abline(v = c(a, b), lty = 3); text(a, 0.2, TeX(r"(area $= I \approx 3 \times 10^{-5}$)"), pos = 4, col = "firebrick")
+g_e_fun <- function(x) lam * exp(-lam * (x - a)) / (1 - exp(-lam * (b - a)))
+curve(dnorm(x) / exact, a, b, lwd = 3, col = "firebrick", xlab = "x", ylab = "density", main = "normalized target vs proposals on [a, b]", ylim = c(0, 4.5))
+curve(g_e_fun, add = TRUE, lwd = 3, col = "forestgreen"); segments(a, 1 / (b - a), b, 1 / (b - a), lwd = 3, col = "steelblue")
+legend("topright", bty = "n", lwd = 3, col = c("firebrick", "forestgreen", "steelblue"),
+       legend = TeX(c(r"($f/C_f$)", r"(shifted exponential $g$)", r"(uniform $g$)")))
+```
 
-## Example 4 — Option 1: Uniform Proposal
+The exponential proposal tracks the shape of the truncated normal; the uniform proposal wastes draws near $b$ where $\varphi$ is tiny, and its weights vary by a factor $e^{(b^2-a^2)/2}\approx e^{10}$.
 
-**Option 1:** $g(x) = I(a \le x \le b)$, $C_g = b - a$
+# 4. Two Bad Stories
 
-Suppose we have $X_s \sim g\,(\text{unif}([a,b]))$:
+## Example 2: Same Support, but a Mode Is Missed
 
-$$
-w(X_s) = \frac{f(X_s)}{g(X_s)} = \varphi(X_s)
-$$
+$$f(\theta) = \tfrac12\varphi(\theta+5) + \tfrac12\varphi(\theta-5), \qquad g(\theta) = \varphi(\theta+5)$$
 
-$$
-\left(\widehat{\frac{C_f}{C_g}}\right) = \frac{\sum_{s=1}^S w(X_s)}{S} = \frac{\sum_{s=1}^S \varphi(X_s)}{S}
-$$
+Both are positive on all of $\mathbb R$, so the support requirement holds. But $g$ concentrates around $-5$ and never produces draws near the second mode at $+5$.
 
-$$
-\hat{A} = \frac{\sum_{s=1}^S a(X_s)\varphi(X_s)}{\sum_{s=1}^S \varphi(X_s)}
-$$
+For $\theta$ near $-5$,
+$$w(\theta) = \frac{f(\theta)}{g(\theta)} = \tfrac12 + \tfrac12\,\frac{\varphi(\theta-5)}{\varphi(\theta+5)} = \tfrac12 + \tfrac12 e^{10\theta}\ \approx\ \tfrac12$$
 
-We know $C_g = b - a$, so
+so all observed weights are nearly equal: $\tilde w_i\approx 1/S$ and $S_{\text{eff}}\approx S$. Yet
 
-$$
-\hat{C}_f = \left(\widehat{\frac{C_f}{C_g}}\right)(b-a) = \frac{\sum_{s=1}^S \varphi(X_s)}{S}(b-a) = \sum_s \varphi(X_s) \cdot \frac{b-a}{S}
-$$
+- $\widehat{C_f/C_g} = \frac1S\sum_i w_i \approx \tfrac12$, while the truth is $1$
+- $\hat E_f(\theta) \approx -5$, while the truth is $0$
 
-![Density g (uniform on [a,b]) under f, with the hatched triangular region illustrating the randomised midpoint rule.](Lec 11 Importance Sampling_images/p11-midpoint.png){width=75%}
+The draws that would reveal the error (those with $w\approx \tfrac12 e^{10\theta}\gg1$, near $\theta = 5$) have probability $\approx \Phi(-10)\approx 10^{-23}$ under $g$: they never appear.
 
-This is the **randomised midpoint rule**.
+## Example 2 (Continued)
 
-## Example 4 — Option 2: Using φ(x) as Proposal
+```{r}
+#| fig-width: 10
+#| fig-height: 4.2
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1)); S <- 5000
+f2 <- function(t) 0.5 * dnorm(t + 5) + 0.5 * dnorm(t - 5); g2 <- function(t) dnorm(t + 5)
+th <- rnorm(S, -5); w <- f2(th) / g2(th); wt <- w / sum(w)
+curve(f2, -9, 9, lwd = 3, col = "firebrick", xlab = TeX(r"($\theta$)"), ylab = "", main = "target f and proposal g", ylim = c(0, 0.42))
+curve(g2, add = TRUE, lwd = 3, col = "steelblue"); rug(th[1:300], col = adjustcolor("steelblue", 0.5))
+legend("topright", bty = "n", lwd = 3, col = c("firebrick", "steelblue"), legend = c("f", "g"))
+hist(wt * S, breaks = 40, col = "gray85", border = "white", xlab = TeX(r"($S \tilde{w}_i$)"),
+     main = sprintf("weights: S_eff = %.0f of %d", ess(w), S))
+mtext(sprintf("C_f/C_g estimate = %.3f (true 1);  E(theta) estimate = %.2f (true 0)", mean(w), sum(th * wt)),
+      side = 1, line = 4, adj = 1, cex = 0.85, outer = TRUE)
+```
 
-**Option 2:** using $g(x) = \varphi(x)$ to approximate $f$.
+**Lesson**: near-constant weights show only that $g$ matches $f$ **where $g$ has mass**. They say nothing about regions $g$ never visits. Use a proposal wide enough to cover all modes, or a mixture proposal, and compare results across different $g$.
 
-![g = φ(x) (black curve) used as the proposal, matching f (red) closely between a and b; sample points shown as dots on the x-axis with w(θ)=0 outside [a,b] and w(θ)=1 inside.](Lec 11 Importance Sampling_images/p12-approxfx.png){width=60%}
+## Example 3: Violating the Support Requirement
 
-Draw $\theta_1, \dots, \theta_n \sim g$, $C_g = 1$:
+$$f(\theta) = I(0\le\theta\le2), \qquad g(\theta) = I(0\le\theta\le1)$$
 
-$$
-\left(\widehat{\frac{C_f}{C_g}}\right) = \frac{\sum w(\theta_i)}{n} = \frac{\#(a < \theta_i < b)}{n}
-$$
+Here $\text{supp}(g)\subset\text{supp}(f)$: the proposal never visits $(1,2]$. True ratio: $C_f/C_g = 2/1 = 2$.
 
-## More Choices of g(x)
+Draw $\theta_s\sim g$, i.e. $\text{Unif}(0,1)$. For every draw, $w(\theta_s) = f(\theta_s)/g(\theta_s) = 1$, so
+$$\widehat{\frac{C_f}{C_g}} = \frac1S\sum_{s=1}^S w(\theta_s) = 1 \ \ne\ 2, \qquad S_{\text{eff}} = S$$
 
-Using tangent lines to $\log g(x)$ at the boundary to build proposal densities:
+The estimate is wrong **regardless of $S$**, with perfect-looking weights. Example 2 is the smooth version of the same failure. The reverse situation ($g$ wider than $f$) is harmless: draws outside $\text{supp}(f)$ simply receive weight $0$.
 
-$$
-g_1(x) = e^{l_1(x)}, \qquad g_2(x) = e^{l_2(x)}
-$$
+```{r}
+#| fig-width: 8
+#| fig-height: 2.4
+par(mar = c(4, 1, 1, 1))
+plot(NA, xlim = c(-0.2, 2.4), ylim = c(0, 1.5), xlab = TeX(r"($\theta$)"), ylab = "", yaxt = "n")
+rect(0, 0, 2, 1, col = adjustcolor("firebrick", 0.25), border = "firebrick", lwd = 3)
+rect(0, 0, 1, 1, col = adjustcolor("steelblue", 0.35), border = "steelblue", lwd = 3)
+text(1.5, 0.5, "never sampled", col = "firebrick"); text(0.5, 1.2, TeX(r"($g$: $w = 1$ everywhere)"), col = "steelblue")
+text(2, 1.2, TeX(r"($f = I(0 \leq \theta \leq 2)$)"), col = "firebrick")
+```
 
-![log g(x) with two tangent-line approximations l1 and l2 near the boundary point b, defining g1(x)=e^{l1(x)} and g2(x)=e^{l2(x)}.](Lec 11 Importance Sampling_images/p13-loggx.png){width=70%}
+## The Opposite Failure: Heavy-Tailed Weights
 
-Inverting the CDF of $e^{l_1(t)}$ on $[a,b]$ to sample $x$:
+Examples 2 and 3 fail silently because $g$ is too **narrow**. A $g$ with lighter tails than $f$ fails noisily: $w = f/g$ is unbounded, $\text{Var}_g(w)$ may be infinite, and a rare tail draw arrives with a huge weight.
 
-$$
-F(x) = \frac{\int_a^x e^{l_1(t)}\, dt}{\int_a^b e^{l_1(t)}\, dt}
-$$
+```{r}
+#| fig-width: 10
+#| fig-height: 3.6
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1)); S <- 2000
+f3 <- function(t) dt(t, 3)
+for (case in 1:2) {
+  if (case == 1) { th <- rnorm(S, 0, 1.2); g3 <- function(t) dnorm(t, 0, 1.2); lab <- "proposal N(0, 1.2^2)" }
+  else           { th <- 1.5 * rt(S, 3);    g3 <- function(t) dt(t / 1.5, 3) / 1.5; lab <- "proposal 1.5 x t(3)" }
+  w <- f3(th) / g3(th); wt <- w / sum(w)
+  plot(sort(wt, decreasing = TRUE)[1:200], type = "h", lwd = 2, col = c("firebrick", "steelblue")[case],
+       xlab = "draw (sorted by weight)", ylab = TeX(r"($\tilde{w}_i$)"),
+       main = sprintf("%s:  S_eff = %.0f, max weight = %.3f", lab, ess(w), max(wt)))
+}
+```
 
-![Density e^{l1(t)} on [a,b] with shaded area up to x, and the CDF formula F(x) used for inverting the CDF to sample.](Lec 11 Importance Sampling_images/p13-invertcdf.png){width=55%}
+**Practical rules**: give $g$ tails at least as heavy as $f$ (a $t$ rather than a normal); centre and inflate $g$ using a mode and Hessian (a Laplace approximation is a natural start); report $S_{\text{eff}}$ and $\max_i\tilde w_i$; rerun with different $g$ and distrust diverging answers.
 
-## Example: Quadratic Approximation to log f(x)
+# 5. Two Advanced Applications
 
-Using a quadratic function (matching the curvature at $\theta_0$) to approximate $\log f(x)$, giving a Gaussian-shaped $\log g(x)$.
+## Example 4: Free Energy and the Marginal Likelihood {.smaller}
 
-![log f(x) in red vs. a quadratic approximation log g(x) in blue, matched at θ0.](Lec 11 Importance Sampling_images/p14-quadapprox.png){width=75%}
+In statistical physics, a system with energy $U(x)$ at inverse temperature $\beta$ has
+$$Z(\beta) = \int e^{-\beta U(x)}\,dx, \qquad F(\beta) = -\frac1\beta\log Z(\beta) \ \ (\text{free energy})$$
 
-## Advanced Examples: Free Energy
+Importance sampling from $\beta_0$ to $\beta_1$ with $g = e^{-\beta_0 U}$, $f = e^{-\beta_1 U}$, $w(x) = e^{-(\beta_1-\beta_0)U(x)}$:
+$$\frac{Z(\beta_1)}{Z(\beta_0)} = E_{\beta_0}\Big[e^{-(\beta_1-\beta_0)U(x)}\Big]$$
 
-Consider a family of unnormalized densities indexed by $\lambda$:
+**Bayesian analogue.** With $U(\theta) = -\log L(\theta)$ and $g = \pi(\theta)$ (prior, $\beta_0 = 0$), $f = L(\theta)\pi(\theta)$ (posterior, $\beta_1 = 1$):
+$$P(y) = \frac{C_f}{C_g} = E_\pi\big[L(\theta)\big] \approx \frac1S\sum_{s=1}^S L(\theta_s), \qquad \theta_s\sim\pi$$
 
-$$
-f_\lambda(s) = e^{-E_\lambda(s)}
-$$
+$-\log P(y)$ is the free energy of the posterior. This "prior sampling" estimator is exactly Example 2 in disguise: the prior is diffuse, the likelihood is a narrow spike, weights are $L(\theta_s)$, and almost all prior draws have negligible weight.
 
-![Nested contour plot: outer contour is g, inner (red) contours represent f, illustrating a family of distributions f_λ(s) shrinking toward the target.](Lec 11 Importance Sampling_images/p15-freeenergy.png){width=60%}
+## Example 4 (Continued): Prior Sampling Fails, Tempering Helps
 
-$$
-F(\lambda) = \int f_\lambda(s)\, ds
-$$
+```{r}
+#| echo: true
+y <- rnorm(30, 1, 1); n <- length(y)                       # data; model N(theta, 1), prior N(0, 10^2)
+logL <- function(th) sapply(th, function(t) sum(dnorm(y, t, log = TRUE)))
+s2p <- 100; ybar <- mean(y)                                # exact log P(y): y ~ N(0, I + s2p * 11')
+exact <- -n / 2 * log(2 * pi) - 0.5 * sum((y - ybar)^2) - 0.5 * log(1 + n * s2p) - 0.5 * n * ybar^2 / (1 + n * s2p)
+S <- 1e5; lse <- function(l) { M <- max(l); M + log(sum(exp(l - M))) }
+th <- rnorm(S, 0, 10); lw <- logL(th)                       # prior sampling: log weights = log L
+c(exact = exact, prior_sampling = lse(lw) - log(S), S_eff = ess(exp(lw - max(lw))))
+```
 
-$$
-f_0(s) = g(s) = e^{-E_0(s)}
-$$
+```{r}
+#| echo: true
+betas <- seq(0, 1, by = 0.1); logZ <- 0                     # stepping stones: chain of small steps
+for (k in 2:length(betas)) {                                # draw from tempered posterior beta_{k-1} (conjugate here)
+  b0 <- betas[k - 1]; v <- 1 / (1 / s2p + b0 * n); m <- v * b0 * n * ybar
+  th <- rnorm(S, m, sqrt(v)); lw <- (betas[k] - b0) * logL(th)
+  logZ <- logZ + lse(lw) - log(S) }
+c(exact = exact, stepping_stones = logZ)
+```
 
-$$
-\frac{F(\lambda)}{F(0)} = \sum_s \frac{f_\lambda(s)}{f_0(s)} \Big/ n, \qquad \text{with } s \sim f_0(s) = g(s)
-$$
+Each small temperature step has near-constant weights (a good story), and the log ratios add up: $\log Z(1) - \log Z(0) = \sum_k \log\frac{Z(\beta_k)}{Z(\beta_{k-1})}$.
 
-## Advanced Examples: Chaining Free Energy Ratios
+## Example 5: Bayesian Cross-Validation
 
-Chain a sequence of intermediate distributions $f_0, f_1, f_2, \dots, f_{100}$ from the proposal to the target, and estimate the ratio of normalizing constants as a product of successive ratios:
+Leave-one-out predictive density, the Bayesian analogue of cross-validation error:
+$$p(y_i\mid y_{-i}) = \int p(y_i\mid\theta)\,p(\theta\mid y_{-i})\,d\theta$$
 
-![Nested contours from f0(s) (outermost, the proposal) through f1, f2, ... down to f100(s) (innermost, the target), used to bridge a chain of importance-sampling ratios.](Lec 11 Importance Sampling_images/p16-chaining.png){width=70%}
+Refitting the model $n$ times is expensive. Instead, reuse draws $\theta_s\sim p(\theta\mid y)$ from the **full** posterior as the proposal. The target is the leave-one-out posterior,
+$$f(\theta) = p(\theta\mid y_{-i}) \propto \frac{p(\theta\mid y)}{p(y_i\mid\theta)}, \qquad
+w_i(\theta) = \frac{f(\theta)}{g(\theta)} = \frac{1}{p(y_i\mid\theta)}$$
 
-$$
-\frac{\widehat{F}_{100}}{\widehat{F}_0} = \frac{\widehat{F}_{100}}{\widehat{F}_{99}} \cdot \frac{\widehat{F}_{99}}{\widehat{F}_{98}} \cdots \frac{\widehat{F}_1}{\widehat{F}_0}
-$$
+Then
+$$\hat p(y_i\mid y_{-i}) = \frac{\sum_s p(y_i\mid\theta_s)\,w_i(\theta_s)}{\sum_s w_i(\theta_s)}
+= \frac{S}{\sum_{s=1}^S 1/p(y_i\mid\theta_s)}$$
 
-## A Toy Example: Estimating the Area of the Red Region
+the harmonic mean of $p(y_i\mid\theta_s)$ over posterior draws (Gelfand, Dey & Chang, 1992).
 
-A nested sequence of regions $f_1 \supset f_2 \supset \dots \supset f_{99} \supset f_{100}$, where $f_{100}$ (red) is the small target region whose area we want, bridged via the chain of intermediate regions.
+## Example 5 (Continued): When It Works and When It Breaks
 
-![Nested contours f1, f2, ..., f99 with the small red irregular region f100 (target area) at the centre.](Lec 11 Importance Sampling_images/p17-toyexample.png){width=55%}
+- The full posterior is **narrower** than the leave-one-out posterior (it has one more observation), so $g$ has lighter tails than $f$: the heavy-tailed-weight failure
+- For a typical $y_i$ the two posteriors nearly coincide and the weights are stable
+- For an **influential** $y_i$ (an outlier, a high-leverage point) the weights $1/p(y_i\mid\theta_s)$ have infinite variance and the estimate is dominated by a few draws
 
-## Approximating Cross-Validation
+**Diagnostics and fixes**
 
-Data $y_1, \dots, y_i, \dots, y_n$.
+- Report $S_{\text{eff}}$ per observation; a small value flags an influential point
+- **Pareto-smoothed importance sampling** (Vehtari, Gelman & Gabry, 2017): fit a generalized Pareto distribution to the largest weights, replace them by smoothed values, and use the estimated shape $\hat k$ as a diagnostic ($\hat k>0.7$ unreliable)
+- Fall back to actual refitting for the flagged observations only
 
-**Full data posterior:**
+## Example 5 (Continued)
 
-$$
-f(\theta \mid y_1, \dots, y_n) \propto g(\theta) = \prod_{i=1}^n p(y_i \mid \theta) \cdot \pi(\theta)
-$$
+Normal model, $\theta\sim N(0,10^2)$, 30 observations plus one outlier at $y = 6$. Weight distributions for a typical point and for the outlier.
 
-**Leave-one-out posterior:**
+```{r}
+#| fig-width: 10
+#| fig-height: 3.8
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
+y2 <- c(y, 6); n2 <- length(y2); v <- 1 / (1 / s2p + n2); m <- v * sum(y2)
+ths <- rnorm(4000, m, sqrt(v))
+for (i in c(1, n2)) { lw <- -dnorm(y2[i], ths, log = TRUE); w <- exp(lw - max(lw)); wt <- w / sum(w)
+  plot(sort(wt, decreasing = TRUE)[1:150], type = "h", lwd = 2, col = if (i == 1) "steelblue" else "firebrick",
+       xlab = "draw (sorted by weight)", ylab = TeX(r"($\tilde{w}_s$)"),
+       main = sprintf("%s (y = %.2f):  S_eff = %.0f of 4000", if (i == 1) "typical point" else "outlier", y2[i], ess(w))) }
+```
 
-$$
-f_{-i}(\theta \mid y_1, \dots, y_{i-1}, y_{i+1}, \dots, y_n) \propto f(\theta) = \prod_{j \ne i} p(y_j \mid \theta) \cdot \pi(\theta)
-$$
+## Summary
 
-**Importance weight:**
-
-$$
-w(\theta) = \frac{f(\theta)}{g(\theta)} = \frac{1}{p(y_i \mid \theta)}
-$$
+- Importance sampling estimates $E_f[a(\theta)]$ and $C_f = \int f(\theta)\,d\theta$ from draws $\theta_i\sim g$ using weights $w_i = f(\theta_i)/g(\theta_i)$:
+$$\widehat{C_f/C_g} = \frac1n\sum_i w_i, \qquad \hat A = \sum_i a(\theta_i)\,\tilde w_i, \quad \tilde w_i = \frac{w_i}{\sum_j w_j}$$
+- Good story: a proposal shaped like the target on its support (Example 1) gives near-constant weights and $S_{\text{eff}}\approx n$
+- Bad stories: a proposal that misses a mode (Example 2) or part of the support (Example 3) fails **silently**, with perfect-looking weights; a proposal with lighter tails fails **noisily**, with a few huge weights
+- $S_{\text{eff}} = 1/\sum_i\tilde w_i^2$ diagnoses only the second kind of failure
+- Advanced uses: normalizing-constant ratios (free energy, marginal likelihood) via tempering steps; leave-one-out cross-validation from full-posterior draws with $w_i = 1/p(y_i\mid\theta)$
