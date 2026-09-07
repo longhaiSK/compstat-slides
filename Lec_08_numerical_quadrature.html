@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_08_numerical_quadrature_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_08_numerical_quadrature_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_08_numerical_quadrature_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_08_numerical_quadrature_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_08_numerical_quadrature_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_08_numerical_quadrature_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_08_numerical_quadrature_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <title>Elements of Statistical Computation</title>
+  <title>Course Lectures – Elements of Statistical Computation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_08_numerical_quadrature_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_08_numerical_quadrature_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -98,8 +98,8 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="Lec_08_numerical_quadrature_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
-  <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -116,12 +116,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -319,15 +319,15 @@ Longhai Li
 <section id="implementation-in-r" class="slide level2">
 <h2>Implementation in R</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>midpoint <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; h <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">f</span>(a <span class="sc">+</span> (<span class="dv">1</span><span class="sc">:</span>n <span class="sc">-</span> <span class="fl">0.5</span>) <span class="sc">*</span> h)) }</span>
-<span id="cb3-2"><a href=""></a>trapezoid <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; x <span class="ot">&lt;-</span> a <span class="sc">+</span> (<span class="dv">0</span><span class="sc">:</span>n) <span class="sc">*</span> h</span>
-<span id="cb3-3"><a href=""></a>  h <span class="sc">*</span> (<span class="fu">sum</span>(<span class="fu">f</span>(x)) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> (<span class="fu">f</span>(a) <span class="sc">+</span> <span class="fu">f</span>(b))) }</span>
-<span id="cb3-4"><a href=""></a>simpson <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { <span class="fu">stopifnot</span>(n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>); h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; x <span class="ot">&lt;-</span> a <span class="sc">+</span> (<span class="dv">0</span><span class="sc">:</span>n) <span class="sc">*</span> h</span>
-<span id="cb3-5"><a href=""></a>  h <span class="sc">/</span> <span class="dv">3</span> <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">f</span>(x) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">2</span>), n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>), <span class="dv">4</span>, <span class="dv">1</span>)) }</span>
-<span id="cb3-6"><a href=""></a><span class="co"># P(0.5 &lt; Z &lt; 2) for Z ~ N(0, 1); exact value from pnorm</span></span>
-<span id="cb3-7"><a href=""></a>exact <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fl">0.5</span>)</span>
-<span id="cb3-8"><a href=""></a><span class="fu">sapply</span>(<span class="fu">c</span>(<span class="at">midpoint =</span> midpoint, <span class="at">trapezoid =</span> trapezoid, <span class="at">simpson =</span> simpson),</span>
-<span id="cb3-9"><a href=""></a>       <span class="cf">function</span>(rule) <span class="fu">rule</span>(dnorm, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="dv">10</span>) <span class="sc">-</span> exact)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>midpoint <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; h <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">f</span>(a <span class="sc">+</span> (<span class="dv">1</span><span class="sc">:</span>n <span class="sc">-</span> <span class="fl">0.5</span>) <span class="sc">*</span> h)) }</span>
+<span id="cb3-2"><a></a>trapezoid <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; x <span class="ot">&lt;-</span> a <span class="sc">+</span> (<span class="dv">0</span><span class="sc">:</span>n) <span class="sc">*</span> h</span>
+<span id="cb3-3"><a></a>  h <span class="sc">*</span> (<span class="fu">sum</span>(<span class="fu">f</span>(x)) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> (<span class="fu">f</span>(a) <span class="sc">+</span> <span class="fu">f</span>(b))) }</span>
+<span id="cb3-4"><a></a>simpson <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, n) { <span class="fu">stopifnot</span>(n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>); h <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">/</span> n; x <span class="ot">&lt;-</span> a <span class="sc">+</span> (<span class="dv">0</span><span class="sc">:</span>n) <span class="sc">*</span> h</span>
+<span id="cb3-5"><a></a>  h <span class="sc">/</span> <span class="dv">3</span> <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">f</span>(x) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">2</span>), n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>), <span class="dv">4</span>, <span class="dv">1</span>)) }</span>
+<span id="cb3-6"><a></a><span class="co"># P(0.5 &lt; Z &lt; 2) for Z ~ N(0, 1); exact value from pnorm</span></span>
+<span id="cb3-7"><a></a>exact <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fl">0.5</span>)</span>
+<span id="cb3-8"><a></a><span class="fu">sapply</span>(<span class="fu">c</span>(<span class="at">midpoint =</span> midpoint, <span class="at">trapezoid =</span> trapezoid, <span class="at">simpson =</span> simpson),</span>
+<span id="cb3-9"><a></a>       <span class="cf">function</span>(rule) <span class="fu">rule</span>(dnorm, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="dv">10</span>) <span class="sc">-</span> exact)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     midpoint     trapezoid       simpson 
 -6.416299e-05  1.280126e-04 -1.689521e-06 </code></pre>
@@ -385,9 +385,9 @@ d\mu\,dw = \frac{du}{u(1-u)}\,\frac{dv}{v(1-v)}</span></p>
 <p><span class="math inline">L(\theta)</span> underflows for moderate <span class="math inline">n</span> (a product of <span class="math inline">n</span> densities), so store <span class="math inline">\log g</span> at each grid point and combine with <strong>log-sum-exp</strong>: <span class="math display">\log\sum_{i} e^{\ell_i} = M + \log\sum_i e^{\ell_i - M}, \qquad M = \max_i \ell_i</span></p>
 <p>The largest term becomes <span class="math inline">e^0 = 1</span> and nothing overflows; terms far below <span class="math inline">M</span> underflow to <span class="math inline">0</span> harmlessly.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { M <span class="ot">&lt;-</span> <span class="fu">max</span>(l); M <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> M))) }</span>
-<span id="cb5-2"><a href=""></a>log_ml <span class="ot">&lt;-</span> <span class="fu">log_sum_exp</span>(G) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(h)          <span class="co"># log P(y) = log( h^2 * sum exp(log g) )</span></span>
-<span id="cb5-3"><a href=""></a><span class="fu">c</span>(<span class="at">log_marginal_likelihood =</span> log_ml, <span class="at">direct_sum =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(G))) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(h))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { M <span class="ot">&lt;-</span> <span class="fu">max</span>(l); M <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> M))) }</span>
+<span id="cb5-2"><a></a>log_ml <span class="ot">&lt;-</span> <span class="fu">log_sum_exp</span>(G) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(h)          <span class="co"># log P(y) = log( h^2 * sum exp(log g) )</span></span>
+<span id="cb5-3"><a></a><span class="fu">c</span>(<span class="at">log_marginal_likelihood =</span> log_ml, <span class="at">direct_sum =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(G))) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(h))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>log_marginal_likelihood              direct_sum 
               -48.09731               -48.09731 </code></pre>
@@ -472,6 +472,7 @@ d\mu\,dw = \frac{du}{u(1-u)}\,\frac{dv}{v(1-v)}</span></p>
 <li>Limitations: peaked integrands need a grid adapted to the mode and scale; product grids cost <span class="math inline">n^d</span> evaluations, so quadrature is practical only in low dimension</li>
 </ul>
 
+
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -481,19 +482,19 @@ d\mu\,dw = \frac{du}{u(1-u)}\,\frac{dv}{v(1-v)}</span></p>
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_08_numerical_quadrature_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

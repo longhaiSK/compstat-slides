@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Lec_01_intro-course_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Lec_01_intro-course_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Lec_01_intro-course_files/libs/quarto-html/popper.min.js"></script>
-<script src="Lec_01_intro-course_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Lec_01_intro-course_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Lec_01_intro-course_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_01_intro-course_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <title>Elements of Statistical Computation</title>
+  <title>Course Lectures – Elements of Statistical Computation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Lec_01_intro-course_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Lec_01_intro-course_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -98,8 +98,8 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="Lec_01_intro-course_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
-  <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -116,12 +116,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -373,22 +373,22 @@ p(\theta \mid x) = \frac{f(x \mid \theta)\,\pi(\theta)}{\int f(x \mid \theta)\,\
 <section id="example-rounding-error" class="slide level2">
 <h2>Example: Rounding Error</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">1</span>, <span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">2</span>, <span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">3</span>)</span>
-<span id="cb3-2"><a href=""></a><span class="fu">var</span>(x)                                    <span class="co"># correct answer: 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">1</span>, <span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">2</span>, <span class="fl">1e10</span> <span class="sc">+</span> <span class="dv">3</span>)</span>
+<span id="cb3-2"><a></a><span class="fu">var</span>(x)                                    <span class="co"># correct answer: 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">3</span> <span class="sc">*</span> <span class="fu">mean</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">2</span>           <span class="co"># textbook formula</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">3</span> <span class="sc">*</span> <span class="fu">mean</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">2</span>           <span class="co"># textbook formula</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">prod</span>(<span class="fu">dnorm</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>)))                  <span class="co"># likelihood underflows to 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="fu">prod</span>(<span class="fu">dnorm</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>)))                  <span class="co"># likelihood underflows to 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="fu">sum</span>(<span class="fu">dnorm</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>), <span class="at">log =</span> <span class="cn">TRUE</span>))       <span class="co"># log-likelihood is fine</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="fu">sum</span>(<span class="fu">dnorm</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>), <span class="at">log =</span> <span class="cn">TRUE</span>))       <span class="co"># log-likelihood is fine</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -1373.279</code></pre>
 </div>
@@ -400,8 +400,8 @@ p(\theta \mid x) = \frac{f(x \mid \theta)\,\pi(\theta)}{\int f(x \mid \theta)\,\
 <p><strong>Monte Carlo</strong>: replace a probability calculation with repeated random experiments.</p>
 <p>Generate <span class="math inline">X_1, X_2 \overset{iid}{\sim} \text{Unif}(0,1)</span>. What is the distribution of <span class="math inline">X_1 + X_2</span>?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>z <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10000</span>) <span class="sc">+</span> <span class="fu">runif</span>(<span class="dv">10000</span>)</span>
-<span id="cb11-2"><a href=""></a><span class="fu">hist</span>(z, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">""</span>, <span class="at">xlab =</span> <span class="st">"X1 + X2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>z <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10000</span>) <span class="sc">+</span> <span class="fu">runif</span>(<span class="dv">10000</span>)</span>
+<span id="cb11-2"><a></a><span class="fu">hist</span>(z, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">""</span>, <span class="at">xlab =</span> <span class="st">"X1 + X2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
 <img data-src="Lec_01_intro-course_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
@@ -479,6 +479,7 @@ E(X) = \int x f(x)\,dx, \qquad V(X), \qquad \int f(x\mid\theta)\pi(\theta)\,d\th
 </table>
 <p>Throughout: R programming, vectorization, and efficient code.</p>
 
+
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -488,19 +489,19 @@ E(X) = \int x f(x)\,dx, \qquad V(X), \qquad \int f(x\mid\theta)\pi(\theta)\,d\th
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Lec_01_intro-course_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

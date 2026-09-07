@@ -1,0 +1,8 @@
+---
+title: "Course Lectures"
+format: html
+---
+
+Welcome to the course materials. 
+
+Please select a lecture from the sidebar to view the slides.
