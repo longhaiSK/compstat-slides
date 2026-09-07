@@ -19,6 +19,23 @@
   font-size: 0.9em !important;
 }
 
+/* Quarto compensates that shrink on headings with a hardcoded calc(_em/0.7),
+   which assumes the 0.7em scale above and otherwise over-inflates headings.
+   Redo the same compensation using our 0.9em scale so headings stay the
+   same absolute size as on non-.smaller slides. */
+.reveal .slides section.smaller h1,
+.reveal.smaller .slides h1 {
+  font-size: calc(2.5em / 0.9) !important;
+}
+.reveal .slides section.smaller h2,
+.reveal.smaller .slides h2 {
+  font-size: calc(1.6em / 0.9) !important;
+}
+.reveal .slides section.smaller h3,
+.reveal.smaller .slides h3 {
+  font-size: calc(1.3em / 0.9) !important;
+}
+
 /* 3. Your Custom Rules */
 
 /* Brute-force blue headers */
