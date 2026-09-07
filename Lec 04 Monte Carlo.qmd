@@ -1,8 +1,6 @@
 ---
-title: "STAT 420/812 Computational Statistics"
-subtitle: "Simple Monte Carlo"
+subtitle: "Random Numbers and Elementary Monte Carlo"
 author: "Longhai Li"
-date: "2022"
 format: banner_slides-revealjs
 ---
 

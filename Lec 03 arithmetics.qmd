@@ -1,7 +1,5 @@
 ---
-title: "Elements of Statistical Computation"
 subtitle: "Computer Arithmetic"
-author: "Longhai Li"
 format: banner_slides-revealjs
 code-fold: show
 execute:
@@ -46,10 +44,12 @@ A computer uses base 2, so each box (a **bit**) holds 0 or 1:
 <p class="cap">$1101_2 = 1\times2^3 + 1\times2^2 + 0\times2^1 + 1\times2^0 = 13$</p>
 :::
 
-## Integers: Fixed Number of Boxes
+## Integers: Fixed Number of Boxes {.smaller}
 
 An integer is stored in a **fixed** number of bits, e.g. 32 or 64. With $p$ bits the largest unsigned value is
-$$\sum_{i=0}^{p-1} 2^i = 2^p - 1 .$$
+$$
+\sum_{i=0}^{p-1} 2^i = 2^p - 1 .
+$$
 
 A 4-bit example: the largest storable integer is $1111_2 = 15$.
 
@@ -349,6 +349,7 @@ Software provides functions written specifically to avoid cancellation and overf
 | `log(pnorm(x))` | `pnorm(x, log.p = TRUE)` | underflow |
 
 ```{r}
+#| code-fold: true
 c(log(1 + 1e-20), log1p(1e-20))
 c(log(factorial(1000)), lfactorial(1000))
 ```

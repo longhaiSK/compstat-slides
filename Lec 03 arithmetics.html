@@ -319,9 +319,11 @@ Longhai Li
 </p>
 </div>
 </section>
-<section id="integers-fixed-number-of-boxes" class="slide level2">
+<section id="integers-fixed-number-of-boxes" class="slide level2 smaller">
 <h2>Integers: Fixed Number of Boxes</h2>
-<p>An integer is stored in a <strong>fixed</strong> number of bits, e.g.&nbsp;32 or 64. With <span class="math inline">p</span> bits the largest unsigned value is <span class="math display">\sum_{i=0}^{p-1} 2^i = 2^p - 1 .</span></p>
+<p>An integer is stored in a <strong>fixed</strong> number of bits, e.g.&nbsp;32 or 64. With <span class="math inline">p</span> bits the largest unsigned value is <span class="math display">
+\sum_{i=0}^{p-1} 2^i = 2^p - 1 .
+</span></p>
 <p>A 4-bit example: the largest storable integer is <span class="math inline">1111_2 = 15</span>.</p>
 <div class="pv">
 <table>
@@ -1304,14 +1306,14 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 </tbody>
 </table>
 <div class="cell">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-20</span>), <span class="fu">log1p</span>(<span class="fl">1e-20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0e+00 1e-20</code></pre>
 </div>
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="fu">factorial</span>(<span class="dv">1000</span>)), <span class="fu">lfactorial</span>(<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
