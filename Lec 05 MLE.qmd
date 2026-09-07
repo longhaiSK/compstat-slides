@@ -385,7 +385,7 @@ $$\theta_{k+1} = \theta_k + \big[nI(\theta_k)\big]^{-1}\nabla\ell(\theta_k).$$
 
 Each iteration costs one $p \times p$ linear solve — $O(p^3)$ — fine for $p$ in the hundreds, expensive for $p$ in the millions.
 
-## Example: Logistic Regression
+## Example: Logistic Regression {.smaller}
 
 $y_i \mid x_i \sim \mathrm{Bern}(\pi_i)$ with $\pi_i = \dfrac{e^{\eta_i}}{1 + e^{\eta_i}} = \dfrac{1}{1 + e^{-\eta_i}}$, $\eta_i = x_i'\beta$, $x_i = (1, x_{i1}, \ldots, x_{ip})'$.
 
@@ -395,6 +395,8 @@ $$\ell(\beta) = \sum_{i=1}^n \big[y_i\,x_i'\beta - \log(1 + e^{x_i'\beta})\big]$
 
 Using $\dfrac{\partial}{\partial\beta}\log(1 + e^{x_i'\beta}) = \pi_i x_i$ and $\dfrac{\partial\pi_i}{\partial\beta} = \pi_i(1-\pi_i)x_i$:
 $$\nabla\ell(\beta) = \sum_{i=1}^n (y_i - \pi_i)\,x_i = X'(y - \pi), \qquad
+$$
+$$
 \nabla^2\ell(\beta) = -\sum_{i=1}^n \pi_i(1-\pi_i)\,x_i x_i' = -X'WX,$$
 with $W = \mathrm{diag}\big(\pi_i(1-\pi_i)\big)$.
 
@@ -403,7 +405,10 @@ with $W = \mathrm{diag}\big(\pi_i(1-\pi_i)\big)$.
 - $-\nabla^2\ell = X'WX$ is positive semi-definite, so $\ell$ is **concave**: any stationary point is the global maximum.
 - The Hessian does not involve $y$, so its expectation equals itself: **Newton–Raphson and Fisher scoring coincide**.
 - The update
-$$\beta_{k+1} = \beta_k + (X'W_kX)^{-1}X'(y - \pi_k) = (X'W_kX)^{-1}X'W_k z_k, \qquad z_k = X\beta_k + W_k^{-1}(y - \pi_k),$$
+$$\beta_{k+1} = \beta_k + (X'W_kX)^{-1}X'(y - \pi_k) = (X'W_kX)^{-1}X'W_k z_k,
+$$ 
+$$
+z_k = X\beta_k + W_k^{-1}(y - \pi_k),$$
 is a weighted least squares fit of the *working response* $z_k$: **iteratively reweighted least squares (IRLS)**, which is how `glm()` fits all generalized linear models.
 - Caveat: if the classes are perfectly separable, $\ell$ increases forever and the MLE does not exist ($\|\hat\beta\| \to \infty$).
 
@@ -417,9 +422,11 @@ grad   <- function(b) crossprod(X, y - plogis(X %*% b))
 hess   <- function(b) { p <- plogis(X %*% b); -crossprod(X, X * drop(p * (1 - p))) }
 
 newton_mv <- function(grad, hess, b0, tol = 1e-8, maxit = 50) {
+  path <- drop(b0)
   for (k in 1:maxit) {
-    b1 <- b0 - solve(hess(b0), grad(b0))
-    if (max(abs(b1 - b0)) < tol) return(list(est = drop(b1), iter = k, se = sqrt(diag(solve(-hess(b1))))))
+    b1 <- b0 - solve(hess(b0), grad(b0)); path <- rbind(path, drop(b1))
+    if (max(abs(b1 - b0)) < tol)
+      return(list(est = drop(b1), iter = k, se = sqrt(diag(solve(-hess(b1)))), path = path))
     b0 <- b1 }
 }
 fit <- newton_mv(grad, hess, rep(0, 3)); fit$iter
@@ -507,6 +514,8 @@ Fix the zig-zag by making each new direction **conjugate** to the previous ones 
 
 The nonlinear version builds directions from gradients only:
 $$d_0 = -g_0, \qquad d_{k+1} = -g_{k+1} + \beta_k d_k, \qquad
+$$
+$$
 \beta_k^{FR} = \frac{g_{k+1}'g_{k+1}}{g_k'g_k}\ \text{(Fletcher–Reeves)}, \quad
 \beta_k^{PR} = \frac{g_{k+1}'(g_{k+1} - g_k)}{g_k'g_k}\ \text{(Polak–Ribière)},$$
 with $\theta_{k+1} = \theta_k + \alpha_k d_k$ from a line search and $g_k = \nabla f(\theta_k)$.
@@ -606,13 +615,18 @@ rbind(sgd = sg$est, newton = fit$est, truth = beta_true)
 
 ```{r}
 #| echo: false
-matplot(sg$path[, 2:3], type = "l", lty = 1, col = c(2, 4), xlab = "mini-batch update", ylab = "coefficient", main = "SGD path for beta1 (red), beta2 (blue)")
-abline(h = fit$est[2:3], col = c(2, 4), lty = 2); abline(v = seq(0, 250, 50), col = "grey80")
-legend("right", c("SGD iterate", "MLE (Newton)"), lty = 1:2, bty = "n")
+m <- 10; per_epoch <- nrow(X) / m
+xs <- 0:(nrow(sg$path) - 1); xn <- (0:fit$iter) * per_epoch
+matplot(xs, sg$path[, 2:3], type = "l", lty = 1, col = c(2, 4), ylim = range(sg$path[, 2:3], fit$path[, 2:3]),
+        xlab = "mini-batch updates (one epoch = one full-data pass)", ylab = "coefficient",
+        main = expression(paste("SGD vs. Newton: ", beta[1], " (red), ", beta[2], " (blue)")))
+matlines(xn, fit$path[, 2:3], type = "b", lty = 2, pch = 19, col = c(2, 4), lwd = 2)
+abline(h = fit$est[2:3], col = c(2, 4), lty = 3); abline(v = seq(0, max(xs), per_epoch), col = "grey85")
+legend("right", c("SGD (mini-batch)", "Newton (per full pass)", "MLE"), lty = c(1, 2, 3), pch = c(NA, 19, NA), bty = "n")
 ```
 
-- Newton needed `r fit$iter` full-data iterations; SGD made `r nrow(sg$path) - 1` cheap updates over 5 epochs and lands near the MLE with residual noise.
-- For $n = 500$ this is no gain — SGD earns its keep when a single full gradient is prohibitively expensive.
+- Newton needed `r fit$iter` full-data passes; SGD made `r nrow(sg$path) - 1` cheap updates over 5 epochs and lands near the MLE with residual noise.
+- Per data pass, Newton is far more efficient here ($n = 500$, $p = 3$); SGD earns its keep when one full gradient — or the $O(p^3)$ Hessian solve — is prohibitively expensive.
 
 ## Summary
 

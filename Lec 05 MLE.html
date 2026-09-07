@@ -637,12 +637,13 @@ fisher 1.469493    5</code></pre>
 <p><strong>Fisher scoring</strong> replaces <span class="math inline">-\nabla^2\ell(\theta_k)</span> by the expected information <span class="math inline">nI(\theta_k)</span>: <span class="math display">\theta_{k+1} = \theta_k + \big[nI(\theta_k)\big]^{-1}\nabla\ell(\theta_k).</span></p>
 <p>Each iteration costs one <span class="math inline">p \times p</span> linear solve — <span class="math inline">O(p^3)</span> — fine for <span class="math inline">p</span> in the hundreds, expensive for <span class="math inline">p</span> in the millions.</p>
 </section>
-<section id="example-logistic-regression" class="slide level2">
+<section id="example-logistic-regression" class="slide level2 smaller">
 <h2>Example: Logistic Regression</h2>
 <p><span class="math inline">y_i \mid x_i \sim \mathrm{Bern}(\pi_i)</span> with <span class="math inline">\pi_i = \dfrac{e^{\eta_i}}{1 + e^{\eta_i}} = \dfrac{1}{1 + e^{-\eta_i}}</span>, <span class="math inline">\eta_i = x_i'\beta</span>, <span class="math inline">x_i = (1, x_{i1}, \ldots, x_{ip})'</span>.</p>
 <p><span class="math display">L(\beta) = \prod_{i=1}^n \pi_i^{y_i}(1-\pi_i)^{1-y_i}
 = \prod_{i=1}^n \frac{e^{y_i\eta_i}}{1 + e^{\eta_i}}</span> <span class="math display">\ell(\beta) = \sum_{i=1}^n \big[y_i\,x_i'\beta - \log(1 + e^{x_i'\beta})\big]</span></p>
 <p>Using <span class="math inline">\dfrac{\partial}{\partial\beta}\log(1 + e^{x_i'\beta}) = \pi_i x_i</span> and <span class="math inline">\dfrac{\partial\pi_i}{\partial\beta} = \pi_i(1-\pi_i)x_i</span>: <span class="math display">\nabla\ell(\beta) = \sum_{i=1}^n (y_i - \pi_i)\,x_i = X'(y - \pi), \qquad
+</span> <span class="math display">
 \nabla^2\ell(\beta) = -\sum_{i=1}^n \pi_i(1-\pi_i)\,x_i x_i' = -X'WX,</span> with <span class="math inline">W = \mathrm{diag}\big(\pi_i(1-\pi_i)\big)</span>.</p>
 </section>
 <section id="logistic-regression-newton-fisher-scoring-irls" class="slide level2">
@@ -650,7 +651,9 @@ fisher 1.469493    5</code></pre>
 <ul>
 <li><span class="math inline">-\nabla^2\ell = X'WX</span> is positive semi-definite, so <span class="math inline">\ell</span> is <strong>concave</strong>: any stationary point is the global maximum.</li>
 <li>The Hessian does not involve <span class="math inline">y</span>, so its expectation equals itself: <strong>Newton–Raphson and Fisher scoring coincide</strong>.</li>
-<li>The update <span class="math display">\beta_{k+1} = \beta_k + (X'W_kX)^{-1}X'(y - \pi_k) = (X'W_kX)^{-1}X'W_k z_k, \qquad z_k = X\beta_k + W_k^{-1}(y - \pi_k),</span> is a weighted least squares fit of the <em>working response</em> <span class="math inline">z_k</span>: <strong>iteratively reweighted least squares (IRLS)</strong>, which is how <code>glm()</code> fits all generalized linear models.</li>
+<li>The update <span class="math display">\beta_{k+1} = \beta_k + (X'W_kX)^{-1}X'(y - \pi_k) = (X'W_kX)^{-1}X'W_k z_k,
+</span> <span class="math display">
+z_k = X\beta_k + W_k^{-1}(y - \pi_k),</span> is a weighted least squares fit of the <em>working response</em> <span class="math inline">z_k</span>: <strong>iteratively reweighted least squares (IRLS)</strong>, which is how <code>glm()</code> fits all generalized linear models.</li>
 <li>Caveat: if the classes are perfectly separable, <span class="math inline">\ell</span> increases forever and the MLE does not exist (<span class="math inline">\|\hat\beta\| \to \infty</span>).</li>
 </ul>
 </section>
@@ -664,12 +667,14 @@ fisher 1.469493    5</code></pre>
 <span id="cb31-5"><a href=""></a>hess   <span class="ot">&lt;-</span> <span class="cf">function</span>(b) { p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(X <span class="sc">%*%</span> b); <span class="sc">-</span><span class="fu">crossprod</span>(X, X <span class="sc">*</span> <span class="fu">drop</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))) }</span>
 <span id="cb31-6"><a href=""></a></span>
 <span id="cb31-7"><a href=""></a>newton_mv <span class="ot">&lt;-</span> <span class="cf">function</span>(grad, hess, b0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">50</span>) {</span>
-<span id="cb31-8"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
-<span id="cb31-9"><a href=""></a>    b1 <span class="ot">&lt;-</span> b0 <span class="sc">-</span> <span class="fu">solve</span>(<span class="fu">hess</span>(b0), <span class="fu">grad</span>(b0))</span>
-<span id="cb31-10"><a href=""></a>    <span class="cf">if</span> (<span class="fu">max</span>(<span class="fu">abs</span>(b1 <span class="sc">-</span> b0)) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b1), <span class="at">iter =</span> k, <span class="at">se =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(<span class="sc">-</span><span class="fu">hess</span>(b1))))))</span>
-<span id="cb31-11"><a href=""></a>    b0 <span class="ot">&lt;-</span> b1 }</span>
-<span id="cb31-12"><a href=""></a>}</span>
-<span id="cb31-13"><a href=""></a>fit <span class="ot">&lt;-</span> <span class="fu">newton_mv</span>(grad, hess, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>)); fit<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb31-8"><a href=""></a>  path <span class="ot">&lt;-</span> <span class="fu">drop</span>(b0)</span>
+<span id="cb31-9"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb31-10"><a href=""></a>    b1 <span class="ot">&lt;-</span> b0 <span class="sc">-</span> <span class="fu">solve</span>(<span class="fu">hess</span>(b0), <span class="fu">grad</span>(b0)); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b1))</span>
+<span id="cb31-11"><a href=""></a>    <span class="cf">if</span> (<span class="fu">max</span>(<span class="fu">abs</span>(b1 <span class="sc">-</span> b0)) <span class="sc">&lt;</span> tol)</span>
+<span id="cb31-12"><a href=""></a>      <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b1), <span class="at">iter =</span> k, <span class="at">se =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(<span class="sc">-</span><span class="fu">hess</span>(b1)))), <span class="at">path =</span> path))</span>
+<span id="cb31-13"><a href=""></a>    b0 <span class="ot">&lt;-</span> b1 }</span>
+<span id="cb31-14"><a href=""></a>}</span>
+<span id="cb31-15"><a href=""></a>fit <span class="ot">&lt;-</span> <span class="fu">newton_mv</span>(grad, hess, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>)); fit<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 7</code></pre>
 </div>
@@ -799,6 +804,7 @@ glm      0.1337429 0.1511637 0.2228005</code></pre>
 <h2>Conjugate Gradient</h2>
 <p>Fix the zig-zag by making each new direction <strong>conjugate</strong> to the previous ones with respect to the Hessian <span class="math inline">Q</span>: <span class="math inline">d_i'Qd_j = 0</span> for <span class="math inline">i \ne j</span>. For a quadratic <span class="math inline">f(\theta) = \tfrac12\theta'Q\theta - b'\theta</span>, minimizing along <span class="math inline">p</span> such directions reaches the exact minimum in <strong>at most <span class="math inline">p</span> steps</strong>.</p>
 <p>The nonlinear version builds directions from gradients only: <span class="math display">d_0 = -g_0, \qquad d_{k+1} = -g_{k+1} + \beta_k d_k, \qquad
+</span> <span class="math display">
 \beta_k^{FR} = \frac{g_{k+1}'g_{k+1}}{g_k'g_k}\ \text{(Fletcher–Reeves)}, \quad
 \beta_k^{PR} = \frac{g_{k+1}'(g_{k+1} - g_k)}{g_k'g_k}\ \text{(Polak–Ribière)},</span> with <span class="math inline">\theta_{k+1} = \theta_k + \alpha_k d_k</span> from a line search and <span class="math inline">g_k = \nabla f(\theta_k)</span>.</p>
 <ul>
@@ -906,8 +912,8 @@ truth  -0.5000000 1.0000000 -2.000000</code></pre>
 <h2>SGD Trajectory vs.&nbsp;Newton</h2>
 
 <img data-src="Lec-05-MLE_files/figure-revealjs/unnamed-chunk-25-1.png" width="672" class="r-stretch"><ul>
-<li>Newton needed 7 full-data iterations; SGD made 250 cheap updates over 5 epochs and lands near the MLE with residual noise.</li>
-<li>For <span class="math inline">n = 500</span> this is no gain — SGD earns its keep when a single full gradient is prohibitively expensive.</li>
+<li>Newton needed 7 full-data passes; SGD made 250 cheap updates over 5 epochs and lands near the MLE with residual noise.</li>
+<li>Per data pass, Newton is far more efficient here (<span class="math inline">n = 500</span>, <span class="math inline">p = 3</span>); SGD earns its keep when one full gradient — or the <span class="math inline">O(p^3)</span> Hessian solve — is prohibitively expensive.</li>
 </ul>
 </section>
 <section id="summary" class="slide level2">
