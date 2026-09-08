@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Longhai Li">
-<meta name="dcterms.date" content="2026-09-07">
+<meta name="dcterms.date" content="2026-09-08">
 
 <title>Slides for ‘Elements of Statistical Computation’</title>
 <style>
@@ -39,36 +39,9 @@ ul.task-list li input[type="checkbox"] {
 <script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="index_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="index_files/libs/quarto-contrib/fontawesome6-6.7.2/all.min.css" rel="stylesheet">
+<link href="index_files/libs/quarto-contrib/fontawesome6-6.7.2/latex-fontsize.css" rel="stylesheet">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -80,7 +53,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Slides for ‘Elements of Statistical Computation’</h1>
+<h1 class="title">Slides for ‘Elements of Statistical Computation’<a href="https://github.com/longhaiSK/compstat-slides/"><i class="fa-brands fa-github" aria-label="github"></i></a></h1>
 </div>
 
 
@@ -97,7 +70,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 7, 2026</p>
+      <p class="date">September 8, 2026</p>
     </div>
   </div>
   
@@ -109,29 +82,47 @@ window.Quarto = {
 </header>
 
 
+<p><br>
+</p>
 <section id="table-of-content" class="level2">
 <h2 class="anchored" data-anchor-id="table-of-content">Table of Content</h2>
-<ol type="1">
-<li><a href="Lec_01_intro-course.html" target="_blank">Introduction</a> — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration</li>
-<li><a href="Lec_03_arithmetics.html" target="_blank">Computer Arithmetic</a> — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas</li>
-<li><a href="Lec_04_Monte_Carlo.html" target="_blank">Monte Carlo</a> — random number generation, sampling distributions, and evaluating estimators and tests by simulation</li>
-<li><a href="Lec_05_MLE.html" target="_blank">Maximum Likelihood</a> — gradients, Hessians, and numerical optimization of likelihoods</li>
-<li><a href="Lec_06_EM.html" target="_blank">EM Algorithm</a> — the <span class="math inline">\(Q\)</span> function, the ascending property, mixture models, censored data, and extensions</li>
-<li><a href="Lec_07_bayesian_inference.html" target="_blank">Bayesian Inference</a> — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example</li>
-<li><a href="Lec_08_numerical_quadrature.html" target="_blank">Numerical Quadrature</a> — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality</li>
-<li><a href="Lec_09_laplace_approximation.html" target="_blank">Laplace Approximation</a> — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC</li>
-<li><a href="Lec_10_Rejection_sampling.html" target="_blank">Rejection Sampling</a> — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling</li>
-<li><a href="Lec_11_Importance_Sampling.html" target="_blank">Importance Sampling</a> — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation</li>
-<li><a href="Lec_12_mcmc.html" target="_blank">MCMC</a> — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo</li>
-</ol>
+<section id="introduction" class="level3">
+<h3 class="anchored" data-anchor-id="introduction">1. <a href="https://www.google.com/search?q=Lec_01_intro-course.html" target="_blank">Introduction</a></h3>
+</section>
+<section id="computer-arithmetic" class="level3">
+<h3 class="anchored" data-anchor-id="computer-arithmetic">2. <a href="https://www.google.com/search?q=Lec_03_arithmetics.html" target="_blank">Computer Arithmetic</a></h3>
+</section>
+<section id="monte-carlo" class="level3">
+<h3 class="anchored" data-anchor-id="monte-carlo">3. <a href="https://www.google.com/search?q=Lec_04_Monte_Carlo.html" target="_blank">Monte Carlo</a></h3>
+</section>
+<section id="maximum-likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="maximum-likelihood">4. <a href="https://www.google.com/search?q=Lec_05_MLE.html" target="_blank">Maximum Likelihood</a></h3>
+</section>
+<section id="em-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="em-algorithm">5. <a href="https://www.google.com/search?q=Lec_06_EM.html" target="_blank">EM Algorithm</a></h3>
+</section>
+<section id="bayesian-inference" class="level3">
+<h3 class="anchored" data-anchor-id="bayesian-inference">6. <a href="https://www.google.com/search?q=Lec_07_bayesian_inference.html" target="_blank">Bayesian Inference</a></h3>
+</section>
+<section id="numerical-quadrature" class="level3">
+<h3 class="anchored" data-anchor-id="numerical-quadrature">7. <a href="https://www.google.com/search?q=Lec_08_numerical_quadrature.html" target="_blank">Numerical Quadrature</a></h3>
+</section>
+<section id="laplace-approximation" class="level3">
+<h3 class="anchored" data-anchor-id="laplace-approximation">8. <a href="https://www.google.com/search?q=Lec_09_laplace_approximation.html" target="_blank">Laplace Approximation</a></h3>
+</section>
+<section id="rejection-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="rejection-sampling">9. <a href="https://www.google.com/search?q=Lec_10_Rejection_sampling.html" target="_blank">Rejection Sampling</a></h3>
+</section>
+<section id="importance-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="importance-sampling">10. <a href="https://www.google.com/search?q=Lec_11_Importance_Sampling.html" target="_blank">Importance Sampling</a></h3>
+</section>
+<section id="mcmc" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc">11. <a href="https://www.google.com/search?q=Lec_12_mcmc.html" target="_blank">MCMC</a></h3>
+</section>
 </section>
 <section id="about-the-slides" class="level2">
 <h2 class="anchored" data-anchor-id="about-the-slides">About the slides</h2>
 <p>The slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it.</p>
-</section>
-<section id="quarto-source" class="level2">
-<h2 class="anchored" data-anchor-id="quarto-source">Quarto source</h2>
-<p><a href="https://github.com/longhaiSK/compstat-slides/" class="btn btn-primary">Github Repo</a></p>
 </section>
 
 </main>

@@ -1,29 +1,37 @@
 ---
-title: "Slides for 'Elements of Statistical Computation'"
+title: "Slides for 'Elements of Statistical Computation'[{{< fa brands github >}}](https://github.com/longhaiSK/compstat-slides/)"
 author: Longhai Li
 date: last-modified
 format: html
 ---
 
+\
+
 
 ## Table of Content
 
-1. [Introduction](Lec_01_intro-course.html){target="_blank"} — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration
-2. [Computer Arithmetic](Lec_03_arithmetics.html){target="_blank"} — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas
-3. [Monte Carlo](Lec_04_Monte_Carlo.html){target="_blank"} — random number generation, sampling distributions, and evaluating estimators and tests by simulation
-4. [Maximum Likelihood](Lec_05_MLE.html){target="_blank"} — gradients, Hessians, and numerical optimization of likelihoods
-5. [EM Algorithm](Lec_06_EM.html){target="_blank"} — the $Q$ function, the ascending property, mixture models, censored data, and extensions
-6. [Bayesian Inference](Lec_07_bayesian_inference.html){target="_blank"} — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example
-7. [Numerical Quadrature](Lec_08_numerical_quadrature.html){target="_blank"} — midpoint, trapezoidal, and Simpson's rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality
-8. [Laplace Approximation](Lec_09_laplace_approximation.html){target="_blank"} — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC
-9. [Rejection Sampling](Lec_10_Rejection_sampling.html){target="_blank"} — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling
-10. [Importance Sampling](Lec_11_Importance_Sampling.html){target="_blank"} — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation
-11. [MCMC](Lec_12_mcmc.html){target="_blank"} — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo
+### 1. [Introduction](https://www.google.com/search?q=Lec_01_intro-course.html){target="_blank"}
+
+### 2. [Computer Arithmetic](https://www.google.com/search?q=Lec_03_arithmetics.html){target="_blank"}
+
+### 3. [Monte Carlo](https://www.google.com/search?q=Lec_04_Monte_Carlo.html){target="_blank"}
+
+### 4. [Maximum Likelihood](https://www.google.com/search?q=Lec_05_MLE.html){target="_blank"}
+
+### 5. [EM Algorithm](https://www.google.com/search?q=Lec_06_EM.html){target="_blank"}
+
+### 6. [Bayesian Inference](https://www.google.com/search?q=Lec_07_bayesian_inference.html){target="_blank"}
+
+### 7. [Numerical Quadrature](https://www.google.com/search?q=Lec_08_numerical_quadrature.html){target="_blank"}
+
+### 8. [Laplace Approximation](https://www.google.com/search?q=Lec_09_laplace_approximation.html){target="_blank"}
+
+### 9. [Rejection Sampling](https://www.google.com/search?q=Lec_10_Rejection_sampling.html){target="_blank"}
+
+### 10. [Importance Sampling](https://www.google.com/search?q=Lec_11_Importance_Sampling.html){target="_blank"}
+
+### 11. [MCMC](https://www.google.com/search?q=Lec_12_mcmc.html){target="_blank"}
 
 ## About the slides
 
 The slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it.
-
-## Quarto source
-
-[Github Repo](https://github.com/longhaiSK/compstat-slides/){.btn .btn-primary}
