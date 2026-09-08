@@ -10,27 +10,27 @@ format: html
 
 ## Table of Content
 
-### 1. [Introduction](https://www.google.com/search?q=Lec_01_intro-course.html){target="_blank"}
+####  1. [Introduction](https://www.google.com/search?q=Lec_01_intro-course.html){target="_blank"}
 
-### 2. [Computer Arithmetic](https://www.google.com/search?q=Lec_03_arithmetics.html){target="_blank"}
+####  2. [Computer Arithmetic](https://www.google.com/search?q=Lec_03_arithmetics.html){target="_blank"}
 
-### 3. [Monte Carlo](https://www.google.com/search?q=Lec_04_Monte_Carlo.html){target="_blank"}
+####  3. [Monte Carlo](https://www.google.com/search?q=Lec_04_Monte_Carlo.html){target="_blank"}
 
-### 4. [Maximum Likelihood](https://www.google.com/search?q=Lec_05_MLE.html){target="_blank"}
+####  4. [Maximum Likelihood](https://www.google.com/search?q=Lec_05_MLE.html){target="_blank"}
 
-### 5. [EM Algorithm](https://www.google.com/search?q=Lec_06_EM.html){target="_blank"}
+####  5. [EM Algorithm](https://www.google.com/search?q=Lec_06_EM.html){target="_blank"}
 
-### 6. [Bayesian Inference](https://www.google.com/search?q=Lec_07_bayesian_inference.html){target="_blank"}
+####  6. [Bayesian Inference](https://www.google.com/search?q=Lec_07_bayesian_inference.html){target="_blank"}
 
-### 7. [Numerical Quadrature](https://www.google.com/search?q=Lec_08_numerical_quadrature.html){target="_blank"}
+####  7. [Numerical Quadrature](https://www.google.com/search?q=Lec_08_numerical_quadrature.html){target="_blank"}
 
-### 8. [Laplace Approximation](https://www.google.com/search?q=Lec_09_laplace_approximation.html){target="_blank"}
+####  8. [Laplace Approximation](https://www.google.com/search?q=Lec_09_laplace_approximation.html){target="_blank"}
 
-### 9. [Rejection Sampling](https://www.google.com/search?q=Lec_10_Rejection_sampling.html){target="_blank"}
+####  9. [Rejection Sampling](https://www.google.com/search?q=Lec_10_Rejection_sampling.html){target="_blank"}
 
-### 10. [Importance Sampling](https://www.google.com/search?q=Lec_11_Importance_Sampling.html){target="_blank"}
+####  10. [Importance Sampling](https://www.google.com/search?q=Lec_11_Importance_Sampling.html){target="_blank"}
 
-### 11. [MCMC](https://www.google.com/search?q=Lec_12_mcmc.html){target="_blank"}
+####  11. [MCMC](https://www.google.com/search?q=Lec_12_mcmc.html){target="_blank"}
 
 ## About the slides
 
