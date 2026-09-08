@@ -1,13 +1,9 @@
 project:
-  type: website
+  type: default
   output-dir: "."
   render:
     - index.qmd
     - "Lec_*.qmd"
-
-website:
-  title: "Elements of Statistical Computation"
-  description: "Lecture slides"
-
+repo-url: https://github.com/longhaiSK/compstat-slides/
 format: html
   

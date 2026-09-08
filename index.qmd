@@ -6,7 +6,7 @@ format: html
 ---
 
 
-## Chapters
+## Table of Content
 
 1. [Introduction](Lec_01_intro-course.html){target="_blank"} — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration
 2. [Computer Arithmetic](Lec_03_arithmetics.html){target="_blank"} — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas
@@ -24,4 +24,6 @@ format: html
 
 The slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it.
 
-## [Github Source](https://github.com/longhaiSK/compstat-slides/)
+## Quarto source
+
+[Github Repo](https://github.com/longhaiSK/compstat-slides/){.btn .btn-primary}
