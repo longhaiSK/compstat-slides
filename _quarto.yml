@@ -9,8 +9,5 @@ website:
   title: "Elements of Statistical Computation"
   description: "Lecture slides"
 
-format:
-  html:
-    theme: cosmo
-    css: styles.css
-    toc: false
+format: html
+  

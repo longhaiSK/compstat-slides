@@ -1,9 +1,10 @@
 ---
-title: "Elements of Statistical Computation"
+title: "Slides for 'Elements of Statistical Computation'"
+author: Longhai Li
+date: last-modified
 format: html
 ---
 
-Welcome to the course materials for STAT 420/812, Computational Statistics. Each chapter below opens its slides in a new window.
 
 ## Chapters
 
@@ -23,6 +24,4 @@ Welcome to the course materials for STAT 420/812, Computational Statistics. Each
 
 The slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it.
 
-## Software
-
-All computation is in base R. The only additional package used in the slides is `latex2exp`, for mathematical notation in figures.
+## [Github Source](https://github.com/longhaiSK/compstat-slides/)

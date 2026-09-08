@@ -1234,14 +1234,14 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Elements of Statistical Computation",
+    "title": "Slides for ‘Elements of Statistical Computation’",
     "section": "",
-    "text": "Welcome to the course materials for STAT 420/812, Computational Statistics. Each chapter below opens its slides in a new window."
+    "text": "Introduction — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration\nComputer Arithmetic — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas\nMonte Carlo — random number generation, sampling distributions, and evaluating estimators and tests by simulation\nMaximum Likelihood — gradients, Hessians, and numerical optimization of likelihoods\nEM Algorithm — the \\(Q\\) function, the ascending property, mixture models, censored data, and extensions\nBayesian Inference — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example\nNumerical Quadrature — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality\nLaplace Approximation — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC\nRejection Sampling — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling\nImportance Sampling — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation\nMCMC — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo"
   },
   {
     "objectID": "index.html#about-the-slides",
     "href": "index.html#about-the-slides",
-    "title": "Elements of Statistical Computation",
+    "title": "Slides for ‘Elements of Statistical Computation’",
     "section": "About the slides",
     "text": "About the slides\nThe slides are written in Quarto and rendered with reveal.js. Every figure is drawn in R at render time, and the R code that produces a result is shown on the slide when the computation itself is the point; for illustrative figures the code is hidden but available in the source. Each example is self-contained: a data set is simulated with a fixed seed, so all numbers reported on the slides can be reproduced exactly by re-rendering. Where a method has a known failure mode, the slides show it rather than describe it, with a working example and a diagnostic. Derivations are kept on the slides in full, split across slides where they are long, and every lecture ends with a summary that connects the method to the ones before and after it."
   },
@@ -2165,8 +2165,15 @@
   {
     "objectID": "index.html#chapters",
     "href": "index.html#chapters",
-    "title": "Elements of Statistical Computation",
-    "section": "Chapters",
-    "text": "Chapters\n\nIntroduction — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration\nComputer Arithmetic — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas\nMonte Carlo — random number generation, sampling distributions, and evaluating estimators and tests by simulation\nMaximum Likelihood — gradients, Hessians, and numerical optimization of likelihoods\nEM Algorithm — the \\(Q\\) function, the ascending property, mixture models, censored data, and extensions\nBayesian Inference — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example\nNumerical Quadrature — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality\nLaplace Approximation — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC\nRejection Sampling — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling\nImportance Sampling — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation\nMCMC — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo"
+    "title": "Slides for ‘Elements of Statistical Computation’",
+    "section": "",
+    "text": "Introduction — why statistics needs computation: point estimation, hypothesis testing, and Bayesian inference as problems of calculation, simulation, optimization, and integration\nComputer Arithmetic — floating-point representation, overflow, underflow, rounding error, and numerically stable formulas\nMonte Carlo — random number generation, sampling distributions, and evaluating estimators and tests by simulation\nMaximum Likelihood — gradients, Hessians, and numerical optimization of likelihoods\nEM Algorithm — the \\(Q\\) function, the ascending property, mixture models, censored data, and extensions\nBayesian Inference — prior, likelihood, posterior, Bayes estimates under loss, prediction, and the Beta–Bernoulli example\nNumerical Quadrature — midpoint, trapezoidal, and Simpson’s rules; transformations; marginal likelihoods on the log scale; the curse of dimensionality\nLaplace Approximation — Gaussian approximation at the posterior mode, the marginal likelihood, and BIC\nRejection Sampling — envelope functions, the uniform-under-the-curve view, and adaptive rejection sampling\nImportance Sampling — importance weights, effective sample size and its limitations, free energy, and Bayesian cross-validation\nMCMC — Markov chains, detailed balance, Gibbs sampling, Metropolis–Hastings, and Hamiltonian Monte Carlo"
+  },
+  {
+    "objectID": "index.html#github-source",
+    "href": "index.html#github-source",
+    "title": "Slides for ‘Elements of Statistical Computation’",
+    "section": "Github Source",
+    "text": "Github Source"
   }
 ]
