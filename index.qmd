@@ -1,5 +1,6 @@
 ---
-title: "Slides for 'Elements of Statistical Computation'[{{< fa brands github >}}](https://github.com/longhaiSK/compstat-slides/)"
+title: "Elements of Statistical Computation  "
+subtitle: Lecture Slides [{{< fa brands github >}}](https://github.com/longhaiSK/compstat-slides/)
 author: Longhai Li
 date: last-modified
 format:
@@ -17,13 +18,17 @@ format:
           ol {
             margin-left: 1em;
           }
+          main {
+            margin-top: 3em;
+          }
+          h2, h3 {
+            margin-top: 3em;
+          }
         </style>
 ---
 
-\
 
-
-## Table of Content
+### Table of Content
 
 1. [Introduction](Lec_01_intro-course.html){target="_blank"}
 
@@ -45,5 +50,5 @@ format:
 
 10. [Importance Sampling](Lec_11_Importance_Sampling.html){target="_blank"}
 
-11. [MCMC](Lec_12_mcmc.html){target="_blank"}
+11. [Markov Chain Monte Carlo](Lec_12_mcmc.html){target="_blank"}
 
