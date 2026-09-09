@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-html/tabby.min.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Lec_05_MLE-old_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Lec_05_MLE-old_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Lec_05_MLE-old_files/libs/quarto-html/popper.min.js"></script>
+<script src="Lec_05_MLE-old_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Lec_05_MLE-old_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Lec_05_MLE-old_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Lec_05_MLE-old_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <title>Elements of Statistical Computation – An Introduction of Likelihood Theory</title>
+  <meta name="dcterms.date" content="2026-09-07">
+  <title>An Introduction of Likelihood Theory</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Lec_05_MLE-old_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Lec_05_MLE-old_files/libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -32,8 +33,8 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
-  <link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/banner_slides/slides.css">
+  <link rel="stylesheet" href="Lec_05_MLE-old_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -50,12 +51,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="Lec_05_MLE-old_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Lec_05_MLE-old_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Lec_05_MLE-old_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Lec_05_MLE-old_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="Lec_05_MLE-old_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="Lec_05_MLE-old_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -160,6 +161,7 @@ Longhai Li
 </div>
 </div>
 
+  <p class="date">2026-09-07</p>
 </section>
 <section id="a.1-maximum-likelihood-estimation" class="slide level2">
 <h2>A.1 Maximum Likelihood Estimation</h2>
@@ -189,7 +191,7 @@ Longhai Li
 <p>where <span class="math inline">\bar y=\sum y_i/n</span> is the sample mean. The fact that the log-likelihood depends on the observations only through the sample mean shows that <span class="math inline">\bar y</span> is a <em>sufficient</em> statistic for the unknown probability <span class="math inline">\pi</span>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p02-figA1-loglik-plot.png" class="quarto-figure quarto-figure-center" height="480"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p02-figA1-loglik-plot.png" class="quarto-figure quarto-figure-center" height="480"></p>
 </figure>
 </div>
 </section>
@@ -387,7 +389,7 @@ Longhai Li
 <p><span class="math display">x_1 = f(x_0)</span> <span class="math display">x_2 = f(x_1)</span> <span class="math display">\vdots</span> <span class="math display">x_n = f(x_{n-1})</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p15-cobweb-diagram.png" class="quarto-figure quarto-figure-center" height="480"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p15-cobweb-diagram.png" class="quarto-figure quarto-figure-center" height="480"></p>
 </figure>
 </div>
 </section>
@@ -440,7 +442,7 @@ Longhai Li
 <p>The secant method requires two initial values, <span class="math inline">x_0</span> and <span class="math inline">x_1</span>, which should ideally be chosen to lie close to the root.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p19-secant-diagram.png" class="quarto-figure quarto-figure-center" height="260"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p19-secant-diagram.png" class="quarto-figure quarto-figure-center" height="260"></p>
 </figure>
 </div>
 <p>Given two points <span class="math inline">(x_{n-1}, f(x_{n-1}))</span> and <span class="math inline">(x_n, f(x_n))</span>:</p>
@@ -460,14 +462,14 @@ Longhai Li
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p20-nr-quadratic-diagram.png" class="quarto-figure quarto-figure-center"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p20-nr-quadratic-diagram.png" class="quarto-figure quarto-figure-center"></p>
 </figure>
 </div>
 </div>
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p20-nr-f2-diagram.png" class="quarto-figure quarto-figure-center"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p20-nr-f2-diagram.png" class="quarto-figure quarto-figure-center"></p>
 </figure>
 </div>
 </div>
@@ -535,7 +537,7 @@ L(\lambda) &amp;= \log P(x_1,\dots,x_n\mid\theta) \\
 <p>If <span class="math inline">f(x_0) &gt; f(x_2)</span>: New interval <span class="math inline">[x_0,x_3]</span>; next point: <span class="math inline">x_5 = x_3-\alpha(x_3-x_0)</span>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p25-golden-section-sketch.png" class="quarto-figure quarto-figure-center" height="420"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p25-golden-section-sketch.png" class="quarto-figure quarto-figure-center" height="420"></p>
 </figure>
 </div>
 </section>
@@ -543,7 +545,7 @@ L(\lambda) &amp;= \log P(x_1,\dots,x_n\mid\theta) \\
 <h2>Illustration of Golden Section Search</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p26-golden-section-illustration.png" class="quarto-figure quarto-figure-center" height="820"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p26-golden-section-illustration.png" class="quarto-figure quarto-figure-center" height="820"></p>
 </figure>
 </div>
 <p>Step 1: <span class="math inline">[a,b]</span>, points <span class="math inline">a',b'</span> with <span class="math inline">f(a')&lt;f(b')</span></p>
@@ -653,7 +655,7 @@ L(\lambda) &amp;= \log P(x_1,\dots,x_n\mid\theta) \\
 <h2>Illustration: Logistic Transform</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="Lec 05 MLE-old_images/p34-logistic-transform-illustration.png" class="quarto-figure quarto-figure-center" height="700"></p>
+<p><img data-src="Lec%2005%20MLE-old_images/p34-logistic-transform-illustration.png" class="quarto-figure quarto-figure-center" height="700"></p>
 </figure>
 </div>
 <p>A sketch of the linear predictor <span class="math inline">u = b_1+b_2 z</span> being mapped through the exponential/logistic transform to give <span class="math inline">u_2 = e^u</span>, tabulated against paired values <span class="math inline">(y_i, z_i)</span>, with <span class="math inline">b=(b_1,b_2)</span>.</p>
@@ -704,7 +706,6 @@ L(\lambda) &amp;= \log P(x_1,\dots,x_n\mid\theta) \\
 <p><span class="math display">y = \nabla f(x_{n+1}) - \nabla f(x_n)</span> <span class="math display">s = x_{n+1} - x_n</span></p>
 <p><strong>(5) Fisher scoring method:</strong> replacing <span class="math inline">\nabla^2 f(x_n)</span> with <span class="math inline">\mathrm{E}(\nabla^2 f(x_n))</span>.</p>
 
-
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -714,19 +715,19 @@ L(\lambda) &amp;= \log P(x_1,\dots,x_n\mid\theta) \\
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="site_libs/revealjs/plugin/search/search.js"></script>
-  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Lec_05_MLE-old_files/libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

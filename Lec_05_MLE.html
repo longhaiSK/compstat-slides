@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-html/tabby.min.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Lec_05_MLE_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Lec_05_MLE_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Lec_05_MLE_files/libs/quarto-html/popper.min.js"></script>
+<script src="Lec_05_MLE_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Lec_05_MLE_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Lec_05_MLE_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Lec_05_MLE_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
+  <meta name="dcterms.date" content="2026-09-07">
   <title>Elements of Statistical Computation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Lec_05_MLE_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Lec_05_MLE_files/libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -98,8 +99,8 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
-  <link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/banner_slides/slides.css">
+  <link rel="stylesheet" href="Lec_05_MLE_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -116,12 +117,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="Lec_05_MLE_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Lec_05_MLE_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Lec_05_MLE_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Lec_05_MLE_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="Lec_05_MLE_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="Lec_05_MLE_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -226,6 +227,7 @@ Longhai Li
 </div>
 </div>
 
+  <p class="date">2026-09-07</p>
 </section>
 <section>
 <section id="review-likelihood-theory-and-mle" class="title-slide slide level1 center" data-number="1">
@@ -335,9 +337,9 @@ S(\theta) = \sum_{i=1}^n \frac{2(x_i - \theta)}{1 + (x_i - \theta)^2}.
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>xc <span class="ot">&lt;-</span> <span class="fu">rcauchy</span>(<span class="dv">8</span>, <span class="at">location =</span> <span class="dv">3</span>)</span>
-<span id="cb3-2"><a></a>llc <span class="ot">&lt;-</span> <span class="cf">function</span>(th, dat) <span class="fu">sapply</span>(th, <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="fu">dcauchy</span>(dat, t, <span class="at">log =</span> <span class="cn">TRUE</span>)))</span>
-<span id="cb3-3"><a></a><span class="fu">curve</span>(<span class="fu">llc</span>(x, xc), <span class="sc">-</span><span class="dv">10</span>, <span class="dv">15</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(theta), <span class="at">ylab =</span> <span class="fu">expression</span>(<span class="fu">l</span>(theta)), <span class="at">main =</span> <span class="st">"Cauchy log-likelihood, n = 8"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>xc <span class="ot">&lt;-</span> <span class="fu">rcauchy</span>(<span class="dv">8</span>, <span class="at">location =</span> <span class="dv">3</span>)</span>
+<span id="cb3-2"><a href=""></a>llc <span class="ot">&lt;-</span> <span class="cf">function</span>(th, dat) <span class="fu">sapply</span>(th, <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="fu">dcauchy</span>(dat, t, <span class="at">log =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb3-3"><a href=""></a><span class="fu">curve</span>(<span class="fu">llc</span>(x, xc), <span class="sc">-</span><span class="dv">10</span>, <span class="dv">15</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(theta), <span class="at">ylab =</span> <span class="fu">expression</span>(<span class="fu">l</span>(theta)), <span class="at">main =</span> <span class="st">"Cauchy log-likelihood, n = 8"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 
 </div>
@@ -439,19 +441,19 @@ nI(\lambda) = -E[S'(\lambda)] = \frac{n}{\lambda(1 - e^{-\lambda})} - \frac{n e^
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">200</span>, <span class="fl">1.5</span>); x <span class="ot">&lt;-</span> y[y <span class="sc">&gt;</span> <span class="dv">0</span>]; n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); sx <span class="ot">&lt;-</span> <span class="fu">sum</span>(x)</span>
-<span id="cb4-2"><a></a>ll <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>n <span class="sc">*</span> l <span class="sc">+</span> sx <span class="sc">*</span> <span class="fu">log</span>(l) <span class="sc">-</span> n <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))</span>
-<span id="cb4-3"><a></a>S  <span class="ot">&lt;-</span> <span class="cf">function</span>(l) sx <span class="sc">/</span> l <span class="sc">-</span> n <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))</span>
-<span id="cb4-4"><a></a>dS <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>sx <span class="sc">/</span> l<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> n <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>l) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb4-5"><a></a>nI <span class="ot">&lt;-</span> <span class="cf">function</span>(l) n <span class="sc">/</span> (l <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))) <span class="sc">-</span> n <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>l) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb4-6"><a></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
-<span id="cb4-7"><a></a><span class="fu">curve</span>(ll, <span class="fl">0.3</span>, <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">"log-likelihood"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(lambda))</span>
-<span id="cb4-8"><a></a><span class="fu">curve</span>(S, <span class="fl">0.3</span>, <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">"score"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(lambda)); <span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">200</span>, <span class="fl">1.5</span>); x <span class="ot">&lt;-</span> y[y <span class="sc">&gt;</span> <span class="dv">0</span>]; n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); sx <span class="ot">&lt;-</span> <span class="fu">sum</span>(x)</span>
+<span id="cb4-2"><a href=""></a>ll <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>n <span class="sc">*</span> l <span class="sc">+</span> sx <span class="sc">*</span> <span class="fu">log</span>(l) <span class="sc">-</span> n <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))</span>
+<span id="cb4-3"><a href=""></a>S  <span class="ot">&lt;-</span> <span class="cf">function</span>(l) sx <span class="sc">/</span> l <span class="sc">-</span> n <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))</span>
+<span id="cb4-4"><a href=""></a>dS <span class="ot">&lt;-</span> <span class="cf">function</span>(l) <span class="sc">-</span>sx <span class="sc">/</span> l<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> n <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>l) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-5"><a href=""></a>nI <span class="ot">&lt;-</span> <span class="cf">function</span>(l) n <span class="sc">/</span> (l <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))) <span class="sc">-</span> n <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>l) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-6"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb4-7"><a href=""></a><span class="fu">curve</span>(ll, <span class="fl">0.3</span>, <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">"log-likelihood"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(lambda))</span>
+<span id="cb4-8"><a href=""></a><span class="fu">curve</span>(S, <span class="fl">0.3</span>, <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">"score"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(lambda)); <span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">c</span>(<span class="at">naive_mean =</span> <span class="fu">mean</span>(x), <span class="at">true_lambda =</span> <span class="fl">1.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive_mean =</span> <span class="fu">mean</span>(x), <span class="at">true_lambda =</span> <span class="fl">1.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> naive_mean true_lambda 
@@ -469,11 +471,11 @@ nI(\lambda) = -E[S'(\lambda)] = \frac{n}{\lambda(1 - e^{-\lambda})} - \frac{n e^
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>fixed_point <span class="ot">&lt;-</span> <span class="cf">function</span>(g, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">500</span>) {</span>
-<span id="cb7-2"><a></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) { x1 <span class="ot">&lt;-</span> <span class="fu">g</span>(x0); <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k)); x0 <span class="ot">&lt;-</span> x1 }</span>
-<span id="cb7-3"><a></a>  <span class="fu">stop</span>(<span class="st">"not converged"</span>)</span>
-<span id="cb7-4"><a></a>}</span>
-<span id="cb7-5"><a></a><span class="fu">fixed_point</span>(<span class="cf">function</span>(l) <span class="fu">mean</span>(x) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l)), <span class="at">x0 =</span> <span class="fu">mean</span>(x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>fixed_point <span class="ot">&lt;-</span> <span class="cf">function</span>(g, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">500</span>) {</span>
+<span id="cb7-2"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) { x1 <span class="ot">&lt;-</span> <span class="fu">g</span>(x0); <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k)); x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb7-3"><a href=""></a>  <span class="fu">stop</span>(<span class="st">"not converged"</span>)</span>
+<span id="cb7-4"><a href=""></a>}</span>
+<span id="cb7-5"><a href=""></a><span class="fu">fixed_point</span>(<span class="cf">function</span>(l) <span class="fu">mean</span>(x) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>l)), <span class="at">x0 =</span> <span class="fu">mean</span>(x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>     root      iter 
@@ -488,12 +490,12 @@ nI(\lambda) = -E[S'(\lambda)] = \frac{n}{\lambda(1 - e^{-\lambda})} - \frac{n e^
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>bisection <span class="ot">&lt;-</span> <span class="cf">function</span>(S, a, b, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
-<span id="cb9-2"><a></a>  k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb9-3"><a></a>  <span class="cf">while</span> (b <span class="sc">-</span> a <span class="sc">&gt;</span> tol) { m <span class="ot">&lt;-</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>; <span class="cf">if</span> (<span class="fu">S</span>(a) <span class="sc">*</span> <span class="fu">S</span>(m) <span class="sc">&lt;=</span> <span class="dv">0</span>) b <span class="ot">&lt;-</span> m <span class="cf">else</span> a <span class="ot">&lt;-</span> m; k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span> }</span>
-<span id="cb9-4"><a></a>  <span class="fu">c</span>(<span class="at">root =</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">iter =</span> k)</span>
-<span id="cb9-5"><a></a>}</span>
-<span id="cb9-6"><a></a><span class="fu">bisection</span>(S, <span class="fl">0.1</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a>bisection <span class="ot">&lt;-</span> <span class="cf">function</span>(S, a, b, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb9-2"><a href=""></a>  k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb9-3"><a href=""></a>  <span class="cf">while</span> (b <span class="sc">-</span> a <span class="sc">&gt;</span> tol) { m <span class="ot">&lt;-</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>; <span class="cf">if</span> (<span class="fu">S</span>(a) <span class="sc">*</span> <span class="fu">S</span>(m) <span class="sc">&lt;=</span> <span class="dv">0</span>) b <span class="ot">&lt;-</span> m <span class="cf">else</span> a <span class="ot">&lt;-</span> m; k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span> }</span>
+<span id="cb9-4"><a href=""></a>  <span class="fu">c</span>(<span class="at">root =</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">iter =</span> k)</span>
+<span id="cb9-5"><a href=""></a>}</span>
+<span id="cb9-6"><a href=""></a><span class="fu">bisection</span>(S, <span class="fl">0.1</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>     root      iter 
@@ -515,16 +517,16 @@ nI(\lambda) = -E[S'(\lambda)] = \frac{n}{\lambda(1 - e^{-\lambda})} - \frac{n e^
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>golden <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
-<span id="cb11-2"><a></a>  phi <span class="ot">&lt;-</span> (<span class="fu">sqrt</span>(<span class="dv">5</span>) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="dv">2</span>; k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb11-3"><a></a>  x1 <span class="ot">&lt;-</span> b <span class="sc">-</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); x2 <span class="ot">&lt;-</span> a <span class="sc">+</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f1 <span class="ot">&lt;-</span> <span class="fu">f</span>(x1); f2 <span class="ot">&lt;-</span> <span class="fu">f</span>(x2)</span>
-<span id="cb11-4"><a></a>  <span class="cf">while</span> (b <span class="sc">-</span> a <span class="sc">&gt;</span> tol) {</span>
-<span id="cb11-5"><a></a>    <span class="cf">if</span> (f1 <span class="sc">&lt;</span> f2) { b <span class="ot">&lt;-</span> x2; x2 <span class="ot">&lt;-</span> x1; f2 <span class="ot">&lt;-</span> f1; x1 <span class="ot">&lt;-</span> b <span class="sc">-</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f1 <span class="ot">&lt;-</span> <span class="fu">f</span>(x1) }</span>
-<span id="cb11-6"><a></a>    <span class="cf">else</span>         { a <span class="ot">&lt;-</span> x1; x1 <span class="ot">&lt;-</span> x2; f1 <span class="ot">&lt;-</span> f2; x2 <span class="ot">&lt;-</span> a <span class="sc">+</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f2 <span class="ot">&lt;-</span> <span class="fu">f</span>(x2) }</span>
-<span id="cb11-7"><a></a>    k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span> }</span>
-<span id="cb11-8"><a></a>  <span class="fu">c</span>(<span class="at">root =</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">iter =</span> k)</span>
-<span id="cb11-9"><a></a>}</span>
-<span id="cb11-10"><a></a><span class="fu">golden</span>(<span class="cf">function</span>(l) <span class="sc">-</span><span class="fu">ll</span>(l), <span class="fl">0.1</span>, <span class="dv">10</span>)      <span class="co"># R equivalent: optimize(function(l) -ll(l), c(0.1, 10))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>golden <span class="ot">&lt;-</span> <span class="cf">function</span>(f, a, b, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb11-2"><a href=""></a>  phi <span class="ot">&lt;-</span> (<span class="fu">sqrt</span>(<span class="dv">5</span>) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="dv">2</span>; k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb11-3"><a href=""></a>  x1 <span class="ot">&lt;-</span> b <span class="sc">-</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); x2 <span class="ot">&lt;-</span> a <span class="sc">+</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f1 <span class="ot">&lt;-</span> <span class="fu">f</span>(x1); f2 <span class="ot">&lt;-</span> <span class="fu">f</span>(x2)</span>
+<span id="cb11-4"><a href=""></a>  <span class="cf">while</span> (b <span class="sc">-</span> a <span class="sc">&gt;</span> tol) {</span>
+<span id="cb11-5"><a href=""></a>    <span class="cf">if</span> (f1 <span class="sc">&lt;</span> f2) { b <span class="ot">&lt;-</span> x2; x2 <span class="ot">&lt;-</span> x1; f2 <span class="ot">&lt;-</span> f1; x1 <span class="ot">&lt;-</span> b <span class="sc">-</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f1 <span class="ot">&lt;-</span> <span class="fu">f</span>(x1) }</span>
+<span id="cb11-6"><a href=""></a>    <span class="cf">else</span>         { a <span class="ot">&lt;-</span> x1; x1 <span class="ot">&lt;-</span> x2; f1 <span class="ot">&lt;-</span> f2; x2 <span class="ot">&lt;-</span> a <span class="sc">+</span> phi <span class="sc">*</span> (b <span class="sc">-</span> a); f2 <span class="ot">&lt;-</span> <span class="fu">f</span>(x2) }</span>
+<span id="cb11-7"><a href=""></a>    k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span> }</span>
+<span id="cb11-8"><a href=""></a>  <span class="fu">c</span>(<span class="at">root =</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">iter =</span> k)</span>
+<span id="cb11-9"><a href=""></a>}</span>
+<span id="cb11-10"><a href=""></a><span class="fu">golden</span>(<span class="cf">function</span>(l) <span class="sc">-</span><span class="fu">ll</span>(l), <span class="fl">0.1</span>, <span class="dv">10</span>)      <span class="co"># R equivalent: optimize(function(l) -ll(l), c(0.1, 10))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>     root      iter 
@@ -560,16 +562,16 @@ S(\theta) \approx S(\theta_k) + S'(\theta_k)(\theta - \theta_k) = 0
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>newton <span class="ot">&lt;-</span> <span class="cf">function</span>(S, dS, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">100</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>) {</span>
-<span id="cb13-2"><a></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
-<span id="cb13-3"><a></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">-</span> <span class="fu">S</span>(x0) <span class="sc">/</span> <span class="fu">dS</span>(x0)</span>
-<span id="cb13-4"><a></a>    <span class="cf">if</span> (trace) <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"iter %2d: %.10f</span><span class="sc">\n</span><span class="st">"</span>, k, x1))</span>
-<span id="cb13-5"><a></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.finite</span>(x1)) <span class="fu">stop</span>(<span class="st">"diverged"</span>)</span>
-<span id="cb13-6"><a></a>    <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k))</span>
-<span id="cb13-7"><a></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
-<span id="cb13-8"><a></a>  <span class="fu">stop</span>(<span class="st">"not converged"</span>)</span>
-<span id="cb13-9"><a></a>}</span>
-<span id="cb13-10"><a></a><span class="fu">newton</span>(S, dS, <span class="at">x0 =</span> <span class="fu">mean</span>(x), <span class="at">trace =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a>newton <span class="ot">&lt;-</span> <span class="cf">function</span>(S, dS, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">100</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb13-2"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb13-3"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">-</span> <span class="fu">S</span>(x0) <span class="sc">/</span> <span class="fu">dS</span>(x0)</span>
+<span id="cb13-4"><a href=""></a>    <span class="cf">if</span> (trace) <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"iter %2d: %.10f</span><span class="sc">\n</span><span class="st">"</span>, k, x1))</span>
+<span id="cb13-5"><a href=""></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.finite</span>(x1)) <span class="fu">stop</span>(<span class="st">"diverged"</span>)</span>
+<span id="cb13-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k))</span>
+<span id="cb13-7"><a href=""></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb13-8"><a href=""></a>  <span class="fu">stop</span>(<span class="st">"not converged"</span>)</span>
+<span id="cb13-9"><a href=""></a>}</span>
+<span id="cb13-10"><a href=""></a><span class="fu">newton</span>(S, dS, <span class="at">x0 =</span> <span class="fu">mean</span>(x), <span class="at">trace =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>iter  1: 1.3636086724
@@ -606,11 +608,11 @@ e_{k+1} = e_k - \frac{S(\theta_k)}{S'(\theta_k)} = \frac{S''(\xi)}{2S'(\theta_k)
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>Sc  <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="dv">2</span> <span class="sc">*</span> (x_c <span class="sc">-</span> t) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span>))       <span class="co"># Cauchy score</span></span>
-<span id="cb16-2"><a></a>dSc <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="dv">2</span> <span class="sc">*</span> ((x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb16-3"><a></a>x_c <span class="ot">&lt;-</span> <span class="fu">rcauchy</span>(<span class="dv">8</span>, <span class="dv">3</span>)</span>
-<span id="cb16-4"><a></a>starts <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>, <span class="fu">median</span>(x_c), <span class="dv">8</span>)</span>
-<span id="cb16-5"><a></a><span class="fu">sapply</span>(starts, <span class="cf">function</span>(s) <span class="fu">tryCatch</span>(<span class="fu">newton</span>(Sc, dSc, s)[<span class="st">"root"</span>], <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NA</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a>Sc  <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="dv">2</span> <span class="sc">*</span> (x_c <span class="sc">-</span> t) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span>))       <span class="co"># Cauchy score</span></span>
+<span id="cb16-2"><a href=""></a>dSc <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="dv">2</span> <span class="sc">*</span> ((x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (x_c <span class="sc">-</span> t)<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb16-3"><a href=""></a>x_c <span class="ot">&lt;-</span> <span class="fu">rcauchy</span>(<span class="dv">8</span>, <span class="dv">3</span>)</span>
+<span id="cb16-4"><a href=""></a>starts <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>, <span class="fu">median</span>(x_c), <span class="dv">8</span>)</span>
+<span id="cb16-5"><a href=""></a><span class="fu">sapply</span>(starts, <span class="cf">function</span>(s) <span class="fu">tryCatch</span>(<span class="fu">newton</span>(Sc, dSc, s)[<span class="st">"root"</span>], <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NA</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>                      root     root 
@@ -621,7 +623,7 @@ e_{k+1} = e_k - \frac{S(\theta_k)}{S'(\theta_k)} = \frac{S''(\xi)}{2S'(\theta_k)
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">c</span>(<span class="at">step_from_3.5 =</span> <span class="fl">3.5</span> <span class="sc">-</span> <span class="fu">S</span>(<span class="fl">3.5</span>) <span class="sc">/</span> <span class="fu">dS</span>(<span class="fl">3.5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a><span class="fu">c</span>(<span class="at">step_from_3.5 =</span> <span class="fl">3.5</span> <span class="sc">-</span> <span class="fu">S</span>(<span class="fl">3.5</span>) <span class="sc">/</span> <span class="fu">dS</span>(<span class="fl">3.5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>step_from_3.5 
@@ -629,7 +631,7 @@ e_{k+1} = e_k - \frac{S(\theta_k)}{S'(\theta_k)} = \frac{S''(\xi)}{2S'(\theta_k)
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">tryCatch</span>(<span class="fu">newton</span>(S, dS, <span class="fl">3.5</span>), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">conditionMessage</span>(e))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a><span class="fu">tryCatch</span>(<span class="fu">newton</span>(S, dS, <span class="fl">3.5</span>), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">conditionMessage</span>(e))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "diverged"</code></pre>
@@ -650,10 +652,10 @@ e_{k+1} = e_k - \frac{S(\theta_k)}{S'(\theta_k)} = \frac{S''(\xi)}{2S'(\theta_k)
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>fisher_scoring <span class="ot">&lt;-</span> <span class="cf">function</span>(S, nI, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">100</span>) {</span>
-<span id="cb22-2"><a></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) { x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> <span class="fu">S</span>(x0) <span class="sc">/</span> <span class="fu">nI</span>(x0); <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k)); x0 <span class="ot">&lt;-</span> x1 }</span>
-<span id="cb22-3"><a></a>}</span>
-<span id="cb22-4"><a></a><span class="fu">rbind</span>(<span class="at">newton =</span> <span class="fu">newton</span>(S, dS, <span class="dv">3</span>), <span class="at">fisher =</span> <span class="fu">fisher_scoring</span>(S, nI, <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href=""></a>fisher_scoring <span class="ot">&lt;-</span> <span class="cf">function</span>(S, nI, x0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">100</span>) {</span>
+<span id="cb22-2"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) { x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> <span class="fu">S</span>(x0) <span class="sc">/</span> <span class="fu">nI</span>(x0); <span class="cf">if</span> (<span class="fu">abs</span>(x1 <span class="sc">-</span> x0) <span class="sc">&lt;</span> tol) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">root =</span> x1, <span class="at">iter =</span> k)); x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb22-3"><a href=""></a>}</span>
+<span id="cb22-4"><a href=""></a><span class="fu">rbind</span>(<span class="at">newton =</span> <span class="fu">newton</span>(S, dS, <span class="dv">3</span>), <span class="at">fisher =</span> <span class="fu">fisher_scoring</span>(S, nI, <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>           root iter
@@ -668,8 +670,8 @@ fisher 1.469493    5</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>lhat <span class="ot">&lt;-</span> <span class="fu">newton</span>(S, dS, <span class="fu">mean</span>(x))[<span class="st">"root"</span>]</span>
-<span id="cb24-2"><a></a><span class="fu">c</span>(<span class="at">mle =</span> lhat, <span class="at">se_observed =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="sc">-</span><span class="fu">dS</span>(lhat)), <span class="at">se_expected =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">nI</span>(lhat)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href=""></a>lhat <span class="ot">&lt;-</span> <span class="fu">newton</span>(S, dS, <span class="fu">mean</span>(x))[<span class="st">"root"</span>]</span>
+<span id="cb24-2"><a href=""></a><span class="fu">c</span>(<span class="at">mle =</span> lhat, <span class="at">se_observed =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="sc">-</span><span class="fu">dS</span>(lhat)), <span class="at">se_expected =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">nI</span>(lhat)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mle.root se_observed.root se_expected.root 
@@ -677,7 +679,7 @@ fisher 1.469493    5</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a>lhat <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.96</span>, <span class="fl">1.96</span>) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="sc">-</span><span class="fu">dS</span>(lhat))    <span class="co"># 95% Wald interval</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href=""></a>lhat <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.96</span>, <span class="fl">1.96</span>) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="sc">-</span><span class="fu">dS</span>(lhat))    <span class="co"># 95% Wald interval</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.252129 1.686856</code></pre>
@@ -698,8 +700,8 @@ fisher 1.469493    5</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>h <span class="ot">&lt;-</span> <span class="fl">1e-5</span></span>
-<span id="cb28-2"><a></a><span class="fu">c</span>(<span class="at">analytic =</span> <span class="fu">dS</span>(lhat), <span class="at">numeric =</span> (<span class="fu">ll</span>(lhat <span class="sc">+</span> h) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">ll</span>(lhat) <span class="sc">+</span> <span class="fu">ll</span>(lhat <span class="sc">-</span> h)) <span class="sc">/</span> h<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href=""></a>h <span class="ot">&lt;-</span> <span class="fl">1e-5</span></span>
+<span id="cb28-2"><a href=""></a><span class="fu">c</span>(<span class="at">analytic =</span> <span class="fu">dS</span>(lhat), <span class="at">numeric =</span> (<span class="fu">ll</span>(lhat <span class="sc">+</span> h) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">ll</span>(lhat) <span class="sc">+</span> <span class="fu">ll</span>(lhat <span class="sc">-</span> h)) <span class="sc">/</span> h<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>analytic.root  numeric.root 
@@ -793,28 +795,28 @@ z_k = X\beta_k + W_k^{-1}(y - \pi_k),
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a>n <span class="ot">&lt;-</span> <span class="dv">500</span>; X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">rnorm</span>(n), <span class="fu">rnorm</span>(n)); beta_true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>)</span>
-<span id="cb30-2"><a></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(X <span class="sc">%*%</span> beta_true))</span>
-<span id="cb30-3"><a></a>loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="fu">sum</span>(y <span class="sc">*</span> (X <span class="sc">%*%</span> b) <span class="sc">-</span> <span class="fu">log1p</span>(<span class="fu">exp</span>(X <span class="sc">%*%</span> b)))</span>
-<span id="cb30-4"><a></a>grad   <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="fu">crossprod</span>(X, y <span class="sc">-</span> <span class="fu">plogis</span>(X <span class="sc">%*%</span> b))</span>
-<span id="cb30-5"><a></a>hess   <span class="ot">&lt;-</span> <span class="cf">function</span>(b) { p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(X <span class="sc">%*%</span> b); <span class="sc">-</span><span class="fu">crossprod</span>(X, X <span class="sc">*</span> <span class="fu">drop</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))) }</span>
-<span id="cb30-6"><a></a></span>
-<span id="cb30-7"><a></a>newton_mv <span class="ot">&lt;-</span> <span class="cf">function</span>(grad, hess, b0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">50</span>) {</span>
-<span id="cb30-8"><a></a>  path <span class="ot">&lt;-</span> <span class="fu">drop</span>(b0)</span>
-<span id="cb30-9"><a></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
-<span id="cb30-10"><a></a>    b1 <span class="ot">&lt;-</span> b0 <span class="sc">-</span> <span class="fu">solve</span>(<span class="fu">hess</span>(b0), <span class="fu">grad</span>(b0)); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b1))</span>
-<span id="cb30-11"><a></a>    <span class="cf">if</span> (<span class="fu">max</span>(<span class="fu">abs</span>(b1 <span class="sc">-</span> b0)) <span class="sc">&lt;</span> tol)</span>
-<span id="cb30-12"><a></a>      <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b1), <span class="at">iter =</span> k, <span class="at">se =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(<span class="sc">-</span><span class="fu">hess</span>(b1)))), <span class="at">path =</span> path))</span>
-<span id="cb30-13"><a></a>    b0 <span class="ot">&lt;-</span> b1 }</span>
-<span id="cb30-14"><a></a>}</span>
-<span id="cb30-15"><a></a>fit <span class="ot">&lt;-</span> <span class="fu">newton_mv</span>(grad, hess, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>)); fit<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">500</span>; X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">rnorm</span>(n), <span class="fu">rnorm</span>(n)); beta_true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb30-2"><a href=""></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(X <span class="sc">%*%</span> beta_true))</span>
+<span id="cb30-3"><a href=""></a>loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="fu">sum</span>(y <span class="sc">*</span> (X <span class="sc">%*%</span> b) <span class="sc">-</span> <span class="fu">log1p</span>(<span class="fu">exp</span>(X <span class="sc">%*%</span> b)))</span>
+<span id="cb30-4"><a href=""></a>grad   <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="fu">crossprod</span>(X, y <span class="sc">-</span> <span class="fu">plogis</span>(X <span class="sc">%*%</span> b))</span>
+<span id="cb30-5"><a href=""></a>hess   <span class="ot">&lt;-</span> <span class="cf">function</span>(b) { p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(X <span class="sc">%*%</span> b); <span class="sc">-</span><span class="fu">crossprod</span>(X, X <span class="sc">*</span> <span class="fu">drop</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))) }</span>
+<span id="cb30-6"><a href=""></a></span>
+<span id="cb30-7"><a href=""></a>newton_mv <span class="ot">&lt;-</span> <span class="cf">function</span>(grad, hess, b0, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">maxit =</span> <span class="dv">50</span>) {</span>
+<span id="cb30-8"><a href=""></a>  path <span class="ot">&lt;-</span> <span class="fu">drop</span>(b0)</span>
+<span id="cb30-9"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb30-10"><a href=""></a>    b1 <span class="ot">&lt;-</span> b0 <span class="sc">-</span> <span class="fu">solve</span>(<span class="fu">hess</span>(b0), <span class="fu">grad</span>(b0)); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b1))</span>
+<span id="cb30-11"><a href=""></a>    <span class="cf">if</span> (<span class="fu">max</span>(<span class="fu">abs</span>(b1 <span class="sc">-</span> b0)) <span class="sc">&lt;</span> tol)</span>
+<span id="cb30-12"><a href=""></a>      <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b1), <span class="at">iter =</span> k, <span class="at">se =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(<span class="sc">-</span><span class="fu">hess</span>(b1)))), <span class="at">path =</span> path))</span>
+<span id="cb30-13"><a href=""></a>    b0 <span class="ot">&lt;-</span> b1 }</span>
+<span id="cb30-14"><a href=""></a>}</span>
+<span id="cb30-15"><a href=""></a>fit <span class="ot">&lt;-</span> <span class="fu">newton_mv</span>(grad, hess, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>)); fit<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 7</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="fu">rbind</span>(<span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">glm =</span> <span class="fu">coef</span>(<span class="fu">glm</span>(y <span class="sc">~</span> X[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">family =</span> binomial)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href=""></a><span class="fu">rbind</span>(<span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">glm =</span> <span class="fu">coef</span>(<span class="fu">glm</span>(y <span class="sc">~</span> X[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">family =</span> binomial)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>       (Intercept) X[, -1]1  X[, -1]2
@@ -823,7 +825,7 @@ glm     -0.5431413 1.080382 -2.453254</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="fu">rbind</span>(<span class="at">newton =</span> fit<span class="sc">$</span>se, <span class="at">glm =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(<span class="fu">glm</span>(y <span class="sc">~</span> X[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">family =</span> binomial)))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href=""></a><span class="fu">rbind</span>(<span class="at">newton =</span> fit<span class="sc">$</span>se, <span class="at">glm =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(<span class="fu">glm</span>(y <span class="sc">~</span> X[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">family =</span> binomial)))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>       (Intercept)  X[, -1]1  X[, -1]2
@@ -913,8 +915,8 @@ z_j = \frac{\hat\beta_j}{\widehat{\mathrm{SE}}(\hat\beta_j)} \;\dot\sim\; N(0,1)
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a>rosen <span class="ot">&lt;-</span> <span class="cf">function</span>(v) (<span class="dv">1</span> <span class="sc">-</span> v[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">100</span> <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> v[<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>       <span class="co"># Rosenbrock "banana", min at (1, 1)</span></span>
-<span id="cb36-2"><a></a>nm <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.2</span>, <span class="dv">1</span>), rosen, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>); <span class="fu">c</span>(nm<span class="sc">$</span>par, <span class="at">evals =</span> nm<span class="sc">$</span>counts[<span class="st">"function"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href=""></a>rosen <span class="ot">&lt;-</span> <span class="cf">function</span>(v) (<span class="dv">1</span> <span class="sc">-</span> v[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">100</span> <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> v[<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>       <span class="co"># Rosenbrock "banana", min at (1, 1)</span></span>
+<span id="cb36-2"><a href=""></a>nm <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.2</span>, <span class="dv">1</span>), rosen, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>); <span class="fu">c</span>(nm<span class="sc">$</span>par, <span class="at">evals =</span> nm<span class="sc">$</span>counts[<span class="st">"function"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>                              evals.function 
@@ -935,15 +937,15 @@ z_j = \frac{\hat\beta_j}{\widehat{\mathrm{SE}}(\hat\beta_j)} \;\dot\sim\; N(0,1)
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a>grad_descent <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
-<span id="cb38-2"><a></a>  path <span class="ot">&lt;-</span> x0</span>
-<span id="cb38-3"><a></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
-<span id="cb38-4"><a></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">gr</span>(x0); a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum   <span class="co"># exact line search</span></span>
-<span id="cb38-5"><a></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
-<span id="cb38-6"><a></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>((x1 <span class="sc">-</span> x0)<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
-<span id="cb38-7"><a></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
-<span id="cb38-8"><a></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
-<span id="cb38-9"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href=""></a>grad_descent <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb38-2"><a href=""></a>  path <span class="ot">&lt;-</span> x0</span>
+<span id="cb38-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb38-4"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">gr</span>(x0); a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum   <span class="co"># exact line search</span></span>
+<span id="cb38-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
+<span id="cb38-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>((x1 <span class="sc">-</span> x0)<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
+<span id="cb38-7"><a href=""></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb38-8"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
+<span id="cb38-9"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -972,20 +974,20 @@ d_0 = -g_0, \qquad d_{k+1} = -g_{k+1} + \beta_k d_k, \qquad
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a>conj_grad <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">restart =</span> <span class="fu">length</span>(x0)) {</span>
-<span id="cb39-2"><a></a>  g0 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x0); d <span class="ot">&lt;-</span> <span class="sc">-</span>g0; path <span class="ot">&lt;-</span> x0</span>
-<span id="cb39-3"><a></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
-<span id="cb39-4"><a></a>    a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum</span>
-<span id="cb39-5"><a></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; g1 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x1); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
-<span id="cb39-6"><a></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>(g1<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
-<span id="cb39-7"><a></a>    beta <span class="ot">&lt;-</span> <span class="cf">if</span> (k <span class="sc">%%</span> restart <span class="sc">==</span> <span class="dv">0</span>) <span class="dv">0</span> <span class="cf">else</span> <span class="fu">max</span>(<span class="dv">0</span>, <span class="fu">sum</span>(g1 <span class="sc">*</span> (g1 <span class="sc">-</span> g0)) <span class="sc">/</span> <span class="fu">sum</span>(g0<span class="sc">^</span><span class="dv">2</span>))   <span class="co"># Polak-Ribiere+</span></span>
-<span id="cb39-8"><a></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span>g1 <span class="sc">+</span> beta <span class="sc">*</span> d; x0 <span class="ot">&lt;-</span> x1; g0 <span class="ot">&lt;-</span> g1 }</span>
-<span id="cb39-9"><a></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
-<span id="cb39-10"><a></a>}</span>
-<span id="cb39-11"><a></a>cg <span class="ot">&lt;-</span> <span class="fu">conj_grad</span>(fq, gq, <span class="fu">c</span>(<span class="dv">2</span>, <span class="sc">-</span><span class="fl">1.8</span>))</span>
-<span id="cb39-12"><a></a><span class="fu">par</span>(<span class="at">pty =</span> <span class="st">"s"</span>, <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>)); <span class="fu">contour</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="sc">-</span>z, <span class="at">nlevels =</span> <span class="dv">15</span>, <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"conjugate gradient, %d iterations"</span>, cg<span class="sc">$</span>iter))</span>
-<span id="cb39-13"><a></a><span class="fu">lines</span>(gd<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>); <span class="fu">lines</span>(cg<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb39-14"><a></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"gradient descent"</span>, <span class="st">"conjugate gradient"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a>conj_grad <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">restart =</span> <span class="fu">length</span>(x0)) {</span>
+<span id="cb39-2"><a href=""></a>  g0 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x0); d <span class="ot">&lt;-</span> <span class="sc">-</span>g0; path <span class="ot">&lt;-</span> x0</span>
+<span id="cb39-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb39-4"><a href=""></a>    a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum</span>
+<span id="cb39-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; g1 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x1); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
+<span id="cb39-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>(g1<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
+<span id="cb39-7"><a href=""></a>    beta <span class="ot">&lt;-</span> <span class="cf">if</span> (k <span class="sc">%%</span> restart <span class="sc">==</span> <span class="dv">0</span>) <span class="dv">0</span> <span class="cf">else</span> <span class="fu">max</span>(<span class="dv">0</span>, <span class="fu">sum</span>(g1 <span class="sc">*</span> (g1 <span class="sc">-</span> g0)) <span class="sc">/</span> <span class="fu">sum</span>(g0<span class="sc">^</span><span class="dv">2</span>))   <span class="co"># Polak-Ribiere+</span></span>
+<span id="cb39-8"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span>g1 <span class="sc">+</span> beta <span class="sc">*</span> d; x0 <span class="ot">&lt;-</span> x1; g0 <span class="ot">&lt;-</span> g1 }</span>
+<span id="cb39-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
+<span id="cb39-10"><a href=""></a>}</span>
+<span id="cb39-11"><a href=""></a>cg <span class="ot">&lt;-</span> <span class="fu">conj_grad</span>(fq, gq, <span class="fu">c</span>(<span class="dv">2</span>, <span class="sc">-</span><span class="fl">1.8</span>))</span>
+<span id="cb39-12"><a href=""></a><span class="fu">par</span>(<span class="at">pty =</span> <span class="st">"s"</span>, <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>)); <span class="fu">contour</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="sc">-</span>z, <span class="at">nlevels =</span> <span class="dv">15</span>, <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"conjugate gradient, %d iterations"</span>, cg<span class="sc">$</span>iter))</span>
+<span id="cb39-13"><a href=""></a><span class="fu">lines</span>(gd<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>); <span class="fu">lines</span>(cg<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb39-14"><a href=""></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"gradient descent"</span>, <span class="st">"conjugate gradient"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 
 </div>
@@ -996,11 +998,11 @@ d_0 = -g_0, \qquad d_{k+1} = -g_{k+1} + \beta_k d_k, \qquad
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a>negll <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">loglik</span>(b); neggr <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">drop</span>(<span class="fu">grad</span>(b))</span>
-<span id="cb40-2"><a></a>fits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NM =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>),</span>
-<span id="cb40-3"><a></a>             <span class="at">CG =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"CG"</span>),</span>
-<span id="cb40-4"><a></a>             <span class="at">BFGS =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"BFGS"</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb40-5"><a></a><span class="fu">t</span>(<span class="fu">sapply</span>(fits, <span class="cf">function</span>(f) <span class="fu">c</span>(f<span class="sc">$</span>par, <span class="at">f_evals =</span> f<span class="sc">$</span>counts[<span class="dv">1</span>], <span class="at">g_evals =</span> f<span class="sc">$</span>counts[<span class="dv">2</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href=""></a>negll <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">loglik</span>(b); neggr <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">drop</span>(<span class="fu">grad</span>(b))</span>
+<span id="cb40-2"><a href=""></a>fits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NM =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>),</span>
+<span id="cb40-3"><a href=""></a>             <span class="at">CG =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"CG"</span>),</span>
+<span id="cb40-4"><a href=""></a>             <span class="at">BFGS =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"BFGS"</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb40-5"><a href=""></a><span class="fu">t</span>(<span class="fu">sapply</span>(fits, <span class="cf">function</span>(f) <span class="fu">c</span>(f<span class="sc">$</span>par, <span class="at">f_evals =</span> f<span class="sc">$</span>counts[<span class="dv">1</span>], <span class="at">g_evals =</span> f<span class="sc">$</span>counts[<span class="dv">2</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                   f_evals.function g_evals.gradient
@@ -1010,7 +1012,7 @@ BFGS -0.5431413 1.080382 -2.453255               36               13</code></pre
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(fits<span class="sc">$</span>BFGS<span class="sc">$</span>hessian)))     <span class="co"># SEs from the numerically computed Hessian at the optimum</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href=""></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(fits<span class="sc">$</span>BFGS<span class="sc">$</span>hessian)))     <span class="co"># SEs from the numerically computed Hessian at the optimum</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1337429 0.1511637 0.2228005</code></pre>
@@ -1064,18 +1066,18 @@ E_i\big[\nabla\ell_i(\theta)\big] = \frac{1}{n}\nabla\ell(\theta).
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a></a>sgd <span class="ot">&lt;-</span> <span class="cf">function</span>(X, y, b0, <span class="at">gamma0 =</span> <span class="fl">0.05</span>, <span class="at">t0 =</span> <span class="dv">200</span>, <span class="at">epochs =</span> <span class="dv">5</span>, <span class="at">batch =</span> <span class="dv">10</span>) {</span>
-<span id="cb44-2"><a></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X); b <span class="ot">&lt;-</span> b0; t <span class="ot">&lt;-</span> <span class="dv">0</span>; path <span class="ot">&lt;-</span> b0</span>
-<span id="cb44-3"><a></a>  <span class="cf">for</span> (e <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
-<span id="cb44-4"><a></a>    idx <span class="ot">&lt;-</span> <span class="fu">sample</span>(n)</span>
-<span id="cb44-5"><a></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n, <span class="at">by =</span> batch)) {</span>
-<span id="cb44-6"><a></a>      i <span class="ot">&lt;-</span> idx[s<span class="sc">:</span><span class="fu">min</span>(s <span class="sc">+</span> batch <span class="sc">-</span> <span class="dv">1</span>, n)]; t <span class="ot">&lt;-</span> t <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb44-7"><a></a>      g <span class="ot">&lt;-</span> <span class="fu">crossprod</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>], y[i] <span class="sc">-</span> <span class="fu">plogis</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">%*%</span> b)) <span class="sc">/</span> <span class="fu">length</span>(i)</span>
-<span id="cb44-8"><a></a>      b <span class="ot">&lt;-</span> b <span class="sc">+</span> gamma0 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> t <span class="sc">/</span> t0) <span class="sc">*</span> g; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b)) } }</span>
-<span id="cb44-9"><a></a>  <span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b), <span class="at">path =</span> path)</span>
-<span id="cb44-10"><a></a>}</span>
-<span id="cb44-11"><a></a>sg <span class="ot">&lt;-</span> <span class="fu">sgd</span>(X, y, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>))</span>
-<span id="cb44-12"><a></a><span class="fu">rbind</span>(<span class="at">sgd =</span> sg<span class="sc">$</span>est, <span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">truth =</span> beta_true)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href=""></a>sgd <span class="ot">&lt;-</span> <span class="cf">function</span>(X, y, b0, <span class="at">gamma0 =</span> <span class="fl">0.05</span>, <span class="at">t0 =</span> <span class="dv">200</span>, <span class="at">epochs =</span> <span class="dv">5</span>, <span class="at">batch =</span> <span class="dv">10</span>) {</span>
+<span id="cb44-2"><a href=""></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X); b <span class="ot">&lt;-</span> b0; t <span class="ot">&lt;-</span> <span class="dv">0</span>; path <span class="ot">&lt;-</span> b0</span>
+<span id="cb44-3"><a href=""></a>  <span class="cf">for</span> (e <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
+<span id="cb44-4"><a href=""></a>    idx <span class="ot">&lt;-</span> <span class="fu">sample</span>(n)</span>
+<span id="cb44-5"><a href=""></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n, <span class="at">by =</span> batch)) {</span>
+<span id="cb44-6"><a href=""></a>      i <span class="ot">&lt;-</span> idx[s<span class="sc">:</span><span class="fu">min</span>(s <span class="sc">+</span> batch <span class="sc">-</span> <span class="dv">1</span>, n)]; t <span class="ot">&lt;-</span> t <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb44-7"><a href=""></a>      g <span class="ot">&lt;-</span> <span class="fu">crossprod</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>], y[i] <span class="sc">-</span> <span class="fu">plogis</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">%*%</span> b)) <span class="sc">/</span> <span class="fu">length</span>(i)</span>
+<span id="cb44-8"><a href=""></a>      b <span class="ot">&lt;-</span> b <span class="sc">+</span> gamma0 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> t <span class="sc">/</span> t0) <span class="sc">*</span> g; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b)) } }</span>
+<span id="cb44-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b), <span class="at">path =</span> path)</span>
+<span id="cb44-10"><a href=""></a>}</span>
+<span id="cb44-11"><a href=""></a>sg <span class="ot">&lt;-</span> <span class="fu">sgd</span>(X, y, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>))</span>
+<span id="cb44-12"><a href=""></a><span class="fu">rbind</span>(<span class="at">sgd =</span> sg<span class="sc">$</span>est, <span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">truth =</span> beta_true)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>             [,1]      [,2]      [,3]
@@ -1151,7 +1153,6 @@ truth  -0.5000000 1.0000000 -2.000000</code></pre>
 </table>
 <p>The log-likelihood is approximately quadratic near the MLE (asymptotic normality); every method above exploits that, and its curvature at the optimum delivers the standard errors.</p>
 
-
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -1161,19 +1162,19 @@ truth  -0.5000000 1.0000000 -2.000000</code></pre>
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="site_libs/revealjs/plugin/search/search.js"></script>
-  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Lec_05_MLE_files/libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-html/tabby.min.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Lec_11_Importance_Sampling_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-html/popper.min.js"></script>
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
+  <meta name="dcterms.date" content="2026-09-07">
   <title>Elements of Statistical Computation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Lec_11_Importance_Sampling_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Lec_11_Importance_Sampling_files/libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -98,8 +99,8 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
-  <link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/banner_slides/slides.css">
+  <link rel="stylesheet" href="Lec_11_Importance_Sampling_files/libs/revealjs/dist/theme/quarto-2abc1c5b7b5c7eecd6137558e106e4c3.css">
+  <link rel="stylesheet" href="_extensions/banner_slides/slides.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -116,12 +117,12 @@
 }}});
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -226,6 +227,7 @@ Longhai Li
 </div>
 </div>
 
+  <p class="date">2026-09-07</p>
 </section>
 <section>
 <section id="goal-and-idea" class="title-slide slide level1 center">
@@ -320,13 +322,13 @@ E_f\big[a(\theta)\big] &amp;= \int a(\theta)\,\frac{f(\theta)}{C_f}\,d\theta
 <li><strong>Shifted exponential</strong> <span class="math inline">g(x) = \dfrac{\lambda e^{-\lambda(x-a)}}{1-e^{-\lambda(b-a)}}\,I(a\le x\le b)</span> with <span class="math inline">\lambda\approx a</span>: matches the decay of <span class="math inline">\varphi</span> on the tail, so <span class="math inline">w</span> is nearly constant and <span class="math inline">S_{\text{eff}}\approx n</span></li>
 </ul>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>a <span class="ot">&lt;-</span> <span class="dv">4</span>; b <span class="ot">&lt;-</span> <span class="dv">6</span>; n <span class="ot">&lt;-</span> <span class="fl">1e4</span>; exact <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(b) <span class="sc">-</span> <span class="fu">pnorm</span>(a)</span>
-<span id="cb3-2"><a></a>x_u <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, a, b);  w_u <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">*</span> <span class="fu">dnorm</span>(x_u)</span>
-<span id="cb3-3"><a></a>lam <span class="ot">&lt;-</span> a; x_e <span class="ot">&lt;-</span> a <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">runif</span>(n) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (b <span class="sc">-</span> a)))) <span class="sc">/</span> lam       <span class="co"># inverse CDF</span></span>
-<span id="cb3-4"><a></a>g_e <span class="ot">&lt;-</span> lam <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (x_e <span class="sc">-</span> a)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (b <span class="sc">-</span> a))); w_e <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x_e) <span class="sc">/</span> g_e</span>
-<span id="cb3-5"><a></a><span class="fu">rbind</span>(<span class="at">uniform =</span> <span class="fu">c</span>(<span class="at">I_hat =</span> <span class="fu">mean</span>(w_u), <span class="at">rel_error =</span> <span class="fu">mean</span>(w_u) <span class="sc">/</span> exact <span class="sc">-</span> <span class="dv">1</span>, <span class="at">S_eff =</span> <span class="fu">ess</span>(w_u),</span>
-<span id="cb3-6"><a></a>                  <span class="at">E_X_given =</span> <span class="fu">sum</span>(x_u <span class="sc">*</span> w_u) <span class="sc">/</span> <span class="fu">sum</span>(w_u)),</span>
-<span id="cb3-7"><a></a>      <span class="at">exponential =</span> <span class="fu">c</span>(<span class="fu">mean</span>(w_e), <span class="fu">mean</span>(w_e) <span class="sc">/</span> exact <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">ess</span>(w_e), <span class="fu">sum</span>(x_e <span class="sc">*</span> w_e) <span class="sc">/</span> <span class="fu">sum</span>(w_e)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>a <span class="ot">&lt;-</span> <span class="dv">4</span>; b <span class="ot">&lt;-</span> <span class="dv">6</span>; n <span class="ot">&lt;-</span> <span class="fl">1e4</span>; exact <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(b) <span class="sc">-</span> <span class="fu">pnorm</span>(a)</span>
+<span id="cb3-2"><a href=""></a>x_u <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, a, b);  w_u <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">*</span> <span class="fu">dnorm</span>(x_u)</span>
+<span id="cb3-3"><a href=""></a>lam <span class="ot">&lt;-</span> a; x_e <span class="ot">&lt;-</span> a <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">runif</span>(n) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (b <span class="sc">-</span> a)))) <span class="sc">/</span> lam       <span class="co"># inverse CDF</span></span>
+<span id="cb3-4"><a href=""></a>g_e <span class="ot">&lt;-</span> lam <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (x_e <span class="sc">-</span> a)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (b <span class="sc">-</span> a))); w_e <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x_e) <span class="sc">/</span> g_e</span>
+<span id="cb3-5"><a href=""></a><span class="fu">rbind</span>(<span class="at">uniform =</span> <span class="fu">c</span>(<span class="at">I_hat =</span> <span class="fu">mean</span>(w_u), <span class="at">rel_error =</span> <span class="fu">mean</span>(w_u) <span class="sc">/</span> exact <span class="sc">-</span> <span class="dv">1</span>, <span class="at">S_eff =</span> <span class="fu">ess</span>(w_u),</span>
+<span id="cb3-6"><a href=""></a>                  <span class="at">E_X_given =</span> <span class="fu">sum</span>(x_u <span class="sc">*</span> w_u) <span class="sc">/</span> <span class="fu">sum</span>(w_u)),</span>
+<span id="cb3-7"><a href=""></a>      <span class="at">exponential =</span> <span class="fu">c</span>(<span class="fu">mean</span>(w_e), <span class="fu">mean</span>(w_e) <span class="sc">/</span> exact <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">ess</span>(w_e), <span class="fu">sum</span>(x_e <span class="sc">*</span> w_e) <span class="sc">/</span> <span class="fu">sum</span>(w_e)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   I_hat   rel_error    S_eff E_X_given
 uniform     3.184127e-05 0.005399818 2325.597  4.226393
@@ -390,25 +392,25 @@ exponential 3.172442e-05 0.001710140 9904.602  4.222298</code></pre>
 <section id="example-4-continued-prior-sampling-fails-tempering-helps" class="slide level2">
 <h2>Example 4 (Continued): Prior Sampling Fails, Tempering Helps</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">1</span>, <span class="dv">1</span>); n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)                       <span class="co"># data; model N(theta, 1), prior N(0, 10^2)</span></span>
-<span id="cb5-2"><a></a>logL <span class="ot">&lt;-</span> <span class="cf">function</span>(th) <span class="fu">sapply</span>(th, <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="fu">dnorm</span>(y, t, <span class="at">log =</span> <span class="cn">TRUE</span>)))</span>
-<span id="cb5-3"><a></a>s2p <span class="ot">&lt;-</span> <span class="dv">100</span>; ybar <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)                                <span class="co"># exact log P(y): y ~ N(0, I + s2p * 11')</span></span>
-<span id="cb5-4"><a></a>exact <span class="ot">&lt;-</span> <span class="sc">-</span>n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>((y <span class="sc">-</span> ybar)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> n <span class="sc">*</span> s2p) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> n <span class="sc">*</span> ybar<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> n <span class="sc">*</span> s2p)</span>
-<span id="cb5-5"><a></a>S <span class="ot">&lt;-</span> <span class="fl">1e5</span>; lse <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { M <span class="ot">&lt;-</span> <span class="fu">max</span>(l); M <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> M))) }</span>
-<span id="cb5-6"><a></a>th <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, <span class="dv">0</span>, <span class="dv">10</span>); lw <span class="ot">&lt;-</span> <span class="fu">logL</span>(th)                       <span class="co"># prior sampling: log weights = log L</span></span>
-<span id="cb5-7"><a></a><span class="fu">c</span>(<span class="at">exact =</span> exact, <span class="at">prior_sampling =</span> <span class="fu">lse</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S), <span class="at">S_eff =</span> <span class="fu">ess</span>(<span class="fu">exp</span>(lw <span class="sc">-</span> <span class="fu">max</span>(lw))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">1</span>, <span class="dv">1</span>); n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)                       <span class="co"># data; model N(theta, 1), prior N(0, 10^2)</span></span>
+<span id="cb5-2"><a href=""></a>logL <span class="ot">&lt;-</span> <span class="cf">function</span>(th) <span class="fu">sapply</span>(th, <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="fu">dnorm</span>(y, t, <span class="at">log =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb5-3"><a href=""></a>s2p <span class="ot">&lt;-</span> <span class="dv">100</span>; ybar <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)                                <span class="co"># exact log P(y): y ~ N(0, I + s2p * 11')</span></span>
+<span id="cb5-4"><a href=""></a>exact <span class="ot">&lt;-</span> <span class="sc">-</span>n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>((y <span class="sc">-</span> ybar)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> n <span class="sc">*</span> s2p) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> n <span class="sc">*</span> ybar<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> n <span class="sc">*</span> s2p)</span>
+<span id="cb5-5"><a href=""></a>S <span class="ot">&lt;-</span> <span class="fl">1e5</span>; lse <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { M <span class="ot">&lt;-</span> <span class="fu">max</span>(l); M <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> M))) }</span>
+<span id="cb5-6"><a href=""></a>th <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, <span class="dv">0</span>, <span class="dv">10</span>); lw <span class="ot">&lt;-</span> <span class="fu">logL</span>(th)                       <span class="co"># prior sampling: log weights = log L</span></span>
+<span id="cb5-7"><a href=""></a><span class="fu">c</span>(<span class="at">exact =</span> exact, <span class="at">prior_sampling =</span> <span class="fu">lse</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S), <span class="at">S_eff =</span> <span class="fu">ess</span>(<span class="fu">exp</span>(lw <span class="sc">-</span> <span class="fu">max</span>(lw))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         exact prior_sampling          S_eff 
      -45.66509      -45.67049     2550.01439 </code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>betas <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.1</span>); logZ <span class="ot">&lt;-</span> <span class="dv">0</span>                     <span class="co"># stepping stones: chain of small steps</span></span>
-<span id="cb7-2"><a></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(betas)) {                                <span class="co"># draw from tempered posterior beta_{k-1} (conjugate here)</span></span>
-<span id="cb7-3"><a></a>  b0 <span class="ot">&lt;-</span> betas[k <span class="sc">-</span> <span class="dv">1</span>]; v <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">/</span> s2p <span class="sc">+</span> b0 <span class="sc">*</span> n); m <span class="ot">&lt;-</span> v <span class="sc">*</span> b0 <span class="sc">*</span> n <span class="sc">*</span> ybar</span>
-<span id="cb7-4"><a></a>  th <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, m, <span class="fu">sqrt</span>(v)); lw <span class="ot">&lt;-</span> (betas[k] <span class="sc">-</span> b0) <span class="sc">*</span> <span class="fu">logL</span>(th)</span>
-<span id="cb7-5"><a></a>  logZ <span class="ot">&lt;-</span> logZ <span class="sc">+</span> <span class="fu">lse</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S) }</span>
-<span id="cb7-6"><a></a><span class="fu">c</span>(<span class="at">exact =</span> exact, <span class="at">stepping_stones =</span> logZ)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>betas <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.1</span>); logZ <span class="ot">&lt;-</span> <span class="dv">0</span>                     <span class="co"># stepping stones: chain of small steps</span></span>
+<span id="cb7-2"><a href=""></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(betas)) {                                <span class="co"># draw from tempered posterior beta_{k-1} (conjugate here)</span></span>
+<span id="cb7-3"><a href=""></a>  b0 <span class="ot">&lt;-</span> betas[k <span class="sc">-</span> <span class="dv">1</span>]; v <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">/</span> s2p <span class="sc">+</span> b0 <span class="sc">*</span> n); m <span class="ot">&lt;-</span> v <span class="sc">*</span> b0 <span class="sc">*</span> n <span class="sc">*</span> ybar</span>
+<span id="cb7-4"><a href=""></a>  th <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, m, <span class="fu">sqrt</span>(v)); lw <span class="ot">&lt;-</span> (betas[k] <span class="sc">-</span> b0) <span class="sc">*</span> <span class="fu">logL</span>(th)</span>
+<span id="cb7-5"><a href=""></a>  logZ <span class="ot">&lt;-</span> logZ <span class="sc">+</span> <span class="fu">lse</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S) }</span>
+<span id="cb7-6"><a href=""></a><span class="fu">c</span>(<span class="at">exact =</span> exact, <span class="at">stepping_stones =</span> logZ)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          exact stepping_stones 
       -45.66509       -45.66597 </code></pre>
@@ -454,7 +456,6 @@ w_i(\theta) = \frac{f(\theta)}{g(\theta)} = \frac{1}{p(y_i\mid\theta)}</span></p
 <li>Advanced uses: normalizing-constant ratios (free energy, marginal likelihood) via tempering steps; leave-one-out cross-validation from full-posterior draws with <span class="math inline">w_i = 1/p(y_i\mid\theta)</span></li>
 </ul>
 
-
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -464,19 +465,19 @@ w_i(\theta) = \frac{f(\theta)}{g(\theta)} = \frac{1}{p(y_i\mid\theta)}</span></p
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="site_libs/revealjs/plugin/search/search.js"></script>
-  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Lec_11_Importance_Sampling_files/libs/revealjs/plugin/zoom/zoom.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
