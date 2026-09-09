@@ -1,7 +1,9 @@
 ---
 subtitle: "Random Numbers and Elementary Monte Carlo"
 author: "Longhai Li"
-format: banner_slides-revealjs
+format: 
+  banner_slides-revealjs:
+    slide-level: 3
 execute:
   echo: true
   fig-width: 7
@@ -276,10 +278,17 @@ data.frame(n = ns, estimate = round(res[, 1], 5), error = round(res[, 1] - pi, 5
 ## Convergence of $\hat\pi_n$
 
 ```{r}
+#| label: pi-convergence
+#| fig-width: 10
+#| fig-height: 4
+set.seed(1)
 n <- 1e5; z <- 4 * (runif(n, -1, 1)^2 + runif(n, -1, 1)^2 <= 1)
 k <- 1:n; pihat <- cumsum(z) / k
-plot(k, pihat, type = "l", log = "x", ylim = c(2.8, 3.5), xlab = "n (log scale)", ylab = expression(hat(pi)[n]))
-lines(k, pi + 1.96 * 1.64 / sqrt(k), lty = 2, col = 2); lines(k, pi - 1.96 * 1.64 / sqrt(k), lty = 2, col = 2)
+par(mar = c(4, 4.5, 0.5, 0.5), mgp = c(2.5, 0.8, 0))
+plot(k, pihat, type = "l", log = "x", ylim = c(2, 4),
+     xlab = "n (log scale)", ylab = expression(hat(pi)[n]))
+lines(k, pi + 1.96 * 1.64 / sqrt(k), lty = 2, col = 2)
+lines(k, pi - 1.96 * 1.64 / sqrt(k), lty = 2, col = 2)
 abline(h = pi, col = 4)
 ```
 
@@ -395,8 +404,8 @@ Under $H_0$ the p-values are uniform; under $H_1$ they pile up near 0.
 
 ## Monte Carlo Estimates of Size and Power
 
-$$\widehat{\text{size}} = \hat P(pv < \alpha \mid H_0) = \frac{1}{N}\sum_{j=1}^N I\big(pv^{(j)}_{H_0} < \alpha\big), \qquad
-\widehat{\text{power}} = \hat P(pv < \alpha \mid H_1) = \frac{1}{N}\sum_{j=1}^N I\big(pv^{(j)}_{H_1} < \alpha\big)$$
+$$\widehat{\text{size}} = \hat P(pv < \alpha \mid H_0) = \frac{1}{N}\sum_{j=1}^N I\big(pv^{(j)}_{H_0} < \alpha\big), $$
+$$\widehat{\text{power}} = \hat P(pv < \alpha \mid H_1) = \frac{1}{N}\sum_{j=1}^N I\big(pv^{(j)}_{H_1} < \alpha\big)$$
 
 ```{r}
 c(size = mean(pv0 < 0.05), power = mean(pv1 < 0.05),
@@ -420,7 +429,9 @@ Tnull <- replicate(5000, { y <- rnorm(15); abs(mean(y)) / (sd(y) / sqrt(15)) })
 c(mc_pv = (1 + sum(Tnull >= tobs)) / 5001, exact_pv = 2 * pt(-tobs, df = 14))
 ```
 
-## A Permutation Test for the Correlation Coefficient
+## Example 1: A Permutation Test for the Correlation Coefficient
+
+### Setting and Procedure
 
 Data $(X_i, Y_i)$, $i = 1, \ldots, n$. Test $H_0: X \perp Y$ (which implies $\mathrm{corr}(X,Y) = 0$) with $T = |\hat\rho|$.
 
@@ -432,9 +443,10 @@ Under $H_0$, **every pairing of the $X$ values with the $Y$ values is equally li
 
 No normality assumption is needed; the null distribution is generated **from the data itself**.
 
-## Permutation Test for Correlation in R
+### Implementation in R
 
 ```{r}
+#| label: perm-cor
 perm_cor_test <- function(x, y, N = 2000) {
   robs <- cor(x, y)
   rperm <- replicate(N, cor(x, sample(y)))
@@ -447,9 +459,35 @@ abline(v = c(-1, 1) * abs(out$rho), col = 2, lwd = 2)
 c(rho_obs = out$rho, perm_pv = out$pv, pearson_pv = cor.test(x, y)$p.value)
 ```
 
-## Example: Testing a Regression With Variable Selection
+### Evaluation Under $H_0$
 
-**Setting.** Response $Y$ and $p = 20$ candidate predictors $X_1, \ldots, X_{20}$, $n = 50$. We want to test $H_0$: $Y$ is unrelated to **all** of the $X$'s.
+Generate independent non-normal $X$ and $Y$, and test whether the permutation p-values are uniform and the size is $\alpha$; the Pearson $t$-test p-value is included for comparison.
+
+```{r}
+#| label: perm-cor-h0
+#| cache: true
+#| code-fold: true
+sim_cor_h0 <- function(n = 30) list(x = rexp(n), y = rexp(n))   # independent
+res <- replicate(500, {
+  d <- sim_cor_h0()
+  c(perm = perm_cor_test(d$x, d$y, N = 500)$pv,
+    pearson = cor.test(d$x, d$y)$p.value)
+})
+par(mfrow = c(1, 2))
+hist(res["perm", ], breaks = 20, main = "permutation p-values under H0", xlab = "p-value")
+hist(res["pearson", ], breaks = 20, main = "Pearson p-values under H0", xlab = "p-value")
+c(size_perm = mean(res["perm", ] < 0.05), size_pearson = mean(res["pearson", ] < 0.05))
+```
+
+The permutation p-values are uniform on $[0,1]$ and the size is close to 0.05, with no distributional assumption on $(X, Y)$.
+
+
+
+## Example 2: Testing a Regression With Variable Selection
+
+### Setting
+
+Response $Y$ and $p = 20$ candidate predictors $X_1, \ldots, X_{20}$, $n = 50$. We want to test $H_0$: $Y$ is unrelated to **all** of the $X$'s.
 
 A common practice:
 
@@ -458,10 +496,11 @@ A common practice:
 
 **Question.** Is this a valid test of $H_0$? Does it have size $\alpha$?
 
-## A Naive (Incorrect) Test
+### A Test With Post-Selection Fitting
 
 ```{r}
-naive_test <- function(y, X) {
+#| label: test-lm-sel
+test_lm_sel <- function(y, X) {
   k <- which.max(abs(cor(X, y)))
   summary(lm(y ~ X[, k]))$coefficients[2, 4]    # t-test p-value of selected slope
 }
@@ -469,52 +508,52 @@ naive_test <- function(y, X) {
 
 The $t$-test p-value assumes $X_{k^*}$ was **chosen in advance**. Selecting the best of 20 predictors *after* looking at the data means that, even under $H_0$, $\max_k |\hat\rho_k|$ tends to be large. The reported p-value ignores this selection.
 
-## Simulation for Evaluating the Naive Test
-
-Generate data under $H_0$ ($Y$ independent of all $X$'s) and check whether the p-values are uniform:
+### Simulation for Evaluating `test_lm_sel`
 
 ```{r}
+#| label: test-lm-sel-h0
 sim_null <- function(n = 50, p = 20) list(y = rnorm(n), X = matrix(rnorm(n * p), n, p))
-pv_naive <- replicate(2000, { d <- sim_null(); naive_test(d$y, d$X) })
-hist(pv_naive, breaks = 20, main = "naive test p-values under H0", xlab = "p-value")
-c(size_at_0.05 = mean(pv_naive < 0.05))
+pv_sel <- replicate(2000, { d <- sim_null(); test_lm_sel(d$y, d$X) })
+hist(pv_sel, breaks = 20, main = "test_lm_sel p-values under H0", xlab = "p-value")
+c(size_at_0.05 = mean(pv_sel < 0.05))
 ```
 
-The true size is far above 0.05: the naive test rejects a true $H_0$ far too often. Note that under $H_0$ the naive p-value is **not** uniform, which is a general diagnostic for an invalid test.
+The true size is far above 0.05: `test_lm_sel` rejects a true $H_0$ far too often. Under $H_0$ its p-value is **not** uniform, which is a general diagnostic for an invalid test.
 
-## Permutation Test (Full Procedure)
+### Permutation Test for Regression With a Selected Variable
 
-Fix: treat the **entire procedure** — selection plus fitting — as the test statistic, and obtain its null distribution by permuting $Y$.
+Fix: repeat the **whole procedure** — select the most correlated variable, fit the linear model, report its p-value — on permuted responses, and compare the observed p-value with the permutation distribution of p-values.
 
-$$T(Y, X) = \max_k |\hat\rho(X_k, Y)|$$
-
-1. Compute $T^{obs} = T(Y, X)$.
-2. For $j = 1, \ldots, N$: permute $Y$, compute $T^{(j)} = T(Y^{(j)}, X)$ (**re-doing the selection** each time).
-3. $\widehat{pv} = \dfrac{1 + \#\{j : T^{(j)} \ge T^{obs}\}}{N+1}$.
+1. Compute $p^{obs}$ = p-value of `test_lm_sel` on $(Y, X)$.
+2. For $j = 1, \ldots, N$: permute $Y$, compute $p^{(j)}$ = p-value of `test_lm_sel` on $(Y^{(j)}, X)$ (**re-doing the selection** each time).
+3. $\widehat{pv} = \dfrac{1 + \#\{j : p^{(j)} \le p^{obs}\}}{N+1}$, the proportion of permuted p-values at least as small as the observed one.
 
 ```{r}
-perm_test <- function(y, X, N = 500) {
-  Tstat <- function(y) max(abs(cor(X, y)))
-  Tobs <- Tstat(y); Tperm <- replicate(N, Tstat(sample(y)))
-  (1 + sum(Tperm >= Tobs)) / (N + 1)
+#| label: perm-lm-sel
+perm_lm_sel <- function(y, X, N = 500) {
+  pobs <- test_lm_sel(y, X)
+  pperm <- replicate(N, test_lm_sel(sample(y), X))
+  (1 + sum(pperm <= pobs)) / (N + 1)
 }
 ```
 
-## Size and Power of the Permutation Test
+### Size and Power of the Permutation Test
 
 ```{r}
+#| label: perm-lm-sel-size-power
 #| cache: true
 sim_alt <- function(n = 50, p = 20, beta = 0.5) {
   X <- matrix(rnorm(n * p), n, p); list(y = beta * X[, 1] + rnorm(n), X = X)
 }
-pv_perm0 <- replicate(300, { d <- sim_null(); perm_test(d$y, d$X) })
-pv_perm1 <- replicate(300, { d <- sim_alt();  perm_test(d$y, d$X) })
-pv_naive1 <- replicate(300, { d <- sim_alt(); naive_test(d$y, d$X) })
-rbind(naive = c(size = mean(pv_naive < 0.05), power = mean(pv_naive1 < 0.05)),
+pv_perm0 <- replicate(300, { d <- sim_null(); perm_lm_sel(d$y, d$X) })
+pv_perm1 <- replicate(300, { d <- sim_alt();  perm_lm_sel(d$y, d$X) })
+pv_sel1  <- replicate(300, { d <- sim_alt();  test_lm_sel(d$y, d$X) })
+hist(pv_perm0, breaks = 20, main = "perm_lm_sel p-values under H0", xlab = "p-value")
+rbind(test_lm_sel = c(size = mean(pv_sel < 0.05),   power = mean(pv_sel1 < 0.05)),
       permutation = c(size = mean(pv_perm0 < 0.05), power = mean(pv_perm1 < 0.05)))
 ```
 
-- The permutation test has the correct size; its power is honest, whereas the naive test's "power" is inflated by its false positives.
+- Under $H_0$ the permutation p-values are uniform and the size is close to 0.05; the power is honest, whereas the "power" of `test_lm_sel` is inflated by its false positives.
 - Power comparisons are only meaningful **between tests of the same size**.
 
 ## Summary
