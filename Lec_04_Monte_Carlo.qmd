@@ -29,6 +29,7 @@ $$x_{i+1} = (a\,x_i + c) \bmod m, \qquad u_{i+1} = x_{i+1}/m$$
 - R's default is the Mersenne Twister (period $2^{19937}-1$). All other distributions in R are built from $\mathrm{Unif}(0,1)$ draws.
 
 ```{r}
+#| code-fold: true
 lcg <- function(n, seed, a = 1103515245, c = 12345, m = 2^31) {
   x <- numeric(n); x[1] <- seed
   for (i in 2:n) x[i] <- (a * x[i - 1] + c) %% m
@@ -176,25 +177,25 @@ c(mean = mean(z), sd = sd(z), corr = cor(z)[1, 2])
 
 # Monte Carlo Integration
 
-## Why Monte Carlo Works: Two Theorems
+## Law of Large Numbers and Central Limit Theorem {.smaller}
 
 Monte Carlo estimates an expectation $\mu = E(g(X))$ by an average of simulated values,
 $$\hat\mu_n = \frac{1}{n}\sum_{i=1}^n g(X_i), \qquad X_i \overset{iid}{\sim} f .$$
 
-**Theorem 5.1.1 (Strong Law of Large Numbers).** If $X_1, X_2, \ldots$ are iid with finite mean $\mu$, then
-$$P\left(\frac{X_1 + \cdots + X_n}{n} \to \mu\right) = 1 . \tag{5.1}$$
+**Theorem (Strong Law of Large Numbers).** If $X_1, X_2, \ldots$ are iid with finite mean $\mu$, then
+$$P\left(\frac{X_1 + \cdots + X_n}{n} \to \mu\right) = 1 . $$
 
 The LLN guarantees that the average **converges** to the truth. It does not say how fast.
 
-**Theorem 5.1.2 (Central Limit Theorem).** If in addition the variance $\sigma^2$ is finite, then
-$$\frac{\bar X - \mu}{\sigma/\sqrt n} \;\xrightarrow{d}\; N(0,1). \tag{5.2}$$
+**Theorem (Central Limit Theorem).** If in addition the variance $\sigma^2$ is finite, then
+$$\frac{\bar X - \mu}{\sigma/\sqrt n} \;\xrightarrow{d}\; N(0,1). $$
 
 The CLT gives the **error bound**: the Monte Carlo error is of order $\sigma/\sqrt n$.
 
 ## Monte Carlo Error Bound from the CLT
 
 From (5.2), with confidence level 95%,
-$$P\!\left(|\bar X - \mu| \le 1.96\,\frac{\sigma}{\sqrt n}\right) \approx 0.95, \tag{5.3}$$
+$$P\!\left(|\bar X - \mu| \le 1.96\,\frac{\sigma}{\sqrt n}\right) \approx 0.95,$$
 so a 95% interval for $\mu$ is
 $$\bar X \pm 1.96\,\frac{\sigma}{\sqrt n}, \qquad \sigma \text{ replaced by the sample SD } s .$$
 
@@ -237,7 +238,7 @@ Define $Z = 4\, I\big((X,Y)\in C\big)$, so $E(Z) = \pi$ and
 $$\mathrm{Var}(Z) = 16 \cdot \frac{\pi}{4}\left(1 - \frac{\pi}{4}\right) \approx 2.70, \qquad \mathrm{SD}(Z) \approx 1.64 .$$
 
 Drawing $(X_i, Y_i)$ and averaging $Z_i$:
-$$\hat\pi_n = \frac{1}{n}\sum_{i=1}^n Z_i = 4 \times \frac{\#\{i: X_i^2 + Y_i^2 \le 1\}}{n}. \tag{5.4}$$
+$$\hat\pi_n = \frac{1}{n}\sum_{i=1}^n Z_i = 4 \times \frac{\#\{i: X_i^2 + Y_i^2 \le 1\}}{n}. $$
 
 ## Visualizing the Method
 
@@ -464,7 +465,7 @@ c(rho_obs = out$rho, perm_pv = out$pv, pearson_pv = cor.test(x, y)$p.value)
 Generate independent non-normal $X$ and $Y$, and test whether the permutation p-values are uniform and the size is $\alpha$; the Pearson $t$-test p-value is included for comparison.
 
 ```{r}
-#| label: perm-cor-h0
+#| label: cal-perm-cor-h0
 #| cache: true
 #| code-fold: true
 sim_cor_h0 <- function(n = 30) list(x = rexp(n), y = rexp(n))   # independent
@@ -473,17 +474,22 @@ res <- replicate(500, {
   c(perm = perm_cor_test(d$x, d$y, N = 500)$pv,
     pearson = cor.test(d$x, d$y)$p.value)
 })
+c(size_perm = mean(res["perm", ] < 0.05), size_pearson = mean(res["pearson", ] < 0.05))
+```
+```{r}
+#| label: perm-cor-h0
+#| cache: true
+#| code-fold: true
 par(mfrow = c(1, 2))
 hist(res["perm", ], breaks = 20, main = "permutation p-values under H0", xlab = "p-value")
 hist(res["pearson", ], breaks = 20, main = "Pearson p-values under H0", xlab = "p-value")
-c(size_perm = mean(res["perm", ] < 0.05), size_pearson = mean(res["pearson", ] < 0.05))
 ```
 
 The permutation p-values are uniform on $[0,1]$ and the size is close to 0.05, with no distributional assumption on $(X, Y)$.
 
 
 
-## Example 2: Testing a Regression With Variable Selection
+## Example 2: Testing for Post-selection Regression
 
 ### Setting
 
@@ -520,7 +526,7 @@ c(size_at_0.05 = mean(pv_sel < 0.05))
 
 The true size is far above 0.05: `test_lm_sel` rejects a true $H_0$ far too often. Under $H_0$ its p-value is **not** uniform, which is a general diagnostic for an invalid test.
 
-### Permutation Test for Regression With a Selected Variable
+### Permutation Test for Post-selection Regression
 
 Fix: repeat the **whole procedure** — select the most correlated variable, fit the linear model, report its p-value — on permuted responses, and compare the observed p-value with the permutation distribution of p-values.
 

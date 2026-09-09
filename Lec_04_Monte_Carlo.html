@@ -242,12 +242,15 @@ Longhai Li
 <li>R’s default is the Mersenne Twister (period <span class="math inline">2^{19937}-1</span>). All other distributions in R are built from <span class="math inline">\mathrm{Unif}(0,1)</span> draws.</li>
 </ul>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>lcg <span class="ot">&lt;-</span> <span class="cf">function</span>(n, seed, <span class="at">a =</span> <span class="dv">1103515245</span>, <span class="at">c =</span> <span class="dv">12345</span>, <span class="at">m =</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">31</span>) {</span>
 <span id="cb3-2"><a href=""></a>  x <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); x[<span class="dv">1</span>] <span class="ot">&lt;-</span> seed</span>
 <span id="cb3-3"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) x[i] <span class="ot">&lt;-</span> (a <span class="sc">*</span> x[i <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> c) <span class="sc">%%</span> m</span>
 <span id="cb3-4"><a href=""></a>  x <span class="sc">/</span> m</span>
 <span id="cb3-5"><a href=""></a>}</span>
 <span id="cb3-6"><a href=""></a><span class="fu">round</span>(<span class="fu">lcg</span>(<span class="dv">5</span>, <span class="at">seed =</span> <span class="dv">812</span>), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.0000 0.2578 0.3720 0.2820 0.1523</code></pre>
 </div>
@@ -388,18 +391,18 @@ Longhai Li
 <h1><span class="header-section-number">2</span> Monte Carlo Integration</h1>
 
 </section>
-<section id="why-monte-carlo-works-two-theorems" class="title-slide slide level2 center">
-<h2>Why Monte Carlo Works: Two Theorems</h2>
+<section id="law-of-large-numbers-and-central-limit-theorem" class="title-slide slide level2 smaller center">
+<h2>Law of Large Numbers and Central Limit Theorem</h2>
 <p>Monte Carlo estimates an expectation <span class="math inline">\mu = E(g(X))</span> by an average of simulated values, <span class="math display">\hat\mu_n = \frac{1}{n}\sum_{i=1}^n g(X_i), \qquad X_i \overset{iid}{\sim} f .</span></p>
-<p><strong>Theorem 5.1.1 (Strong Law of Large Numbers).</strong> If <span class="math inline">X_1, X_2, \ldots</span> are iid with finite mean <span class="math inline">\mu</span>, then <span class="math display">P\left(\frac{X_1 + \cdots + X_n}{n} \to \mu\right) = 1 . \tag{5.1}</span></p>
+<p><strong>Theorem (Strong Law of Large Numbers).</strong> If <span class="math inline">X_1, X_2, \ldots</span> are iid with finite mean <span class="math inline">\mu</span>, then <span class="math display">P\left(\frac{X_1 + \cdots + X_n}{n} \to \mu\right) = 1 . </span></p>
 <p>The LLN guarantees that the average <strong>converges</strong> to the truth. It does not say how fast.</p>
-<p><strong>Theorem 5.1.2 (Central Limit Theorem).</strong> If in addition the variance <span class="math inline">\sigma^2</span> is finite, then <span class="math display">\frac{\bar X - \mu}{\sigma/\sqrt n} \;\xrightarrow{d}\; N(0,1). \tag{5.2}</span></p>
+<p><strong>Theorem (Central Limit Theorem).</strong> If in addition the variance <span class="math inline">\sigma^2</span> is finite, then <span class="math display">\frac{\bar X - \mu}{\sigma/\sqrt n} \;\xrightarrow{d}\; N(0,1). </span></p>
 <p>The CLT gives the <strong>error bound</strong>: the Monte Carlo error is of order <span class="math inline">\sigma/\sqrt n</span>.</p>
 </section>
 
 <section id="monte-carlo-error-bound-from-the-clt" class="title-slide slide level2 center">
 <h2>Monte Carlo Error Bound from the CLT</h2>
-<p>From (5.2), with confidence level 95%, <span class="math display">P\!\left(|\bar X - \mu| \le 1.96\,\frac{\sigma}{\sqrt n}\right) \approx 0.95, \tag{5.3}</span> so a 95% interval for <span class="math inline">\mu</span> is <span class="math display">\bar X \pm 1.96\,\frac{\sigma}{\sqrt n}, \qquad \sigma \text{ replaced by the sample SD } s .</span></p>
+<p>From (5.2), with confidence level 95%, <span class="math display">P\!\left(|\bar X - \mu| \le 1.96\,\frac{\sigma}{\sqrt n}\right) \approx 0.95,</span> so a 95% interval for <span class="math inline">\mu</span> is <span class="math display">\bar X \pm 1.96\,\frac{\sigma}{\sqrt n}, \qquad \sigma \text{ replaced by the sample SD } s .</span></p>
 <ul>
 <li>Halving the error requires <strong>four times</strong> as many samples; each extra decimal digit of accuracy costs a <strong>100-fold</strong> increase in <span class="math inline">n</span>.</li>
 <li>The rate <span class="math inline">n^{-1/2}</span> does not depend on the dimension of <span class="math inline">X</span>, which is why Monte Carlo beats numerical quadrature in high dimensions.</li>
@@ -438,7 +441,7 @@ Longhai Li
 <h2>An Example: Estimating <span class="math inline">\pi</span> by Monte Carlo</h2>
 <p>Let <span class="math inline">(X, Y)</span> be uniform on the square <span class="math inline">S = (-1,1)\times(-1,1)</span>, and let <span class="math inline">C = \{(x,y): x^2 + y^2 \le 1\}</span> be the unit disk. Then <span class="math display">P\big((X,Y) \in C\big) = \frac{\text{area}(C)}{\text{area}(S)} = \frac{\pi}{4}.</span></p>
 <p>Define <span class="math inline">Z = 4\, I\big((X,Y)\in C\big)</span>, so <span class="math inline">E(Z) = \pi</span> and <span class="math display">\mathrm{Var}(Z) = 16 \cdot \frac{\pi}{4}\left(1 - \frac{\pi}{4}\right) \approx 2.70, \qquad \mathrm{SD}(Z) \approx 1.64 .</span></p>
-<p>Drawing <span class="math inline">(X_i, Y_i)</span> and averaging <span class="math inline">Z_i</span>: <span class="math display">\hat\pi_n = \frac{1}{n}\sum_{i=1}^n Z_i = 4 \times \frac{\#\{i: X_i^2 + Y_i^2 \le 1\}}{n}. \tag{5.4}</span></p>
+<p>Drawing <span class="math inline">(X_i, Y_i)</span> and averaging <span class="math inline">Z_i</span>: <span class="math display">\hat\pi_n = \frac{1}{n}\sum_{i=1}^n Z_i = 4 \times \frac{\#\{i: X_i^2 + Y_i^2 \le 1\}}{n}. </span></p>
 </section>
 
 <section id="visualizing-the-method" class="title-slide slide level2 center">
@@ -742,25 +745,27 @@ P\big(pv(T) &lt; t\big) &amp;= P\big(1 - F_{H_0}(T) &lt; t\big) = P\big(F_{H_0}(
 <span id="cb42-4"><a href=""></a>  <span class="fu">c</span>(<span class="at">perm =</span> <span class="fu">perm_cor_test</span>(d<span class="sc">$</span>x, d<span class="sc">$</span>y, <span class="at">N =</span> <span class="dv">500</span>)<span class="sc">$</span>pv,</span>
 <span id="cb42-5"><a href=""></a>    <span class="at">pearson =</span> <span class="fu">cor.test</span>(d<span class="sc">$</span>x, d<span class="sc">$</span>y)<span class="sc">$</span>p.value)</span>
 <span id="cb42-6"><a href=""></a>})</span>
-<span id="cb42-7"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb42-8"><a href=""></a><span class="fu">hist</span>(res[<span class="st">"perm"</span>, ], <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"permutation p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span>
-<span id="cb42-9"><a href=""></a><span class="fu">hist</span>(res[<span class="st">"pearson"</span>, ], <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"Pearson p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a><span class="fu">c</span>(<span class="at">size_perm =</span> <span class="fu">mean</span>(res[<span class="st">"perm"</span>, ] <span class="sc">&lt;</span> <span class="fl">0.05</span>), <span class="at">size_pearson =</span> <span class="fu">mean</span>(res[<span class="st">"pearson"</span>, ] <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb42-7"><a href=""></a><span class="fu">c</span>(<span class="at">size_perm =</span> <span class="fu">mean</span>(res[<span class="st">"perm"</span>, ] <span class="sc">&lt;</span> <span class="fl">0.05</span>), <span class="at">size_pearson =</span> <span class="fu">mean</span>(res[<span class="st">"pearson"</span>, ] <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   size_perm size_pearson 
        0.054        0.052 </code></pre>
 </div>
 </div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb44-2"><a href=""></a><span class="fu">hist</span>(res[<span class="st">"perm"</span>, ], <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"permutation p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span>
+<span id="cb44-3"><a href=""></a><span class="fu">hist</span>(res[<span class="st">"pearson"</span>, ], <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"Pearson p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+
+</div>
 <img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/perm-cor-h0-1.png" width="672" class="r-stretch"><p>The permutation p-values are uniform on <span class="math inline">[0,1]</span> and the size is close to 0.05, with no distributional assumption on <span class="math inline">(X, Y)</span>.</p>
 </section>
 
-<section id="example-2-testing-a-regression-with-variable-selection" class="title-slide slide level2 center">
-<h2>Example 2: Testing a Regression With Variable Selection</h2>
+<section id="example-2-testing-for-post-selection-regression" class="title-slide slide level2 center">
+<h2>Example 2: Testing for Post-selection Regression</h2>
 
 </section>
 <section id="setting" class="slide level3">
@@ -798,8 +803,8 @@ P\big(pv(T) &lt; t\big) &amp;= P\big(1 - F_{H_0}(T) &lt; t\big) = P\big(F_{H_0}(
 </div>
 <img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/test-lm-sel-h0-1.png" width="672" class="r-stretch"><p>The true size is far above 0.05: <code>test_lm_sel</code> rejects a true <span class="math inline">H_0</span> far too often. Under <span class="math inline">H_0</span> its p-value is <strong>not</strong> uniform, which is a general diagnostic for an invalid test.</p>
 </section>
-<section id="permutation-test-for-regression-with-a-selected-variable" class="slide level3">
-<h3>Permutation Test for Regression With a Selected Variable</h3>
+<section id="permutation-test-for-post-selection-regression" class="slide level3">
+<h3>Permutation Test for Post-selection Regression</h3>
 <p>Fix: repeat the <strong>whole procedure</strong> — select the most correlated variable, fit the linear model, report its p-value — on permuted responses, and compare the observed p-value with the permutation distribution of p-values.</p>
 <ol type="1">
 <li>Compute <span class="math inline">p^{obs}</span> = p-value of <code>test_lm_sel</code> on <span class="math inline">(Y, X)</span>.</li>

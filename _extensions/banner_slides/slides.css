@@ -106,6 +106,12 @@
    ## slides (level2, including empty section breaks) get the blue frame
    with a banner; ### slides (level3) get a green frame and a plain heading. */
 
+/* Fix framed slides to the full slide height so the frame does not vary */
+.reveal .slides section:not(#title-slide):not(.quarto-title-block):not(.level1):not(:has(section)) {
+  height: 100%;
+  box-sizing: border-box;
+}   
+
 /* 5a. Frame (painted OUTSIDE via ::before) — default colour for ## slides */
 .reveal .slides section:not(#title-slide):not(.quarto-title-block):not(.level1):not(:has(section))::before {
   content: "";
@@ -139,6 +145,29 @@
   box-sizing: border-box !important;
   position: relative;
   z-index: 1;
+}
+
+/* 5c'. Empty ## slides (section breaks): frame kept, banner moved to the
+   vertical middle as a full-width band with centred text */
+.reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):has(> h2:only-child) > h2 {
+  position: absolute !important;
+  top: 50% !important;
+  left: -30px !important;
+  width: calc(100% + 60px) !important;
+  transform: translateY(-50%);
+  margin: 0 !important;
+  padding: 25px 30px !important;
+  border-radius: 0 !important;
+  text-align: center !important;
+}
+
+/* Toggle-off state for the same slides */
+body.hide-debug .reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):has(> h2:only-child) > h2 {
+  left: 0 !important;
+  width: 100% !important;
+  background-color: transparent !important;
+  color: var(--frame-outline-color) !important;
+  padding: 0 !important;
 }
 
 /* 5d. ### slides: no banner; heading in the frame colour with an underline */
