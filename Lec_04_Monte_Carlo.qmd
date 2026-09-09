@@ -1,6 +1,7 @@
 ---
 subtitle: "Random Numbers and Elementary Monte Carlo"
 author: "Longhai Li"
+date: last-modified
 format: 
   banner_slides-revealjs:
     slide-level: 3
