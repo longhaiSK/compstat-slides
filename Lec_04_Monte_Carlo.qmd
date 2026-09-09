@@ -240,7 +240,7 @@ $$\mathrm{Var}(Z) = 16 \cdot \frac{\pi}{4}\left(1 - \frac{\pi}{4}\right) \approx
 Drawing $(X_i, Y_i)$ and averaging $Z_i$:
 $$\hat\pi_n = \frac{1}{n}\sum_{i=1}^n Z_i = 4 \times \frac{\#\{i: X_i^2 + Y_i^2 \le 1\}}{n}. $$
 
-## Visualizing the Method
+## Visualizing the Method 
 
 ```{r}
 n <- 2000; x <- runif(n, -1, 1); y <- runif(n, -1, 1); inside <- x^2 + y^2 <= 1
