@@ -685,6 +685,16 @@ sqrt(diag(solve(fits$BFGS$hessian)))     # SEs from the numerically computed Hes
 
 `optim(..., hessian = TRUE)` returns a finite-difference Hessian at the solution, so standard errors are available even for gradient-only methods.
 
+## Animation for Various Optimization Methods
+
+
+[An overview](https://scipy-lectures.org/advanced/mathematical_optimization/index.html#knowing-your-problem)
+
+
+[Nelder-Mead Method (A Gradient-Free Method)](https://codesachin.wordpress.com/2016/01/16/nelder-mead-optimization/)
+
+[Gradient Descent Methods (Hessian-Free Methods)](https://www.benfrederickson.com/numerical-optimization/)
+
 # Stochastic Gradient Descent
 
 ## Motivation: Large $n$
