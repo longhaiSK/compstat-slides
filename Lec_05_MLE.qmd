@@ -1439,128 +1439,178 @@ A noisy but cheap gradient estimate is enough to make progress — a Monte Carlo
 
 ```{shinylive-r}
 #| standalone: true
-#| viewerHeight: 860
+#| viewerHeight: 900
 
 library(shiny)
 
+## -------------------------------------------------------------------
 ## ------------------------------------------------------------------- data
-sim_data <- function(n, sigma, seed = 1) {
+## True DGP is itself a 1 - 3 tanh - 1 network ("teacher"), so a student
+## network with H >= 3 can represent it exactly.
+TEACH <- list(w = c(4, 3, 5), cc = c(4, 0, -5), v = c(1.0, -1.2, 0.8), b = 0)
+
+gtrue <- function(x) {
+  Hm <- tanh(outer(x, TEACH$w) + rep(TEACH$cc, each = length(x)))
+  as.vector(Hm %*% TEACH$v + TEACH$b)
+}
+
+XG <- seq(-2, 2, length.out = 300)
+
+make_data <- function(n, sigma, seed) {
+  set.seed(500 + seed)
+  x <- sort(runif(n, -2, 2))
+  list(x = x, y = gtrue(x) + rnorm(n, 0, sigma), n = n)
+}
+
+## ------------------------------------------------- network: 1 - H tanh - 1
+unpack <- function(p, H)
+  list(w = p[1:H], cc = p[H + (1:H)], v = p[2 * H + (1:H)], b = p[3 * H + 1])
+
+fnet <- function(p, x, H) {
+  P <- unpack(p, H)
+  Hm <- tanh(outer(x, P$w) + rep(P$cc, each = length(x)))
+  as.vector(Hm %*% P$v + P$b)
+}
+
+gnet <- function(p, x, y, H) {
+  n <- length(x); P <- unpack(p, H)
+  Hm <- tanh(outer(x, P$w) + rep(P$cc, each = n))
+  r <- as.vector(Hm %*% P$v + P$b) - y
+  S <- (1 - Hm^2) * outer(r, P$v)
+  c(as.vector(colSums(S * x)) / n,        # dw
+    as.vector(colSums(S)) / n,            # dc
+    as.vector(crossprod(Hm, r)) / n,      # dv
+    mean(r))                              # db
+}
+
+mse <- function(p, H, x, y) 0.5 * mean((fnet(p, x, H) - y)^2)
+
+init_p <- function(H, seed) {
+  set.seed(1000 + seed)
+  c(rnorm(H, 0, 2), rnorm(H, 0, 1.5), rnorm(H, 0, 0.7), 0)
+}
+
+## ---------------------------------------------------------------- training
+## B = number of batches per epoch; B = 1 is full-batch gradient descent.
+train <- function(p0, H, B, a, nepoch, seed, D) {
+  n <- D$n
+  nup <- B * nepoch
+  P <- matrix(NA_real_, nup + 1, length(p0))
+  L <- rep(NA_real_, nup + 1); EP <- rep(NA_real_, nup + 1)
+  IDX <- vector("list", nup + 1)
   set.seed(seed)
-  x <- runif(n, 1, 3)                       # not centred: b0 and b1 correlate
-  y <- 1 + 2 * x + rnorm(n, 0, sigma)
-  list(x = x, y = y, n = n)
-}
-
-suff <- function(D)
-  list(n = D$n, Sx = sum(D$x), Sy = sum(D$y), Sxx = sum(D$x^2),
-       Sxy = sum(D$x * D$y), Syy = sum(D$y^2))
-
-## full-sample loss F(b) = sum of squares / (2n), evaluated on a grid
-loss_grid <- function(S, b0s, b1s)
-  outer(b0s, b1s, function(a, b)
-    (S$Syy - 2 * a * S$Sy - 2 * b * S$Sxy + S$n * a^2 +
-     2 * a * b * S$Sx + b^2 * S$Sxx) / (2 * S$n))
-
-loss_full <- function(S, b)
-  (S$Syy - 2 * b[1] * S$Sy - 2 * b[2] * S$Sxy + S$n * b[1]^2 +
-   2 * b[1] * b[2] * S$Sx + b[2]^2 * S$Sxx) / (2 * S$n)
-
-grad_sub <- function(D, b, idx) {                 # gradient on a subset
-  x <- D$x[idx]; y <- D$y[idx]
-  r <- y - b[1] - b[2] * x
-  -c(mean(r), mean(x * r))
-}
-
-## -------------------------------------------------------------------- SGD
-run_sgd <- function(D, b0, m, a0, decay, niter, seed) {
-  S <- suff(D); set.seed(seed)
-  B <- matrix(NA_real_, niter + 1, 2)
-  GB <- matrix(NA_real_, niter + 1, 2)             # minibatch gradient
-  GF <- matrix(NA_real_, niter + 1, 2)             # full gradient
-  AL <- rep(NA_real_, niter + 1); FL <- rep(NA_real_, niter + 1)
-  IDX <- vector("list", niter + 1)
-  b <- b0
-  for (k in seq_len(niter + 1)) {
-    idx <- sample.int(D$n, m)
-    B[k, ] <- b; IDX[[k]] <- idx
-    GB[k, ] <- grad_sub(D, b, idx)
-    GF[k, ] <- grad_sub(D, b, seq_len(D$n))
-    FL[k] <- loss_full(S, b)
-    if (k > niter) break
-    a <- if (decay) a0 / (1 + (k - 1) / 20) else a0
-    AL[k] <- a
-    b <- b - a * GB[k, ]
-    if (any(!is.finite(b))) { B <- B[1:k, , drop = FALSE]; break }
+  p <- p0; k <- 0; bad <- FALSE
+  for (e in seq_len(nepoch)) {
+    perm <- if (B == 1) seq_len(n) else sample.int(n)
+    grp <- split(perm, rep_len(seq_len(B), n))       # nearly equal sizes
+    for (b in seq_len(B)) {
+      k <- k + 1
+      idx <- grp[[b]]
+      P[k, ] <- p; IDX[[k]] <- idx
+      L[k] <- mse(p, H, D$x, D$y); EP[k] <- (k - 1) / B
+      p <- p - a * gnet(p, D$x[idx], D$y[idx], H)
+      if (any(!is.finite(p))) { bad <- TRUE; break }
+    }
+    if (bad) break
   }
-  n <- sum(is.finite(B[, 1]))
-  list(B = B[1:n, , drop = FALSE], GB = GB[1:n, , drop = FALSE],
-       GF = GF[1:n, , drop = FALSE], A = AL[1:n], FL = FL[1:n],
-       IDX = IDX[1:n], n = n)
-}
-
-run_gd <- function(D, b0, a0, niter) {             # full-batch reference
-  S <- suff(D); b <- b0
-  B <- matrix(NA_real_, niter + 1, 2); FL <- rep(NA_real_, niter + 1)
-  for (k in seq_len(niter + 1)) {
-    B[k, ] <- b; FL[k] <- loss_full(S, b)
-    if (k > niter) break
-    b <- b - a0 * grad_sub(D, b, seq_len(D$n))
-    if (any(!is.finite(b))) break
+  if (!bad) {
+    k <- k + 1
+    P[k, ] <- p; IDX[[k]] <- seq_len(n)
+    L[k] <- mse(p, H, D$x, D$y); EP[k] <- (k - 1) / B
   }
-  n <- sum(is.finite(B[, 1]))
-  list(B = B[1:n, , drop = FALSE], FL = FL[1:n], n = n)
+  n_rec <- max(1, k)
+  list(P = P[1:n_rec, , drop = FALSE], L = L[1:n_rec], EP = EP[1:n_rec],
+       IDX = IDX[1:n_rec], n = n_rec, B = B, diverged = bad)
 }
 
-expand_box <- function(xlim, ylim, pin) {
-  if (length(pin) != 2 || any(!is.finite(pin)) || any(pin <= 0))
-    return(list(xlim = xlim, ylim = ylim))
-  rr <- pin[1] / pin[2]; wd <- diff(xlim); ht <- diff(ylim)
-  if (wd / ht < rr) { w <- ht * rr; m <- mean(xlim); xlim <- m + c(-.5, .5) * w }
-  else { h <- wd / rr; m <- mean(ylim); ylim <- m + c(-.5, .5) * h }
-  list(xlim = xlim, ylim = ylim)
-}
+## ------------------------------------------------------------ weight plot
+HOT <- colorRampPalette(c("#f0f0f0", "#ffe08a", "#ffa73c",
+                          "#ef4a15", "#7f0000"))(100)
+wcol <- function(v, wmax)
+  HOT[pmax(1, pmin(100, ceiling(abs(v) / wmax * 100)))]
 
-BOX <- list(b0 = c(-4, 6), b1 = c(-1, 5))
-START <- c(-3, 4.5)
+draw_net <- function(p, H, wmax, main) {
+  P <- unpack(p, H)
+  yh <- if (H == 1) 0.5 else seq(0.92, 0.10, length.out = H)
+  ix <- 0.05; hx <- 0.55; ox <- 1.05
+  nc <- max(1.2, min(4.2, 34 / H))                   # node size shrinks with H
+  plot.new(); plot.window(c(-0.05, 1.2), c(-0.08, 1.02))
+  title(main = main, cex.main = 1.05)
+  lw <- function(v) 0.7 + 4.5 * abs(v) / wmax
+  for (j in 1:H)
+    segments(ix, 0.5, hx, yh[j], col = wcol(P$w[j], wmax),
+             lwd = lw(P$w[j]), lty = if (P$w[j] < 0) 2 else 1)
+  for (j in 1:H)
+    segments(hx, yh[j], ox, 0.5, col = wcol(P$v[j], wmax),
+             lwd = lw(P$v[j]), lty = if (P$v[j] < 0) 2 else 1)
+  points(ix, 0.5, pch = 21, cex = 3.2, bg = "white", lwd = 2)
+  text(ix, 0.5, "x", font = 2)
+  points(rep(hx, H), yh, pch = 21, cex = nc, lwd = 1.6, bg = wcol(P$cc, wmax))
+  if (H <= 8) text(rep(hx, H), yh, paste0("h", 1:H), cex = 0.7)
+  points(ox, 0.5, pch = 21, cex = 3.4, lwd = 2, bg = wcol(P$b, wmax))
+  text(ox, 0.5, "y", font = 2)
+  xs <- seq(0.15, 0.95, length.out = 100)
+  rect(xs, -0.07, xs + diff(xs)[1], -0.02, col = HOT, border = NA)
+  text(0.15, 0.005, "0", cex = 0.75)
+  text(0.95, 0.005, formatC(wmax, format = "g", digits = 3), cex = 0.75)
+  text(0.55, 0.005, "|weight|", cex = 0.75)
+}
 
 ## --------------------------------------------------------------------- UI
 ui <- fluidPage(
   fluidRow(
+    ## ---- column 1: training controls -----------------------------------
     column(
       3,
-      sliderInput("m", "Minibatch size m", min = 1, max = 100, value = 5,
+      sliderInput("H", "Hidden neurons", min = 2, max = 16, value = 8,
                   step = 1),
-      sliderInput("a0", "Learning rate", min = 0.005, max = 0.30,
-                  value = 0.06, step = 0.005),
-      checkboxInput("decay", "Decaying rate a0 / (1 + k/20)", FALSE),
-      sliderInput("k", "Iteration k", min = 0, max = 1, value = 0, step = 1),
-      checkboxInput("showpath", "Keep the whole path", TRUE),
-      checkboxInput("showgd", "Overlay full-batch gradient descent", TRUE),
+      sliderInput("B", "Number of batches B per epoch", min = 1, max = 40,
+                  value = 10, step = 1),
+      sliderInput("a", "Learning rate", min = 0.01, max = 0.60, value = 0.20,
+                  step = 0.01),
+      sliderInput("nep", "Epochs", min = 10, max = 300, value = 100, step = 10),
+      sliderInput("k", "Update k", min = 0, max = 1, value = 0, step = 1),
+      checkboxInput("showgd", "Overlay the B = 1 run", TRUE),
       htmlOutput("info")
     ),
+    ## ---- column 2: data generation, then playback ----------------------
     column(
       2,
       div(
-        style = "margin-top:26px;",
+        style = "margin-top:10px;",
+        tags$h5(tags$b("Data")),
+        sliderInput("n", "Sample size n", min = 40, max = 400, value = 200,
+                    step = 20),
+        sliderInput("sigma", "Noise SD", min = 0.01, max = 0.40, value = 0.08,
+                    step = 0.01),
+        actionButton("newdata", "Regenerate a dataset",
+                     class = "btn-warning",
+                     style = "width:100%; margin-bottom:6px;"),
+
+        hr(style = "border-top:2px solid #999; margin:14px 0;"),
+
+        tags$h5(tags$b("Training")),
         actionButton("play", "Play", class = "btn-primary btn-lg",
                      style = "width:100%; margin-bottom:10px;"),
         actionButton("step", "Next", class = "btn-lg",
                      style = "width:100%; margin-bottom:10px;"),
         actionButton("back", "Prev", class = "btn-lg",
                      style = "width:100%;"),
-        hr(),
+        checkboxInput("byepoch", "Advance a whole epoch", TRUE),
         checkboxInput("autoplay", "Autoplay on change", FALSE),
-        actionButton("reset", "Reset initial",
+        actionButton("newinit", "New initial weights",
                      style = "width:100%; margin-bottom:8px;"),
-        actionButton("newseed", "New sample path",
+        actionButton("newseed", "New batch sequence",
                      style = "width:100%; margin-bottom:8px;"),
-        helpText("Click inside the contour plot to choose a new initial value.")
+        helpText("Both runs share the data, the initial weights and the",
+                 "number of epochs; only B differs.")
       )
     ),
+    ## ---- column 3: plots -----------------------------------------------
     column(
       7,
-      plotOutput("contour", click = "click", height = "520px"),
-      plotOutput("side", height = "210px")
+      plotOutput("nets", height = "300px"),
+      plotOutput("fit", height = "340px")
     )
   )
 )
@@ -1568,159 +1618,138 @@ ui <- fluidPage(
 ## ----------------------------------------------------------------- server
 server <- function(input, output, session) {
 
-  D <- sim_data(n = 200, sigma = 1, seed = 11)
-  S <- suff(D)
-  bhat <- solve(matrix(c(S$n, S$Sx, S$Sx, S$Sxx), 2, 2), c(S$Sy, S$Sxy))
-  Fmin <- loss_full(S, bhat)
-
-  start <- reactiveVal(START)
-  seed <- reactiveVal(1)
+  MAXUP <- 4000
+  dseed <- reactiveVal(1); wseed <- reactiveVal(1); bseed <- reactiveVal(1)
   playing <- reactiveVal(FALSE)
-  NIT <- 120
 
-  observeEvent(input$reset, start(START))
-  observeEvent(input$newseed, seed(seed() + 1))
-  observeEvent(input$click, {
-    p <- c(input$click$x, input$click$y)
-    if (all(is.finite(p))) start(p)
+  observeEvent(input$newdata, dseed(dseed() + 1))
+  observeEvent(input$newinit, wseed(wseed() + 1))
+  observeEvent(input$newseed, bseed(bseed() + 1))
+
+  DAT <- reactive(make_data(input$n, input$sigma, dseed()))
+
+  runs <- reactive({
+    D <- DAT(); H <- input$H; B <- as.integer(input$B)
+    ne <- max(1, min(input$nep, floor(MAXUP / B)))
+    p0 <- init_p(H, wseed())
+    S <- train(p0, H, B, input$a, ne, bseed(), D)
+    G <- train(p0, H, 1L, input$a, ne, bseed(), D)
+    list(S = S, G = G, H = H, B = B, D = D, ne = ne,
+         capped = ne < input$nep,
+         wmax = max(1e-6, max(abs(S$P), na.rm = TRUE),
+                    max(abs(G$P), na.rm = TRUE)))
   })
 
-  path <- reactive({
-    req(start())
-    run_sgd(D, start(), input$m, input$a0, isTRUE(input$decay), NIT, seed())
-  })
-  gpath <- reactive(run_gd(D, start(), input$a0, NIT))
+  stride <- reactive(if (isTRUE(input$byepoch)) as.integer(input$B) else 1L)
 
-  observeEvent(path(), {
-    updateSliderInput(session, "k", max = max(1, path()$n - 1), value = 0)
-    playing(isTRUE(input$autoplay) && path()$n > 1)
+  observeEvent(runs(), {
+    updateSliderInput(session, "k", max = max(1, runs()$S$n - 1), value = 0)
+    playing(isTRUE(input$autoplay) && runs()$S$n > 1)
   })
 
   observeEvent(input$play, {
     if (isTRUE(playing())) playing(FALSE)
     else {
-      if (as.integer(input$k) >= path()$n - 1)
+      if (as.integer(input$k) >= runs()$S$n - 1)
         updateSliderInput(session, "k", value = 0)
       playing(TRUE)
     }
   })
-
   observeEvent(playing(), {
     updateActionButton(session, "play",
                        label = if (isTRUE(playing())) "Pause" else "Play")
   })
-
   observe({
     if (!isTRUE(playing())) return()
-    kmax <- isolate(path()$n) - 1
-    k <- isolate(as.integer(input$k))
+    kmax <- isolate(runs()$S$n) - 1
+    k <- isolate(as.integer(input$k)); st <- isolate(stride())
     if (k >= kmax) { playing(FALSE); return() }
-    invalidateLater(350, session)
-    updateSliderInput(session, "k", value = k + 1)
+    invalidateLater(250, session)
+    updateSliderInput(session, "k", value = min(k + st, kmax))
   })
-
   observeEvent(input$step, {
     playing(FALSE)
     updateSliderInput(session, "k",
-                      value = min(as.integer(input$k) + 1, max(0, path()$n - 1)))
+                      value = min(as.integer(input$k) + stride(),
+                                  max(0, runs()$S$n - 1)))
   })
   observeEvent(input$back, {
     playing(FALSE)
-    updateSliderInput(session, "k", value = max(as.integer(input$k) - 1, 0))
+    updateSliderInput(session, "k",
+                      value = max(as.integer(input$k) - stride(), 0))
   })
 
-  output$contour <- renderPlot({
-    P <- path(); k <- min(as.integer(input$k), P$n - 1) + 1L
-
-    par(mar = c(4, 4, 2.5, 1))
-    plot.new()
-    bx <- expand_box(BOX$b0, BOX$b1, par("pin"))
-    plot.window(xlim = bx$xlim, ylim = bx$ylim, xaxs = "i", yaxs = "i")
-
-    b0s <- seq(bx$xlim[1], bx$xlim[2], length.out = 200)
-    b1s <- seq(bx$ylim[1], bx$ylim[2], length.out = 200)
-    z <- loss_grid(S, b0s, b1s)
-    lv <- unique(quantile(z, probs = seq(0, 1, length.out = 30)^1.7))
-    zr <- matrix(rank(z, ties.method = "average"), nrow = length(b0s))
-    image(b0s, b1s, zr, add = TRUE,
-          col = colorRampPalette(c("#f7fbff", "#9ec4e3"))(128))
-    contour(b0s, b1s, z, levels = lv, add = TRUE, col = "grey45",
-            drawlabels = FALSE)
-    axis(1); axis(2); box()
-    title(main = paste0("SGD on least squares:  m = ", input$m,
-                        ",  rate = ", format(P$A[min(k, P$n - 1)], digits = 3)),
-          xlab = expression(b[0]), ylab = expression(b[1]))
-    points(bhat[1], bhat[2], pch = 8, col = "red", cex = 1.4, lwd = 2)
-
-    if (isTRUE(input$showgd)) {
-      G <- gpath(); kg <- min(k, G$n)
-      lines(G$B[1:kg, 1], G$B[1:kg, 2], col = "#7B3FBF", lwd = 2)
-    }
-    if (isTRUE(input$showpath) && k > 1)
-      lines(P$B[1:k, 1], P$B[1:k, 2], col = "grey25", lty = 1)
-    points(P$B[1:k, 1], P$B[1:k, 2], pch = 20, col = "grey40", cex = 0.7)
-
-    bk <- P$B[k, ]; gf <- P$GF[k, ]; gb <- P$GB[k, ]
-    L <- 0.10 * diff(bx$xlim)
-    if (sqrt(sum(gf^2)) > 0) {
-      u <- -gf / sqrt(sum(gf^2))
-      arrows(bk[1], bk[2], bk[1] + L * u[1], bk[2] + L * u[2],
-             col = "grey35", lwd = 3, length = 0.10)
-    }
-    if (sqrt(sum(gb^2)) > 0) {
-      u <- -gb / sqrt(sum(gb^2))
-      arrows(bk[1], bk[2], bk[1] + L * u[1], bk[2] + L * u[2],
-             col = "#E8820C", lwd = 3, length = 0.10)
-    }
-    if (k < P$n)
-      arrows(bk[1], bk[2], P$B[k + 1, 1], P$B[k + 1, 2],
-             col = "#2E8B57", lwd = 3, length = 0.12)
-    points(bk[1], bk[2], pch = 19, cex = 1.3)
-
-    legend("topright", cex = 0.85, lwd = 3, bg = "#ffffffcc", box.col = NA,
-           col = c("grey35", "#E8820C", "#2E8B57", "#7B3FBF"),
-           legend = c("full gradient (direction)",
-                      "minibatch gradient (direction)",
-                      "step taken", "full-batch GD path"))
+  cur <- reactive({
+    R <- runs()
+    k <- min(as.integer(input$k), R$S$n - 1) + 1L
+    ep <- R$S$EP[k]
+    kg <- max(1, min(R$G$n, floor(ep) + 1L))
+    list(R = R, k = k, kg = kg, ep = ep)
   })
 
-  output$side <- renderPlot({
-    P <- path(); k <- min(as.integer(input$k), P$n - 1) + 1L
-    par(mfrow = c(1, 2), mar = c(4, 4.2, 2, 1))
+  output$nets <- renderPlot({
+    C <- cur(); R <- C$R
+    msz <- length(R$S$IDX[[C$k]])
+    par(mfrow = c(1, if (isTRUE(input$showgd)) 2 else 1), mar = c(1, 1, 3, 1))
+    draw_net(R$S$P[C$k, ], R$H, R$wmax,
+             sprintf("B = %d (m = %d),  epoch %.2f", R$B, msz, C$ep))
+    if (isTRUE(input$showgd))
+      draw_net(R$G$P[C$kg, ], R$H, R$wmax,
+               sprintf("B = 1 (m = %d),  epoch %d", R$D$n, C$kg - 1L))
+  })
 
-    idx <- P$IDX[[k]]
-    plot(D$x, D$y, pch = 20, col = "grey70", xlab = "x", ylab = "y",
-         main = "data and current fit")
+  output$fit <- renderPlot({
+    C <- cur(); R <- C$R; D <- R$D
+    par(mfrow = c(1, 2), mar = c(4, 4.2, 2.5, 1))
+
+    idx <- R$S$IDX[[C$k]]
+    plot(D$x, D$y, pch = 20, col = "grey75", cex = 0.9,
+         xlab = "x", ylab = "y", main = "fitted curve and current batch")
     points(D$x[idx], D$y[idx], pch = 19, col = "#E8820C", cex = 1.2)
-    abline(a = bhat[1], b = bhat[2], col = "red", lty = 2, lwd = 2)
-    abline(a = P$B[k, 1], b = P$B[k, 2], col = "#2E8B57", lwd = 2.5)
+    lines(XG, gtrue(XG), col = "red", lty = 2, lwd = 2)
+    lines(XG, fnet(R$S$P[C$k, ], XG, R$H), col = "#2E8B57", lwd = 2.5)
+    if (isTRUE(input$showgd))
+      lines(XG, fnet(R$G$P[C$kg, ], XG, R$H), col = "#7B3FBF", lwd = 2.5)
+    legend("topright", bty = "n", cex = 0.85,
+           lwd = c(2, 2.5, 2.5), lty = c(2, 1, 1),
+           col = c("red", "#2E8B57", "#7B3FBF"),
+           legend = c("true curve", paste0("B = ", R$B, " fit"), "B = 1 fit"))
 
-    ex <- pmax(P$FL - Fmin, 1e-12)
-    plot(seq_len(P$n) - 1, ex, type = "l", log = "y", col = "grey40",
-         xlab = "iteration k", ylab = expression(F(b[k]) - F(hat(b))),
-         main = "excess loss")
-    if (isTRUE(input$showgd)) {
-      G <- gpath()
-      lines(seq_len(G$n) - 1, pmax(G$FL - Fmin, 1e-12), col = "#7B3FBF", lwd = 2)
-    }
-    points(k - 1, ex[k], pch = 19, col = "#E8820C", cex = 1.5)
+    yl <- range(c(R$S$L, if (isTRUE(input$showgd)) R$G$L), na.rm = TRUE)
+    plot(R$S$EP, R$S$L, type = "l", log = "y", col = "#2E8B57", lwd = 2,
+         ylim = pmax(yl, 1e-7), xlab = "epoch (one pass over all n)",
+         ylab = "training loss (all n)", main = "loss per epoch")
+    if (isTRUE(input$showgd))
+      lines(R$G$EP, R$G$L, col = "#7B3FBF", lwd = 2)
+    abline(h = 0.5 * input$sigma^2, col = "grey55", lty = 3)
+    points(C$ep, R$S$L[C$k], pch = 19, col = "#E8820C", cex = 1.5)
   })
 
   output$info <- renderUI({
-    P <- path(); k <- min(as.integer(input$k), P$n - 1) + 1L
-    gf <- P$GF[k, ]; gb <- P$GB[k, ]
-    cs <- sum(gf * gb) / (sqrt(sum(gf^2)) * sqrt(sum(gb^2)))
-    ang <- acos(max(-1, min(1, cs))) * 180 / pi
-    fmt <- function(v, d = 4) formatC(v, format = "g", digits = d)
+    C <- cur(); R <- C$R; H <- R$H
+    P <- unpack(R$S$P[C$k, ], H)
+    fmt <- function(v, d = 3) formatC(v, format = "f", digits = d)
+    rows <- paste0(
+      "<tr><td>h", 1:H, "</td><td align='right'>", fmt(P$w),
+      "</td><td align='right'>", fmt(P$cc),
+      "</td><td align='right'>", fmt(P$v), "</td></tr>", collapse = "")
     HTML(paste0(
-      "<hr><b>iteration</b> ", k - 1, " of ", P$n - 1, "<br>",
-      "<b>b<sub>k</sub></b> = (", fmt(P$B[k, 1]), ", ", fmt(P$B[k, 2]), ")<br>",
-      "<b>F(b<sub>k</sub>)</b> = ", fmt(P$FL[k], 6), "<br>",
-      "<b>excess loss</b> = ", fmt(P$FL[k] - Fmin), "<br><br>",
-      "<b>||full grad||</b> = ", fmt(sqrt(sum(gf^2))), "<br>",
-      "<b>||batch grad||</b> = ", fmt(sqrt(sum(gb^2))), "<br>",
-      "<b>angle between them</b> = ", fmt(ang, 3), "&deg;<br><br>",
-      "<i>least squares solution: (", fmt(bhat[1]), ", ", fmt(bhat[2]), ")</i>"
+      "<hr><b>update</b> ", C$k - 1, " of ", R$S$n - 1,
+      "  (epoch ", fmt(C$ep, 2), ")<br>",
+      "<b>batch size m</b> = ", length(R$S$IDX[[C$k]]), " of ", R$D$n, "<br>",
+      "<b>parameters</b> = ", 3 * H + 1, "<br><br>",
+      "<b>loss, B = ", R$B, "</b> = ", fmt(R$S$L[C$k], 5), "<br>",
+      "<b>loss, B = 1</b> = ", fmt(R$G$L[C$kg], 5), "<br>",
+      "<b>noise floor</b> &asymp; ", fmt(0.5 * input$sigma^2, 5), "<br>",
+      if (isTRUE(R$S$diverged))
+        "<b style='color:#C81E1E'>B run diverged</b><br>" else "",
+      if (isTRUE(R$capped))
+        paste0("<i style='color:#C81E1E'>epochs capped at ", R$ne,
+               "</i><br>") else "",
+      "<br><table style='font-size:90%'>",
+      "<tr><th>unit</th><th>w</th><th>bias</th><th>v</th></tr>",
+      rows, "</table>",
+      "<br><i>output bias = ", fmt(P$b), "</i>"
     ))
   })
 }
