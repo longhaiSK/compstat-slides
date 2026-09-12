@@ -1,0 +1,323 @@
+---
+title: "Multivariate Optimization: Newton, Gradient Descent, Conjugate Gradient, BFGS"
+format:
+  html:
+    page-layout: full
+filters:
+  - shinylive
+---
+
+Set-up (once per project):
+
+``` bash
+quarto add quarto-ext/shinylive     # Quarto extension
+```
+
+``` r
+install.packages("shinylive")       # R package that supplies the webR assets
+```
+
+The chunk below is self-contained: it runs in the browser through webR, so no Shiny
+server is needed and the page can be published as static HTML.
+
+**How to read the picture.** The <span style="color:#E8820C;">**orange**</span> arrow is the
+steepest-descent direction $-\nabla f(x_k)$, drawn with fixed length (direction only).
+The <span style="color:#2E8B57;">**green**</span> arrow is the step actually taken,
+$\alpha_k d_k$, from $x_k$ to $x_{k+1}$. The angle between them is what distinguishes the
+four algorithms.
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 780
+
+library(shiny)
+
+## ---------------------------------------------------------------- objectives
+mk <- function(label, fv, xlim, ylim, start, xstar) {
+  force(fv)
+  list(label = label, fv = fv, f = function(p) fv(p[1], p[2]),
+       xlim = xlim, ylim = ylim, start = start, xstar = xstar)
+}
+
+FNS <- list(
+  quad = mk(
+    "(a) Well-conditioned quadratic",
+    function(x, y) 0.5 * (2 * (x - 1)^2 + 1.6 * (x - 1) * (y - 1) +
+                          2 * (y - 1)^2),
+    c(-3, 4), c(-3, 4), c(-2, 3), c(1, 1)
+  ),
+  ridge = mk(
+    "(b) Narrow curved ridge (Rosenbrock)",
+    function(x, y) (1 - x)^2 + 100 * (y - x^2)^2,
+    c(-2, 2), c(-1, 3), c(-1.2, 1), c(1, 1)
+  ),
+  mix = mk(
+    "(c) Highly correlated, two modes",
+    function(x, y) {
+      rho <- 0.9; den <- 1 - rho^2
+      q <- function(u, v) (u^2 - 2 * rho * u * v + v^2) / den
+      -log(exp(-0.5 * q(x - 1.2, y - 1.2)) +
+           0.6 * exp(-0.5 * q(x + 1.5, y + 1.5) / 1.5) + 1e-12)
+    },
+    c(-4, 4), c(-4, 4), c(-3, -0.5), c(1.2, 1.2)
+  )
+)
+
+## ------------------------------------------------- numerical derivatives
+num_grad <- function(f, x) {
+  h <- 1e-5 * (1 + abs(x))
+  g <- numeric(2)
+  for (i in 1:2) {
+    e <- numeric(2); e[i] <- h[i]
+    g[i] <- (f(x + e) - f(x - e)) / (2 * h[i])
+  }
+  g
+}
+
+num_hess <- function(f, x) {
+  h <- 1e-4 * (1 + abs(x))
+  H <- matrix(0, 2, 2)
+  for (i in 1:2) for (j in i:2) {
+    ei <- numeric(2); ei[i] <- h[i]
+    ej <- numeric(2); ej[j] <- h[j]
+    H[i, j] <- (f(x + ei + ej) - f(x + ei - ej) -
+                f(x - ei + ej) + f(x - ei - ej)) / (4 * h[i] * h[j])
+    H[j, i] <- H[i, j]
+  }
+  H
+}
+
+## --------------------------------------------------- Wolfe line search
+line_search <- function(f, g, x, d, a0 = 1, c1 = 1e-4, c2 = 0.9) {
+  f0 <- f(x); gd0 <- sum(g * d)
+  if (!is.finite(gd0) || gd0 >= 0) return(list(alpha = 0, ok = FALSE))
+  lo <- 0; hi <- Inf; a <- a0
+  for (it in 1:60) {
+    fa <- f(x + a * d)
+    if (!is.finite(fa) || fa > f0 + c1 * a * gd0) {
+      hi <- a; a <- 0.5 * (lo + hi)
+    } else {
+      ga <- num_grad(f, x + a * d)
+      if (sum(ga * d) < c2 * gd0) {
+        lo <- a
+        a <- if (is.finite(hi)) 0.5 * (lo + hi) else min(2 * a, 1e4)
+      } else {
+        return(list(alpha = a, ok = TRUE))
+      }
+    }
+    if (a < 1e-14) return(list(alpha = 0, ok = FALSE))
+  }
+  list(alpha = a, ok = (a > 0))
+}
+
+## ------------------------------------------------------------- algorithms
+run_alg <- function(alg, FN, x0, maxit = 60, tol = 1e-6) {
+  f <- FN$f
+  X <- matrix(NA_real_, maxit + 1, 2); G <- matrix(NA_real_, maxit + 1, 2)
+  D <- matrix(NA_real_, maxit + 1, 2); Fv <- rep(NA_real_, maxit + 1)
+  AL <- rep(NA_real_, maxit + 1)
+  x <- x0; B <- diag(2)
+  g_prev <- NULL; d_prev <- NULL; s_prev <- NULL
+  n <- 0; note <- "maximum number of iterations reached"
+
+  for (k in seq_len(maxit)) {
+    g <- num_grad(f, x); gn <- sqrt(sum(g^2))
+    X[k, ] <- x; G[k, ] <- g; Fv[k] <- f(x); n <- k
+    if (!is.finite(gn)) { note <- "diverged"; break }
+    if (gn < tol) { note <- "converged (||grad|| < 1e-6)"; break }
+
+    if (alg == "nr") {
+      H <- num_hess(f, x); H <- (H + t(H)) / 2
+      ev <- eigen(H, symmetric = TRUE, only.values = TRUE)$values
+      tau <- if (min(ev) < 1e-8) 1e-8 - min(ev) + 1e-6 * max(abs(ev)) else 0
+      d <- tryCatch(solve(H + tau * diag(2), -g), error = function(e) -g)
+    } else if (alg == "gd") {
+      d <- -g
+    } else if (alg == "cg") {
+      if (is.null(d_prev)) {
+        d <- -g
+      } else {
+        y <- g - g_prev
+        beta <- max(0, sum(g * y) / max(sum(g_prev^2), 1e-300))   # PR+
+        d <- -g + beta * d_prev
+      }
+      if (sum(g * d) > -1e-12) d <- -g                            # restart
+    } else {                                                      # BFGS
+      if (!is.null(s_prev)) {
+        y <- g - g_prev; sy <- sum(s_prev * y)
+        if (sy > 1e-10) {
+          rho <- 1 / sy
+          V <- diag(2) - rho * outer(s_prev, y)
+          B <- V %*% B %*% t(V) + rho * outer(s_prev, s_prev)
+        }
+      }
+      d <- -as.vector(B %*% g)
+      if (sum(g * d) > -1e-12) { B <- diag(2); d <- -g }
+    }
+
+    ls <- line_search(f, g, x, d)
+    D[k, ] <- d; AL[k] <- ls$alpha
+    if (ls$alpha <= 0) { note <- "line search failed (flat or non-descent)"; break }
+
+    s_prev <- ls$alpha * d; g_prev <- g; d_prev <- d
+    x <- x + s_prev
+  }
+
+  list(X = X[1:n, , drop = FALSE], G = G[1:n, , drop = FALSE],
+       D = D[1:n, , drop = FALSE], F = Fv[1:n], A = AL[1:n],
+       n = n, note = note)
+}
+
+ALGS <- c("Newton-Raphson (modified Hessian)" = "nr",
+          "Gradient descent + line search"    = "gd",
+          "Conjugate gradient (PR+)"          = "cg",
+          "BFGS (quasi-Newton)"               = "bfgs")
+
+## --------------------------------------------------------------------- UI
+ui <- fluidPage(
+  fluidRow(
+    column(
+      4,
+      selectInput("alg", "Algorithm", ALGS),
+      selectInput("fn", "Objective function",
+                  setNames(names(FNS), sapply(FNS, `[[`, "label"))),
+      sliderInput("k", "Iteration k", min = 0, max = 1, value = 0, step = 1,
+                  animate = animationOptions(interval = 1000, loop = TRUE)),
+      checkboxInput("showpath", "Show the whole path", TRUE),
+      actionButton("reset", "Reset starting point"),
+      helpText("Click inside the contour plot to choose a new starting point."),
+      htmlOutput("info")
+    ),
+    column(
+      8,
+      plotOutput("contour", click = "click", height = "520px"),
+      plotOutput("conv", height = "190px")
+    )
+  )
+)
+
+## ----------------------------------------------------------------- server
+server <- function(input, output, session) {
+
+  FN <- reactive(FNS[[input$fn]])
+  start <- reactiveVal(FNS[[1]]$start)
+
+  observeEvent(input$fn, start(FNS[[input$fn]]$start))
+  observeEvent(input$reset, start(FN()$start))
+  observeEvent(input$click, {
+    p <- c(input$click$x, input$click$y)
+    if (all(is.finite(p))) start(p)
+  })
+
+  grid <- reactive({
+    FNc <- FN()
+    xs <- seq(FNc$xlim[1], FNc$xlim[2], length.out = 160)
+    ys <- seq(FNc$ylim[1], FNc$ylim[2], length.out = 160)
+    list(x = xs, y = ys, z = outer(xs, ys, FNc$fv))
+  })
+
+  path <- reactive({
+    req(start())
+    run_alg(input$alg, FN(), start())
+  })
+
+  observeEvent(path(), {
+    updateSliderInput(session, "k", max = max(1, path()$n - 1), value = 0)
+  })
+
+  output$contour <- renderPlot({
+    FNc <- FN(); gr <- grid(); P <- path()
+    k <- min(as.integer(input$k), P$n - 1) + 1L      # row index of x_k
+
+    zf <- gr$z[is.finite(gr$z)]
+    lv <- unique(quantile(zf, probs = seq(0, 1, length.out = 30)^1.7))
+
+    zr <- matrix(rank(gr$z, na.last = "keep", ties.method = "average"),
+                 nrow = length(gr$x))
+
+    par(mar = c(4, 4, 2.5, 1))
+    image(gr$x, gr$y, zr, asp = 1,
+          col = colorRampPalette(c("#f7fbff", "#c9dcef"))(64),
+          xlab = expression(x[1]), ylab = expression(x[2]),
+          main = paste0(names(ALGS)[ALGS == input$alg], "  |  ", FNc$label))
+    contour(gr$x, gr$y, gr$z, levels = lv, add = TRUE,
+            col = "grey55", drawlabels = FALSE)
+    points(FNc$xstar[1], FNc$xstar[2], pch = 8, col = "red", cex = 1.3, lwd = 2)
+
+    if (isTRUE(input$showpath) && k > 1)
+      lines(P$X[1:k, 1], P$X[1:k, 2], col = "grey25", lty = 2)
+    points(P$X[1:k, 1], P$X[1:k, 2], pch = 20, col = "grey35", cex = 0.9)
+
+    xk <- P$X[k, ]; gk <- P$G[k, ]; gn <- sqrt(sum(gk^2))
+    L <- 0.18 * diff(FNc$xlim)
+    if (gn > 0) {
+      u <- -gk / gn
+      arrows(xk[1], xk[2], xk[1] + L * u[1], xk[2] + L * u[2],
+             col = "#E8820C", lwd = 3, length = 0.13)
+    }
+    if (k < P$n) {
+      arrows(xk[1], xk[2], P$X[k + 1, 1], P$X[k + 1, 2],
+             col = "#2E8B57", lwd = 3, length = 0.13)
+      points(P$X[k + 1, 1], P$X[k + 1, 2], pch = 21, bg = "white",
+             col = "#2E8B57", cex = 1.2)
+    }
+    points(xk[1], xk[2], pch = 19, col = "black", cex = 1.3)
+
+    legend("topleft", bty = "n", lwd = 3, cex = 0.95,
+           col = c("#E8820C", "#2E8B57"),
+           legend = c(expression(-nabla * f(x[k])~"(direction only)"),
+                      expression(alpha[k] * d[k]~"(step taken)")))
+  })
+
+  output$conv <- renderPlot({
+    P <- path(); k <- min(as.integer(input$k), P$n - 1) + 1L
+    gn <- sqrt(rowSums(P$G^2))
+    gn[!is.finite(gn) | gn <= 0] <- NA
+    par(mar = c(4, 4.5, 1.5, 1))
+    plot(seq_len(P$n) - 1, gn, type = "b", pch = 20, log = "y",
+         xlab = "iteration k", ylab = expression("||" * nabla * f * "||"),
+         col = "grey40")
+    points(k - 1, gn[k], pch = 19, col = "#E8820C", cex = 1.6)
+  })
+
+  output$info <- renderUI({
+    P <- path(); k <- min(as.integer(input$k), P$n - 1) + 1L
+    xk <- P$X[k, ]; gk <- P$G[k, ]; gn <- sqrt(sum(gk^2))
+    ang <- NA
+    if (k < P$n) {
+      sk <- P$X[k + 1, ] - xk
+      cs <- sum(-gk * sk) / (gn * sqrt(sum(sk^2)))
+      ang <- acos(max(-1, min(1, cs))) * 180 / pi
+    }
+    fmt <- function(v, d = 4) formatC(v, format = "g", digits = d)
+    HTML(paste0(
+      "<hr><b>iteration</b> ", k - 1, " of ", P$n - 1, "<br>",
+      "<b>x<sub>k</sub></b> = (", fmt(xk[1]), ", ", fmt(xk[2]), ")<br>",
+      "<b>f(x<sub>k</sub>)</b> = ", fmt(P$F[k], 6), "<br>",
+      "<b>||grad||</b> = ", fmt(gn), "<br>",
+      "<b>step size &alpha;<sub>k</sub></b> = ",
+      if (k < P$n) fmt(P$A[k]) else "&ndash;", "<br>",
+      "<b>angle(orange, green)</b> = ",
+      if (is.na(ang)) "&ndash;" else paste0(fmt(ang, 3), "&deg;"),
+      "<br><br><i>", P$note, "</i>"
+    ))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+## Points the animation is meant to make
+
+1.  On the quadratic, Newton's step solves the model exactly: one iteration with
+    $\alpha_k = 1$, and the two arrows differ in direction whenever the Hessian is not a
+    multiple of the identity. Conjugate gradient terminates in two iterations, BFGS in
+    roughly the same number once the inverse-Hessian approximation is built; gradient
+    descent zigzags at right angles between consecutive steps.
+2.  On the Rosenbrock ridge, the orange arrow points almost perpendicular to the valley,
+    so gradient descent makes little progress per iteration. Newton and BFGS turn the step
+    along the valley; the angle between the arrows becomes large.
+3.  On the correlated bimodal surface, the limit depends on the starting point. Clicking
+    different starting points shows convergence to different stationary points, and
+    Newton's method is attracted to whichever stationary point is nearest, including
+    saddle points when the Hessian modification is switched off.

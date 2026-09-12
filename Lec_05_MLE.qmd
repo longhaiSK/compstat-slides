@@ -580,21 +580,6 @@ This is the `summary(glm(...))` table. The variance comes from the same Hessian 
 
 All are available through `optim(par, fn, gr, method = ...)` in R. Convention below: **minimize** $f(\theta) = -\ell(\theta)$.
 
-## Nelder–Mead (Simplex Method)
-
-Maintains a **simplex** of $p+1$ points (a triangle in 2D) and moves it downhill using only function values:
-
-1. Order the vertices $f(\theta_{(1)}) \le \cdots \le f(\theta_{(p+1)})$; let $\overline\theta$ be the centroid of the best $p$.
-
-2. **Reflect** the worst vertex through $\overline\theta$; if the reflected point is the new best, try **expanding** further.
-3. If reflection is poor, **contract** toward $\overline\theta$; if that also fails, **shrink** all vertices toward the best.
-
-```{r}
-rosen <- function(v) (1 - v[1])^2 + 100 * (v[2] - v[1]^2)^2       # Rosenbrock "banana", min at (1, 1)
-nm <- optim(c(-1.2, 1), rosen, method = "Nelder-Mead"); c(nm$par, evals = nm$counts["function"])
-```
-
-Robust and derivative-free (R's `optim` default), but slow in high dimensions and offers no standard errors.
 
 ## Gradient Descent with Line Search
 
@@ -685,15 +670,26 @@ sqrt(diag(solve(fits$BFGS$hessian)))     # SEs from the numerically computed Hes
 
 `optim(..., hessian = TRUE)` returns a finite-difference Hessian at the solution, so standard errors are available even for gradient-only methods.
 
-## Animation for Various Optimization Methods
+## Animation for Gradient-based Methods
 
 
-[An overview](https://scipy-lectures.org/advanced/mathematical_optimization/index.html#knowing-your-problem)
 
 
-[Nelder-Mead Method (A Gradient-Free Method)](https://codesachin.wordpress.com/2016/01/16/nelder-mead-optimization/)
+# Nelder–Mead (Simplex Method)
 
-[Gradient Descent Methods (Hessian-Free Methods)](https://www.benfrederickson.com/numerical-optimization/)
+Maintains a **simplex** of $p+1$ points (a triangle in 2D) and moves it downhill using only function values:
+
+1. Order the vertices $f(\theta_{(1)}) \le \cdots \le f(\theta_{(p+1)})$; let $\overline\theta$ be the centroid of the best $p$.
+
+2. **Reflect** the worst vertex through $\overline\theta$; if the reflected point is the new best, try **expanding** further.
+3. If reflection is poor, **contract** toward $\overline\theta$; if that also fails, **shrink** all vertices toward the best.
+
+```{r}
+rosen <- function(v) (1 - v[1])^2 + 100 * (v[2] - v[1]^2)^2       # Rosenbrock "banana", min at (1, 1)
+nm <- optim(c(-1.2, 1), rosen, method = "Nelder-Mead"); c(nm$par, evals = nm$counts["function"])
+```
+
+Robust and derivative-free (R's `optim` default), but slow in high dimensions and offers no standard errors.
 
 # Stochastic Gradient Descent
 
