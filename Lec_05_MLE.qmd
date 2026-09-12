@@ -1439,27 +1439,35 @@ A noisy but cheap gradient estimate is enough to make progress — a Monte Carlo
 
 ```{shinylive-r}
 #| standalone: true
-#| viewerHeight: 900
+#| viewerHeight: 830
 
 library(shiny)
 
-## -------------------------------------------------------------------
 ## ------------------------------------------------------------------- data
-## True DGP is itself a 1 - 3 tanh - 1 network ("teacher"), so a student
-## network with H >= 3 can represent it exactly.
+## Two data-generating processes. The teacher network lies inside the
+## student's model class; the bumps do not.
 TEACH <- list(w = c(4, 3, 5), cc = c(4, 0, -5), v = c(1.0, -1.2, 0.8), b = 0)
 
-gtrue <- function(x) {
+g_teacher <- function(x) {
   Hm <- tanh(outer(x, TEACH$w) + rep(TEACH$cc, each = length(x)))
   as.vector(Hm %*% TEACH$v + TEACH$b)
 }
 
+g_bumps <- function(x)
+  1.2 * exp(-9 * (x + 0.7)^2) - 1.0 * exp(-9 * (x - 0.8)^2)
+
+DGPS <- c("Teacher network (1 - 3 tanh - 1)" = "teacher",
+          "Two Gaussian bumps (outside the model class)" = "bumps")
+
+gtrue <- function(x, dgp)
+  if (identical(dgp, "bumps")) g_bumps(x) else g_teacher(x)
+
 XG <- seq(-2, 2, length.out = 300)
 
-make_data <- function(n, sigma, seed) {
+make_data <- function(n, sigma, seed, dgp) {
   set.seed(500 + seed)
   x <- sort(runif(n, -2, 2))
-  list(x = x, y = gtrue(x) + rnorm(n, 0, sigma), n = n)
+  list(x = x, y = gtrue(x, dgp) + rnorm(n, 0, sigma), n = n, dgp = dgp)
 }
 
 ## ------------------------------------------------- network: 1 - H tanh - 1
@@ -1562,6 +1570,7 @@ ui <- fluidPage(
     ## ---- column 1: training controls -----------------------------------
     column(
       3,
+      selectInput("dgp", "True curve", choices = DGPS, selected = "teacher"),
       sliderInput("H", "Hidden neurons", min = 2, max = 16, value = 8,
                   step = 1),
       sliderInput("B", "Number of batches B per epoch", min = 1, max = 40,
@@ -1569,9 +1578,7 @@ ui <- fluidPage(
       sliderInput("a", "Learning rate", min = 0.01, max = 0.60, value = 0.20,
                   step = 0.01),
       sliderInput("nep", "Epochs", min = 10, max = 300, value = 100, step = 10),
-      sliderInput("k", "Update k", min = 0, max = 1, value = 0, step = 1),
-      checkboxInput("showgd", "Overlay the B = 1 run", TRUE),
-      htmlOutput("info")
+      checkboxInput("showgd", "Overlay the B = 1 run", TRUE)
     ),
     ## ---- column 2: data generation, then playback ----------------------
     column(
@@ -1610,7 +1617,9 @@ ui <- fluidPage(
     column(
       7,
       plotOutput("nets", height = "300px"),
-      plotOutput("fit", height = "340px")
+      plotOutput("fit", height = "340px"),
+      sliderInput("k", "Update k", min = 0, max = 1, value = 0, step = 1,
+                  width = "900px")
     )
   )
 )
@@ -1626,7 +1635,7 @@ server <- function(input, output, session) {
   observeEvent(input$newinit, wseed(wseed() + 1))
   observeEvent(input$newseed, bseed(bseed() + 1))
 
-  DAT <- reactive(make_data(input$n, input$sigma, dseed()))
+  DAT <- reactive(make_data(input$n, input$sigma, dseed(), input$dgp))
 
   runs <- reactive({
     D <- DAT(); H <- input$H; B <- as.integer(input$B)
@@ -1706,14 +1715,16 @@ server <- function(input, output, session) {
     plot(D$x, D$y, pch = 20, col = "grey75", cex = 0.9,
          xlab = "x", ylab = "y", main = "fitted curve and current batch")
     points(D$x[idx], D$y[idx], pch = 19, col = "#E8820C", cex = 1.2)
-    lines(XG, gtrue(XG), col = "red", lty = 2, lwd = 2)
+    lines(XG, gtrue(XG, D$dgp), col = "red", lty = 2, lwd = 2)
     lines(XG, fnet(R$S$P[C$k, ], XG, R$H), col = "#2E8B57", lwd = 2.5)
     if (isTRUE(input$showgd))
       lines(XG, fnet(R$G$P[C$kg, ], XG, R$H), col = "#7B3FBF", lwd = 2.5)
     legend("topright", bty = "n", cex = 0.85,
            lwd = c(2, 2.5, 2.5), lty = c(2, 1, 1),
            col = c("red", "#2E8B57", "#7B3FBF"),
-           legend = c("true curve", paste0("B = ", R$B, " fit"), "B = 1 fit"))
+           legend = c(if (identical(D$dgp, "bumps")) "true curve (bumps)"
+                      else "teacher network",
+                      paste0("B = ", R$B, " fit"), "B = 1 fit"))
 
     yl <- range(c(R$S$L, if (isTRUE(input$showgd)) R$G$L), na.rm = TRUE)
     plot(R$S$EP, R$S$L, type = "l", log = "y", col = "#2E8B57", lwd = 2,
