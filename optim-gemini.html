@@ -9,7 +9,7 @@
 <meta name="author" content="Longhai Li">
 <meta name="dcterms.date" content="2026-09-11">
 
-<title>Multivariate Optimization: Newton, Gradient Descent, Conjugate Gradient, BFGS</title>
+<title>Optimization Algorithms Animation</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,60 +25,25 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
-<script src="optim-animation_files/libs/clipboard/clipboard.min.js"></script>
-<script src="optim-animation_files/libs/quarto-html/quarto.js" type="module"></script>
-<script src="optim-animation_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="optim-animation_files/libs/quarto-html/popper.min.js"></script>
-<script src="optim-animation_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="optim-animation_files/libs/quarto-html/anchor.min.js"></script>
-<link href="optim-animation_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="optim-animation_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="optim-animation_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="optim-animation_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="optim-animation_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="optim-gemini_files/libs/clipboard/clipboard.min.js"></script>
+<script src="optim-gemini_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="optim-gemini_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="optim-gemini_files/libs/quarto-html/popper.min.js"></script>
+<script src="optim-gemini_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="optim-gemini_files/libs/quarto-html/anchor.min.js"></script>
+<link href="optim-gemini_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="optim-gemini_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="optim-gemini_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="optim-gemini_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="optim-gemini_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <meta name="shinylive:serviceworker_dir" content=".">
-<script src="optim-animation_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/load-shinylive-sw.js" type="module"></script>
-<script src="optim-animation_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/run-python-blocks.js" type="module"></script>
-<link href="optim-animation_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/shinylive.css" rel="stylesheet">
-<link href="optim-animation_files/libs/quarto-contrib/shinylive-quarto-css/shinylive-quarto.css" rel="stylesheet">
+<script src="optim-gemini_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/load-shinylive-sw.js" type="module"></script>
+<script src="optim-gemini_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/run-python-blocks.js" type="module"></script>
+<link href="optim-gemini_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/shinylive.css" rel="stylesheet">
+<link href="optim-gemini_files/libs/quarto-contrib/shinylive-quarto-css/shinylive-quarto.css" rel="stylesheet">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -112,20 +77,20 @@ window.Quarto = {
 
 </head>
 
-<body class="quarto-light">
+<body class="fullcontent quarto-light">
 
-<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
 
-<main class="content column-page" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Multivariate Optimization: Newton, Gradient Descent, Conjugate Gradient, BFGS</h1>
+<h1 class="title">Optimization Algorithms Animation</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta">
 
     <div>
     <div class="quarto-title-meta-heading">Author</div>
@@ -149,315 +114,236 @@ window.Quarto = {
 </header>
 
 
-<p>Set-up (once per project):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> add quarto-ext/shinylive     <span class="co"># Quarto extension</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"shinylive"</span>)       <span class="co"># R package that supplies the webR assets</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The chunk below is self-contained: it runs in the browser through webR, so no Shiny server is needed and the page can be published as static HTML.</p>
-<p><strong>How to read the picture.</strong> The steepest-descent direction <span class="math inline">\(-\nabla f(x_k)\)</span> is drawn twice: in <span style="color:#6b6b6b;"><strong>grey</strong></span> with a fixed length, showing direction only, and in <span style="color:#E8820C;"><strong>orange</strong></span> at its actual length <span class="math inline">\(\|\nabla f(x_k)\|\)</span>. The <span style="color:#2E8B57;"><strong>green</strong></span> arrow is the step actually taken, <span class="math inline">\(\alpha_k d_k\)</span>, from <span class="math inline">\(x_k\)</span> to <span class="math inline">\(x_{k+1}\)</span>. The angle between grey and green is what distinguishes the four algorithms; the orange arrow shows why a raw gradient step is unusable as a step length. On the Rosenbrock ridge <span class="math inline">\(\|\nabla f\|\)</span> reaches several hundred, so the orange arrow runs off the frame and is clipped — that is the point being made.</p>
-<p>The slider plays once through the iterations and stops. <strong>Next step</strong> and <strong>Previous</strong> advance it by one iteration for discussion at the board.</p>
+<p>This interactive animation demonstrates how different optimization algorithms navigate bivariate surfaces.</p>
+<ul>
+<li><strong>Orange Arrow:</strong> The gradient <span class="math inline">\(\nabla f\)</span> at the current point (normalized for visibility). It points in the direction of steepest <em>ascent</em>.</li>
+<li><strong>Green Arrow:</strong> The actual step <span class="math inline">\(p_k\)</span> taken by the algorithm.</li>
+</ul>
 <pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
 #|   shinylive does not work in self-contained HTML documents.
 #|   Please set `embed-resources: false` in your metadata.
 #| standalone: true
-#| viewerHeight: 780
+#| viewerHeight: 700
 
 library(shiny)
+library(bslib)
+library(ggplot2)
 
-## ---------------------------------------------------------------- objectives
-mk &lt;- function(label, fv, xlim, ylim, start, xstar) {
-  force(fv)
-  list(label = label, fv = fv, f = function(p) fv(p[1], p[2]),
-       xlim = xlim, ylim = ylim, start = start, xstar = xstar)
-}
-
-FNS &lt;- list(
-  quad = mk(
-    "(a) Well-conditioned quadratic",
-    function(x, y) 0.5 * (2 * (x - 1)^2 + 1.6 * (x - 1) * (y - 1) +
-                          2 * (y - 1)^2),
-    c(-3, 4), c(-3, 4), c(-2, 3), c(1, 1)
+# --- Objective Functions Definition ---
+fns &lt;- list(
+  "Good Quadratic" = list(
+    f = function(x) x[1]^2 + x[2]^2,
+    g = function(x) c(2*x[1], 2*x[2]),
+    H = function(x) matrix(c(2,0,0,2), 2, 2),
+    xlim = c(-2, 2), ylim = c(-2, 2),
+    default_start = c(-1.8, -1.2)
   ),
-  ridge = mk(
-    "(b) Narrow curved ridge (Rosenbrock)",
-    function(x, y) (1 - x)^2 + 100 * (y - x^2)^2,
-    c(-2, 2), c(-1, 3), c(-1.2, 1), c(1, 1)
+  "Narrow Ridge (Rosenbrock)" = list(
+    f = function(x) (1-x[1])^2 + 100*(x[2]-x[1]^2)^2,
+    g = function(x) c(-2*(1-x[1]) - 400*x[1]*(x[2]-x[1]^2), 200*(x[2]-x[1]^2)),
+    H = function(x) matrix(c(2-400*x[2]+1200*x[1]^2, -400*x[1], -400*x[1], 200), 2, 2),
+    xlim = c(-2, 2), ylim = c(-1, 3),
+    default_start = c(-1.5, 2.5)
   ),
-  mix = mk(
-    "(c) Highly correlated, two modes",
-    function(x, y) {
-      rho &lt;- 0.9; den &lt;- 1 - rho^2
-      q &lt;- function(u, v) (u^2 - 2 * rho * u * v + v^2) / den
-      -log(exp(-0.5 * q(x - 1.2, y - 1.2)) +
-           0.6 * exp(-0.5 * q(x + 1.5, y + 1.5) / 1.5) + 1e-12)
-    },
-    c(-4, 4), c(-4, 4), c(-3, -0.5), c(1.2, 1.2)
+  "Multi-Mode (Himmelblau)" = list(
+    f = function(x) (x[1]^2+x[2]-11)^2 + (x[1]+x[2]^2-7)^2,
+    g = function(x) c(4*x[1]*(x[1]^2+x[2]-11) + 2*(x[1]+x[2]^2-7), 
+                      2*(x[1]^2+x[2]-11) + 4*x[2]*(x[1]+x[2]^2-7)),
+    H = function(x) matrix(c(12*x[1]^2 + 4*x[2] - 42, 4*x[1] + 4*x[2],
+                             4*x[1] + 4*x[2], 4*x[1] + 12*x[2]^2 - 26), 2, 2),
+    xlim = c(-5, 5), ylim = c(-5, 5),
+    default_start = c(-4, -4)
   )
 )
 
-## ------------------------------------------------- numerical derivatives
-num_grad &lt;- function(f, x) {
-  h &lt;- 1e-5 * (1 + abs(x))
-  g &lt;- numeric(2)
-  for (i in 1:2) {
-    e &lt;- numeric(2); e[i] &lt;- h[i]
-    g[i] &lt;- (f(x + e) - f(x - e)) / (2 * h[i])
+# --- Backtracking Line Search ---
+line_search &lt;- function(f, g, x, p, max_iter=20) {
+  a &lt;- 1
+  c1 &lt;- 1e-4
+  fx &lt;- f(x)
+  gx &lt;- g(x)
+  for(i in 1:max_iter) {
+    if(f(x + a*p) &lt;= fx + c1*a*sum(gx*p)) break
+    a &lt;- a * 0.5
   }
-  g
+  return(a)
 }
 
-num_hess &lt;- function(f, x) {
-  h &lt;- 1e-4 * (1 + abs(x))
-  H &lt;- matrix(0, 2, 2)
-  for (i in 1:2) for (j in i:2) {
-    ei &lt;- numeric(2); ei[i] &lt;- h[i]
-    ej &lt;- numeric(2); ej[j] &lt;- h[j]
-    H[i, j] &lt;- (f(x + ei + ej) - f(x + ei - ej) -
-                f(x - ei + ej) + f(x - ei - ej)) / (4 * h[i] * h[j])
-    H[j, i] &lt;- H[i, j]
-  }
-  H
-}
-
-## --------------------------------------------------- Wolfe line search
-line_search &lt;- function(f, g, x, d, a0 = 1, c1 = 1e-4, c2 = 0.9) {
-  f0 &lt;- f(x); gd0 &lt;- sum(g * d)
-  if (!is.finite(gd0) || gd0 &gt;= 0) return(list(alpha = 0, ok = FALSE))
-  lo &lt;- 0; hi &lt;- Inf; a &lt;- a0
-  for (it in 1:60) {
-    fa &lt;- f(x + a * d)
-    if (!is.finite(fa) || fa &gt; f0 + c1 * a * gd0) {
-      hi &lt;- a; a &lt;- 0.5 * (lo + hi)
-    } else {
-      ga &lt;- num_grad(f, x + a * d)
-      if (sum(ga * d) &lt; c2 * gd0) {
-        lo &lt;- a
-        a &lt;- if (is.finite(hi)) 0.5 * (lo + hi) else min(2 * a, 1e4)
+# --- Core Optimization Engine ---
+run_optim &lt;- function(method, fn, x0, max_iter=50) {
+  f &lt;- fn$f; g &lt;- fn$g; H &lt;- fn$H
+  x &lt;- x0
+  path &lt;- data.frame(iter=1, x=x[1], y=x[2], gx=NA, gy=NA, dx=NA, dy=NA)
+  
+  B &lt;- diag(2)
+  p_old &lt;- rep(0, 2)
+  gx_old &lt;- rep(0, 2)
+  
+  for(k in 1:max_iter) {
+    gx &lt;- g(x)
+    if(sqrt(sum(gx^2)) &lt; 1e-4) break # Converged
+    
+    # Calculate search direction
+    if(method == "GD + Line Search") {
+      pk &lt;- -gx
+    } else if(method == "Newton-Raphson") {
+      Hk &lt;- H(x)
+      # Ensure positive definiteness to force descent direction
+      eig &lt;- eigen(Hk)$values
+      if(min(eig) &lt; 1e-5) Hk &lt;- Hk + diag(2) * (abs(min(eig)) + 1e-2)
+      pk &lt;- -solve(Hk, gx)
+    } else if(method == "BFGS") {
+      pk &lt;- - as.vector(B %*% gx)
+    } else if(method == "Conjugate Gradient") {
+      if(k == 1) {
+        pk &lt;- -gx
       } else {
-        return(list(alpha = a, ok = TRUE))
+        beta &lt;- sum(gx^2) / sum(gx_old^2) # Fletcher-Reeves
+        pk &lt;- -gx + beta * p_old
       }
     }
-    if (a &lt; 1e-14) return(list(alpha = 0, ok = FALSE))
-  }
-  list(alpha = a, ok = (a &gt; 0))
-}
-
-## ------------------------------------------------------------- algorithms
-run_alg &lt;- function(alg, FN, x0, maxit = 60, tol = 1e-6) {
-  f &lt;- FN$f
-  X &lt;- matrix(NA_real_, maxit + 1, 2); G &lt;- matrix(NA_real_, maxit + 1, 2)
-  D &lt;- matrix(NA_real_, maxit + 1, 2); Fv &lt;- rep(NA_real_, maxit + 1)
-  AL &lt;- rep(NA_real_, maxit + 1)
-  x &lt;- x0; B &lt;- diag(2)
-  g_prev &lt;- NULL; d_prev &lt;- NULL; s_prev &lt;- NULL
-  n &lt;- 0; note &lt;- "maximum number of iterations reached"
-
-  for (k in seq_len(maxit)) {
-    g &lt;- num_grad(f, x); gn &lt;- sqrt(sum(g^2))
-    X[k, ] &lt;- x; G[k, ] &lt;- g; Fv[k] &lt;- f(x); n &lt;- k
-    if (!is.finite(gn)) { note &lt;- "diverged"; break }
-    if (gn &lt; tol) { note &lt;- "converged (||grad|| &lt; 1e-6)"; break }
-
-    if (alg == "nr") {
-      H &lt;- num_hess(f, x); H &lt;- (H + t(H)) / 2
-      ev &lt;- eigen(H, symmetric = TRUE, only.values = TRUE)$values
-      tau &lt;- if (min(ev) &lt; 1e-8) 1e-8 - min(ev) + 1e-6 * max(abs(ev)) else 0
-      d &lt;- tryCatch(solve(H + tau * diag(2), -g), error = function(e) -g)
-    } else if (alg == "gd") {
-      d &lt;- -g
-    } else if (alg == "cg") {
-      if (is.null(d_prev)) {
-        d &lt;- -g
-      } else {
-        y &lt;- g - g_prev
-        beta &lt;- max(0, sum(g * y) / max(sum(g_prev^2), 1e-300))   # PR+
-        d &lt;- -g + beta * d_prev
+    
+    # Step size
+    alpha &lt;- line_search(f, g, x, pk)
+    x_next &lt;- x + alpha * pk
+    
+    # BFGS Update
+    if(method == "BFGS") {
+      sk &lt;- x_next - x
+      yk &lt;- g(x_next) - gx
+      rho &lt;- 1/sum(yk*sk)
+      if(rho &gt; 0 &amp;&amp; !is.infinite(rho)) {
+        I &lt;- diag(2)
+        B &lt;- (I - rho * sk %*% t(yk)) %*% B %*% (I - rho * yk %*% t(sk)) + rho * sk %*% t(sk)
       }
-      if (sum(g * d) &gt; -1e-12) d &lt;- -g                            # restart
-    } else {                                                      # BFGS
-      if (!is.null(s_prev)) {
-        y &lt;- g - g_prev; sy &lt;- sum(s_prev * y)
-        if (sy &gt; 1e-10) {
-          rho &lt;- 1 / sy
-          V &lt;- diag(2) - rho * outer(s_prev, y)
-          B &lt;- V %*% B %*% t(V) + rho * outer(s_prev, s_prev)
-        }
-      }
-      d &lt;- -as.vector(B %*% g)
-      if (sum(g * d) &gt; -1e-12) { B &lt;- diag(2); d &lt;- -g }
     }
-
-    ls &lt;- line_search(f, g, x, d)
-    D[k, ] &lt;- d; AL[k] &lt;- ls$alpha
-    if (ls$alpha &lt;= 0) { note &lt;- "line search failed (flat or non-descent)"; break }
-
-    s_prev &lt;- ls$alpha * d; g_prev &lt;- g; d_prev &lt;- d
-    x &lt;- x + s_prev
+    
+    # Save path data
+    path$gx[k] &lt;- gx[1]
+    path$gy[k] &lt;- gx[2]
+    path$dx[k] &lt;- x_next[1] - x[1]
+    path$dy[k] &lt;- x_next[2] - x[2]
+    
+    x_old &lt;- x; gx_old &lt;- gx; p_old &lt;- pk
+    x &lt;- x_next
+    
+    path &lt;- rbind(path, data.frame(iter=k+1, x=x[1], y=x[2], gx=NA, gy=NA, dx=NA, dy=NA))
   }
-
-  list(X = X[1:n, , drop = FALSE], G = G[1:n, , drop = FALSE],
-       D = D[1:n, , drop = FALSE], F = Fv[1:n], A = AL[1:n],
-       n = n, note = note)
+  return(path)
 }
 
-ALGS &lt;- c("Newton-Raphson (modified Hessian)" = "nr",
-          "Gradient descent + line search"    = "gd",
-          "Conjugate gradient (PR+)"          = "cg",
-          "BFGS (quasi-Newton)"               = "bfgs")
-
-## --------------------------------------------------------------------- UI
-ui &lt;- fluidPage(
-  fluidRow(
-    column(
-      4,
-      selectInput("alg", "Algorithm", ALGS),
-      selectInput("fn", "Objective function",
-                  setNames(names(FNS), sapply(FNS, `[[`, "label"))),
-      sliderInput("k", "Iteration k", min = 0, max = 1, value = 0, step = 1,
-                  animate = animationOptions(interval = 1000, loop = FALSE)),
-      div(actionButton("step", "Next step"),
-          actionButton("back", "Previous"),
-          actionButton("reset", "Reset starting point")),
-      checkboxInput("showpath", "Show the whole path", TRUE),
-      helpText("Click inside the contour plot to choose a new starting point."),
-      htmlOutput("info")
+# --- Shiny UI ---
+ui &lt;- page_sidebar(
+  title = "Bivariate Optimization Animation",
+  sidebar = sidebar(
+    selectInput("func", "Objective Function:", choices = names(fns)),
+    selectInput("algo", "Algorithm:", choices = c("GD + Line Search", "Newton-Raphson", "Conjugate Gradient", "BFGS")),
+    fluidRow(
+      column(6, numericInput("start_x", "Start X:", value = -1.8, step = 0.5)),
+      column(6, numericInput("start_y", "Start Y:", value = -1.2, step = 0.5))
     ),
-    column(
-      8,
-      plotOutput("contour", click = "click", height = "520px"),
-      plotOutput("conv", height = "190px")
-    )
+    actionButton("run", "Compute Path", class = "btn-primary", width = "100%"),
+    hr(),
+    uiOutput("slider_ui"),
+    p("Click the Play button above to animate the steps.", style = "font-size: 0.85em; color: gray;")
+  ),
+  card(
+    plotOutput("optim_plot", height = "600px")
   )
 )
 
-## ----------------------------------------------------------------- server
+# --- Shiny Server ---
 server &lt;- function(input, output, session) {
-
-  FN &lt;- reactive(FNS[[input$fn]])
-  start &lt;- reactiveVal(FNS[[1]]$start)
-
-  observeEvent(input$fn, start(FNS[[input$fn]]$start))
-  observeEvent(input$reset, start(FN()$start))
-  observeEvent(input$click, {
-    p &lt;- c(input$click$x, input$click$y)
-    if (all(is.finite(p))) start(p)
+  
+  # Update default start coordinates when function changes
+  observeEvent(input$func, {
+    req(input$func)
+    defaults &lt;- fns[[input$func]]$default_start
+    updateNumericInput(session, "start_x", value = defaults[1])
+    updateNumericInput(session, "start_y", value = defaults[2])
   })
-
-  grid &lt;- reactive({
-    FNc &lt;- FN()
-    xs &lt;- seq(FNc$xlim[1], FNc$xlim[2], length.out = 160)
-    ys &lt;- seq(FNc$ylim[1], FNc$ylim[2], length.out = 160)
-    list(x = xs, y = ys, z = outer(xs, ys, FNc$fv))
+  
+  # Reactive optimization calculation
+  optim_data &lt;- eventReactive(input$run, {
+    fn &lt;- fns[[input$func]]
+    run_optim(input$algo, fn, c(input$start_x, input$start_y))
+  }, ignoreNULL = FALSE)
+  
+  # Render dynamic animation slider
+  output$slider_ui &lt;- renderUI({
+    path &lt;- optim_data()
+    max_steps &lt;- max(1, nrow(path) - 1)
+    sliderInput("step", "Animation Step:", 
+                min = 1, max = max_steps, value = 1, step = 1,
+                animate = animationOptions(interval = 800, loop = FALSE))
   })
-
-  path &lt;- reactive({
-    req(start())
-    run_alg(input$alg, FN(), start())
+  
+  # Background contour data caching
+  contour_grid &lt;- reactive({
+    fn &lt;- fns[[input$func]]
+    x_seq &lt;- seq(fn$xlim[1], fn$xlim[2], length.out = 100)
+    y_seq &lt;- seq(fn$ylim[1], fn$ylim[2], length.out = 100)
+    grid &lt;- expand.grid(x = x_seq, y = y_seq)
+    grid$z &lt;- apply(grid, 1, fn$f)
+    # Log scale z for better visual contours, especially on Rosenbrock
+    grid$z &lt;- log10(grid$z - min(grid$z) + 1e-4) 
+    return(list(grid=grid, fn=fn))
   })
-
-  observeEvent(path(), {
-    updateSliderInput(session, "k", max = max(1, path()$n - 1), value = 0)
-  })
-
-  observeEvent(input$step, {
-    updateSliderInput(session, "k",
-                      value = min(as.integer(input$k) + 1, max(0, path()$n - 1)))
-  })
-
-  observeEvent(input$back, {
-    updateSliderInput(session, "k", value = max(as.integer(input$k) - 1, 0))
-  })
-
-  output$contour &lt;- renderPlot({
-    FNc &lt;- FN(); gr &lt;- grid(); P &lt;- path()
-    k &lt;- min(as.integer(input$k), P$n - 1) + 1L      # row index of x_k
-
-    zf &lt;- gr$z[is.finite(gr$z)]
-    lv &lt;- unique(quantile(zf, probs = seq(0, 1, length.out = 30)^1.7))
-
-    zr &lt;- matrix(rank(gr$z, na.last = "keep", ties.method = "average"),
-                 nrow = length(gr$x))
-
-    par(mar = c(4, 4, 2.5, 1))
-    image(gr$x, gr$y, zr, asp = 1,
-          col = colorRampPalette(c("#f7fbff", "#c9dcef"))(64),
-          xlab = expression(x[1]), ylab = expression(x[2]),
-          main = paste0(names(ALGS)[ALGS == input$alg], "  |  ", FNc$label))
-    contour(gr$x, gr$y, gr$z, levels = lv, add = TRUE,
-            col = "grey55", drawlabels = FALSE)
-    points(FNc$xstar[1], FNc$xstar[2], pch = 8, col = "red", cex = 1.3, lwd = 2)
-
-    if (isTRUE(input$showpath) &amp;&amp; k &gt; 1)
-      lines(P$X[1:k, 1], P$X[1:k, 2], col = "grey25", lty = 2)
-    points(P$X[1:k, 1], P$X[1:k, 2], pch = 20, col = "grey35", cex = 0.9)
-
-    xk &lt;- P$X[k, ]; gk &lt;- P$G[k, ]; gn &lt;- sqrt(sum(gk^2))
-    L &lt;- 0.09 * diff(FNc$xlim)                      # fixed display length
-    if (gn &gt; 0) {
-      u &lt;- -gk / gn
-      arrows(xk[1], xk[2], xk[1] + L * u[1], xk[2] + L * u[2],
-             col = "grey45", lwd = 3, length = 0.10)
-      arrows(xk[1], xk[2], xk[1] - gk[1], xk[2] - gk[2],
-             col = "#E8820C", lwd = 3, length = 0.13)
+  
+  # Main Plot
+  output$optim_plot &lt;- renderPlot({
+    req(input$step)
+    path &lt;- optim_data()
+    cg &lt;- contour_grid()
+    
+    current_step &lt;- input$step
+    path_to_current &lt;- path[1:current_step, ]
+    current_pt &lt;- path[current_step, ]
+    
+    p &lt;- ggplot() +
+      geom_contour(data = cg$grid, aes(x=x, y=y, z=z), bins = 25, color = "grey70") +
+      geom_path(data = path_to_current, aes(x=x, y=y), color = "black", linewidth = 0.8) +
+      geom_point(data = path_to_current, aes(x=x, y=y), size = 2) +
+      coord_cartesian(xlim = cg$fn$xlim, ylim = cg$fn$ylim) +
+      theme_minimal() +
+      labs(x = "X", y = "Y", title = paste(input$algo, "on", input$func))
+    
+    # If not the last step, draw arrows
+    if(!is.na(current_pt$gx) &amp;&amp; !is.na(current_pt$dx)) {
+      
+      # 1. Normalize gradient vector length for clear visualization
+      g_mag &lt;- sqrt(current_pt$gx^2 + current_pt$gy^2)
+      arrow_len &lt;- (cg$fn$xlim[2] - cg$fn$xlim[1]) * 0.1 # Length = 10% of plot width
+      scaled_gx &lt;- (current_pt$gx / g_mag) * arrow_len
+      scaled_gy &lt;- (current_pt$gy / g_mag) * arrow_len
+      
+      # 2. Draw Gradient (Orange)
+      p &lt;- p + geom_segment(
+        aes(x = current_pt$x, y = current_pt$y, 
+            xend = current_pt$x + scaled_gx, yend = current_pt$y + scaled_gy),
+        color = "orange", arrow = arrow(length = unit(0.3, "cm"), type="closed"), 
+        linewidth = 1.2
+      )
+      
+      # 3. Draw Actual Jump Step (Green)
+      p &lt;- p + geom_segment(
+        aes(x = current_pt$x, y = current_pt$y, 
+            xend = current_pt$x + current_pt$dx, yend = current_pt$y + current_pt$dy),
+        color = "green", arrow = arrow(length = unit(0.3, "cm"), type="closed"), 
+        linewidth = 1.2
+      )
+      
+      # Add Legend Annotations manually for clarity
+      p &lt;- p + annotate("text", x = cg$fn$xlim[1], y = cg$fn$ylim[2], 
+                        label = "Orange: Gradient (Direction of Steepest Ascent)\nGreen: Actual Optimization Step", 
+                        hjust = 0, vjust = 1, color = "black", fontface = "bold", size = 4)
     }
-    if (k &lt; P$n) {
-      arrows(xk[1], xk[2], P$X[k + 1, 1], P$X[k + 1, 2],
-             col = "#2E8B57", lwd = 3, length = 0.13)
-      points(P$X[k + 1, 1], P$X[k + 1, 2], pch = 21, bg = "white",
-             col = "#2E8B57", cex = 1.2)
-    }
-    points(xk[1], xk[2], pch = 19, col = "black", cex = 1.3)
-
-    legend("topleft", bty = "n", lwd = 3, cex = 0.9,
-           col = c("grey45", "#E8820C", "#2E8B57"),
-           legend = c(expression(-nabla * f(x[k])~"(direction only)"),
-                      expression(-nabla * f(x[k])~"(actual length)"),
-                      expression(alpha[k] * d[k]~"(step taken)")))
-  })
-
-  output$conv &lt;- renderPlot({
-    P &lt;- path(); k &lt;- min(as.integer(input$k), P$n - 1) + 1L
-    gn &lt;- sqrt(rowSums(P$G^2))
-    gn[!is.finite(gn) | gn &lt;= 0] &lt;- NA
-    par(mar = c(4, 4.5, 1.5, 1))
-    plot(seq_len(P$n) - 1, gn, type = "b", pch = 20, log = "y",
-         xlab = "iteration k", ylab = expression("||" * nabla * f * "||"),
-         col = "grey40")
-    points(k - 1, gn[k], pch = 19, col = "#E8820C", cex = 1.6)
-  })
-
-  output$info &lt;- renderUI({
-    P &lt;- path(); k &lt;- min(as.integer(input$k), P$n - 1) + 1L
-    xk &lt;- P$X[k, ]; gk &lt;- P$G[k, ]; gn &lt;- sqrt(sum(gk^2))
-    ang &lt;- NA
-    if (k &lt; P$n) {
-      sk &lt;- P$X[k + 1, ] - xk
-      cs &lt;- sum(-gk * sk) / (gn * sqrt(sum(sk^2)))
-      ang &lt;- acos(max(-1, min(1, cs))) * 180 / pi
-    }
-    fmt &lt;- function(v, d = 4) formatC(v, format = "g", digits = d)
-    HTML(paste0(
-      "&lt;hr&gt;&lt;b&gt;iteration&lt;/b&gt; ", k - 1, " of ", P$n - 1, "&lt;br&gt;",
-      "&lt;b&gt;x&lt;sub&gt;k&lt;/sub&gt;&lt;/b&gt; = (", fmt(xk[1]), ", ", fmt(xk[2]), ")&lt;br&gt;",
-      "&lt;b&gt;f(x&lt;sub&gt;k&lt;/sub&gt;)&lt;/b&gt; = ", fmt(P$F[k], 6), "&lt;br&gt;",
-      "&lt;b&gt;||grad||&lt;/b&gt; = ", fmt(gn), "&lt;br&gt;",
-      "&lt;b&gt;step size &amp;alpha;&lt;sub&gt;k&lt;/sub&gt;&lt;/b&gt; = ",
-      if (k &lt; P$n) fmt(P$A[k]) else "&amp;ndash;", "&lt;br&gt;",
-      "&lt;b&gt;angle(orange, green)&lt;/b&gt; = ",
-      if (is.na(ang)) "&amp;ndash;" else paste0(fmt(ang, 3), "&amp;deg;"),
-      "&lt;br&gt;&lt;br&gt;&lt;i&gt;", P$note, "&lt;/i&gt;"
-    ))
+    
+    return(p)
   })
 }
 
 shinyApp(ui, server)</code></pre>
-<section id="points-the-animation-is-meant-to-make" class="level2">
-<h2 class="anchored" data-anchor-id="points-the-animation-is-meant-to-make">Points the animation is meant to make</h2>
-<ol type="1">
-<li>On the quadratic, Newton’s step solves the model exactly: one iteration with <span class="math inline">\(\alpha_k = 1\)</span>, and the two arrows differ in direction whenever the Hessian is not a multiple of the identity. Conjugate gradient terminates in two iterations, BFGS in roughly the same number once the inverse-Hessian approximation is built; gradient descent zigzags at right angles between consecutive steps.</li>
-<li>On the Rosenbrock ridge, the gradient points almost perpendicular to the valley, so gradient descent makes little progress per iteration. Newton and BFGS turn the step along the valley; the angle between the grey and green arrows becomes large.</li>
-<li>On the correlated bimodal surface, the limit depends on the starting point. Clicking different starting points shows convergence to different stationary points, and Newton’s method is attracted to whichever stationary point is nearest, including saddle points when the Hessian modification is switched off.</li>
-</ol>
-</section>
 
 </main>
 <!-- /main column -->
