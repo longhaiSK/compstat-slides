@@ -6,11 +6,16 @@
 <script src="Lec_05_MLE_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="Lec_05_MLE_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="Lec_05_MLE_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_05_MLE_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<link href="Lec_05_MLE_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<meta name="shinylive:serviceworker_dir" content=".">
+<script src="Lec_05_MLE_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/load-shinylive-sw.js" type="module"></script>
+<script src="Lec_05_MLE_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/run-python-blocks.js" type="module"></script>
+<link href="Lec_05_MLE_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/shinylive.css" rel="stylesheet">
+<link href="Lec_05_MLE_files/libs/quarto-contrib/shinylive-quarto-css/shinylive-quarto.css" rel="stylesheet"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <meta name="dcterms.date" content="2026-09-09">
+  <meta name="dcterms.date" content="2026-09-12">
   <title>Elements of Statistical Computation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -227,7 +232,7 @@ Longhai Li
 </div>
 </div>
 
-  <p class="date">2026-09-09</p>
+  <p class="date">2026-09-12</p>
 </section>
 <section>
 <section id="review-likelihood-theory-and-mle" class="title-slide slide level1 center" data-number="1">
@@ -904,27 +909,6 @@ z_j = \frac{\hat\beta_j}{\widehat{\mathrm{SE}}(\hat\beta_j)} \;\dot\sim\; N(0,1)
 </table>
 <p>All are available through <code>optim(par, fn, gr, method = ...)</code> in R. Convention below: <strong>minimize</strong> <span class="math inline">f(\theta) = -\ell(\theta)</span>.</p>
 </section>
-<section id="neldermead-simplex-method" class="slide level2">
-<h2>Nelder–Mead (Simplex Method)</h2>
-<p>Maintains a <strong>simplex</strong> of <span class="math inline">p+1</span> points (a triangle in 2D) and moves it downhill using only function values:</p>
-<ol type="1">
-<li><p>Order the vertices <span class="math inline">f(\theta_{(1)}) \le \cdots \le f(\theta_{(p+1)})</span>; let <span class="math inline">\overline\theta</span> be the centroid of the best <span class="math inline">p</span>.</p></li>
-<li><p><strong>Reflect</strong> the worst vertex through <span class="math inline">\overline\theta</span>; if the reflected point is the new best, try <strong>expanding</strong> further.</p></li>
-<li><p>If reflection is poor, <strong>contract</strong> toward <span class="math inline">\overline\theta</span>; if that also fails, <strong>shrink</strong> all vertices toward the best.</p></li>
-</ol>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href=""></a>rosen <span class="ot">&lt;-</span> <span class="cf">function</span>(v) (<span class="dv">1</span> <span class="sc">-</span> v[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">100</span> <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> v[<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>       <span class="co"># Rosenbrock "banana", min at (1, 1)</span></span>
-<span id="cb36-2"><a href=""></a>nm <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.2</span>, <span class="dv">1</span>), rosen, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>); <span class="fu">c</span>(nm<span class="sc">$</span>par, <span class="at">evals =</span> nm<span class="sc">$</span>counts[<span class="st">"function"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>                              evals.function 
-      1.000260       1.000506     195.000000 </code></pre>
-</div>
-</div>
-<p>Robust and derivative-free (R’s <code>optim</code> default), but slow in high dimensions and offers no standard errors.</p>
-</section>
 <section id="gradient-descent-with-line-search" class="slide level2">
 <h2>Gradient Descent with Line Search</h2>
 <p>Move in the direction of steepest descent <span class="math inline">d_k = -\nabla f(\theta_k)</span>, choosing the step length <span class="math inline">\alpha_k</span> by a <strong>line search</strong>: <span class="math display">
@@ -937,15 +921,15 @@ z_j = \frac{\hat\beta_j}{\widehat{\mathrm{SE}}(\hat\beta_j)} \;\dot\sim\; N(0,1)
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href=""></a>grad_descent <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
-<span id="cb38-2"><a href=""></a>  path <span class="ot">&lt;-</span> x0</span>
-<span id="cb38-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
-<span id="cb38-4"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">gr</span>(x0); a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum   <span class="co"># exact line search</span></span>
-<span id="cb38-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
-<span id="cb38-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>((x1 <span class="sc">-</span> x0)<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
-<span id="cb38-7"><a href=""></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
-<span id="cb38-8"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
-<span id="cb38-9"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href=""></a>grad_descent <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb36-2"><a href=""></a>  path <span class="ot">&lt;-</span> x0</span>
+<span id="cb36-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb36-4"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">gr</span>(x0); a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum   <span class="co"># exact line search</span></span>
+<span id="cb36-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
+<span id="cb36-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>((x1 <span class="sc">-</span> x0)<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
+<span id="cb36-7"><a href=""></a>    x0 <span class="ot">&lt;-</span> x1 }</span>
+<span id="cb36-8"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
+<span id="cb36-9"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -953,7 +937,7 @@ z_j = \frac{\hat\beta_j}{\widehat{\mathrm{SE}}(\hat\beta_j)} \;\dot\sim\; N(0,1)
 <h2>Why Gradient Descent Zig-Zags</h2>
 <p>With exact line search, consecutive directions are <strong>orthogonal</strong> (<span class="math inline">\nabla f(\theta_{k+1})'d_k = 0</span>), so on elongated contours the path zig-zags across the valley:</p>
 
-<img data-src="Lec_05_MLE_files/figure-revealjs/unnamed-chunk-21-1.png" width="672" class="r-stretch"><p>The number of iterations grows with the <strong>condition number</strong> of the Hessian (ratio of largest to smallest eigenvalue).</p>
+<img data-src="Lec_05_MLE_files/figure-revealjs/unnamed-chunk-20-1.png" width="672" class="r-stretch"><p>The number of iterations grows with the <strong>condition number</strong> of the Hessian (ratio of largest to smallest eigenvalue).</p>
 </section>
 <section id="conjugate-gradient" class="slide level2">
 <h2>Conjugate Gradient</h2>
@@ -974,35 +958,35 @@ d_0 = -g_0, \qquad d_{k+1} = -g_{k+1} + \beta_k d_k, \qquad
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a>conj_grad <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">restart =</span> <span class="fu">length</span>(x0)) {</span>
-<span id="cb39-2"><a href=""></a>  g0 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x0); d <span class="ot">&lt;-</span> <span class="sc">-</span>g0; path <span class="ot">&lt;-</span> x0</span>
-<span id="cb39-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
-<span id="cb39-4"><a href=""></a>    a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum</span>
-<span id="cb39-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; g1 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x1); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
-<span id="cb39-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>(g1<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
-<span id="cb39-7"><a href=""></a>    beta <span class="ot">&lt;-</span> <span class="cf">if</span> (k <span class="sc">%%</span> restart <span class="sc">==</span> <span class="dv">0</span>) <span class="dv">0</span> <span class="cf">else</span> <span class="fu">max</span>(<span class="dv">0</span>, <span class="fu">sum</span>(g1 <span class="sc">*</span> (g1 <span class="sc">-</span> g0)) <span class="sc">/</span> <span class="fu">sum</span>(g0<span class="sc">^</span><span class="dv">2</span>))   <span class="co"># Polak-Ribiere+</span></span>
-<span id="cb39-8"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span>g1 <span class="sc">+</span> beta <span class="sc">*</span> d; x0 <span class="ot">&lt;-</span> x1; g0 <span class="ot">&lt;-</span> g1 }</span>
-<span id="cb39-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
-<span id="cb39-10"><a href=""></a>}</span>
-<span id="cb39-11"><a href=""></a>cg <span class="ot">&lt;-</span> <span class="fu">conj_grad</span>(fq, gq, <span class="fu">c</span>(<span class="dv">2</span>, <span class="sc">-</span><span class="fl">1.8</span>))</span>
-<span id="cb39-12"><a href=""></a><span class="fu">par</span>(<span class="at">pty =</span> <span class="st">"s"</span>, <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>)); <span class="fu">contour</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="sc">-</span>z, <span class="at">nlevels =</span> <span class="dv">15</span>, <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"conjugate gradient, %d iterations"</span>, cg<span class="sc">$</span>iter))</span>
-<span id="cb39-13"><a href=""></a><span class="fu">lines</span>(gd<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>); <span class="fu">lines</span>(cg<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb39-14"><a href=""></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"gradient descent"</span>, <span class="st">"conjugate gradient"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href=""></a>conj_grad <span class="ot">&lt;-</span> <span class="cf">function</span>(f, gr, x0, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>, <span class="at">restart =</span> <span class="fu">length</span>(x0)) {</span>
+<span id="cb37-2"><a href=""></a>  g0 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x0); d <span class="ot">&lt;-</span> <span class="sc">-</span>g0; path <span class="ot">&lt;-</span> x0</span>
+<span id="cb37-3"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxit) {</span>
+<span id="cb37-4"><a href=""></a>    a <span class="ot">&lt;-</span> <span class="fu">optimize</span>(<span class="cf">function</span>(a) <span class="fu">f</span>(x0 <span class="sc">+</span> a <span class="sc">*</span> d), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>))<span class="sc">$</span>minimum</span>
+<span id="cb37-5"><a href=""></a>    x1 <span class="ot">&lt;-</span> x0 <span class="sc">+</span> a <span class="sc">*</span> d; g1 <span class="ot">&lt;-</span> <span class="fu">gr</span>(x1); path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, x1)</span>
+<span id="cb37-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(<span class="fu">sum</span>(g1<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
+<span id="cb37-7"><a href=""></a>    beta <span class="ot">&lt;-</span> <span class="cf">if</span> (k <span class="sc">%%</span> restart <span class="sc">==</span> <span class="dv">0</span>) <span class="dv">0</span> <span class="cf">else</span> <span class="fu">max</span>(<span class="dv">0</span>, <span class="fu">sum</span>(g1 <span class="sc">*</span> (g1 <span class="sc">-</span> g0)) <span class="sc">/</span> <span class="fu">sum</span>(g0<span class="sc">^</span><span class="dv">2</span>))   <span class="co"># Polak-Ribiere+</span></span>
+<span id="cb37-8"><a href=""></a>    d <span class="ot">&lt;-</span> <span class="sc">-</span>g1 <span class="sc">+</span> beta <span class="sc">*</span> d; x0 <span class="ot">&lt;-</span> x1; g0 <span class="ot">&lt;-</span> g1 }</span>
+<span id="cb37-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">par =</span> x1, <span class="at">iter =</span> k, <span class="at">path =</span> path)</span>
+<span id="cb37-10"><a href=""></a>}</span>
+<span id="cb37-11"><a href=""></a>cg <span class="ot">&lt;-</span> <span class="fu">conj_grad</span>(fq, gq, <span class="fu">c</span>(<span class="dv">2</span>, <span class="sc">-</span><span class="fl">1.8</span>))</span>
+<span id="cb37-12"><a href=""></a><span class="fu">par</span>(<span class="at">pty =</span> <span class="st">"s"</span>, <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>)); <span class="fu">contour</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">l =</span> <span class="dv">80</span>), <span class="sc">-</span>z, <span class="at">nlevels =</span> <span class="dv">15</span>, <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"conjugate gradient, %d iterations"</span>, cg<span class="sc">$</span>iter))</span>
+<span id="cb37-13"><a href=""></a><span class="fu">lines</span>(gd<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>); <span class="fu">lines</span>(cg<span class="sc">$</span>path, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb37-14"><a href=""></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"gradient descent"</span>, <span class="st">"conjugate gradient"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 
 </div>
-<img data-src="Lec_05_MLE_files/figure-revealjs/unnamed-chunk-22-1.png" width="672" class="r-stretch"></section>
+<img data-src="Lec_05_MLE_files/figure-revealjs/unnamed-chunk-21-1.png" width="672" class="r-stretch"></section>
 <section id="quasi-newton-bfgs" class="slide level2">
 <h2>Quasi-Newton: BFGS</h2>
 <p>Between gradient methods and Newton: build an approximation <span class="math inline">B_k \approx \nabla^2 f</span> from successive gradient differences <span class="math inline">s_k = \theta_{k+1} - \theta_k</span>, <span class="math inline">y_k = g_{k+1} - g_k</span>, via a rank-two update that keeps <span class="math inline">B_k</span> positive definite. Steps are <span class="math inline">d_k = -B_k^{-1}g_k</span> with a line search.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href=""></a>negll <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">loglik</span>(b); neggr <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">drop</span>(<span class="fu">grad</span>(b))</span>
-<span id="cb40-2"><a href=""></a>fits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NM =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>),</span>
-<span id="cb40-3"><a href=""></a>             <span class="at">CG =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"CG"</span>),</span>
-<span id="cb40-4"><a href=""></a>             <span class="at">BFGS =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"BFGS"</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb40-5"><a href=""></a><span class="fu">t</span>(<span class="fu">sapply</span>(fits, <span class="cf">function</span>(f) <span class="fu">c</span>(f<span class="sc">$</span>par, <span class="at">f_evals =</span> f<span class="sc">$</span>counts[<span class="dv">1</span>], <span class="at">g_evals =</span> f<span class="sc">$</span>counts[<span class="dv">2</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href=""></a>negll <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">loglik</span>(b); neggr <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">drop</span>(<span class="fu">grad</span>(b))</span>
+<span id="cb38-2"><a href=""></a>fits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NM =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>),</span>
+<span id="cb38-3"><a href=""></a>             <span class="at">CG =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"CG"</span>),</span>
+<span id="cb38-4"><a href=""></a>             <span class="at">BFGS =</span> <span class="fu">optim</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), negll, neggr, <span class="at">method =</span> <span class="st">"BFGS"</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb38-5"><a href=""></a><span class="fu">t</span>(<span class="fu">sapply</span>(fits, <span class="cf">function</span>(f) <span class="fu">c</span>(f<span class="sc">$</span>par, <span class="at">f_evals =</span> f<span class="sc">$</span>counts[<span class="dv">1</span>], <span class="at">g_evals =</span> f<span class="sc">$</span>counts[<span class="dv">2</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                   f_evals.function g_evals.gradient
@@ -1012,7 +996,7 @@ BFGS -0.5431413 1.080382 -2.453255               36               13</code></pre
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href=""></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(fits<span class="sc">$</span>BFGS<span class="sc">$</span>hessian)))     <span class="co"># SEs from the numerically computed Hessian at the optimum</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href=""></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(fits<span class="sc">$</span>BFGS<span class="sc">$</span>hessian)))     <span class="co"># SEs from the numerically computed Hessian at the optimum</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1337429 0.1511637 0.2228005</code></pre>
@@ -1020,15 +1004,367 @@ BFGS -0.5431413 1.080382 -2.453255               36               13</code></pre
 </div>
 <p><code>optim(..., hessian = TRUE)</code> returns a finite-difference Hessian at the solution, so standard errors are available even for gradient-only methods.</p>
 </section>
-<section id="animation-for-various-optimization-methods" class="slide level2">
-<h2>Animation for Various Optimization Methods</h2>
-<p><a href="https://scipy-lectures.org/advanced/mathematical_optimization/index.html#knowing-your-problem">An overview</a></p>
-<p><a href="https://codesachin.wordpress.com/2016/01/16/nelder-mead-optimization/">Nelder-Mead Method (A Gradient-Free Method)</a></p>
-<p><a href="https://www.benfrederickson.com/numerical-optimization/">Gradient Descent Methods (Hessian-Free Methods)</a></p>
+<section id="animation-for-gradient-based-methods" class="slide level2">
+<h2>Animation for Gradient-based Methods</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42" data-engine="r"><pre class="sourceCode numberSource shinylive-r number-lines code-with-copy"><code class="sourceCode"><span id="cb42-1"><a href=""></a>#| '!! shinylive warning !!': |</span>
+<span id="cb42-2"><a href=""></a>#|   shinylive does not work in self-contained HTML documents.</span>
+<span id="cb42-3"><a href=""></a>#|   Please set `embed-resources: false` in your metadata.</span>
+<span id="cb42-4"><a href=""></a>#| standalone: true</span>
+<span id="cb42-5"><a href=""></a>#| viewerHeight: 820</span>
+<span id="cb42-6"><a href=""></a>#| echo: false</span>
+<span id="cb42-7"><a href=""></a></span>
+<span id="cb42-8"><a href=""></a>library(shiny)</span>
+<span id="cb42-9"><a href=""></a></span>
+<span id="cb42-10"><a href=""></a>## ---------------------------------------------------------------- objectives</span>
+<span id="cb42-11"><a href=""></a>mk &lt;- function(label, fv, xlim, ylim, start, xstar) {</span>
+<span id="cb42-12"><a href=""></a>  force(fv)</span>
+<span id="cb42-13"><a href=""></a>  list(label = label, fv = fv, f = function(p) fv(p[1], p[2]),</span>
+<span id="cb42-14"><a href=""></a>       xlim = xlim, ylim = ylim, start = start,</span>
+<span id="cb42-15"><a href=""></a>       xstar = matrix(xstar, ncol = 2))</span>
+<span id="cb42-16"><a href=""></a>}</span>
+<span id="cb42-17"><a href=""></a></span>
+<span id="cb42-18"><a href=""></a>FNS &lt;- list(</span>
+<span id="cb42-19"><a href=""></a>  quad = mk(</span>
+<span id="cb42-20"><a href=""></a>    "(a) Well-conditioned quadratic",</span>
+<span id="cb42-21"><a href=""></a>    function(x, y) 0.5 * (2 * (x - 1)^2 + 1.6 * (x - 1) * (y - 1) +</span>
+<span id="cb42-22"><a href=""></a>                          2 * (y - 1)^2),</span>
+<span id="cb42-23"><a href=""></a>    c(-3, 4), c(-3, 4), c(-2, 3), c(1, 1)</span>
+<span id="cb42-24"><a href=""></a>  ),</span>
+<span id="cb42-25"><a href=""></a>  banana = mk(</span>
+<span id="cb42-26"><a href=""></a>    "(b) Rosenbrock banana (narrow curved ridge)",</span>
+<span id="cb42-27"><a href=""></a>    function(x, y) (1 - x)^2 + 100 * (y - x^2)^2,</span>
+<span id="cb42-28"><a href=""></a>    c(-2, 2), c(-1, 3), c(-1.2, 1), c(1, 1)</span>
+<span id="cb42-29"><a href=""></a>  ),</span>
+<span id="cb42-30"><a href=""></a>  mix = mk(</span>
+<span id="cb42-31"><a href=""></a>    "(c) Highly correlated, two modes",</span>
+<span id="cb42-32"><a href=""></a>    function(x, y) {</span>
+<span id="cb42-33"><a href=""></a>      rho &lt;- 0.9; den &lt;- 1 - rho^2</span>
+<span id="cb42-34"><a href=""></a>      q &lt;- function(u, v) (u^2 - 2 * rho * u * v + v^2) / den</span>
+<span id="cb42-35"><a href=""></a>      -log(exp(-0.5 * q(x - 1.2, y - 1.2)) +</span>
+<span id="cb42-36"><a href=""></a>           0.6 * exp(-0.5 * q(x + 1.5, y + 1.5) / 1.5) + 1e-12)</span>
+<span id="cb42-37"><a href=""></a>    },</span>
+<span id="cb42-38"><a href=""></a>    c(-4, 4), c(-4, 4), c(-3, -0.5), c(1.2, 1.2)</span>
+<span id="cb42-39"><a href=""></a>  ),</span>
+<span id="cb42-40"><a href=""></a>  himmel = mk(</span>
+<span id="cb42-41"><a href=""></a>    "(d) Himmelblau (four global minima)",</span>
+<span id="cb42-42"><a href=""></a>    function(x, y) (x^2 + y - 11)^2 + (x + y^2 - 7)^2,</span>
+<span id="cb42-43"><a href=""></a>    c(-5, 5), c(-5, 5), c(-4, 4),</span>
+<span id="cb42-44"><a href=""></a>    rbind(c(3, 2), c(-2.805118, 3.131312),</span>
+<span id="cb42-45"><a href=""></a>          c(-3.779310, -3.283186), c(3.584428, -1.848126))</span>
+<span id="cb42-46"><a href=""></a>  ),</span>
+<span id="cb42-47"><a href=""></a>  beale = mk(</span>
+<span id="cb42-48"><a href=""></a>    "(e) Beale (flat plateau, sharp valley)",</span>
+<span id="cb42-49"><a href=""></a>    function(x, y) (1.5 - x + x * y)^2 + (2.25 - x + x * y^2)^2 +</span>
+<span id="cb42-50"><a href=""></a>                   (2.625 - x + x * y^3)^2,</span>
+<span id="cb42-51"><a href=""></a>    c(-4.5, 4.5), c(-4.5, 4.5), c(-1, 1), c(3, 0.5)</span>
+<span id="cb42-52"><a href=""></a>  ),</span>
+<span id="cb42-53"><a href=""></a>  rastrigin = mk(</span>
+<span id="cb42-54"><a href=""></a>    "(f) Rastrigin (many local minima)",</span>
+<span id="cb42-55"><a href=""></a>    function(x, y) 20 + x^2 - 10 * cos(2 * pi * x) +</span>
+<span id="cb42-56"><a href=""></a>                        y^2 - 10 * cos(2 * pi * y),</span>
+<span id="cb42-57"><a href=""></a>    c(-5.12, 5.12), c(-5.12, 5.12), c(-3.1, 4.2), c(0, 0)</span>
+<span id="cb42-58"><a href=""></a>  )</span>
+<span id="cb42-59"><a href=""></a>)</span>
+<span id="cb42-60"><a href=""></a></span>
+<span id="cb42-61"><a href=""></a>## ------------------------------------------------- numerical derivatives</span>
+<span id="cb42-62"><a href=""></a>num_grad &lt;- function(f, x) {</span>
+<span id="cb42-63"><a href=""></a>  h &lt;- 1e-5 * (1 + abs(x))</span>
+<span id="cb42-64"><a href=""></a>  g &lt;- numeric(2)</span>
+<span id="cb42-65"><a href=""></a>  for (i in 1:2) {</span>
+<span id="cb42-66"><a href=""></a>    e &lt;- numeric(2); e[i] &lt;- h[i]</span>
+<span id="cb42-67"><a href=""></a>    g[i] &lt;- (f(x + e) - f(x - e)) / (2 * h[i])</span>
+<span id="cb42-68"><a href=""></a>  }</span>
+<span id="cb42-69"><a href=""></a>  g</span>
+<span id="cb42-70"><a href=""></a>}</span>
+<span id="cb42-71"><a href=""></a></span>
+<span id="cb42-72"><a href=""></a>num_hess &lt;- function(f, x) {</span>
+<span id="cb42-73"><a href=""></a>  h &lt;- 1e-4 * (1 + abs(x))</span>
+<span id="cb42-74"><a href=""></a>  H &lt;- matrix(0, 2, 2)</span>
+<span id="cb42-75"><a href=""></a>  for (i in 1:2) for (j in i:2) {</span>
+<span id="cb42-76"><a href=""></a>    ei &lt;- numeric(2); ei[i] &lt;- h[i]</span>
+<span id="cb42-77"><a href=""></a>    ej &lt;- numeric(2); ej[j] &lt;- h[j]</span>
+<span id="cb42-78"><a href=""></a>    H[i, j] &lt;- (f(x + ei + ej) - f(x + ei - ej) -</span>
+<span id="cb42-79"><a href=""></a>                f(x - ei + ej) + f(x - ei - ej)) / (4 * h[i] * h[j])</span>
+<span id="cb42-80"><a href=""></a>    H[j, i] &lt;- H[i, j]</span>
+<span id="cb42-81"><a href=""></a>  }</span>
+<span id="cb42-82"><a href=""></a>  H</span>
+<span id="cb42-83"><a href=""></a>}</span>
+<span id="cb42-84"><a href=""></a></span>
+<span id="cb42-85"><a href=""></a>## --------------------------------------------------- Wolfe line search</span>
+<span id="cb42-86"><a href=""></a>line_search &lt;- function(f, g, x, d, a0 = 1, c1 = 1e-4, c2 = 0.9) {</span>
+<span id="cb42-87"><a href=""></a>  f0 &lt;- f(x); gd0 &lt;- sum(g * d)</span>
+<span id="cb42-88"><a href=""></a>  if (!is.finite(gd0) || gd0 &gt;= 0) return(list(alpha = 0, ok = FALSE))</span>
+<span id="cb42-89"><a href=""></a>  lo &lt;- 0; hi &lt;- Inf; a &lt;- a0</span>
+<span id="cb42-90"><a href=""></a>  for (it in 1:60) {</span>
+<span id="cb42-91"><a href=""></a>    fa &lt;- f(x + a * d)</span>
+<span id="cb42-92"><a href=""></a>    if (!is.finite(fa) || fa &gt; f0 + c1 * a * gd0) {</span>
+<span id="cb42-93"><a href=""></a>      hi &lt;- a; a &lt;- 0.5 * (lo + hi)</span>
+<span id="cb42-94"><a href=""></a>    } else {</span>
+<span id="cb42-95"><a href=""></a>      ga &lt;- num_grad(f, x + a * d)</span>
+<span id="cb42-96"><a href=""></a>      if (sum(ga * d) &lt; c2 * gd0) {</span>
+<span id="cb42-97"><a href=""></a>        lo &lt;- a</span>
+<span id="cb42-98"><a href=""></a>        a &lt;- if (is.finite(hi)) 0.5 * (lo + hi) else min(2 * a, 1e4)</span>
+<span id="cb42-99"><a href=""></a>      } else {</span>
+<span id="cb42-100"><a href=""></a>        return(list(alpha = a, ok = TRUE))</span>
+<span id="cb42-101"><a href=""></a>      }</span>
+<span id="cb42-102"><a href=""></a>    }</span>
+<span id="cb42-103"><a href=""></a>    if (a &lt; 1e-14) return(list(alpha = 0, ok = FALSE))</span>
+<span id="cb42-104"><a href=""></a>  }</span>
+<span id="cb42-105"><a href=""></a>  list(alpha = a, ok = (a &gt; 0))</span>
+<span id="cb42-106"><a href=""></a>}</span>
+<span id="cb42-107"><a href=""></a></span>
+<span id="cb42-108"><a href=""></a>## ------------------------------------------------------------- algorithms</span>
+<span id="cb42-109"><a href=""></a>run_alg &lt;- function(alg, FN, x0, maxit = 60, tol = 1e-6) {</span>
+<span id="cb42-110"><a href=""></a>  f &lt;- FN$f</span>
+<span id="cb42-111"><a href=""></a>  X &lt;- matrix(NA_real_, maxit + 1, 2); G &lt;- matrix(NA_real_, maxit + 1, 2)</span>
+<span id="cb42-112"><a href=""></a>  D &lt;- matrix(NA_real_, maxit + 1, 2); Fv &lt;- rep(NA_real_, maxit + 1)</span>
+<span id="cb42-113"><a href=""></a>  AL &lt;- rep(NA_real_, maxit + 1)</span>
+<span id="cb42-114"><a href=""></a>  x &lt;- x0; B &lt;- diag(2)</span>
+<span id="cb42-115"><a href=""></a>  g_prev &lt;- NULL; d_prev &lt;- NULL; s_prev &lt;- NULL</span>
+<span id="cb42-116"><a href=""></a>  n &lt;- 0; note &lt;- "maximum number of iterations reached"</span>
+<span id="cb42-117"><a href=""></a></span>
+<span id="cb42-118"><a href=""></a>  for (k in seq_len(maxit)) {</span>
+<span id="cb42-119"><a href=""></a>    g &lt;- num_grad(f, x); gn &lt;- sqrt(sum(g^2))</span>
+<span id="cb42-120"><a href=""></a>    X[k, ] &lt;- x; G[k, ] &lt;- g; Fv[k] &lt;- f(x); n &lt;- k</span>
+<span id="cb42-121"><a href=""></a>    if (!is.finite(gn)) { note &lt;- "diverged"; break }</span>
+<span id="cb42-122"><a href=""></a>    if (gn &lt; tol) { note &lt;- "converged (||grad|| &lt; 1e-6)"; break }</span>
+<span id="cb42-123"><a href=""></a></span>
+<span id="cb42-124"><a href=""></a>    if (alg == "nr") {</span>
+<span id="cb42-125"><a href=""></a>      H &lt;- num_hess(f, x); H &lt;- (H + t(H)) / 2</span>
+<span id="cb42-126"><a href=""></a>      ev &lt;- eigen(H, symmetric = TRUE, only.values = TRUE)$values</span>
+<span id="cb42-127"><a href=""></a>      delta &lt;- 1e-3 * max(1, max(abs(ev)))</span>
+<span id="cb42-128"><a href=""></a>      tau &lt;- max(0, delta - min(ev))</span>
+<span id="cb42-129"><a href=""></a>      d &lt;- tryCatch(solve(H + tau * diag(2), -g), error = function(e) -g)</span>
+<span id="cb42-130"><a href=""></a>    } else if (alg == "gd") {</span>
+<span id="cb42-131"><a href=""></a>      d &lt;- -g</span>
+<span id="cb42-132"><a href=""></a>    } else if (alg == "cg") {</span>
+<span id="cb42-133"><a href=""></a>      if (is.null(d_prev)) {</span>
+<span id="cb42-134"><a href=""></a>        d &lt;- -g</span>
+<span id="cb42-135"><a href=""></a>      } else {</span>
+<span id="cb42-136"><a href=""></a>        y &lt;- g - g_prev</span>
+<span id="cb42-137"><a href=""></a>        beta &lt;- max(0, sum(g * y) / max(sum(g_prev^2), 1e-300))   # PR+</span>
+<span id="cb42-138"><a href=""></a>        d &lt;- -g + beta * d_prev</span>
+<span id="cb42-139"><a href=""></a>      }</span>
+<span id="cb42-140"><a href=""></a>      if (sum(g * d) &gt; -1e-12) d &lt;- -g                            # restart</span>
+<span id="cb42-141"><a href=""></a>    } else {                                                      # BFGS</span>
+<span id="cb42-142"><a href=""></a>      if (!is.null(s_prev)) {</span>
+<span id="cb42-143"><a href=""></a>        y &lt;- g - g_prev; sy &lt;- sum(s_prev * y)</span>
+<span id="cb42-144"><a href=""></a>        if (sy &gt; 1e-10) {</span>
+<span id="cb42-145"><a href=""></a>          rho &lt;- 1 / sy</span>
+<span id="cb42-146"><a href=""></a>          V &lt;- diag(2) - rho * outer(s_prev, y)</span>
+<span id="cb42-147"><a href=""></a>          B &lt;- V %*% B %*% t(V) + rho * outer(s_prev, s_prev)</span>
+<span id="cb42-148"><a href=""></a>        }</span>
+<span id="cb42-149"><a href=""></a>      }</span>
+<span id="cb42-150"><a href=""></a>      d &lt;- -as.vector(B %*% g)</span>
+<span id="cb42-151"><a href=""></a>      if (sum(g * d) &gt; -1e-12) { B &lt;- diag(2); d &lt;- -g }</span>
+<span id="cb42-152"><a href=""></a>    }</span>
+<span id="cb42-153"><a href=""></a></span>
+<span id="cb42-154"><a href=""></a>    ls &lt;- line_search(f, g, x, d)</span>
+<span id="cb42-155"><a href=""></a>    D[k, ] &lt;- d; AL[k] &lt;- ls$alpha</span>
+<span id="cb42-156"><a href=""></a>    if (ls$alpha &lt;= 0) { note &lt;- "line search failed (flat or non-descent)"; break }</span>
+<span id="cb42-157"><a href=""></a></span>
+<span id="cb42-158"><a href=""></a>    s_prev &lt;- ls$alpha * d; g_prev &lt;- g; d_prev &lt;- d</span>
+<span id="cb42-159"><a href=""></a>    x &lt;- x + s_prev</span>
+<span id="cb42-160"><a href=""></a>  }</span>
+<span id="cb42-161"><a href=""></a></span>
+<span id="cb42-162"><a href=""></a>  list(X = X[1:n, , drop = FALSE], G = G[1:n, , drop = FALSE],</span>
+<span id="cb42-163"><a href=""></a>       D = D[1:n, , drop = FALSE], F = Fv[1:n], A = AL[1:n],</span>
+<span id="cb42-164"><a href=""></a>       n = n, note = note)</span>
+<span id="cb42-165"><a href=""></a>}</span>
+<span id="cb42-166"><a href=""></a></span>
+<span id="cb42-167"><a href=""></a>ALGS &lt;- c("Safeguarded Newton (modified Hessian + line search)" = "nr",</span>
+<span id="cb42-168"><a href=""></a>          "Gradient descent + line search"    = "gd",</span>
+<span id="cb42-169"><a href=""></a>          "Conjugate gradient (PR+)"          = "cg",</span>
+<span id="cb42-170"><a href=""></a>          "BFGS (quasi-Newton)"               = "bfgs")</span>
+<span id="cb42-171"><a href=""></a></span>
+<span id="cb42-172"><a href=""></a>## ---------------------------- widen the data box to the device aspect ratio</span>
+<span id="cb42-173"><a href=""></a>expand_box &lt;- function(xlim, ylim, pin) {</span>
+<span id="cb42-174"><a href=""></a>  if (length(pin) != 2 || any(!is.finite(pin)) || any(pin &lt;= 0))</span>
+<span id="cb42-175"><a href=""></a>    return(list(xlim = xlim, ylim = ylim))</span>
+<span id="cb42-176"><a href=""></a>  r &lt;- pin[1] / pin[2]</span>
+<span id="cb42-177"><a href=""></a>  wd &lt;- diff(xlim); ht &lt;- diff(ylim)</span>
+<span id="cb42-178"><a href=""></a>  if (wd / ht &lt; r) {</span>
+<span id="cb42-179"><a href=""></a>    w &lt;- ht * r; m &lt;- mean(xlim); xlim &lt;- m + c(-0.5, 0.5) * w</span>
+<span id="cb42-180"><a href=""></a>  } else {</span>
+<span id="cb42-181"><a href=""></a>    h &lt;- wd / r; m &lt;- mean(ylim); ylim &lt;- m + c(-0.5, 0.5) * h</span>
+<span id="cb42-182"><a href=""></a>  }</span>
+<span id="cb42-183"><a href=""></a>  list(xlim = xlim, ylim = ylim)</span>
+<span id="cb42-184"><a href=""></a>}</span>
+<span id="cb42-185"><a href=""></a></span>
+<span id="cb42-186"><a href=""></a>## --------------------------------------------------------------------- UI</span>
+<span id="cb42-187"><a href=""></a>ui &lt;- fluidPage(</span>
+<span id="cb42-188"><a href=""></a>  fluidRow(</span>
+<span id="cb42-189"><a href=""></a>    column(</span>
+<span id="cb42-190"><a href=""></a>      4,</span>
+<span id="cb42-191"><a href=""></a>      selectInput("alg", "Algorithm", ALGS),</span>
+<span id="cb42-192"><a href=""></a>      selectInput("fn", "Objective function",</span>
+<span id="cb42-193"><a href=""></a>                  setNames(names(FNS), sapply(FNS, `[[`, "label"))),</span>
+<span id="cb42-194"><a href=""></a>      sliderInput("k", "Iteration k", min = 0, max = 1, value = 0, step = 1,</span>
+<span id="cb42-195"><a href=""></a>                  animate = animationOptions(interval = 1000, loop = FALSE)),</span>
+<span id="cb42-196"><a href=""></a>      div(actionButton("step", "Next step"),</span>
+<span id="cb42-197"><a href=""></a>          actionButton("back", "Previous"),</span>
+<span id="cb42-198"><a href=""></a>          actionButton("reset", "Reset starting point")),</span>
+<span id="cb42-199"><a href=""></a>      checkboxInput("showpath", "Show the whole path", TRUE),</span>
+<span id="cb42-200"><a href=""></a>      helpText("Click inside the contour plot to choose a new starting point."),</span>
+<span id="cb42-201"><a href=""></a>      htmlOutput("info")</span>
+<span id="cb42-202"><a href=""></a>    ),</span>
+<span id="cb42-203"><a href=""></a>    column(</span>
+<span id="cb42-204"><a href=""></a>      8,</span>
+<span id="cb42-205"><a href=""></a>      plotOutput("contour", click = "click", height = "540px"),</span>
+<span id="cb42-206"><a href=""></a>      plotOutput("conv", height = "190px")</span>
+<span id="cb42-207"><a href=""></a>    )</span>
+<span id="cb42-208"><a href=""></a>  )</span>
+<span id="cb42-209"><a href=""></a>)</span>
+<span id="cb42-210"><a href=""></a></span>
+<span id="cb42-211"><a href=""></a>## ----------------------------------------------------------------- server</span>
+<span id="cb42-212"><a href=""></a>server &lt;- function(input, output, session) {</span>
+<span id="cb42-213"><a href=""></a></span>
+<span id="cb42-214"><a href=""></a>  FN &lt;- reactive(FNS[[input$fn]])</span>
+<span id="cb42-215"><a href=""></a>  start &lt;- reactiveVal(FNS[[1]]$start)</span>
+<span id="cb42-216"><a href=""></a></span>
+<span id="cb42-217"><a href=""></a>  observeEvent(input$fn, start(FNS[[input$fn]]$start))</span>
+<span id="cb42-218"><a href=""></a>  observeEvent(input$reset, start(FN()$start))</span>
+<span id="cb42-219"><a href=""></a>  observeEvent(input$click, {</span>
+<span id="cb42-220"><a href=""></a>    p &lt;- c(input$click$x, input$click$y)</span>
+<span id="cb42-221"><a href=""></a>    if (all(is.finite(p))) start(p)</span>
+<span id="cb42-222"><a href=""></a>  })</span>
+<span id="cb42-223"><a href=""></a></span>
+<span id="cb42-224"><a href=""></a>  path &lt;- reactive({</span>
+<span id="cb42-225"><a href=""></a>    req(start())</span>
+<span id="cb42-226"><a href=""></a>    run_alg(input$alg, FN(), start())</span>
+<span id="cb42-227"><a href=""></a>  })</span>
+<span id="cb42-228"><a href=""></a></span>
+<span id="cb42-229"><a href=""></a>  observeEvent(path(), {</span>
+<span id="cb42-230"><a href=""></a>    updateSliderInput(session, "k", max = max(1, path()$n - 1), value = 0)</span>
+<span id="cb42-231"><a href=""></a>  })</span>
+<span id="cb42-232"><a href=""></a></span>
+<span id="cb42-233"><a href=""></a>  observeEvent(input$step, {</span>
+<span id="cb42-234"><a href=""></a>    updateSliderInput(session, "k",</span>
+<span id="cb42-235"><a href=""></a>                      value = min(as.integer(input$k) + 1, max(0, path()$n - 1)))</span>
+<span id="cb42-236"><a href=""></a>  })</span>
+<span id="cb42-237"><a href=""></a></span>
+<span id="cb42-238"><a href=""></a>  observeEvent(input$back, {</span>
+<span id="cb42-239"><a href=""></a>    updateSliderInput(session, "k", value = max(as.integer(input$k) - 1, 0))</span>
+<span id="cb42-240"><a href=""></a>  })</span>
+<span id="cb42-241"><a href=""></a></span>
+<span id="cb42-242"><a href=""></a>  output$contour &lt;- renderPlot({</span>
+<span id="cb42-243"><a href=""></a>    FNc &lt;- FN(); P &lt;- path()</span>
+<span id="cb42-244"><a href=""></a>    k &lt;- min(as.integer(input$k), P$n - 1) + 1L</span>
+<span id="cb42-245"><a href=""></a></span>
+<span id="cb42-246"><a href=""></a>    par(mar = c(4, 4, 2.5, 1))</span>
+<span id="cb42-247"><a href=""></a>    plot.new()</span>
+<span id="cb42-248"><a href=""></a>    bx &lt;- expand_box(FNc$xlim, FNc$ylim, par("pin"))</span>
+<span id="cb42-249"><a href=""></a>    plot.window(xlim = bx$xlim, ylim = bx$ylim, xaxs = "i", yaxs = "i")</span>
+<span id="cb42-250"><a href=""></a></span>
+<span id="cb42-251"><a href=""></a>    xs &lt;- seq(bx$xlim[1], bx$xlim[2], length.out = 180)</span>
+<span id="cb42-252"><a href=""></a>    ys &lt;- seq(bx$ylim[1], bx$ylim[2], length.out = 180)</span>
+<span id="cb42-253"><a href=""></a>    z  &lt;- outer(xs, ys, FNc$fv)</span>
+<span id="cb42-254"><a href=""></a>    zf &lt;- z[is.finite(z)]</span>
+<span id="cb42-255"><a href=""></a>    lv &lt;- unique(quantile(zf, probs = seq(0, 1, length.out = 30)^1.7))</span>
+<span id="cb42-256"><a href=""></a>    zr &lt;- matrix(rank(z, na.last = "keep", ties.method = "average"),</span>
+<span id="cb42-257"><a href=""></a>                 nrow = length(xs))</span>
+<span id="cb42-258"><a href=""></a></span>
+<span id="cb42-259"><a href=""></a>    image(xs, ys, zr, add = TRUE,</span>
+<span id="cb42-260"><a href=""></a>          col = colorRampPalette(c("#f7fbff", "#9ec4e3"))(128))</span>
+<span id="cb42-261"><a href=""></a>    contour(xs, ys, z, levels = lv, add = TRUE,</span>
+<span id="cb42-262"><a href=""></a>            col = "grey45", drawlabels = FALSE)</span>
+<span id="cb42-263"><a href=""></a>    axis(1); axis(2); box()</span>
+<span id="cb42-264"><a href=""></a>    title(main = paste0(names(ALGS)[ALGS == input$alg], "  |  ", FNc$label),</span>
+<span id="cb42-265"><a href=""></a>          xlab = expression(x[1]), ylab = expression(x[2]), cex.main = 1.0)</span>
+<span id="cb42-266"><a href=""></a></span>
+<span id="cb42-267"><a href=""></a>    points(FNc$xstar[, 1], FNc$xstar[, 2], pch = 8, col = "red",</span>
+<span id="cb42-268"><a href=""></a>           cex = 1.3, lwd = 2)</span>
+<span id="cb42-269"><a href=""></a></span>
+<span id="cb42-270"><a href=""></a>    if (isTRUE(input$showpath) &amp;&amp; k &gt; 1)</span>
+<span id="cb42-271"><a href=""></a>      lines(P$X[1:k, 1], P$X[1:k, 2], col = "grey25", lty = 2)</span>
+<span id="cb42-272"><a href=""></a>    points(P$X[1:k, 1], P$X[1:k, 2], pch = 20, col = "grey35", cex = 0.9)</span>
+<span id="cb42-273"><a href=""></a></span>
+<span id="cb42-274"><a href=""></a>    xk &lt;- P$X[k, ]; gk &lt;- P$G[k, ]; gn &lt;- sqrt(sum(gk^2))</span>
+<span id="cb42-275"><a href=""></a>    L &lt;- 0.09 * diff(bx$xlim)                      # fixed display length</span>
+<span id="cb42-276"><a href=""></a>    if (gn &gt; 0) {</span>
+<span id="cb42-277"><a href=""></a>      u &lt;- -gk / gn</span>
+<span id="cb42-278"><a href=""></a>      arrows(xk[1], xk[2], xk[1] + L * u[1], xk[2] + L * u[2],</span>
+<span id="cb42-279"><a href=""></a>             col = "grey45", lwd = 3, length = 0.10)</span>
+<span id="cb42-280"><a href=""></a>      arrows(xk[1], xk[2], xk[1] - gk[1], xk[2] - gk[2],</span>
+<span id="cb42-281"><a href=""></a>             col = "#E8820C", lwd = 3, length = 0.13)</span>
+<span id="cb42-282"><a href=""></a>    }</span>
+<span id="cb42-283"><a href=""></a>    if (k &lt; P$n) {</span>
+<span id="cb42-284"><a href=""></a>      arrows(xk[1], xk[2], P$X[k + 1, 1], P$X[k + 1, 2],</span>
+<span id="cb42-285"><a href=""></a>             col = "#2E8B57", lwd = 3, length = 0.13)</span>
+<span id="cb42-286"><a href=""></a>      points(P$X[k + 1, 1], P$X[k + 1, 2], pch = 21, bg = "white",</span>
+<span id="cb42-287"><a href=""></a>             col = "#2E8B57", cex = 1.2)</span>
+<span id="cb42-288"><a href=""></a>    }</span>
+<span id="cb42-289"><a href=""></a>    points(xk[1], xk[2], pch = 19, col = "black", cex = 1.3)</span>
+<span id="cb42-290"><a href=""></a></span>
+<span id="cb42-291"><a href=""></a>    legend("topleft", lwd = 3, cex = 0.9, bg = "#ffffffcc", box.col = NA,</span>
+<span id="cb42-292"><a href=""></a>           col = c("grey45", "#E8820C", "#2E8B57"),</span>
+<span id="cb42-293"><a href=""></a>           legend = c(expression(-nabla * f(x[k])~"(direction only)"),</span>
+<span id="cb42-294"><a href=""></a>                      expression(-nabla * f(x[k])~"(actual length)"),</span>
+<span id="cb42-295"><a href=""></a>                      expression(alpha[k] * d[k]~"(step taken)")))</span>
+<span id="cb42-296"><a href=""></a>  })</span>
+<span id="cb42-297"><a href=""></a></span>
+<span id="cb42-298"><a href=""></a>  output$conv &lt;- renderPlot({</span>
+<span id="cb42-299"><a href=""></a>    P &lt;- path(); k &lt;- min(as.integer(input$k), P$n - 1) + 1L</span>
+<span id="cb42-300"><a href=""></a>    gn &lt;- sqrt(rowSums(P$G^2))</span>
+<span id="cb42-301"><a href=""></a>    gn[!is.finite(gn) | gn &lt;= 0] &lt;- NA</span>
+<span id="cb42-302"><a href=""></a>    par(mar = c(4, 4.5, 1.5, 1))</span>
+<span id="cb42-303"><a href=""></a>    plot(seq_len(P$n) - 1, gn, type = "b", pch = 20, log = "y",</span>
+<span id="cb42-304"><a href=""></a>         xlab = "iteration k", ylab = expression("||" * nabla * f * "||"),</span>
+<span id="cb42-305"><a href=""></a>         col = "grey40")</span>
+<span id="cb42-306"><a href=""></a>    points(k - 1, gn[k], pch = 19, col = "#E8820C", cex = 1.6)</span>
+<span id="cb42-307"><a href=""></a>  })</span>
+<span id="cb42-308"><a href=""></a></span>
+<span id="cb42-309"><a href=""></a>  output$info &lt;- renderUI({</span>
+<span id="cb42-310"><a href=""></a>    P &lt;- path(); k &lt;- min(as.integer(input$k), P$n - 1) + 1L</span>
+<span id="cb42-311"><a href=""></a>    xk &lt;- P$X[k, ]; gk &lt;- P$G[k, ]; gn &lt;- sqrt(sum(gk^2))</span>
+<span id="cb42-312"><a href=""></a>    ang &lt;- NA</span>
+<span id="cb42-313"><a href=""></a>    if (k &lt; P$n) {</span>
+<span id="cb42-314"><a href=""></a>      sk &lt;- P$X[k + 1, ] - xk</span>
+<span id="cb42-315"><a href=""></a>      cs &lt;- sum(-gk * sk) / (gn * sqrt(sum(sk^2)))</span>
+<span id="cb42-316"><a href=""></a>      ang &lt;- acos(max(-1, min(1, cs))) * 180 / pi</span>
+<span id="cb42-317"><a href=""></a>    }</span>
+<span id="cb42-318"><a href=""></a>    fmt &lt;- function(v, d = 4) formatC(v, format = "g", digits = d)</span>
+<span id="cb42-319"><a href=""></a>    HTML(paste0(</span>
+<span id="cb42-320"><a href=""></a>      "&lt;hr&gt;&lt;b&gt;iteration&lt;/b&gt; ", k - 1, " of ", P$n - 1, "&lt;br&gt;",</span>
+<span id="cb42-321"><a href=""></a>      "&lt;b&gt;x&lt;sub&gt;k&lt;/sub&gt;&lt;/b&gt; = (", fmt(xk[1]), ", ", fmt(xk[2]), ")&lt;br&gt;",</span>
+<span id="cb42-322"><a href=""></a>      "&lt;b&gt;f(x&lt;sub&gt;k&lt;/sub&gt;)&lt;/b&gt; = ", fmt(P$F[k], 6), "&lt;br&gt;",</span>
+<span id="cb42-323"><a href=""></a>      "&lt;b&gt;||grad||&lt;/b&gt; = ", fmt(gn), "&lt;br&gt;",</span>
+<span id="cb42-324"><a href=""></a>      "&lt;b&gt;step size &amp;alpha;&lt;sub&gt;k&lt;/sub&gt;&lt;/b&gt; = ",</span>
+<span id="cb42-325"><a href=""></a>      if (k &lt; P$n) fmt(P$A[k]) else "&amp;ndash;", "&lt;br&gt;",</span>
+<span id="cb42-326"><a href=""></a>      "&lt;b&gt;angle(grey, green)&lt;/b&gt; = ",</span>
+<span id="cb42-327"><a href=""></a>      if (is.na(ang)) "&amp;ndash;" else paste0(fmt(ang, 3), "&amp;deg;"),</span>
+<span id="cb42-328"><a href=""></a>      "&lt;br&gt;&lt;br&gt;&lt;i&gt;", P$note, "&lt;/i&gt;"</span>
+<span id="cb42-329"><a href=""></a>    ))</span>
+<span id="cb42-330"><a href=""></a>  })</span>
+<span id="cb42-331"><a href=""></a>}</span>
+<span id="cb42-332"><a href=""></a></span>
+<span id="cb42-333"><a href=""></a>shinyApp(ui, server)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section></section>
+<section id="neldermead-simplex-method" class="title-slide slide level1 center" data-number="5">
+<h1><span class="header-section-number">5</span> Nelder–Mead (Simplex Method)</h1>
+<p>Maintains a <strong>simplex</strong> of <span class="math inline">p+1</span> points (a triangle in 2D) and moves it downhill using only function values:</p>
+<ol type="1">
+<li><p>Order the vertices <span class="math inline">f(\theta_{(1)}) \le \cdots \le f(\theta_{(p+1)})</span>; let <span class="math inline">\overline\theta</span> be the centroid of the best <span class="math inline">p</span>.</p></li>
+<li><p><strong>Reflect</strong> the worst vertex through <span class="math inline">\overline\theta</span>; if the reflected point is the new best, try <strong>expanding</strong> further.</p></li>
+<li><p>If reflection is poor, <strong>contract</strong> toward <span class="math inline">\overline\theta</span>; if that also fails, <strong>shrink</strong> all vertices toward the best.</p></li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a>rosen <span class="ot">&lt;-</span> <span class="cf">function</span>(v) (<span class="dv">1</span> <span class="sc">-</span> v[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">100</span> <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> v[<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>       <span class="co"># Rosenbrock "banana", min at (1, 1)</span></span>
+<span id="cb43-2"><a href=""></a>nm <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.2</span>, <span class="dv">1</span>), rosen, <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>); <span class="fu">c</span>(nm<span class="sc">$</span>par, <span class="at">evals =</span> nm<span class="sc">$</span>counts[<span class="st">"function"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              evals.function 
+      1.000260       1.000506     195.000000 </code></pre>
+</div>
+</div>
+<p>Robust and derivative-free (R’s <code>optim</code> default), but slow in high dimensions and offers no standard errors.</p>
+</section>
+
 <section>
-<section id="stochastic-gradient-descent" class="title-slide slide level1 center" data-number="5">
-<h1><span class="header-section-number">5</span> Stochastic Gradient Descent</h1>
+<section id="stochastic-gradient-descent" class="title-slide slide level1 center" data-number="6">
+<h1><span class="header-section-number">6</span> Stochastic Gradient Descent</h1>
 
 </section>
 <section id="motivation-large-n" class="slide level2">
@@ -1072,18 +1408,18 @@ E_i\big[\nabla\ell_i(\theta)\big] = \frac{1}{n}\nabla\ell(\theta).
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href=""></a>sgd <span class="ot">&lt;-</span> <span class="cf">function</span>(X, y, b0, <span class="at">gamma0 =</span> <span class="fl">0.05</span>, <span class="at">t0 =</span> <span class="dv">200</span>, <span class="at">epochs =</span> <span class="dv">5</span>, <span class="at">batch =</span> <span class="dv">10</span>) {</span>
-<span id="cb44-2"><a href=""></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X); b <span class="ot">&lt;-</span> b0; t <span class="ot">&lt;-</span> <span class="dv">0</span>; path <span class="ot">&lt;-</span> b0</span>
-<span id="cb44-3"><a href=""></a>  <span class="cf">for</span> (e <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
-<span id="cb44-4"><a href=""></a>    idx <span class="ot">&lt;-</span> <span class="fu">sample</span>(n)</span>
-<span id="cb44-5"><a href=""></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n, <span class="at">by =</span> batch)) {</span>
-<span id="cb44-6"><a href=""></a>      i <span class="ot">&lt;-</span> idx[s<span class="sc">:</span><span class="fu">min</span>(s <span class="sc">+</span> batch <span class="sc">-</span> <span class="dv">1</span>, n)]; t <span class="ot">&lt;-</span> t <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb44-7"><a href=""></a>      g <span class="ot">&lt;-</span> <span class="fu">crossprod</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>], y[i] <span class="sc">-</span> <span class="fu">plogis</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">%*%</span> b)) <span class="sc">/</span> <span class="fu">length</span>(i)</span>
-<span id="cb44-8"><a href=""></a>      b <span class="ot">&lt;-</span> b <span class="sc">+</span> gamma0 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> t <span class="sc">/</span> t0) <span class="sc">*</span> g; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b)) } }</span>
-<span id="cb44-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b), <span class="at">path =</span> path)</span>
-<span id="cb44-10"><a href=""></a>}</span>
-<span id="cb44-11"><a href=""></a>sg <span class="ot">&lt;-</span> <span class="fu">sgd</span>(X, y, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>))</span>
-<span id="cb44-12"><a href=""></a><span class="fu">rbind</span>(<span class="at">sgd =</span> sg<span class="sc">$</span>est, <span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">truth =</span> beta_true)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a>sgd <span class="ot">&lt;-</span> <span class="cf">function</span>(X, y, b0, <span class="at">gamma0 =</span> <span class="fl">0.05</span>, <span class="at">t0 =</span> <span class="dv">200</span>, <span class="at">epochs =</span> <span class="dv">5</span>, <span class="at">batch =</span> <span class="dv">10</span>) {</span>
+<span id="cb45-2"><a href=""></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X); b <span class="ot">&lt;-</span> b0; t <span class="ot">&lt;-</span> <span class="dv">0</span>; path <span class="ot">&lt;-</span> b0</span>
+<span id="cb45-3"><a href=""></a>  <span class="cf">for</span> (e <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
+<span id="cb45-4"><a href=""></a>    idx <span class="ot">&lt;-</span> <span class="fu">sample</span>(n)</span>
+<span id="cb45-5"><a href=""></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n, <span class="at">by =</span> batch)) {</span>
+<span id="cb45-6"><a href=""></a>      i <span class="ot">&lt;-</span> idx[s<span class="sc">:</span><span class="fu">min</span>(s <span class="sc">+</span> batch <span class="sc">-</span> <span class="dv">1</span>, n)]; t <span class="ot">&lt;-</span> t <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb45-7"><a href=""></a>      g <span class="ot">&lt;-</span> <span class="fu">crossprod</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>], y[i] <span class="sc">-</span> <span class="fu">plogis</span>(X[i, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">%*%</span> b)) <span class="sc">/</span> <span class="fu">length</span>(i)</span>
+<span id="cb45-8"><a href=""></a>      b <span class="ot">&lt;-</span> b <span class="sc">+</span> gamma0 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> t <span class="sc">/</span> t0) <span class="sc">*</span> g; path <span class="ot">&lt;-</span> <span class="fu">rbind</span>(path, <span class="fu">drop</span>(b)) } }</span>
+<span id="cb45-9"><a href=""></a>  <span class="fu">list</span>(<span class="at">est =</span> <span class="fu">drop</span>(b), <span class="at">path =</span> path)</span>
+<span id="cb45-10"><a href=""></a>}</span>
+<span id="cb45-11"><a href=""></a>sg <span class="ot">&lt;-</span> <span class="fu">sgd</span>(X, y, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>))</span>
+<span id="cb45-12"><a href=""></a><span class="fu">rbind</span>(<span class="at">sgd =</span> sg<span class="sc">$</span>est, <span class="at">newton =</span> fit<span class="sc">$</span>est, <span class="at">truth =</span> beta_true)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>             [,1]      [,2]      [,3]

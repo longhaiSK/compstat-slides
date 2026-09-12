@@ -3,6 +3,8 @@ subtitle: "Optimization for Maximum Likelihood Estimation"
 author: "Longhai Li"
 format: banner_slides-revealjs
 code-fold: true
+filters:
+  - shinylive
 execute:
   echo: true
   fig-width: 7
@@ -672,6 +674,338 @@ sqrt(diag(solve(fits$BFGS$hessian)))     # SEs from the numerically computed Hes
 
 ## Animation for Gradient-based Methods
 
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 820
+#| echo: false
+
+library(shiny)
+
+## ---------------------------------------------------------------- objectives
+mk <- function(label, fv, xlim, ylim, start, xstar) {
+  force(fv)
+  list(label = label, fv = fv, f = function(p) fv(p[1], p[2]),
+       xlim = xlim, ylim = ylim, start = start,
+       xstar = matrix(xstar, ncol = 2))
+}
+
+FNS <- list(
+  quad = mk(
+    "(a) Well-conditioned quadratic",
+    function(x, y) 0.5 * (2 * (x - 1)^2 + 1.6 * (x - 1) * (y - 1) +
+                          2 * (y - 1)^2),
+    c(-3, 4), c(-3, 4), c(-2, 3), c(1, 1)
+  ),
+  banana = mk(
+    "(b) Rosenbrock banana (narrow curved ridge)",
+    function(x, y) (1 - x)^2 + 100 * (y - x^2)^2,
+    c(-2, 2), c(-1, 3), c(-1.2, 1), c(1, 1)
+  ),
+  mix = mk(
+    "(c) Highly correlated, two modes",
+    function(x, y) {
+      rho <- 0.9; den <- 1 - rho^2
+      q <- function(u, v) (u^2 - 2 * rho * u * v + v^2) / den
+      -log(exp(-0.5 * q(x - 1.2, y - 1.2)) +
+           0.6 * exp(-0.5 * q(x + 1.5, y + 1.5) / 1.5) + 1e-12)
+    },
+    c(-4, 4), c(-4, 4), c(-3, -0.5), c(1.2, 1.2)
+  ),
+  himmel = mk(
+    "(d) Himmelblau (four global minima)",
+    function(x, y) (x^2 + y - 11)^2 + (x + y^2 - 7)^2,
+    c(-5, 5), c(-5, 5), c(-4, 4),
+    rbind(c(3, 2), c(-2.805118, 3.131312),
+          c(-3.779310, -3.283186), c(3.584428, -1.848126))
+  ),
+  beale = mk(
+    "(e) Beale (flat plateau, sharp valley)",
+    function(x, y) (1.5 - x + x * y)^2 + (2.25 - x + x * y^2)^2 +
+                   (2.625 - x + x * y^3)^2,
+    c(-4.5, 4.5), c(-4.5, 4.5), c(-1, 1), c(3, 0.5)
+  ),
+  rastrigin = mk(
+    "(f) Rastrigin (many local minima)",
+    function(x, y) 20 + x^2 - 10 * cos(2 * pi * x) +
+                        y^2 - 10 * cos(2 * pi * y),
+    c(-5.12, 5.12), c(-5.12, 5.12), c(-3.1, 4.2), c(0, 0)
+  )
+)
+
+## ------------------------------------------------- numerical derivatives
+num_grad <- function(f, x) {
+  h <- 1e-5 * (1 + abs(x))
+  g <- numeric(2)
+  for (i in 1:2) {
+    e <- numeric(2); e[i] <- h[i]
+    g[i] <- (f(x + e) - f(x - e)) / (2 * h[i])
+  }
+  g
+}
+
+num_hess <- function(f, x) {
+  h <- 1e-4 * (1 + abs(x))
+  H <- matrix(0, 2, 2)
+  for (i in 1:2) for (j in i:2) {
+    ei <- numeric(2); ei[i] <- h[i]
+    ej <- numeric(2); ej[j] <- h[j]
+    H[i, j] <- (f(x + ei + ej) - f(x + ei - ej) -
+                f(x - ei + ej) + f(x - ei - ej)) / (4 * h[i] * h[j])
+    H[j, i] <- H[i, j]
+  }
+  H
+}
+
+## --------------------------------------------------- Wolfe line search
+line_search <- function(f, g, x, d, a0 = 1, c1 = 1e-4, c2 = 0.9) {
+  f0 <- f(x); gd0 <- sum(g * d)
+  if (!is.finite(gd0) || gd0 >= 0) return(list(alpha = 0, ok = FALSE))
+  lo <- 0; hi <- Inf; a <- a0
+  for (it in 1:60) {
+    fa <- f(x + a * d)
+    if (!is.finite(fa) || fa > f0 + c1 * a * gd0) {
+      hi <- a; a <- 0.5 * (lo + hi)
+    } else {
+      ga <- num_grad(f, x + a * d)
+      if (sum(ga * d) < c2 * gd0) {
+        lo <- a
+        a <- if (is.finite(hi)) 0.5 * (lo + hi) else min(2 * a, 1e4)
+      } else {
+        return(list(alpha = a, ok = TRUE))
+      }
+    }
+    if (a < 1e-14) return(list(alpha = 0, ok = FALSE))
+  }
+  list(alpha = a, ok = (a > 0))
+}
+
+## ------------------------------------------------------------- algorithms
+run_alg <- function(alg, FN, x0, maxit = 60, tol = 1e-6) {
+  f <- FN$f
+  X <- matrix(NA_real_, maxit + 1, 2); G <- matrix(NA_real_, maxit + 1, 2)
+  D <- matrix(NA_real_, maxit + 1, 2); Fv <- rep(NA_real_, maxit + 1)
+  AL <- rep(NA_real_, maxit + 1)
+  x <- x0; B <- diag(2)
+  g_prev <- NULL; d_prev <- NULL; s_prev <- NULL
+  n <- 0; note <- "maximum number of iterations reached"
+
+  for (k in seq_len(maxit)) {
+    g <- num_grad(f, x); gn <- sqrt(sum(g^2))
+    X[k, ] <- x; G[k, ] <- g; Fv[k] <- f(x); n <- k
+    if (!is.finite(gn)) { note <- "diverged"; break }
+    if (gn < tol) { note <- "converged (||grad|| < 1e-6)"; break }
+
+    if (alg == "nr") {
+      H <- num_hess(f, x); H <- (H + t(H)) / 2
+      ev <- eigen(H, symmetric = TRUE, only.values = TRUE)$values
+      delta <- 1e-3 * max(1, max(abs(ev)))
+      tau <- max(0, delta - min(ev))
+      d <- tryCatch(solve(H + tau * diag(2), -g), error = function(e) -g)
+    } else if (alg == "gd") {
+      d <- -g
+    } else if (alg == "cg") {
+      if (is.null(d_prev)) {
+        d <- -g
+      } else {
+        y <- g - g_prev
+        beta <- max(0, sum(g * y) / max(sum(g_prev^2), 1e-300))   # PR+
+        d <- -g + beta * d_prev
+      }
+      if (sum(g * d) > -1e-12) d <- -g                            # restart
+    } else {                                                      # BFGS
+      if (!is.null(s_prev)) {
+        y <- g - g_prev; sy <- sum(s_prev * y)
+        if (sy > 1e-10) {
+          rho <- 1 / sy
+          V <- diag(2) - rho * outer(s_prev, y)
+          B <- V %*% B %*% t(V) + rho * outer(s_prev, s_prev)
+        }
+      }
+      d <- -as.vector(B %*% g)
+      if (sum(g * d) > -1e-12) { B <- diag(2); d <- -g }
+    }
+
+    ls <- line_search(f, g, x, d)
+    D[k, ] <- d; AL[k] <- ls$alpha
+    if (ls$alpha <= 0) { note <- "line search failed (flat or non-descent)"; break }
+
+    s_prev <- ls$alpha * d; g_prev <- g; d_prev <- d
+    x <- x + s_prev
+  }
+
+  list(X = X[1:n, , drop = FALSE], G = G[1:n, , drop = FALSE],
+       D = D[1:n, , drop = FALSE], F = Fv[1:n], A = AL[1:n],
+       n = n, note = note)
+}
+
+ALGS <- c("Safeguarded Newton (modified Hessian + line search)" = "nr",
+          "Gradient descent + line search"    = "gd",
+          "Conjugate gradient (PR+)"          = "cg",
+          "BFGS (quasi-Newton)"               = "bfgs")
+
+## ---------------------------- widen the data box to the device aspect ratio
+expand_box <- function(xlim, ylim, pin) {
+  if (length(pin) != 2 || any(!is.finite(pin)) || any(pin <= 0))
+    return(list(xlim = xlim, ylim = ylim))
+  r <- pin[1] / pin[2]
+  wd <- diff(xlim); ht <- diff(ylim)
+  if (wd / ht < r) {
+    w <- ht * r; m <- mean(xlim); xlim <- m + c(-0.5, 0.5) * w
+  } else {
+    h <- wd / r; m <- mean(ylim); ylim <- m + c(-0.5, 0.5) * h
+  }
+  list(xlim = xlim, ylim = ylim)
+}
+
+## --------------------------------------------------------------------- UI
+ui <- fluidPage(
+  fluidRow(
+    column(
+      4,
+      selectInput("alg", "Algorithm", ALGS),
+      selectInput("fn", "Objective function",
+                  setNames(names(FNS), sapply(FNS, `[[`, "label"))),
+      sliderInput("k", "Iteration k", min = 0, max = 1, value = 0, step = 1,
+                  animate = animationOptions(interval = 1000, loop = FALSE)),
+      div(actionButton("step", "Next step"),
+          actionButton("back", "Previous"),
+          actionButton("reset", "Reset starting point")),
+      checkboxInput("showpath", "Show the whole path", TRUE),
+      helpText("Click inside the contour plot to choose a new starting point."),
+      htmlOutput("info")
+    ),
+    column(
+      8,
+      plotOutput("contour", click = "click", height = "540px"),
+      plotOutput("conv", height = "190px")
+    )
+  )
+)
+
+## ----------------------------------------------------------------- server
+server <- function(input, output, session) {
+
+  FN <- reactive(FNS[[input$fn]])
+  start <- reactiveVal(FNS[[1]]$start)
+
+  observeEvent(input$fn, start(FNS[[input$fn]]$start))
+  observeEvent(input$reset, start(FN()$start))
+  observeEvent(input$click, {
+    p <- c(input$click$x, input$click$y)
+    if (all(is.finite(p))) start(p)
+  })
+
+  path <- reactive({
+    req(start())
+    run_alg(input$alg, FN(), start())
+  })
+
+  observeEvent(path(), {
+    updateSliderInput(session, "k", max = max(1, path()$n - 1), value = 0)
+  })
+
+  observeEvent(input$step, {
+    updateSliderInput(session, "k",
+                      value = min(as.integer(input$k) + 1, max(0, path()$n - 1)))
+  })
+
+  observeEvent(input$back, {
+    updateSliderInput(session, "k", value = max(as.integer(input$k) - 1, 0))
+  })
+
+  output$contour <- renderPlot({
+    FNc <- FN(); P <- path()
+    k <- min(as.integer(input$k), P$n - 1) + 1L
+
+    par(mar = c(4, 4, 2.5, 1))
+    plot.new()
+    bx <- expand_box(FNc$xlim, FNc$ylim, par("pin"))
+    plot.window(xlim = bx$xlim, ylim = bx$ylim, xaxs = "i", yaxs = "i")
+
+    xs <- seq(bx$xlim[1], bx$xlim[2], length.out = 180)
+    ys <- seq(bx$ylim[1], bx$ylim[2], length.out = 180)
+    z  <- outer(xs, ys, FNc$fv)
+    zf <- z[is.finite(z)]
+    lv <- unique(quantile(zf, probs = seq(0, 1, length.out = 30)^1.7))
+    zr <- matrix(rank(z, na.last = "keep", ties.method = "average"),
+                 nrow = length(xs))
+
+    image(xs, ys, zr, add = TRUE,
+          col = colorRampPalette(c("#f7fbff", "#9ec4e3"))(128))
+    contour(xs, ys, z, levels = lv, add = TRUE,
+            col = "grey45", drawlabels = FALSE)
+    axis(1); axis(2); box()
+    title(main = paste0(names(ALGS)[ALGS == input$alg], "  |  ", FNc$label),
+          xlab = expression(x[1]), ylab = expression(x[2]), cex.main = 1.0)
+
+    points(FNc$xstar[, 1], FNc$xstar[, 2], pch = 8, col = "red",
+           cex = 1.3, lwd = 2)
+
+    if (isTRUE(input$showpath) && k > 1)
+      lines(P$X[1:k, 1], P$X[1:k, 2], col = "grey25", lty = 2)
+    points(P$X[1:k, 1], P$X[1:k, 2], pch = 20, col = "grey35", cex = 0.9)
+
+    xk <- P$X[k, ]; gk <- P$G[k, ]; gn <- sqrt(sum(gk^2))
+    L <- 0.09 * diff(bx$xlim)                      # fixed display length
+    if (gn > 0) {
+      u <- -gk / gn
+      arrows(xk[1], xk[2], xk[1] + L * u[1], xk[2] + L * u[2],
+             col = "grey45", lwd = 3, length = 0.10)
+      arrows(xk[1], xk[2], xk[1] - gk[1], xk[2] - gk[2],
+             col = "#E8820C", lwd = 3, length = 0.13)
+    }
+    if (k < P$n) {
+      arrows(xk[1], xk[2], P$X[k + 1, 1], P$X[k + 1, 2],
+             col = "#2E8B57", lwd = 3, length = 0.13)
+      points(P$X[k + 1, 1], P$X[k + 1, 2], pch = 21, bg = "white",
+             col = "#2E8B57", cex = 1.2)
+    }
+    points(xk[1], xk[2], pch = 19, col = "black", cex = 1.3)
+
+    legend("topleft", lwd = 3, cex = 0.9, bg = "#ffffffcc", box.col = NA,
+           col = c("grey45", "#E8820C", "#2E8B57"),
+           legend = c(expression(-nabla * f(x[k])~"(direction only)"),
+                      expression(-nabla * f(x[k])~"(actual length)"),
+                      expression(alpha[k] * d[k]~"(step taken)")))
+  })
+
+  output$conv <- renderPlot({
+    P <- path(); k <- min(as.integer(input$k), P$n - 1) + 1L
+    gn <- sqrt(rowSums(P$G^2))
+    gn[!is.finite(gn) | gn <= 0] <- NA
+    par(mar = c(4, 4.5, 1.5, 1))
+    plot(seq_len(P$n) - 1, gn, type = "b", pch = 20, log = "y",
+         xlab = "iteration k", ylab = expression("||" * nabla * f * "||"),
+         col = "grey40")
+    points(k - 1, gn[k], pch = 19, col = "#E8820C", cex = 1.6)
+  })
+
+  output$info <- renderUI({
+    P <- path(); k <- min(as.integer(input$k), P$n - 1) + 1L
+    xk <- P$X[k, ]; gk <- P$G[k, ]; gn <- sqrt(sum(gk^2))
+    ang <- NA
+    if (k < P$n) {
+      sk <- P$X[k + 1, ] - xk
+      cs <- sum(-gk * sk) / (gn * sqrt(sum(sk^2)))
+      ang <- acos(max(-1, min(1, cs))) * 180 / pi
+    }
+    fmt <- function(v, d = 4) formatC(v, format = "g", digits = d)
+    HTML(paste0(
+      "<hr><b>iteration</b> ", k - 1, " of ", P$n - 1, "<br>",
+      "<b>x<sub>k</sub></b> = (", fmt(xk[1]), ", ", fmt(xk[2]), ")<br>",
+      "<b>f(x<sub>k</sub>)</b> = ", fmt(P$F[k], 6), "<br>",
+      "<b>||grad||</b> = ", fmt(gn), "<br>",
+      "<b>step size &alpha;<sub>k</sub></b> = ",
+      if (k < P$n) fmt(P$A[k]) else "&ndash;", "<br>",
+      "<b>angle(grey, green)</b> = ",
+      if (is.na(ang)) "&ndash;" else paste0(fmt(ang, 3), "&deg;"),
+      "<br><br><i>", P$note, "</i>"
+    ))
+  })
+}
+
+shinyApp(ui, server)
+```
 
 
 
