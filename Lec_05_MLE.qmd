@@ -1438,8 +1438,9 @@ A noisy but cheap gradient estimate is enough to make progress — a Monte Carlo
 ## Animation for SGD
 
 ```{shinylive-r}
+#| label: sgd-animation
 #| standalone: true
-#| viewerHeight: 830
+#| viewerHeight: 860
 
 library(shiny)
 
@@ -1532,36 +1533,47 @@ train <- function(p0, H, B, a, nepoch, seed, D) {
 }
 
 ## ------------------------------------------------------------ weight plot
-HOT <- colorRampPalette(c("#f0f0f0", "#ffe08a", "#ffa73c",
-                          "#ef4a15", "#7f0000"))(100)
-wcol <- function(v, wmax)
-  HOT[pmax(1, pmin(100, ceiling(abs(v) / wmax * 100)))]
+## Diverging ramp: blue = negative, red = positive, magnitude by saturation.
+DIV <- colorRampPalette(c("#08306B", "#2171B5", "#6BAED6", "#DEEBF7",
+                          "#F7F7F7",
+                          "#FEE0D2", "#FC9272", "#CB181D", "#67000D"))(201)
 
-draw_net <- function(p, H, wmax, main) {
+## compander: maps v in [-wmax, wmax] to [-1, 1], boosting small values.
+tone <- function(v, wmax, k) {
+  u <- pmax(-1, pmin(1, v / wmax))
+  sign(u) * log1p(k * abs(u)) / log1p(k)
+}
+
+wcol <- function(v, wmax, k) DIV[round((tone(v, wmax, k) + 1) * 100) + 1]
+wlwd <- function(v, wmax, k) 0.8 + 6 * abs(tone(v, wmax, k))
+
+draw_net <- function(p, H, wmax, k, main) {
   P <- unpack(p, H)
   yh <- if (H == 1) 0.5 else seq(0.92, 0.10, length.out = H)
   ix <- 0.05; hx <- 0.55; ox <- 1.05
-  nc <- max(1.2, min(4.2, 34 / H))                   # node size shrinks with H
-  plot.new(); plot.window(c(-0.05, 1.2), c(-0.08, 1.02))
+  nc <- max(1.4, min(4.4, 36 / H))
+  plot.new(); plot.window(c(-0.05, 1.2), c(-0.10, 1.02))
   title(main = main, cex.main = 1.05)
-  lw <- function(v) 0.7 + 4.5 * abs(v) / wmax
   for (j in 1:H)
-    segments(ix, 0.5, hx, yh[j], col = wcol(P$w[j], wmax),
-             lwd = lw(P$w[j]), lty = if (P$w[j] < 0) 2 else 1)
+    segments(ix, 0.5, hx, yh[j], col = wcol(P$w[j], wmax, k),
+             lwd = wlwd(P$w[j], wmax, k), lend = 1)
   for (j in 1:H)
-    segments(hx, yh[j], ox, 0.5, col = wcol(P$v[j], wmax),
-             lwd = lw(P$v[j]), lty = if (P$v[j] < 0) 2 else 1)
-  points(ix, 0.5, pch = 21, cex = 3.2, bg = "white", lwd = 2)
+    segments(hx, yh[j], ox, 0.5, col = wcol(P$v[j], wmax, k),
+             lwd = wlwd(P$v[j], wmax, k), lend = 1)
+  points(ix, 0.5, pch = 21, cex = 3.2, bg = "white", lwd = 1.6)
   text(ix, 0.5, "x", font = 2)
-  points(rep(hx, H), yh, pch = 21, cex = nc, lwd = 1.6, bg = wcol(P$cc, wmax))
-  if (H <= 8) text(rep(hx, H), yh, paste0("h", 1:H), cex = 0.7)
-  points(ox, 0.5, pch = 21, cex = 3.4, lwd = 2, bg = wcol(P$b, wmax))
+  points(rep(hx, H), yh, pch = 21, cex = nc, lwd = 1.4,
+         bg = wcol(P$cc, wmax, k))
+  if (H <= 10) text(rep(hx, H), yh, 1:H, cex = 0.65)
+  points(ox, 0.5, pch = 21, cex = 3.4, lwd = 1.6, bg = wcol(P$b, wmax, k))
   text(ox, 0.5, "y", font = 2)
-  xs <- seq(0.15, 0.95, length.out = 100)
-  rect(xs, -0.07, xs + diff(xs)[1], -0.02, col = HOT, border = NA)
-  text(0.15, 0.005, "0", cex = 0.75)
-  text(0.95, 0.005, formatC(wmax, format = "g", digits = 3), cex = 0.75)
-  text(0.55, 0.005, "|weight|", cex = 0.75)
+
+  ## signed colour bar
+  xs <- seq(0.12, 0.98, length.out = 201)
+  rect(xs, -0.09, xs + diff(xs)[1], -0.035, col = DIV, border = NA)
+  lab <- formatC(wmax, format = "g", digits = 2)
+  text(c(0.12, 0.55, 0.98), -0.005,
+       c(paste0("-", lab), "0", paste0("+", lab)), cex = 0.72)
 }
 
 ## --------------------------------------------------------------------- UI
@@ -1578,6 +1590,8 @@ ui <- fluidPage(
       sliderInput("a", "Learning rate", min = 0.01, max = 0.60, value = 0.20,
                   step = 0.01),
       sliderInput("nep", "Epochs", min = 10, max = 300, value = 100, step = 10),
+      sliderInput("ctr", "Weight colour contrast", min = 1, max = 40,
+                  value = 12, step = 1),
       checkboxInput("showgd", "Overlay the B = 1 run", TRUE)
     ),
     ## ---- column 2: data generation, then playback ----------------------
@@ -1645,8 +1659,7 @@ server <- function(input, output, session) {
     G <- train(p0, H, 1L, input$a, ne, bseed(), D)
     list(S = S, G = G, H = H, B = B, D = D, ne = ne,
          capped = ne < input$nep,
-         wmax = max(1e-6, max(abs(S$P), na.rm = TRUE),
-                    max(abs(G$P), na.rm = TRUE)))
+         wmax = max(0.2, quantile(abs(c(S$P, G$P)), 0.97, na.rm = TRUE)))
   })
 
   stride <- reactive(if (isTRUE(input$byepoch)) as.integer(input$B) else 1L)
@@ -1700,10 +1713,10 @@ server <- function(input, output, session) {
     C <- cur(); R <- C$R
     msz <- length(R$S$IDX[[C$k]])
     par(mfrow = c(1, if (isTRUE(input$showgd)) 2 else 1), mar = c(1, 1, 3, 1))
-    draw_net(R$S$P[C$k, ], R$H, R$wmax,
+    draw_net(R$S$P[C$k, ], R$H, R$wmax, input$ctr,
              sprintf("B = %d (m = %d),  epoch %.2f", R$B, msz, C$ep))
     if (isTRUE(input$showgd))
-      draw_net(R$G$P[C$kg, ], R$H, R$wmax,
+      draw_net(R$G$P[C$kg, ], R$H, R$wmax, input$ctr,
                sprintf("B = 1 (m = %d),  epoch %d", R$D$n, C$kg - 1L))
   })
 

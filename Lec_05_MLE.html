@@ -1776,334 +1776,347 @@ E_i\big[\nabla\ell_i(\theta)\big] = \frac{1}{n}\nabla\ell(\theta).
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46" data-engine="r"><pre class="sourceCode numberSource shinylive-r number-lines code-with-copy"><code class="sourceCode"><span id="cb46-1"><a href=""></a>#| '!! shinylive warning !!': |</span>
 <span id="cb46-2"><a href=""></a>#|   shinylive does not work in self-contained HTML documents.</span>
 <span id="cb46-3"><a href=""></a>#|   Please set `embed-resources: false` in your metadata.</span>
-<span id="cb46-4"><a href=""></a>#| standalone: true</span>
-<span id="cb46-5"><a href=""></a>#| viewerHeight: 830</span>
-<span id="cb46-6"><a href=""></a></span>
-<span id="cb46-7"><a href=""></a>library(shiny)</span>
-<span id="cb46-8"><a href=""></a></span>
-<span id="cb46-9"><a href=""></a>## ------------------------------------------------------------------- data</span>
-<span id="cb46-10"><a href=""></a>## Two data-generating processes. The teacher network lies inside the</span>
-<span id="cb46-11"><a href=""></a>## student's model class; the bumps do not.</span>
-<span id="cb46-12"><a href=""></a>TEACH &lt;- list(w = c(4, 3, 5), cc = c(4, 0, -5), v = c(1.0, -1.2, 0.8), b = 0)</span>
-<span id="cb46-13"><a href=""></a></span>
-<span id="cb46-14"><a href=""></a>g_teacher &lt;- function(x) {</span>
-<span id="cb46-15"><a href=""></a>  Hm &lt;- tanh(outer(x, TEACH$w) + rep(TEACH$cc, each = length(x)))</span>
-<span id="cb46-16"><a href=""></a>  as.vector(Hm %*% TEACH$v + TEACH$b)</span>
-<span id="cb46-17"><a href=""></a>}</span>
-<span id="cb46-18"><a href=""></a></span>
-<span id="cb46-19"><a href=""></a>g_bumps &lt;- function(x)</span>
-<span id="cb46-20"><a href=""></a>  1.2 * exp(-9 * (x + 0.7)^2) - 1.0 * exp(-9 * (x - 0.8)^2)</span>
-<span id="cb46-21"><a href=""></a></span>
-<span id="cb46-22"><a href=""></a>DGPS &lt;- c("Teacher network (1 - 3 tanh - 1)" = "teacher",</span>
-<span id="cb46-23"><a href=""></a>          "Two Gaussian bumps (outside the model class)" = "bumps")</span>
-<span id="cb46-24"><a href=""></a></span>
-<span id="cb46-25"><a href=""></a>gtrue &lt;- function(x, dgp)</span>
-<span id="cb46-26"><a href=""></a>  if (identical(dgp, "bumps")) g_bumps(x) else g_teacher(x)</span>
-<span id="cb46-27"><a href=""></a></span>
-<span id="cb46-28"><a href=""></a>XG &lt;- seq(-2, 2, length.out = 300)</span>
-<span id="cb46-29"><a href=""></a></span>
-<span id="cb46-30"><a href=""></a>make_data &lt;- function(n, sigma, seed, dgp) {</span>
-<span id="cb46-31"><a href=""></a>  set.seed(500 + seed)</span>
-<span id="cb46-32"><a href=""></a>  x &lt;- sort(runif(n, -2, 2))</span>
-<span id="cb46-33"><a href=""></a>  list(x = x, y = gtrue(x, dgp) + rnorm(n, 0, sigma), n = n, dgp = dgp)</span>
-<span id="cb46-34"><a href=""></a>}</span>
-<span id="cb46-35"><a href=""></a></span>
-<span id="cb46-36"><a href=""></a>## ------------------------------------------------- network: 1 - H tanh - 1</span>
-<span id="cb46-37"><a href=""></a>unpack &lt;- function(p, H)</span>
-<span id="cb46-38"><a href=""></a>  list(w = p[1:H], cc = p[H + (1:H)], v = p[2 * H + (1:H)], b = p[3 * H + 1])</span>
-<span id="cb46-39"><a href=""></a></span>
-<span id="cb46-40"><a href=""></a>fnet &lt;- function(p, x, H) {</span>
-<span id="cb46-41"><a href=""></a>  P &lt;- unpack(p, H)</span>
-<span id="cb46-42"><a href=""></a>  Hm &lt;- tanh(outer(x, P$w) + rep(P$cc, each = length(x)))</span>
-<span id="cb46-43"><a href=""></a>  as.vector(Hm %*% P$v + P$b)</span>
-<span id="cb46-44"><a href=""></a>}</span>
-<span id="cb46-45"><a href=""></a></span>
-<span id="cb46-46"><a href=""></a>gnet &lt;- function(p, x, y, H) {</span>
-<span id="cb46-47"><a href=""></a>  n &lt;- length(x); P &lt;- unpack(p, H)</span>
-<span id="cb46-48"><a href=""></a>  Hm &lt;- tanh(outer(x, P$w) + rep(P$cc, each = n))</span>
-<span id="cb46-49"><a href=""></a>  r &lt;- as.vector(Hm %*% P$v + P$b) - y</span>
-<span id="cb46-50"><a href=""></a>  S &lt;- (1 - Hm^2) * outer(r, P$v)</span>
-<span id="cb46-51"><a href=""></a>  c(as.vector(colSums(S * x)) / n,        # dw</span>
-<span id="cb46-52"><a href=""></a>    as.vector(colSums(S)) / n,            # dc</span>
-<span id="cb46-53"><a href=""></a>    as.vector(crossprod(Hm, r)) / n,      # dv</span>
-<span id="cb46-54"><a href=""></a>    mean(r))                              # db</span>
-<span id="cb46-55"><a href=""></a>}</span>
-<span id="cb46-56"><a href=""></a></span>
-<span id="cb46-57"><a href=""></a>mse &lt;- function(p, H, x, y) 0.5 * mean((fnet(p, x, H) - y)^2)</span>
-<span id="cb46-58"><a href=""></a></span>
-<span id="cb46-59"><a href=""></a>init_p &lt;- function(H, seed) {</span>
-<span id="cb46-60"><a href=""></a>  set.seed(1000 + seed)</span>
-<span id="cb46-61"><a href=""></a>  c(rnorm(H, 0, 2), rnorm(H, 0, 1.5), rnorm(H, 0, 0.7), 0)</span>
-<span id="cb46-62"><a href=""></a>}</span>
-<span id="cb46-63"><a href=""></a></span>
-<span id="cb46-64"><a href=""></a>## ---------------------------------------------------------------- training</span>
-<span id="cb46-65"><a href=""></a>## B = number of batches per epoch; B = 1 is full-batch gradient descent.</span>
-<span id="cb46-66"><a href=""></a>train &lt;- function(p0, H, B, a, nepoch, seed, D) {</span>
-<span id="cb46-67"><a href=""></a>  n &lt;- D$n</span>
-<span id="cb46-68"><a href=""></a>  nup &lt;- B * nepoch</span>
-<span id="cb46-69"><a href=""></a>  P &lt;- matrix(NA_real_, nup + 1, length(p0))</span>
-<span id="cb46-70"><a href=""></a>  L &lt;- rep(NA_real_, nup + 1); EP &lt;- rep(NA_real_, nup + 1)</span>
-<span id="cb46-71"><a href=""></a>  IDX &lt;- vector("list", nup + 1)</span>
-<span id="cb46-72"><a href=""></a>  set.seed(seed)</span>
-<span id="cb46-73"><a href=""></a>  p &lt;- p0; k &lt;- 0; bad &lt;- FALSE</span>
-<span id="cb46-74"><a href=""></a>  for (e in seq_len(nepoch)) {</span>
-<span id="cb46-75"><a href=""></a>    perm &lt;- if (B == 1) seq_len(n) else sample.int(n)</span>
-<span id="cb46-76"><a href=""></a>    grp &lt;- split(perm, rep_len(seq_len(B), n))       # nearly equal sizes</span>
-<span id="cb46-77"><a href=""></a>    for (b in seq_len(B)) {</span>
-<span id="cb46-78"><a href=""></a>      k &lt;- k + 1</span>
-<span id="cb46-79"><a href=""></a>      idx &lt;- grp[[b]]</span>
-<span id="cb46-80"><a href=""></a>      P[k, ] &lt;- p; IDX[[k]] &lt;- idx</span>
-<span id="cb46-81"><a href=""></a>      L[k] &lt;- mse(p, H, D$x, D$y); EP[k] &lt;- (k - 1) / B</span>
-<span id="cb46-82"><a href=""></a>      p &lt;- p - a * gnet(p, D$x[idx], D$y[idx], H)</span>
-<span id="cb46-83"><a href=""></a>      if (any(!is.finite(p))) { bad &lt;- TRUE; break }</span>
-<span id="cb46-84"><a href=""></a>    }</span>
-<span id="cb46-85"><a href=""></a>    if (bad) break</span>
-<span id="cb46-86"><a href=""></a>  }</span>
-<span id="cb46-87"><a href=""></a>  if (!bad) {</span>
-<span id="cb46-88"><a href=""></a>    k &lt;- k + 1</span>
-<span id="cb46-89"><a href=""></a>    P[k, ] &lt;- p; IDX[[k]] &lt;- seq_len(n)</span>
-<span id="cb46-90"><a href=""></a>    L[k] &lt;- mse(p, H, D$x, D$y); EP[k] &lt;- (k - 1) / B</span>
-<span id="cb46-91"><a href=""></a>  }</span>
-<span id="cb46-92"><a href=""></a>  n_rec &lt;- max(1, k)</span>
-<span id="cb46-93"><a href=""></a>  list(P = P[1:n_rec, , drop = FALSE], L = L[1:n_rec], EP = EP[1:n_rec],</span>
-<span id="cb46-94"><a href=""></a>       IDX = IDX[1:n_rec], n = n_rec, B = B, diverged = bad)</span>
-<span id="cb46-95"><a href=""></a>}</span>
-<span id="cb46-96"><a href=""></a></span>
-<span id="cb46-97"><a href=""></a>## ------------------------------------------------------------ weight plot</span>
-<span id="cb46-98"><a href=""></a>HOT &lt;- colorRampPalette(c("#f0f0f0", "#ffe08a", "#ffa73c",</span>
-<span id="cb46-99"><a href=""></a>                          "#ef4a15", "#7f0000"))(100)</span>
-<span id="cb46-100"><a href=""></a>wcol &lt;- function(v, wmax)</span>
-<span id="cb46-101"><a href=""></a>  HOT[pmax(1, pmin(100, ceiling(abs(v) / wmax * 100)))]</span>
-<span id="cb46-102"><a href=""></a></span>
-<span id="cb46-103"><a href=""></a>draw_net &lt;- function(p, H, wmax, main) {</span>
-<span id="cb46-104"><a href=""></a>  P &lt;- unpack(p, H)</span>
-<span id="cb46-105"><a href=""></a>  yh &lt;- if (H == 1) 0.5 else seq(0.92, 0.10, length.out = H)</span>
-<span id="cb46-106"><a href=""></a>  ix &lt;- 0.05; hx &lt;- 0.55; ox &lt;- 1.05</span>
-<span id="cb46-107"><a href=""></a>  nc &lt;- max(1.2, min(4.2, 34 / H))                   # node size shrinks with H</span>
-<span id="cb46-108"><a href=""></a>  plot.new(); plot.window(c(-0.05, 1.2), c(-0.08, 1.02))</span>
-<span id="cb46-109"><a href=""></a>  title(main = main, cex.main = 1.05)</span>
-<span id="cb46-110"><a href=""></a>  lw &lt;- function(v) 0.7 + 4.5 * abs(v) / wmax</span>
-<span id="cb46-111"><a href=""></a>  for (j in 1:H)</span>
-<span id="cb46-112"><a href=""></a>    segments(ix, 0.5, hx, yh[j], col = wcol(P$w[j], wmax),</span>
-<span id="cb46-113"><a href=""></a>             lwd = lw(P$w[j]), lty = if (P$w[j] &lt; 0) 2 else 1)</span>
-<span id="cb46-114"><a href=""></a>  for (j in 1:H)</span>
-<span id="cb46-115"><a href=""></a>    segments(hx, yh[j], ox, 0.5, col = wcol(P$v[j], wmax),</span>
-<span id="cb46-116"><a href=""></a>             lwd = lw(P$v[j]), lty = if (P$v[j] &lt; 0) 2 else 1)</span>
-<span id="cb46-117"><a href=""></a>  points(ix, 0.5, pch = 21, cex = 3.2, bg = "white", lwd = 2)</span>
-<span id="cb46-118"><a href=""></a>  text(ix, 0.5, "x", font = 2)</span>
-<span id="cb46-119"><a href=""></a>  points(rep(hx, H), yh, pch = 21, cex = nc, lwd = 1.6, bg = wcol(P$cc, wmax))</span>
-<span id="cb46-120"><a href=""></a>  if (H &lt;= 8) text(rep(hx, H), yh, paste0("h", 1:H), cex = 0.7)</span>
-<span id="cb46-121"><a href=""></a>  points(ox, 0.5, pch = 21, cex = 3.4, lwd = 2, bg = wcol(P$b, wmax))</span>
-<span id="cb46-122"><a href=""></a>  text(ox, 0.5, "y", font = 2)</span>
-<span id="cb46-123"><a href=""></a>  xs &lt;- seq(0.15, 0.95, length.out = 100)</span>
-<span id="cb46-124"><a href=""></a>  rect(xs, -0.07, xs + diff(xs)[1], -0.02, col = HOT, border = NA)</span>
-<span id="cb46-125"><a href=""></a>  text(0.15, 0.005, "0", cex = 0.75)</span>
-<span id="cb46-126"><a href=""></a>  text(0.95, 0.005, formatC(wmax, format = "g", digits = 3), cex = 0.75)</span>
-<span id="cb46-127"><a href=""></a>  text(0.55, 0.005, "|weight|", cex = 0.75)</span>
-<span id="cb46-128"><a href=""></a>}</span>
-<span id="cb46-129"><a href=""></a></span>
-<span id="cb46-130"><a href=""></a>## --------------------------------------------------------------------- UI</span>
-<span id="cb46-131"><a href=""></a>ui &lt;- fluidPage(</span>
-<span id="cb46-132"><a href=""></a>  fluidRow(</span>
-<span id="cb46-133"><a href=""></a>    ## ---- column 1: training controls -----------------------------------</span>
-<span id="cb46-134"><a href=""></a>    column(</span>
-<span id="cb46-135"><a href=""></a>      3,</span>
-<span id="cb46-136"><a href=""></a>      selectInput("dgp", "True curve", choices = DGPS, selected = "teacher"),</span>
-<span id="cb46-137"><a href=""></a>      sliderInput("H", "Hidden neurons", min = 2, max = 16, value = 8,</span>
-<span id="cb46-138"><a href=""></a>                  step = 1),</span>
-<span id="cb46-139"><a href=""></a>      sliderInput("B", "Number of batches B per epoch", min = 1, max = 40,</span>
-<span id="cb46-140"><a href=""></a>                  value = 10, step = 1),</span>
-<span id="cb46-141"><a href=""></a>      sliderInput("a", "Learning rate", min = 0.01, max = 0.60, value = 0.20,</span>
-<span id="cb46-142"><a href=""></a>                  step = 0.01),</span>
-<span id="cb46-143"><a href=""></a>      sliderInput("nep", "Epochs", min = 10, max = 300, value = 100, step = 10),</span>
-<span id="cb46-144"><a href=""></a>      checkboxInput("showgd", "Overlay the B = 1 run", TRUE)</span>
-<span id="cb46-145"><a href=""></a>    ),</span>
-<span id="cb46-146"><a href=""></a>    ## ---- column 2: data generation, then playback ----------------------</span>
-<span id="cb46-147"><a href=""></a>    column(</span>
-<span id="cb46-148"><a href=""></a>      2,</span>
-<span id="cb46-149"><a href=""></a>      div(</span>
-<span id="cb46-150"><a href=""></a>        style = "margin-top:10px;",</span>
-<span id="cb46-151"><a href=""></a>        tags$h5(tags$b("Data")),</span>
-<span id="cb46-152"><a href=""></a>        sliderInput("n", "Sample size n", min = 40, max = 400, value = 200,</span>
-<span id="cb46-153"><a href=""></a>                    step = 20),</span>
-<span id="cb46-154"><a href=""></a>        sliderInput("sigma", "Noise SD", min = 0.01, max = 0.40, value = 0.08,</span>
-<span id="cb46-155"><a href=""></a>                    step = 0.01),</span>
-<span id="cb46-156"><a href=""></a>        actionButton("newdata", "Regenerate a dataset",</span>
-<span id="cb46-157"><a href=""></a>                     class = "btn-warning",</span>
-<span id="cb46-158"><a href=""></a>                     style = "width:100%; margin-bottom:6px;"),</span>
-<span id="cb46-159"><a href=""></a></span>
-<span id="cb46-160"><a href=""></a>        hr(style = "border-top:2px solid #999; margin:14px 0;"),</span>
-<span id="cb46-161"><a href=""></a></span>
-<span id="cb46-162"><a href=""></a>        tags$h5(tags$b("Training")),</span>
-<span id="cb46-163"><a href=""></a>        actionButton("play", "Play", class = "btn-primary btn-lg",</span>
-<span id="cb46-164"><a href=""></a>                     style = "width:100%; margin-bottom:10px;"),</span>
-<span id="cb46-165"><a href=""></a>        actionButton("step", "Next", class = "btn-lg",</span>
-<span id="cb46-166"><a href=""></a>                     style = "width:100%; margin-bottom:10px;"),</span>
-<span id="cb46-167"><a href=""></a>        actionButton("back", "Prev", class = "btn-lg",</span>
-<span id="cb46-168"><a href=""></a>                     style = "width:100%;"),</span>
-<span id="cb46-169"><a href=""></a>        checkboxInput("byepoch", "Advance a whole epoch", TRUE),</span>
-<span id="cb46-170"><a href=""></a>        checkboxInput("autoplay", "Autoplay on change", FALSE),</span>
-<span id="cb46-171"><a href=""></a>        actionButton("newinit", "New initial weights",</span>
-<span id="cb46-172"><a href=""></a>                     style = "width:100%; margin-bottom:8px;"),</span>
-<span id="cb46-173"><a href=""></a>        actionButton("newseed", "New batch sequence",</span>
-<span id="cb46-174"><a href=""></a>                     style = "width:100%; margin-bottom:8px;"),</span>
-<span id="cb46-175"><a href=""></a>        helpText("Both runs share the data, the initial weights and the",</span>
-<span id="cb46-176"><a href=""></a>                 "number of epochs; only B differs.")</span>
-<span id="cb46-177"><a href=""></a>      )</span>
-<span id="cb46-178"><a href=""></a>    ),</span>
-<span id="cb46-179"><a href=""></a>    ## ---- column 3: plots -----------------------------------------------</span>
-<span id="cb46-180"><a href=""></a>    column(</span>
-<span id="cb46-181"><a href=""></a>      7,</span>
-<span id="cb46-182"><a href=""></a>      plotOutput("nets", height = "300px"),</span>
-<span id="cb46-183"><a href=""></a>      plotOutput("fit", height = "340px"),</span>
-<span id="cb46-184"><a href=""></a>      sliderInput("k", "Update k", min = 0, max = 1, value = 0, step = 1,</span>
-<span id="cb46-185"><a href=""></a>                  width = "900px")</span>
-<span id="cb46-186"><a href=""></a>    )</span>
-<span id="cb46-187"><a href=""></a>  )</span>
-<span id="cb46-188"><a href=""></a>)</span>
-<span id="cb46-189"><a href=""></a></span>
-<span id="cb46-190"><a href=""></a>## ----------------------------------------------------------------- server</span>
-<span id="cb46-191"><a href=""></a>server &lt;- function(input, output, session) {</span>
-<span id="cb46-192"><a href=""></a></span>
-<span id="cb46-193"><a href=""></a>  MAXUP &lt;- 4000</span>
-<span id="cb46-194"><a href=""></a>  dseed &lt;- reactiveVal(1); wseed &lt;- reactiveVal(1); bseed &lt;- reactiveVal(1)</span>
-<span id="cb46-195"><a href=""></a>  playing &lt;- reactiveVal(FALSE)</span>
-<span id="cb46-196"><a href=""></a></span>
-<span id="cb46-197"><a href=""></a>  observeEvent(input$newdata, dseed(dseed() + 1))</span>
-<span id="cb46-198"><a href=""></a>  observeEvent(input$newinit, wseed(wseed() + 1))</span>
-<span id="cb46-199"><a href=""></a>  observeEvent(input$newseed, bseed(bseed() + 1))</span>
-<span id="cb46-200"><a href=""></a></span>
-<span id="cb46-201"><a href=""></a>  DAT &lt;- reactive(make_data(input$n, input$sigma, dseed(), input$dgp))</span>
-<span id="cb46-202"><a href=""></a></span>
-<span id="cb46-203"><a href=""></a>  runs &lt;- reactive({</span>
-<span id="cb46-204"><a href=""></a>    D &lt;- DAT(); H &lt;- input$H; B &lt;- as.integer(input$B)</span>
-<span id="cb46-205"><a href=""></a>    ne &lt;- max(1, min(input$nep, floor(MAXUP / B)))</span>
-<span id="cb46-206"><a href=""></a>    p0 &lt;- init_p(H, wseed())</span>
-<span id="cb46-207"><a href=""></a>    S &lt;- train(p0, H, B, input$a, ne, bseed(), D)</span>
-<span id="cb46-208"><a href=""></a>    G &lt;- train(p0, H, 1L, input$a, ne, bseed(), D)</span>
-<span id="cb46-209"><a href=""></a>    list(S = S, G = G, H = H, B = B, D = D, ne = ne,</span>
-<span id="cb46-210"><a href=""></a>         capped = ne &lt; input$nep,</span>
-<span id="cb46-211"><a href=""></a>         wmax = max(1e-6, max(abs(S$P), na.rm = TRUE),</span>
-<span id="cb46-212"><a href=""></a>                    max(abs(G$P), na.rm = TRUE)))</span>
-<span id="cb46-213"><a href=""></a>  })</span>
+<span id="cb46-4"><a href=""></a>#| label: sgd-animation</span>
+<span id="cb46-5"><a href=""></a>#| standalone: true</span>
+<span id="cb46-6"><a href=""></a>#| viewerHeight: 860</span>
+<span id="cb46-7"><a href=""></a></span>
+<span id="cb46-8"><a href=""></a>library(shiny)</span>
+<span id="cb46-9"><a href=""></a></span>
+<span id="cb46-10"><a href=""></a>## ------------------------------------------------------------------- data</span>
+<span id="cb46-11"><a href=""></a>## Two data-generating processes. The teacher network lies inside the</span>
+<span id="cb46-12"><a href=""></a>## student's model class; the bumps do not.</span>
+<span id="cb46-13"><a href=""></a>TEACH &lt;- list(w = c(4, 3, 5), cc = c(4, 0, -5), v = c(1.0, -1.2, 0.8), b = 0)</span>
+<span id="cb46-14"><a href=""></a></span>
+<span id="cb46-15"><a href=""></a>g_teacher &lt;- function(x) {</span>
+<span id="cb46-16"><a href=""></a>  Hm &lt;- tanh(outer(x, TEACH$w) + rep(TEACH$cc, each = length(x)))</span>
+<span id="cb46-17"><a href=""></a>  as.vector(Hm %*% TEACH$v + TEACH$b)</span>
+<span id="cb46-18"><a href=""></a>}</span>
+<span id="cb46-19"><a href=""></a></span>
+<span id="cb46-20"><a href=""></a>g_bumps &lt;- function(x)</span>
+<span id="cb46-21"><a href=""></a>  1.2 * exp(-9 * (x + 0.7)^2) - 1.0 * exp(-9 * (x - 0.8)^2)</span>
+<span id="cb46-22"><a href=""></a></span>
+<span id="cb46-23"><a href=""></a>DGPS &lt;- c("Teacher network (1 - 3 tanh - 1)" = "teacher",</span>
+<span id="cb46-24"><a href=""></a>          "Two Gaussian bumps (outside the model class)" = "bumps")</span>
+<span id="cb46-25"><a href=""></a></span>
+<span id="cb46-26"><a href=""></a>gtrue &lt;- function(x, dgp)</span>
+<span id="cb46-27"><a href=""></a>  if (identical(dgp, "bumps")) g_bumps(x) else g_teacher(x)</span>
+<span id="cb46-28"><a href=""></a></span>
+<span id="cb46-29"><a href=""></a>XG &lt;- seq(-2, 2, length.out = 300)</span>
+<span id="cb46-30"><a href=""></a></span>
+<span id="cb46-31"><a href=""></a>make_data &lt;- function(n, sigma, seed, dgp) {</span>
+<span id="cb46-32"><a href=""></a>  set.seed(500 + seed)</span>
+<span id="cb46-33"><a href=""></a>  x &lt;- sort(runif(n, -2, 2))</span>
+<span id="cb46-34"><a href=""></a>  list(x = x, y = gtrue(x, dgp) + rnorm(n, 0, sigma), n = n, dgp = dgp)</span>
+<span id="cb46-35"><a href=""></a>}</span>
+<span id="cb46-36"><a href=""></a></span>
+<span id="cb46-37"><a href=""></a>## ------------------------------------------------- network: 1 - H tanh - 1</span>
+<span id="cb46-38"><a href=""></a>unpack &lt;- function(p, H)</span>
+<span id="cb46-39"><a href=""></a>  list(w = p[1:H], cc = p[H + (1:H)], v = p[2 * H + (1:H)], b = p[3 * H + 1])</span>
+<span id="cb46-40"><a href=""></a></span>
+<span id="cb46-41"><a href=""></a>fnet &lt;- function(p, x, H) {</span>
+<span id="cb46-42"><a href=""></a>  P &lt;- unpack(p, H)</span>
+<span id="cb46-43"><a href=""></a>  Hm &lt;- tanh(outer(x, P$w) + rep(P$cc, each = length(x)))</span>
+<span id="cb46-44"><a href=""></a>  as.vector(Hm %*% P$v + P$b)</span>
+<span id="cb46-45"><a href=""></a>}</span>
+<span id="cb46-46"><a href=""></a></span>
+<span id="cb46-47"><a href=""></a>gnet &lt;- function(p, x, y, H) {</span>
+<span id="cb46-48"><a href=""></a>  n &lt;- length(x); P &lt;- unpack(p, H)</span>
+<span id="cb46-49"><a href=""></a>  Hm &lt;- tanh(outer(x, P$w) + rep(P$cc, each = n))</span>
+<span id="cb46-50"><a href=""></a>  r &lt;- as.vector(Hm %*% P$v + P$b) - y</span>
+<span id="cb46-51"><a href=""></a>  S &lt;- (1 - Hm^2) * outer(r, P$v)</span>
+<span id="cb46-52"><a href=""></a>  c(as.vector(colSums(S * x)) / n,        # dw</span>
+<span id="cb46-53"><a href=""></a>    as.vector(colSums(S)) / n,            # dc</span>
+<span id="cb46-54"><a href=""></a>    as.vector(crossprod(Hm, r)) / n,      # dv</span>
+<span id="cb46-55"><a href=""></a>    mean(r))                              # db</span>
+<span id="cb46-56"><a href=""></a>}</span>
+<span id="cb46-57"><a href=""></a></span>
+<span id="cb46-58"><a href=""></a>mse &lt;- function(p, H, x, y) 0.5 * mean((fnet(p, x, H) - y)^2)</span>
+<span id="cb46-59"><a href=""></a></span>
+<span id="cb46-60"><a href=""></a>init_p &lt;- function(H, seed) {</span>
+<span id="cb46-61"><a href=""></a>  set.seed(1000 + seed)</span>
+<span id="cb46-62"><a href=""></a>  c(rnorm(H, 0, 2), rnorm(H, 0, 1.5), rnorm(H, 0, 0.7), 0)</span>
+<span id="cb46-63"><a href=""></a>}</span>
+<span id="cb46-64"><a href=""></a></span>
+<span id="cb46-65"><a href=""></a>## ---------------------------------------------------------------- training</span>
+<span id="cb46-66"><a href=""></a>## B = number of batches per epoch; B = 1 is full-batch gradient descent.</span>
+<span id="cb46-67"><a href=""></a>train &lt;- function(p0, H, B, a, nepoch, seed, D) {</span>
+<span id="cb46-68"><a href=""></a>  n &lt;- D$n</span>
+<span id="cb46-69"><a href=""></a>  nup &lt;- B * nepoch</span>
+<span id="cb46-70"><a href=""></a>  P &lt;- matrix(NA_real_, nup + 1, length(p0))</span>
+<span id="cb46-71"><a href=""></a>  L &lt;- rep(NA_real_, nup + 1); EP &lt;- rep(NA_real_, nup + 1)</span>
+<span id="cb46-72"><a href=""></a>  IDX &lt;- vector("list", nup + 1)</span>
+<span id="cb46-73"><a href=""></a>  set.seed(seed)</span>
+<span id="cb46-74"><a href=""></a>  p &lt;- p0; k &lt;- 0; bad &lt;- FALSE</span>
+<span id="cb46-75"><a href=""></a>  for (e in seq_len(nepoch)) {</span>
+<span id="cb46-76"><a href=""></a>    perm &lt;- if (B == 1) seq_len(n) else sample.int(n)</span>
+<span id="cb46-77"><a href=""></a>    grp &lt;- split(perm, rep_len(seq_len(B), n))       # nearly equal sizes</span>
+<span id="cb46-78"><a href=""></a>    for (b in seq_len(B)) {</span>
+<span id="cb46-79"><a href=""></a>      k &lt;- k + 1</span>
+<span id="cb46-80"><a href=""></a>      idx &lt;- grp[[b]]</span>
+<span id="cb46-81"><a href=""></a>      P[k, ] &lt;- p; IDX[[k]] &lt;- idx</span>
+<span id="cb46-82"><a href=""></a>      L[k] &lt;- mse(p, H, D$x, D$y); EP[k] &lt;- (k - 1) / B</span>
+<span id="cb46-83"><a href=""></a>      p &lt;- p - a * gnet(p, D$x[idx], D$y[idx], H)</span>
+<span id="cb46-84"><a href=""></a>      if (any(!is.finite(p))) { bad &lt;- TRUE; break }</span>
+<span id="cb46-85"><a href=""></a>    }</span>
+<span id="cb46-86"><a href=""></a>    if (bad) break</span>
+<span id="cb46-87"><a href=""></a>  }</span>
+<span id="cb46-88"><a href=""></a>  if (!bad) {</span>
+<span id="cb46-89"><a href=""></a>    k &lt;- k + 1</span>
+<span id="cb46-90"><a href=""></a>    P[k, ] &lt;- p; IDX[[k]] &lt;- seq_len(n)</span>
+<span id="cb46-91"><a href=""></a>    L[k] &lt;- mse(p, H, D$x, D$y); EP[k] &lt;- (k - 1) / B</span>
+<span id="cb46-92"><a href=""></a>  }</span>
+<span id="cb46-93"><a href=""></a>  n_rec &lt;- max(1, k)</span>
+<span id="cb46-94"><a href=""></a>  list(P = P[1:n_rec, , drop = FALSE], L = L[1:n_rec], EP = EP[1:n_rec],</span>
+<span id="cb46-95"><a href=""></a>       IDX = IDX[1:n_rec], n = n_rec, B = B, diverged = bad)</span>
+<span id="cb46-96"><a href=""></a>}</span>
+<span id="cb46-97"><a href=""></a></span>
+<span id="cb46-98"><a href=""></a>## ------------------------------------------------------------ weight plot</span>
+<span id="cb46-99"><a href=""></a>## Diverging ramp: blue = negative, red = positive, magnitude by saturation.</span>
+<span id="cb46-100"><a href=""></a>DIV &lt;- colorRampPalette(c("#08306B", "#2171B5", "#6BAED6", "#DEEBF7",</span>
+<span id="cb46-101"><a href=""></a>                          "#F7F7F7",</span>
+<span id="cb46-102"><a href=""></a>                          "#FEE0D2", "#FC9272", "#CB181D", "#67000D"))(201)</span>
+<span id="cb46-103"><a href=""></a></span>
+<span id="cb46-104"><a href=""></a>## compander: maps v in [-wmax, wmax] to [-1, 1], boosting small values.</span>
+<span id="cb46-105"><a href=""></a>tone &lt;- function(v, wmax, k) {</span>
+<span id="cb46-106"><a href=""></a>  u &lt;- pmax(-1, pmin(1, v / wmax))</span>
+<span id="cb46-107"><a href=""></a>  sign(u) * log1p(k * abs(u)) / log1p(k)</span>
+<span id="cb46-108"><a href=""></a>}</span>
+<span id="cb46-109"><a href=""></a></span>
+<span id="cb46-110"><a href=""></a>wcol &lt;- function(v, wmax, k) DIV[round((tone(v, wmax, k) + 1) * 100) + 1]</span>
+<span id="cb46-111"><a href=""></a>wlwd &lt;- function(v, wmax, k) 0.8 + 6 * abs(tone(v, wmax, k))</span>
+<span id="cb46-112"><a href=""></a></span>
+<span id="cb46-113"><a href=""></a>draw_net &lt;- function(p, H, wmax, k, main) {</span>
+<span id="cb46-114"><a href=""></a>  P &lt;- unpack(p, H)</span>
+<span id="cb46-115"><a href=""></a>  yh &lt;- if (H == 1) 0.5 else seq(0.92, 0.10, length.out = H)</span>
+<span id="cb46-116"><a href=""></a>  ix &lt;- 0.05; hx &lt;- 0.55; ox &lt;- 1.05</span>
+<span id="cb46-117"><a href=""></a>  nc &lt;- max(1.4, min(4.4, 36 / H))</span>
+<span id="cb46-118"><a href=""></a>  plot.new(); plot.window(c(-0.05, 1.2), c(-0.10, 1.02))</span>
+<span id="cb46-119"><a href=""></a>  title(main = main, cex.main = 1.05)</span>
+<span id="cb46-120"><a href=""></a>  for (j in 1:H)</span>
+<span id="cb46-121"><a href=""></a>    segments(ix, 0.5, hx, yh[j], col = wcol(P$w[j], wmax, k),</span>
+<span id="cb46-122"><a href=""></a>             lwd = wlwd(P$w[j], wmax, k), lend = 1)</span>
+<span id="cb46-123"><a href=""></a>  for (j in 1:H)</span>
+<span id="cb46-124"><a href=""></a>    segments(hx, yh[j], ox, 0.5, col = wcol(P$v[j], wmax, k),</span>
+<span id="cb46-125"><a href=""></a>             lwd = wlwd(P$v[j], wmax, k), lend = 1)</span>
+<span id="cb46-126"><a href=""></a>  points(ix, 0.5, pch = 21, cex = 3.2, bg = "white", lwd = 1.6)</span>
+<span id="cb46-127"><a href=""></a>  text(ix, 0.5, "x", font = 2)</span>
+<span id="cb46-128"><a href=""></a>  points(rep(hx, H), yh, pch = 21, cex = nc, lwd = 1.4,</span>
+<span id="cb46-129"><a href=""></a>         bg = wcol(P$cc, wmax, k))</span>
+<span id="cb46-130"><a href=""></a>  if (H &lt;= 10) text(rep(hx, H), yh, 1:H, cex = 0.65)</span>
+<span id="cb46-131"><a href=""></a>  points(ox, 0.5, pch = 21, cex = 3.4, lwd = 1.6, bg = wcol(P$b, wmax, k))</span>
+<span id="cb46-132"><a href=""></a>  text(ox, 0.5, "y", font = 2)</span>
+<span id="cb46-133"><a href=""></a></span>
+<span id="cb46-134"><a href=""></a>  ## signed colour bar</span>
+<span id="cb46-135"><a href=""></a>  xs &lt;- seq(0.12, 0.98, length.out = 201)</span>
+<span id="cb46-136"><a href=""></a>  rect(xs, -0.09, xs + diff(xs)[1], -0.035, col = DIV, border = NA)</span>
+<span id="cb46-137"><a href=""></a>  lab &lt;- formatC(wmax, format = "g", digits = 2)</span>
+<span id="cb46-138"><a href=""></a>  text(c(0.12, 0.55, 0.98), -0.005,</span>
+<span id="cb46-139"><a href=""></a>       c(paste0("-", lab), "0", paste0("+", lab)), cex = 0.72)</span>
+<span id="cb46-140"><a href=""></a>}</span>
+<span id="cb46-141"><a href=""></a></span>
+<span id="cb46-142"><a href=""></a>## --------------------------------------------------------------------- UI</span>
+<span id="cb46-143"><a href=""></a>ui &lt;- fluidPage(</span>
+<span id="cb46-144"><a href=""></a>  fluidRow(</span>
+<span id="cb46-145"><a href=""></a>    ## ---- column 1: training controls -----------------------------------</span>
+<span id="cb46-146"><a href=""></a>    column(</span>
+<span id="cb46-147"><a href=""></a>      3,</span>
+<span id="cb46-148"><a href=""></a>      selectInput("dgp", "True curve", choices = DGPS, selected = "teacher"),</span>
+<span id="cb46-149"><a href=""></a>      sliderInput("H", "Hidden neurons", min = 2, max = 16, value = 8,</span>
+<span id="cb46-150"><a href=""></a>                  step = 1),</span>
+<span id="cb46-151"><a href=""></a>      sliderInput("B", "Number of batches B per epoch", min = 1, max = 40,</span>
+<span id="cb46-152"><a href=""></a>                  value = 10, step = 1),</span>
+<span id="cb46-153"><a href=""></a>      sliderInput("a", "Learning rate", min = 0.01, max = 0.60, value = 0.20,</span>
+<span id="cb46-154"><a href=""></a>                  step = 0.01),</span>
+<span id="cb46-155"><a href=""></a>      sliderInput("nep", "Epochs", min = 10, max = 300, value = 100, step = 10),</span>
+<span id="cb46-156"><a href=""></a>      sliderInput("ctr", "Weight colour contrast", min = 1, max = 40,</span>
+<span id="cb46-157"><a href=""></a>                  value = 12, step = 1),</span>
+<span id="cb46-158"><a href=""></a>      checkboxInput("showgd", "Overlay the B = 1 run", TRUE)</span>
+<span id="cb46-159"><a href=""></a>    ),</span>
+<span id="cb46-160"><a href=""></a>    ## ---- column 2: data generation, then playback ----------------------</span>
+<span id="cb46-161"><a href=""></a>    column(</span>
+<span id="cb46-162"><a href=""></a>      2,</span>
+<span id="cb46-163"><a href=""></a>      div(</span>
+<span id="cb46-164"><a href=""></a>        style = "margin-top:10px;",</span>
+<span id="cb46-165"><a href=""></a>        tags$h5(tags$b("Data")),</span>
+<span id="cb46-166"><a href=""></a>        sliderInput("n", "Sample size n", min = 40, max = 400, value = 200,</span>
+<span id="cb46-167"><a href=""></a>                    step = 20),</span>
+<span id="cb46-168"><a href=""></a>        sliderInput("sigma", "Noise SD", min = 0.01, max = 0.40, value = 0.08,</span>
+<span id="cb46-169"><a href=""></a>                    step = 0.01),</span>
+<span id="cb46-170"><a href=""></a>        actionButton("newdata", "Regenerate a dataset",</span>
+<span id="cb46-171"><a href=""></a>                     class = "btn-warning",</span>
+<span id="cb46-172"><a href=""></a>                     style = "width:100%; margin-bottom:6px;"),</span>
+<span id="cb46-173"><a href=""></a></span>
+<span id="cb46-174"><a href=""></a>        hr(style = "border-top:2px solid #999; margin:14px 0;"),</span>
+<span id="cb46-175"><a href=""></a></span>
+<span id="cb46-176"><a href=""></a>        tags$h5(tags$b("Training")),</span>
+<span id="cb46-177"><a href=""></a>        actionButton("play", "Play", class = "btn-primary btn-lg",</span>
+<span id="cb46-178"><a href=""></a>                     style = "width:100%; margin-bottom:10px;"),</span>
+<span id="cb46-179"><a href=""></a>        actionButton("step", "Next", class = "btn-lg",</span>
+<span id="cb46-180"><a href=""></a>                     style = "width:100%; margin-bottom:10px;"),</span>
+<span id="cb46-181"><a href=""></a>        actionButton("back", "Prev", class = "btn-lg",</span>
+<span id="cb46-182"><a href=""></a>                     style = "width:100%;"),</span>
+<span id="cb46-183"><a href=""></a>        checkboxInput("byepoch", "Advance a whole epoch", TRUE),</span>
+<span id="cb46-184"><a href=""></a>        checkboxInput("autoplay", "Autoplay on change", FALSE),</span>
+<span id="cb46-185"><a href=""></a>        actionButton("newinit", "New initial weights",</span>
+<span id="cb46-186"><a href=""></a>                     style = "width:100%; margin-bottom:8px;"),</span>
+<span id="cb46-187"><a href=""></a>        actionButton("newseed", "New batch sequence",</span>
+<span id="cb46-188"><a href=""></a>                     style = "width:100%; margin-bottom:8px;"),</span>
+<span id="cb46-189"><a href=""></a>        helpText("Both runs share the data, the initial weights and the",</span>
+<span id="cb46-190"><a href=""></a>                 "number of epochs; only B differs.")</span>
+<span id="cb46-191"><a href=""></a>      )</span>
+<span id="cb46-192"><a href=""></a>    ),</span>
+<span id="cb46-193"><a href=""></a>    ## ---- column 3: plots -----------------------------------------------</span>
+<span id="cb46-194"><a href=""></a>    column(</span>
+<span id="cb46-195"><a href=""></a>      7,</span>
+<span id="cb46-196"><a href=""></a>      plotOutput("nets", height = "300px"),</span>
+<span id="cb46-197"><a href=""></a>      plotOutput("fit", height = "340px"),</span>
+<span id="cb46-198"><a href=""></a>      sliderInput("k", "Update k", min = 0, max = 1, value = 0, step = 1,</span>
+<span id="cb46-199"><a href=""></a>                  width = "900px")</span>
+<span id="cb46-200"><a href=""></a>    )</span>
+<span id="cb46-201"><a href=""></a>  )</span>
+<span id="cb46-202"><a href=""></a>)</span>
+<span id="cb46-203"><a href=""></a></span>
+<span id="cb46-204"><a href=""></a>## ----------------------------------------------------------------- server</span>
+<span id="cb46-205"><a href=""></a>server &lt;- function(input, output, session) {</span>
+<span id="cb46-206"><a href=""></a></span>
+<span id="cb46-207"><a href=""></a>  MAXUP &lt;- 4000</span>
+<span id="cb46-208"><a href=""></a>  dseed &lt;- reactiveVal(1); wseed &lt;- reactiveVal(1); bseed &lt;- reactiveVal(1)</span>
+<span id="cb46-209"><a href=""></a>  playing &lt;- reactiveVal(FALSE)</span>
+<span id="cb46-210"><a href=""></a></span>
+<span id="cb46-211"><a href=""></a>  observeEvent(input$newdata, dseed(dseed() + 1))</span>
+<span id="cb46-212"><a href=""></a>  observeEvent(input$newinit, wseed(wseed() + 1))</span>
+<span id="cb46-213"><a href=""></a>  observeEvent(input$newseed, bseed(bseed() + 1))</span>
 <span id="cb46-214"><a href=""></a></span>
-<span id="cb46-215"><a href=""></a>  stride &lt;- reactive(if (isTRUE(input$byepoch)) as.integer(input$B) else 1L)</span>
+<span id="cb46-215"><a href=""></a>  DAT &lt;- reactive(make_data(input$n, input$sigma, dseed(), input$dgp))</span>
 <span id="cb46-216"><a href=""></a></span>
-<span id="cb46-217"><a href=""></a>  observeEvent(runs(), {</span>
-<span id="cb46-218"><a href=""></a>    updateSliderInput(session, "k", max = max(1, runs()$S$n - 1), value = 0)</span>
-<span id="cb46-219"><a href=""></a>    playing(isTRUE(input$autoplay) &amp;&amp; runs()$S$n &gt; 1)</span>
-<span id="cb46-220"><a href=""></a>  })</span>
-<span id="cb46-221"><a href=""></a></span>
-<span id="cb46-222"><a href=""></a>  observeEvent(input$play, {</span>
-<span id="cb46-223"><a href=""></a>    if (isTRUE(playing())) playing(FALSE)</span>
-<span id="cb46-224"><a href=""></a>    else {</span>
-<span id="cb46-225"><a href=""></a>      if (as.integer(input$k) &gt;= runs()$S$n - 1)</span>
-<span id="cb46-226"><a href=""></a>        updateSliderInput(session, "k", value = 0)</span>
-<span id="cb46-227"><a href=""></a>      playing(TRUE)</span>
-<span id="cb46-228"><a href=""></a>    }</span>
-<span id="cb46-229"><a href=""></a>  })</span>
-<span id="cb46-230"><a href=""></a>  observeEvent(playing(), {</span>
-<span id="cb46-231"><a href=""></a>    updateActionButton(session, "play",</span>
-<span id="cb46-232"><a href=""></a>                       label = if (isTRUE(playing())) "Pause" else "Play")</span>
+<span id="cb46-217"><a href=""></a>  runs &lt;- reactive({</span>
+<span id="cb46-218"><a href=""></a>    D &lt;- DAT(); H &lt;- input$H; B &lt;- as.integer(input$B)</span>
+<span id="cb46-219"><a href=""></a>    ne &lt;- max(1, min(input$nep, floor(MAXUP / B)))</span>
+<span id="cb46-220"><a href=""></a>    p0 &lt;- init_p(H, wseed())</span>
+<span id="cb46-221"><a href=""></a>    S &lt;- train(p0, H, B, input$a, ne, bseed(), D)</span>
+<span id="cb46-222"><a href=""></a>    G &lt;- train(p0, H, 1L, input$a, ne, bseed(), D)</span>
+<span id="cb46-223"><a href=""></a>    list(S = S, G = G, H = H, B = B, D = D, ne = ne,</span>
+<span id="cb46-224"><a href=""></a>         capped = ne &lt; input$nep,</span>
+<span id="cb46-225"><a href=""></a>         wmax = max(0.2, quantile(abs(c(S$P, G$P)), 0.97, na.rm = TRUE)))</span>
+<span id="cb46-226"><a href=""></a>  })</span>
+<span id="cb46-227"><a href=""></a></span>
+<span id="cb46-228"><a href=""></a>  stride &lt;- reactive(if (isTRUE(input$byepoch)) as.integer(input$B) else 1L)</span>
+<span id="cb46-229"><a href=""></a></span>
+<span id="cb46-230"><a href=""></a>  observeEvent(runs(), {</span>
+<span id="cb46-231"><a href=""></a>    updateSliderInput(session, "k", max = max(1, runs()$S$n - 1), value = 0)</span>
+<span id="cb46-232"><a href=""></a>    playing(isTRUE(input$autoplay) &amp;&amp; runs()$S$n &gt; 1)</span>
 <span id="cb46-233"><a href=""></a>  })</span>
-<span id="cb46-234"><a href=""></a>  observe({</span>
-<span id="cb46-235"><a href=""></a>    if (!isTRUE(playing())) return()</span>
-<span id="cb46-236"><a href=""></a>    kmax &lt;- isolate(runs()$S$n) - 1</span>
-<span id="cb46-237"><a href=""></a>    k &lt;- isolate(as.integer(input$k)); st &lt;- isolate(stride())</span>
-<span id="cb46-238"><a href=""></a>    if (k &gt;= kmax) { playing(FALSE); return() }</span>
-<span id="cb46-239"><a href=""></a>    invalidateLater(250, session)</span>
-<span id="cb46-240"><a href=""></a>    updateSliderInput(session, "k", value = min(k + st, kmax))</span>
-<span id="cb46-241"><a href=""></a>  })</span>
-<span id="cb46-242"><a href=""></a>  observeEvent(input$step, {</span>
-<span id="cb46-243"><a href=""></a>    playing(FALSE)</span>
-<span id="cb46-244"><a href=""></a>    updateSliderInput(session, "k",</span>
-<span id="cb46-245"><a href=""></a>                      value = min(as.integer(input$k) + stride(),</span>
-<span id="cb46-246"><a href=""></a>                                  max(0, runs()$S$n - 1)))</span>
-<span id="cb46-247"><a href=""></a>  })</span>
-<span id="cb46-248"><a href=""></a>  observeEvent(input$back, {</span>
-<span id="cb46-249"><a href=""></a>    playing(FALSE)</span>
-<span id="cb46-250"><a href=""></a>    updateSliderInput(session, "k",</span>
-<span id="cb46-251"><a href=""></a>                      value = max(as.integer(input$k) - stride(), 0))</span>
-<span id="cb46-252"><a href=""></a>  })</span>
-<span id="cb46-253"><a href=""></a></span>
-<span id="cb46-254"><a href=""></a>  cur &lt;- reactive({</span>
-<span id="cb46-255"><a href=""></a>    R &lt;- runs()</span>
-<span id="cb46-256"><a href=""></a>    k &lt;- min(as.integer(input$k), R$S$n - 1) + 1L</span>
-<span id="cb46-257"><a href=""></a>    ep &lt;- R$S$EP[k]</span>
-<span id="cb46-258"><a href=""></a>    kg &lt;- max(1, min(R$G$n, floor(ep) + 1L))</span>
-<span id="cb46-259"><a href=""></a>    list(R = R, k = k, kg = kg, ep = ep)</span>
+<span id="cb46-234"><a href=""></a></span>
+<span id="cb46-235"><a href=""></a>  observeEvent(input$play, {</span>
+<span id="cb46-236"><a href=""></a>    if (isTRUE(playing())) playing(FALSE)</span>
+<span id="cb46-237"><a href=""></a>    else {</span>
+<span id="cb46-238"><a href=""></a>      if (as.integer(input$k) &gt;= runs()$S$n - 1)</span>
+<span id="cb46-239"><a href=""></a>        updateSliderInput(session, "k", value = 0)</span>
+<span id="cb46-240"><a href=""></a>      playing(TRUE)</span>
+<span id="cb46-241"><a href=""></a>    }</span>
+<span id="cb46-242"><a href=""></a>  })</span>
+<span id="cb46-243"><a href=""></a>  observeEvent(playing(), {</span>
+<span id="cb46-244"><a href=""></a>    updateActionButton(session, "play",</span>
+<span id="cb46-245"><a href=""></a>                       label = if (isTRUE(playing())) "Pause" else "Play")</span>
+<span id="cb46-246"><a href=""></a>  })</span>
+<span id="cb46-247"><a href=""></a>  observe({</span>
+<span id="cb46-248"><a href=""></a>    if (!isTRUE(playing())) return()</span>
+<span id="cb46-249"><a href=""></a>    kmax &lt;- isolate(runs()$S$n) - 1</span>
+<span id="cb46-250"><a href=""></a>    k &lt;- isolate(as.integer(input$k)); st &lt;- isolate(stride())</span>
+<span id="cb46-251"><a href=""></a>    if (k &gt;= kmax) { playing(FALSE); return() }</span>
+<span id="cb46-252"><a href=""></a>    invalidateLater(250, session)</span>
+<span id="cb46-253"><a href=""></a>    updateSliderInput(session, "k", value = min(k + st, kmax))</span>
+<span id="cb46-254"><a href=""></a>  })</span>
+<span id="cb46-255"><a href=""></a>  observeEvent(input$step, {</span>
+<span id="cb46-256"><a href=""></a>    playing(FALSE)</span>
+<span id="cb46-257"><a href=""></a>    updateSliderInput(session, "k",</span>
+<span id="cb46-258"><a href=""></a>                      value = min(as.integer(input$k) + stride(),</span>
+<span id="cb46-259"><a href=""></a>                                  max(0, runs()$S$n - 1)))</span>
 <span id="cb46-260"><a href=""></a>  })</span>
-<span id="cb46-261"><a href=""></a></span>
-<span id="cb46-262"><a href=""></a>  output$nets &lt;- renderPlot({</span>
-<span id="cb46-263"><a href=""></a>    C &lt;- cur(); R &lt;- C$R</span>
-<span id="cb46-264"><a href=""></a>    msz &lt;- length(R$S$IDX[[C$k]])</span>
-<span id="cb46-265"><a href=""></a>    par(mfrow = c(1, if (isTRUE(input$showgd)) 2 else 1), mar = c(1, 1, 3, 1))</span>
-<span id="cb46-266"><a href=""></a>    draw_net(R$S$P[C$k, ], R$H, R$wmax,</span>
-<span id="cb46-267"><a href=""></a>             sprintf("B = %d (m = %d),  epoch %.2f", R$B, msz, C$ep))</span>
-<span id="cb46-268"><a href=""></a>    if (isTRUE(input$showgd))</span>
-<span id="cb46-269"><a href=""></a>      draw_net(R$G$P[C$kg, ], R$H, R$wmax,</span>
-<span id="cb46-270"><a href=""></a>               sprintf("B = 1 (m = %d),  epoch %d", R$D$n, C$kg - 1L))</span>
-<span id="cb46-271"><a href=""></a>  })</span>
-<span id="cb46-272"><a href=""></a></span>
-<span id="cb46-273"><a href=""></a>  output$fit &lt;- renderPlot({</span>
-<span id="cb46-274"><a href=""></a>    C &lt;- cur(); R &lt;- C$R; D &lt;- R$D</span>
-<span id="cb46-275"><a href=""></a>    par(mfrow = c(1, 2), mar = c(4, 4.2, 2.5, 1))</span>
-<span id="cb46-276"><a href=""></a></span>
-<span id="cb46-277"><a href=""></a>    idx &lt;- R$S$IDX[[C$k]]</span>
-<span id="cb46-278"><a href=""></a>    plot(D$x, D$y, pch = 20, col = "grey75", cex = 0.9,</span>
-<span id="cb46-279"><a href=""></a>         xlab = "x", ylab = "y", main = "fitted curve and current batch")</span>
-<span id="cb46-280"><a href=""></a>    points(D$x[idx], D$y[idx], pch = 19, col = "#E8820C", cex = 1.2)</span>
-<span id="cb46-281"><a href=""></a>    lines(XG, gtrue(XG, D$dgp), col = "red", lty = 2, lwd = 2)</span>
-<span id="cb46-282"><a href=""></a>    lines(XG, fnet(R$S$P[C$k, ], XG, R$H), col = "#2E8B57", lwd = 2.5)</span>
-<span id="cb46-283"><a href=""></a>    if (isTRUE(input$showgd))</span>
-<span id="cb46-284"><a href=""></a>      lines(XG, fnet(R$G$P[C$kg, ], XG, R$H), col = "#7B3FBF", lwd = 2.5)</span>
-<span id="cb46-285"><a href=""></a>    legend("topright", bty = "n", cex = 0.85,</span>
-<span id="cb46-286"><a href=""></a>           lwd = c(2, 2.5, 2.5), lty = c(2, 1, 1),</span>
-<span id="cb46-287"><a href=""></a>           col = c("red", "#2E8B57", "#7B3FBF"),</span>
-<span id="cb46-288"><a href=""></a>           legend = c(if (identical(D$dgp, "bumps")) "true curve (bumps)"</span>
-<span id="cb46-289"><a href=""></a>                      else "teacher network",</span>
-<span id="cb46-290"><a href=""></a>                      paste0("B = ", R$B, " fit"), "B = 1 fit"))</span>
-<span id="cb46-291"><a href=""></a></span>
-<span id="cb46-292"><a href=""></a>    yl &lt;- range(c(R$S$L, if (isTRUE(input$showgd)) R$G$L), na.rm = TRUE)</span>
-<span id="cb46-293"><a href=""></a>    plot(R$S$EP, R$S$L, type = "l", log = "y", col = "#2E8B57", lwd = 2,</span>
-<span id="cb46-294"><a href=""></a>         ylim = pmax(yl, 1e-7), xlab = "epoch (one pass over all n)",</span>
-<span id="cb46-295"><a href=""></a>         ylab = "training loss (all n)", main = "loss per epoch")</span>
+<span id="cb46-261"><a href=""></a>  observeEvent(input$back, {</span>
+<span id="cb46-262"><a href=""></a>    playing(FALSE)</span>
+<span id="cb46-263"><a href=""></a>    updateSliderInput(session, "k",</span>
+<span id="cb46-264"><a href=""></a>                      value = max(as.integer(input$k) - stride(), 0))</span>
+<span id="cb46-265"><a href=""></a>  })</span>
+<span id="cb46-266"><a href=""></a></span>
+<span id="cb46-267"><a href=""></a>  cur &lt;- reactive({</span>
+<span id="cb46-268"><a href=""></a>    R &lt;- runs()</span>
+<span id="cb46-269"><a href=""></a>    k &lt;- min(as.integer(input$k), R$S$n - 1) + 1L</span>
+<span id="cb46-270"><a href=""></a>    ep &lt;- R$S$EP[k]</span>
+<span id="cb46-271"><a href=""></a>    kg &lt;- max(1, min(R$G$n, floor(ep) + 1L))</span>
+<span id="cb46-272"><a href=""></a>    list(R = R, k = k, kg = kg, ep = ep)</span>
+<span id="cb46-273"><a href=""></a>  })</span>
+<span id="cb46-274"><a href=""></a></span>
+<span id="cb46-275"><a href=""></a>  output$nets &lt;- renderPlot({</span>
+<span id="cb46-276"><a href=""></a>    C &lt;- cur(); R &lt;- C$R</span>
+<span id="cb46-277"><a href=""></a>    msz &lt;- length(R$S$IDX[[C$k]])</span>
+<span id="cb46-278"><a href=""></a>    par(mfrow = c(1, if (isTRUE(input$showgd)) 2 else 1), mar = c(1, 1, 3, 1))</span>
+<span id="cb46-279"><a href=""></a>    draw_net(R$S$P[C$k, ], R$H, R$wmax, input$ctr,</span>
+<span id="cb46-280"><a href=""></a>             sprintf("B = %d (m = %d),  epoch %.2f", R$B, msz, C$ep))</span>
+<span id="cb46-281"><a href=""></a>    if (isTRUE(input$showgd))</span>
+<span id="cb46-282"><a href=""></a>      draw_net(R$G$P[C$kg, ], R$H, R$wmax, input$ctr,</span>
+<span id="cb46-283"><a href=""></a>               sprintf("B = 1 (m = %d),  epoch %d", R$D$n, C$kg - 1L))</span>
+<span id="cb46-284"><a href=""></a>  })</span>
+<span id="cb46-285"><a href=""></a></span>
+<span id="cb46-286"><a href=""></a>  output$fit &lt;- renderPlot({</span>
+<span id="cb46-287"><a href=""></a>    C &lt;- cur(); R &lt;- C$R; D &lt;- R$D</span>
+<span id="cb46-288"><a href=""></a>    par(mfrow = c(1, 2), mar = c(4, 4.2, 2.5, 1))</span>
+<span id="cb46-289"><a href=""></a></span>
+<span id="cb46-290"><a href=""></a>    idx &lt;- R$S$IDX[[C$k]]</span>
+<span id="cb46-291"><a href=""></a>    plot(D$x, D$y, pch = 20, col = "grey75", cex = 0.9,</span>
+<span id="cb46-292"><a href=""></a>         xlab = "x", ylab = "y", main = "fitted curve and current batch")</span>
+<span id="cb46-293"><a href=""></a>    points(D$x[idx], D$y[idx], pch = 19, col = "#E8820C", cex = 1.2)</span>
+<span id="cb46-294"><a href=""></a>    lines(XG, gtrue(XG, D$dgp), col = "red", lty = 2, lwd = 2)</span>
+<span id="cb46-295"><a href=""></a>    lines(XG, fnet(R$S$P[C$k, ], XG, R$H), col = "#2E8B57", lwd = 2.5)</span>
 <span id="cb46-296"><a href=""></a>    if (isTRUE(input$showgd))</span>
-<span id="cb46-297"><a href=""></a>      lines(R$G$EP, R$G$L, col = "#7B3FBF", lwd = 2)</span>
-<span id="cb46-298"><a href=""></a>    abline(h = 0.5 * input$sigma^2, col = "grey55", lty = 3)</span>
-<span id="cb46-299"><a href=""></a>    points(C$ep, R$S$L[C$k], pch = 19, col = "#E8820C", cex = 1.5)</span>
-<span id="cb46-300"><a href=""></a>  })</span>
-<span id="cb46-301"><a href=""></a></span>
-<span id="cb46-302"><a href=""></a>  output$info &lt;- renderUI({</span>
-<span id="cb46-303"><a href=""></a>    C &lt;- cur(); R &lt;- C$R; H &lt;- R$H</span>
-<span id="cb46-304"><a href=""></a>    P &lt;- unpack(R$S$P[C$k, ], H)</span>
-<span id="cb46-305"><a href=""></a>    fmt &lt;- function(v, d = 3) formatC(v, format = "f", digits = d)</span>
-<span id="cb46-306"><a href=""></a>    rows &lt;- paste0(</span>
-<span id="cb46-307"><a href=""></a>      "&lt;tr&gt;&lt;td&gt;h", 1:H, "&lt;/td&gt;&lt;td align='right'&gt;", fmt(P$w),</span>
-<span id="cb46-308"><a href=""></a>      "&lt;/td&gt;&lt;td align='right'&gt;", fmt(P$cc),</span>
-<span id="cb46-309"><a href=""></a>      "&lt;/td&gt;&lt;td align='right'&gt;", fmt(P$v), "&lt;/td&gt;&lt;/tr&gt;", collapse = "")</span>
-<span id="cb46-310"><a href=""></a>    HTML(paste0(</span>
-<span id="cb46-311"><a href=""></a>      "&lt;hr&gt;&lt;b&gt;update&lt;/b&gt; ", C$k - 1, " of ", R$S$n - 1,</span>
-<span id="cb46-312"><a href=""></a>      "  (epoch ", fmt(C$ep, 2), ")&lt;br&gt;",</span>
-<span id="cb46-313"><a href=""></a>      "&lt;b&gt;batch size m&lt;/b&gt; = ", length(R$S$IDX[[C$k]]), " of ", R$D$n, "&lt;br&gt;",</span>
-<span id="cb46-314"><a href=""></a>      "&lt;b&gt;parameters&lt;/b&gt; = ", 3 * H + 1, "&lt;br&gt;&lt;br&gt;",</span>
-<span id="cb46-315"><a href=""></a>      "&lt;b&gt;loss, B = ", R$B, "&lt;/b&gt; = ", fmt(R$S$L[C$k], 5), "&lt;br&gt;",</span>
-<span id="cb46-316"><a href=""></a>      "&lt;b&gt;loss, B = 1&lt;/b&gt; = ", fmt(R$G$L[C$kg], 5), "&lt;br&gt;",</span>
-<span id="cb46-317"><a href=""></a>      "&lt;b&gt;noise floor&lt;/b&gt; &amp;asymp; ", fmt(0.5 * input$sigma^2, 5), "&lt;br&gt;",</span>
-<span id="cb46-318"><a href=""></a>      if (isTRUE(R$S$diverged))</span>
-<span id="cb46-319"><a href=""></a>        "&lt;b style='color:#C81E1E'&gt;B run diverged&lt;/b&gt;&lt;br&gt;" else "",</span>
-<span id="cb46-320"><a href=""></a>      if (isTRUE(R$capped))</span>
-<span id="cb46-321"><a href=""></a>        paste0("&lt;i style='color:#C81E1E'&gt;epochs capped at ", R$ne,</span>
-<span id="cb46-322"><a href=""></a>               "&lt;/i&gt;&lt;br&gt;") else "",</span>
-<span id="cb46-323"><a href=""></a>      "&lt;br&gt;&lt;table style='font-size:90%'&gt;",</span>
-<span id="cb46-324"><a href=""></a>      "&lt;tr&gt;&lt;th&gt;unit&lt;/th&gt;&lt;th&gt;w&lt;/th&gt;&lt;th&gt;bias&lt;/th&gt;&lt;th&gt;v&lt;/th&gt;&lt;/tr&gt;",</span>
-<span id="cb46-325"><a href=""></a>      rows, "&lt;/table&gt;",</span>
-<span id="cb46-326"><a href=""></a>      "&lt;br&gt;&lt;i&gt;output bias = ", fmt(P$b), "&lt;/i&gt;"</span>
-<span id="cb46-327"><a href=""></a>    ))</span>
-<span id="cb46-328"><a href=""></a>  })</span>
-<span id="cb46-329"><a href=""></a>}</span>
-<span id="cb46-330"><a href=""></a></span>
-<span id="cb46-331"><a href=""></a>shinyApp(ui, server)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb46-297"><a href=""></a>      lines(XG, fnet(R$G$P[C$kg, ], XG, R$H), col = "#7B3FBF", lwd = 2.5)</span>
+<span id="cb46-298"><a href=""></a>    legend("topright", bty = "n", cex = 0.85,</span>
+<span id="cb46-299"><a href=""></a>           lwd = c(2, 2.5, 2.5), lty = c(2, 1, 1),</span>
+<span id="cb46-300"><a href=""></a>           col = c("red", "#2E8B57", "#7B3FBF"),</span>
+<span id="cb46-301"><a href=""></a>           legend = c(if (identical(D$dgp, "bumps")) "true curve (bumps)"</span>
+<span id="cb46-302"><a href=""></a>                      else "teacher network",</span>
+<span id="cb46-303"><a href=""></a>                      paste0("B = ", R$B, " fit"), "B = 1 fit"))</span>
+<span id="cb46-304"><a href=""></a></span>
+<span id="cb46-305"><a href=""></a>    yl &lt;- range(c(R$S$L, if (isTRUE(input$showgd)) R$G$L), na.rm = TRUE)</span>
+<span id="cb46-306"><a href=""></a>    plot(R$S$EP, R$S$L, type = "l", log = "y", col = "#2E8B57", lwd = 2,</span>
+<span id="cb46-307"><a href=""></a>         ylim = pmax(yl, 1e-7), xlab = "epoch (one pass over all n)",</span>
+<span id="cb46-308"><a href=""></a>         ylab = "training loss (all n)", main = "loss per epoch")</span>
+<span id="cb46-309"><a href=""></a>    if (isTRUE(input$showgd))</span>
+<span id="cb46-310"><a href=""></a>      lines(R$G$EP, R$G$L, col = "#7B3FBF", lwd = 2)</span>
+<span id="cb46-311"><a href=""></a>    abline(h = 0.5 * input$sigma^2, col = "grey55", lty = 3)</span>
+<span id="cb46-312"><a href=""></a>    points(C$ep, R$S$L[C$k], pch = 19, col = "#E8820C", cex = 1.5)</span>
+<span id="cb46-313"><a href=""></a>  })</span>
+<span id="cb46-314"><a href=""></a></span>
+<span id="cb46-315"><a href=""></a>  output$info &lt;- renderUI({</span>
+<span id="cb46-316"><a href=""></a>    C &lt;- cur(); R &lt;- C$R; H &lt;- R$H</span>
+<span id="cb46-317"><a href=""></a>    P &lt;- unpack(R$S$P[C$k, ], H)</span>
+<span id="cb46-318"><a href=""></a>    fmt &lt;- function(v, d = 3) formatC(v, format = "f", digits = d)</span>
+<span id="cb46-319"><a href=""></a>    rows &lt;- paste0(</span>
+<span id="cb46-320"><a href=""></a>      "&lt;tr&gt;&lt;td&gt;h", 1:H, "&lt;/td&gt;&lt;td align='right'&gt;", fmt(P$w),</span>
+<span id="cb46-321"><a href=""></a>      "&lt;/td&gt;&lt;td align='right'&gt;", fmt(P$cc),</span>
+<span id="cb46-322"><a href=""></a>      "&lt;/td&gt;&lt;td align='right'&gt;", fmt(P$v), "&lt;/td&gt;&lt;/tr&gt;", collapse = "")</span>
+<span id="cb46-323"><a href=""></a>    HTML(paste0(</span>
+<span id="cb46-324"><a href=""></a>      "&lt;hr&gt;&lt;b&gt;update&lt;/b&gt; ", C$k - 1, " of ", R$S$n - 1,</span>
+<span id="cb46-325"><a href=""></a>      "  (epoch ", fmt(C$ep, 2), ")&lt;br&gt;",</span>
+<span id="cb46-326"><a href=""></a>      "&lt;b&gt;batch size m&lt;/b&gt; = ", length(R$S$IDX[[C$k]]), " of ", R$D$n, "&lt;br&gt;",</span>
+<span id="cb46-327"><a href=""></a>      "&lt;b&gt;parameters&lt;/b&gt; = ", 3 * H + 1, "&lt;br&gt;&lt;br&gt;",</span>
+<span id="cb46-328"><a href=""></a>      "&lt;b&gt;loss, B = ", R$B, "&lt;/b&gt; = ", fmt(R$S$L[C$k], 5), "&lt;br&gt;",</span>
+<span id="cb46-329"><a href=""></a>      "&lt;b&gt;loss, B = 1&lt;/b&gt; = ", fmt(R$G$L[C$kg], 5), "&lt;br&gt;",</span>
+<span id="cb46-330"><a href=""></a>      "&lt;b&gt;noise floor&lt;/b&gt; &amp;asymp; ", fmt(0.5 * input$sigma^2, 5), "&lt;br&gt;",</span>
+<span id="cb46-331"><a href=""></a>      if (isTRUE(R$S$diverged))</span>
+<span id="cb46-332"><a href=""></a>        "&lt;b style='color:#C81E1E'&gt;B run diverged&lt;/b&gt;&lt;br&gt;" else "",</span>
+<span id="cb46-333"><a href=""></a>      if (isTRUE(R$capped))</span>
+<span id="cb46-334"><a href=""></a>        paste0("&lt;i style='color:#C81E1E'&gt;epochs capped at ", R$ne,</span>
+<span id="cb46-335"><a href=""></a>               "&lt;/i&gt;&lt;br&gt;") else "",</span>
+<span id="cb46-336"><a href=""></a>      "&lt;br&gt;&lt;table style='font-size:90%'&gt;",</span>
+<span id="cb46-337"><a href=""></a>      "&lt;tr&gt;&lt;th&gt;unit&lt;/th&gt;&lt;th&gt;w&lt;/th&gt;&lt;th&gt;bias&lt;/th&gt;&lt;th&gt;v&lt;/th&gt;&lt;/tr&gt;",</span>
+<span id="cb46-338"><a href=""></a>      rows, "&lt;/table&gt;",</span>
+<span id="cb46-339"><a href=""></a>      "&lt;br&gt;&lt;i&gt;output bias = ", fmt(P$b), "&lt;/i&gt;"</span>
+<span id="cb46-340"><a href=""></a>    ))</span>
+<span id="cb46-341"><a href=""></a>  })</span>
+<span id="cb46-342"><a href=""></a>}</span>
+<span id="cb46-343"><a href=""></a></span>
+<span id="cb46-344"><a href=""></a>shinyApp(ui, server)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="the-sgd-algorithm" class="slide level2 smaller">
 <h2>The SGD Algorithm</h2>
