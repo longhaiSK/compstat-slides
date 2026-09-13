@@ -568,7 +568,90 @@ $$
 
 This is the `summary(glm(...))` table. The variance comes from the same Hessian that drove the Newton iterations.
 
-# Other Multivariate Optimization Methods
+## The Need to Robustify Newton–Raphson
+
+The Newton step $d_k = -H_k^{-1} g_k$, with $g_k = \nabla f(x_k)$ and
+$H_k = \nabla^2 f(x_k)$, solves the local quadratic model exactly. Two things
+can go wrong away from the solution:
+
+- **The direction may not descend.** $g_k^\top d_k = -g_k^\top H_k^{-1} g_k < 0$
+  requires $H_k \succ 0$. Where $f$ is not convex, $H_k$ may be indefinite or
+  singular and $d_k$ can point uphill.
+- **The unit step may overshoot.** Even with $H_k \succ 0$, the quadratic model
+  is trustworthy only near $x_k$; $\alpha_k = 1$ can increase $f$.
+
+The two failures are independent and need separate remedies: one fixes the
+**direction**, the other the **length**.
+
+## Robustification of the Hessian
+
+Replace $H_k$ by a positive definite $\tilde H_k$ and solve
+$\tilde H_k d_k = -g_k$.
+
+**Shift by a multiple of the identity.** With $\lambda_{\min}$ the smallest
+eigenvalue of $H_k$,
+$$
+\tilde H_k = H_k + \tau I, \qquad
+\tau = \max\left(0,\; \delta - \lambda_{\min}\right), \qquad
+\delta = 10^{-3}\lambda_{\max} .
+$$
+Eigenvectors are unchanged and every eigenvalue is shifted by $\tau$. As
+$\tau \to \infty$ the direction rotates toward $-g_k$, so the method
+interpolates between Newton and steepest descent.
+
+**Spectral modification.** With $H_k = V \Lambda V^\top$, replace
+$\lambda_i$ by $\max(|\lambda_i|, \delta)$. This reverses negative-curvature
+directions rather than damping them, so the step moves *away* from a saddle.
+
+Where $H_k \succ 0$ already, $\tau = 0$ and $\tilde H_k = H_k$: the refinement
+is inactive near a well-behaved minimum.
+
+## Step length: backtracking and line search
+
+Given a descent direction, choose $\alpha_k$ by an inexact search along
+$\phi(\alpha) = f(x_k + \alpha d_k)$.
+
+**Armijo (sufficient decrease).**
+$$
+f(x_k + \alpha d_k) \le f(x_k) + c_1 \alpha\, g_k^\top d_k,
+\qquad c_1 = 10^{-4}.
+$$
+
+**Backtracking.** Start at $\alpha = 1$ and set $\alpha \leftarrow \rho\alpha$
+with $\rho = \tfrac12$ until Armijo holds. Simple, and it accepts $\alpha_k = 1$
+whenever the full Newton step is acceptable.
+
+**Curvature (Wolfe) condition.**
+$$
+g(x_k + \alpha d_k)^\top d_k \ \ge\ c_2\, g_k^\top d_k,
+\qquad c_2 = 0.9,
+$$
+which rules out steps that are too short. Backtracking alone cannot enforce it,
+since it never lengthens the trial step. The condition matters for conjugate
+gradient and is what keeps $s_k^\top y_k > 0$, hence the BFGS update well
+defined.
+
+## The safeguarded algorithm
+
+::: {.callout-note appearance="minimal"}
+At $x_k$: compute $g_k$, $H_k$; form $\tilde H_k \succ 0$; solve
+$\tilde H_k d_k = -g_k$; find $\alpha_k$ from $\alpha_0 = 1$ by line search;
+set $x_{k+1} = x_k + \alpha_k d_k$.
+:::
+
+Both safeguards are needed, and both switch themselves off:
+
+| | near a minimum | far away / indefinite |
+|---|---|---|
+| $\tau$ | $0$ | $> 0$, direction rotates toward $-g_k$ |
+| $\alpha_k$ | $1$ | $< 1$ (or $> 1$ under Wolfe) |
+
+Quadratic convergence is therefore retained locally, while sufficient decrease
+at every iteration gives convergence from remote starting points. This is
+**safeguarded Newton**, not "Newton–Raphson" in the textbook sense — and not
+what `nlm()` runs, which globalizes with a trust region.
+
+# Gradient-based Methods
 
 ## What If the Hessian Is Unavailable or Too Big?
 
@@ -1435,12 +1518,45 @@ $$
 
 A noisy but cheap gradient estimate is enough to make progress — a Monte Carlo idea applied to optimization.
 
+
+## The SGD Algorithm {.smaller}
+
+For $t = 1, 2, \ldots$:
+
+1. Sample an index $i_t$ uniformly from $\{1, \ldots, n\}$ (or shuffle the data and cycle through it; one pass is an **epoch**).
+
+2. Update in the ascent direction of that single observation's log-likelihood:
+$$
+\theta_{t+1} = \theta_t + \gamma_t\,\nabla\ell_{i_t}(\theta_t).
+$$
+
+**Mini-batch SGD** averages the gradient over a batch $B_t$ of $m$ observations ($m = 32$–$512$ typical):
+$$
+\theta_{t+1} = \theta_t + \gamma_t\,\frac{1}{m}\sum_{i\in B_t}\nabla\ell_i(\theta_t),
+$$
+reducing the variance by $1/m$ at $m$ times the cost, and using vectorized/GPU arithmetic.
+
+The **learning rate** $\gamma_t$ replaces the line search (a line search would need full-data evaluations).
+
+## Learning Rate and Convergence
+
+Because the gradient is noisy, a constant $\gamma$ makes $\theta_t$ **bounce around** the optimum with variance $\propto \gamma$. Robbins–Monro (1951): convergence to the optimum is guaranteed if
+$$
+\sum_t \gamma_t = \infty \quad\text{and}\quad \sum_t \gamma_t^2 < \infty, \qquad\text{e.g. } \gamma_t = \frac{\gamma_0}{1 + t/t_0} .
+$$
+
+- $\gamma$ too large: divergence or persistent noise. $\gamma$ too small: painfully slow.
+
+- Convergence is only **sublinear**, far slower than Newton *per iteration* — but each iteration costs $O(p)$ instead of $O(np)$, and early progress is fast.
+- Common refinements: **momentum** (average past gradients), **Adam** (per-coordinate adaptive rates), **averaging** the iterates $\overline\theta_T = \frac1T\sum_t\theta_t$ (Polyak–Ruppert), which restores the $\sqrt n$-efficiency of the MLE.
+
+
 ## Animation for SGD
 
 ```{shinylive-r}
-#| label: sgd-animation
+#| label: fig-sgd-animation
 #| standalone: true
-#| viewerHeight: 860
+#| viewerHeight: 830
 
 library(shiny)
 
@@ -1500,9 +1616,11 @@ init_p <- function(H, seed) {
 }
 
 ## ---------------------------------------------------------------- training
-## B = number of batches per epoch; B = 1 is full-batch gradient descent.
-train <- function(p0, H, B, a, nepoch, seed, D) {
+## m = batch size; m >= n is full-batch gradient descent.
+train <- function(p0, H, m, a, nepoch, seed, D) {
   n <- D$n
+  m <- max(1, min(m, n))
+  B <- ceiling(n / m)                              # updates per epoch
   nup <- B * nepoch
   P <- matrix(NA_real_, nup + 1, length(p0))
   L <- rep(NA_real_, nup + 1); EP <- rep(NA_real_, nup + 1)
@@ -1511,7 +1629,7 @@ train <- function(p0, H, B, a, nepoch, seed, D) {
   p <- p0; k <- 0; bad <- FALSE
   for (e in seq_len(nepoch)) {
     perm <- if (B == 1) seq_len(n) else sample.int(n)
-    grp <- split(perm, rep_len(seq_len(B), n))       # nearly equal sizes
+    grp <- split(perm, ceiling(seq_len(n) / m))    # last batch may be smaller
     for (b in seq_len(B)) {
       k <- k + 1
       idx <- grp[[b]]
@@ -1529,7 +1647,7 @@ train <- function(p0, H, B, a, nepoch, seed, D) {
   }
   n_rec <- max(1, k)
   list(P = P[1:n_rec, , drop = FALSE], L = L[1:n_rec], EP = EP[1:n_rec],
-       IDX = IDX[1:n_rec], n = n_rec, B = B, diverged = bad)
+       IDX = IDX[1:n_rec], n = n_rec, B = B, m = m, diverged = bad)
 }
 
 ## ------------------------------------------------------------ weight plot
@@ -1585,14 +1703,14 @@ ui <- fluidPage(
       selectInput("dgp", "True curve", choices = DGPS, selected = "teacher"),
       sliderInput("H", "Hidden neurons", min = 2, max = 16, value = 8,
                   step = 1),
-      sliderInput("B", "Number of batches B per epoch", min = 1, max = 40,
-                  value = 10, step = 1),
+      sliderInput("m", "Batch size m", min = 1, max = 400, value = 20,
+                  step = 1),
       sliderInput("a", "Learning rate", min = 0.01, max = 0.60, value = 0.20,
                   step = 0.01),
       sliderInput("nep", "Epochs", min = 10, max = 300, value = 100, step = 10),
       sliderInput("ctr", "Weight colour contrast", min = 1, max = 40,
                   value = 12, step = 1),
-      checkboxInput("showgd", "Overlay the B = 1 run", TRUE)
+      checkboxInput("showgd", "Overlay the full-batch run", TRUE)
     ),
     ## ---- column 2: data generation, then playback ----------------------
     column(
@@ -1624,7 +1742,7 @@ ui <- fluidPage(
         actionButton("newseed", "New batch sequence",
                      style = "width:100%; margin-bottom:8px;"),
         helpText("Both runs share the data, the initial weights and the",
-                 "number of epochs; only B differs.")
+                 "number of epochs; only m differs.")
       )
     ),
     ## ---- column 3: plots -----------------------------------------------
@@ -1649,20 +1767,27 @@ server <- function(input, output, session) {
   observeEvent(input$newinit, wseed(wseed() + 1))
   observeEvent(input$newseed, bseed(bseed() + 1))
 
+  observeEvent(input$n, {
+    updateSliderInput(session, "m", max = input$n,
+                      value = min(input$m, input$n))
+  })
+
   DAT <- reactive(make_data(input$n, input$sigma, dseed(), input$dgp))
 
   runs <- reactive({
-    D <- DAT(); H <- input$H; B <- as.integer(input$B)
+    D <- DAT(); H <- input$H
+    m <- max(1, min(input$m, D$n))
+    B <- ceiling(D$n / m)
     ne <- max(1, min(input$nep, floor(MAXUP / B)))
     p0 <- init_p(H, wseed())
-    S <- train(p0, H, B, input$a, ne, bseed(), D)
-    G <- train(p0, H, 1L, input$a, ne, bseed(), D)
-    list(S = S, G = G, H = H, B = B, D = D, ne = ne,
+    S <- train(p0, H, m, input$a, ne, bseed(), D)
+    G <- train(p0, H, D$n, input$a, ne, bseed(), D)
+    list(S = S, G = G, H = H, B = B, m = m, D = D, ne = ne,
          capped = ne < input$nep,
          wmax = max(0.2, quantile(abs(c(S$P, G$P)), 0.97, na.rm = TRUE)))
   })
 
-  stride <- reactive(if (isTRUE(input$byepoch)) as.integer(input$B) else 1L)
+  stride <- reactive(if (isTRUE(input$byepoch)) runs()$B else 1L)
 
   observeEvent(runs(), {
     updateSliderInput(session, "k", max = max(1, runs()$S$n - 1), value = 0)
@@ -1714,10 +1839,10 @@ server <- function(input, output, session) {
     msz <- length(R$S$IDX[[C$k]])
     par(mfrow = c(1, if (isTRUE(input$showgd)) 2 else 1), mar = c(1, 1, 3, 1))
     draw_net(R$S$P[C$k, ], R$H, R$wmax, input$ctr,
-             sprintf("B = %d (m = %d),  epoch %.2f", R$B, msz, C$ep))
+             sprintf("m = %d (B = %d),  epoch %.2f", msz, R$B, C$ep))
     if (isTRUE(input$showgd))
       draw_net(R$G$P[C$kg, ], R$H, R$wmax, input$ctr,
-               sprintf("B = 1 (m = %d),  epoch %d", R$D$n, C$kg - 1L))
+               sprintf("m = %d (full batch),  epoch %d", R$D$n, C$kg - 1L))
   })
 
   output$fit <- renderPlot({
@@ -1737,7 +1862,7 @@ server <- function(input, output, session) {
            col = c("red", "#2E8B57", "#7B3FBF"),
            legend = c(if (identical(D$dgp, "bumps")) "true curve (bumps)"
                       else "teacher network",
-                      paste0("B = ", R$B, " fit"), "B = 1 fit"))
+                      paste0("m = ", R$m, " fit"), "full-batch fit"))
 
     yl <- range(c(R$S$L, if (isTRUE(input$showgd)) R$G$L), na.rm = TRUE)
     plot(R$S$EP, R$S$L, type = "l", log = "y", col = "#2E8B57", lwd = 2,
@@ -1761,12 +1886,13 @@ server <- function(input, output, session) {
       "<hr><b>update</b> ", C$k - 1, " of ", R$S$n - 1,
       "  (epoch ", fmt(C$ep, 2), ")<br>",
       "<b>batch size m</b> = ", length(R$S$IDX[[C$k]]), " of ", R$D$n, "<br>",
+      "<b>updates per epoch</b> = ", R$B, "<br>",
       "<b>parameters</b> = ", 3 * H + 1, "<br><br>",
-      "<b>loss, B = ", R$B, "</b> = ", fmt(R$S$L[C$k], 5), "<br>",
-      "<b>loss, B = 1</b> = ", fmt(R$G$L[C$kg], 5), "<br>",
+      "<b>loss, m = ", R$m, "</b> = ", fmt(R$S$L[C$k], 5), "<br>",
+      "<b>loss, full batch</b> = ", fmt(R$G$L[C$kg], 5), "<br>",
       "<b>noise floor</b> &asymp; ", fmt(0.5 * input$sigma^2, 5), "<br>",
       if (isTRUE(R$S$diverged))
-        "<b style='color:#C81E1E'>B run diverged</b><br>" else "",
+        "<b style='color:#C81E1E'>run diverged</b><br>" else "",
       if (isTRUE(R$capped))
         paste0("<i style='color:#C81E1E'>epochs capped at ", R$ne,
                "</i><br>") else "",
@@ -1781,38 +1907,8 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-## The SGD Algorithm {.smaller}
 
-For $t = 1, 2, \ldots$:
-
-1. Sample an index $i_t$ uniformly from $\{1, \ldots, n\}$ (or shuffle the data and cycle through it; one pass is an **epoch**).
-
-2. Update in the ascent direction of that single observation's log-likelihood:
-$$
-\theta_{t+1} = \theta_t + \gamma_t\,\nabla\ell_{i_t}(\theta_t).
-$$
-
-**Mini-batch SGD** averages the gradient over a batch $B_t$ of $m$ observations ($m = 32$–$512$ typical):
-$$
-\theta_{t+1} = \theta_t + \gamma_t\,\frac{1}{m}\sum_{i\in B_t}\nabla\ell_i(\theta_t),
-$$
-reducing the variance by $1/m$ at $m$ times the cost, and using vectorized/GPU arithmetic.
-
-The **learning rate** $\gamma_t$ replaces the line search (a line search would need full-data evaluations).
-
-## Learning Rate and Convergence
-
-Because the gradient is noisy, a constant $\gamma$ makes $\theta_t$ **bounce around** the optimum with variance $\propto \gamma$. Robbins–Monro (1951): convergence to the optimum is guaranteed if
-$$
-\sum_t \gamma_t = \infty \quad\text{and}\quad \sum_t \gamma_t^2 < \infty, \qquad\text{e.g. } \gamma_t = \frac{\gamma_0}{1 + t/t_0} .
-$$
-
-- $\gamma$ too large: divergence or persistent noise. $\gamma$ too small: painfully slow.
-
-- Convergence is only **sublinear**, far slower than Newton *per iteration* — but each iteration costs $O(p)$ instead of $O(np)$, and early progress is fast.
-- Common refinements: **momentum** (average past gradients), **Adam** (per-coordinate adaptive rates), **averaging** the iterates $\overline\theta_T = \frac1T\sum_t\theta_t$ (Polyak–Ruppert), which restores the $\sqrt n$-efficiency of the MLE.
-
-## SGD for Logistic Regression in R
+## Example: SGD for Logistic Regression in R
 
 ```{r}
 sgd <- function(X, y, b0, gamma0 = 0.05, t0 = 200, epochs = 5, batch = 10) {
@@ -1847,7 +1943,7 @@ legend("right", c("SGD (mini-batch)", "Newton (per full pass)", "MLE"), lty = c(
 
 - Per data pass, Newton is far more efficient here ($n = 500$, $p = 3$); SGD earns its keep when one full gradient — or the $O(p^3)$ Hessian solve — is prohibitively expensive.
 
-## Summary
+## Summary {.smaller}
 
 | | needs | strength | weakness |
 |:--|:--|:--|:--|
