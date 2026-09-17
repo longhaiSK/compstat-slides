@@ -214,21 +214,6 @@ To add, align by place value. Solid boxes are stored digits, dashed boxes are al
 
 **Machine epsilon** $\epsilon$ = the gap next to $1$ = the smallest increment the last mantissa box can register: here $\epsilon = 0.1$. Below it, digits are lost — partly (middle) or wholly (right, at a higher zoom).
 
-
-## Roundoff Error: General Principle {.smaller}
-
-- The stored result of $a+b$ (or $a\times b$, …) is the **nearest representable number** to the exact result — as in the addition examples above.
-- Each operation has relative error up to about $\epsilon$; the concern is when these errors **accumulate** or are **amplified**.
-- Two patterns amplify roundoff error: adding a **large + small** number, and subtracting **large − large** nearly equal numbers (**catastrophic cancellation**).
-- Doubles represent **every integer exactly** up to $2^{53}$; beyond that the gap exceeds 1, so some integers are skipped.
-
-```{r}
-#| code-fold: true
-.Machine$double.eps      # 2^-52
-1 + 1e-16 == 1
-2^53 + 1 == 2^53          # gap is now 2: the +1 is lost
-```
-
 ## Largest and Smallest Toy Numbers
 
 | | sign | mantissa | exponent | value |
@@ -279,7 +264,24 @@ For doubles the smallest positive value is $2^{-1074}\approx 4.9\times10^{-324}$
 ```
 
 
-# Rounding Error and Methods for Preventing It
+# Methods for Mitigating Rounding Error
+
+
+
+## Roundoff Error: General Principle {.smaller}
+
+- The stored result of $a+b$ (or $a\times b$, …) is the **nearest representable number** to the exact result — as in the addition examples above.
+- Each operation has relative error up to about $\epsilon$; the concern is when these errors **accumulate** or are **amplified**.
+- Two patterns amplify roundoff error: adding a **large + small** number, and subtracting **large − large** nearly equal numbers (**catastrophic cancellation**).
+- Doubles represent **every integer exactly** up to $2^{53}$; beyond that the gap exceeds 1, so some integers are skipped.
+
+```{r}
+#| code-fold: true
+.Machine$double.eps      # 2^-52
+1 + 1e-16 == 1
+2^53 + 1 == 2^53          # gap is now 2: the +1 is lost
+```
+
 
 ## Computing Sum: Avoiding Large + Small
 
@@ -354,7 +356,7 @@ c(naive = taylor_exp(-20), reciprocal = 1 / taylor_exp(20), true = exp(-20))
 
 **General principle**: rearrange a formula so that quantities of similar magnitude and **the same sign** are combined; avoid computing a small result as the difference of two large numbers.
 
-## Computing Variance: Avoiding Large − Large
+## Computing Variance: Avoiding Large − Large {.smaller}
 
 Two algebraically identical formulas for the sum of squared deviations:
 $$\underbrace{\sum_{i=1}^{n}(x_i - \bar{x})^2}_{\text{two-pass}}
@@ -447,29 +449,6 @@ x <- 1000
 c(naive = exp(x) / (1 + exp(x)), stable = 1 / (1 + exp(-x)))
 ```
 
-## Changing Algebraic Expression: Built-in Functions {.smaller}
-
-Software provides functions written specifically to avoid cancellation and overflow.
-
-| instead of | use | reason |
-|:--|:--|:--|
-| `log(1 + x)` | `log1p(x)` | for tiny $x$, `1 + x` rounds to 1 |
-| `exp(x) - 1` | `expm1(x)` | for tiny $x$, `exp(x)` rounds to 1 |
-| `log(factorial(n))` | `lfactorial(n)`, `lgamma(n + 1)` | `factorial(n)` overflows |
-| `log(choose(n, k))` | `lchoose(n, k)` | overflow |
-| `log(dnorm(x))` | `dnorm(x, log = TRUE)` | `dnorm(x)` underflows |
-| `log(pnorm(x))` | `pnorm(x, log.p = TRUE)` | underflow |
-| `log(1 - pnorm(x))` | `pnorm(x, lower.tail = FALSE, log.p = TRUE)` | cancellation *and* underflow |
-
-```{r}
-#| code-fold: true
-c(log(1 + 1e-20), log1p(1e-20))
-c(log(factorial(1000)), lfactorial(1000))
-c(naive = log(1 - pnorm(10)), stable = pnorm(10, lower.tail = FALSE, log.p = TRUE))
-```
-
-`1 - pnorm(10)` rounds to exactly `1 - 1 = 0` in double precision, so the naive answer is `-Inf`; the true value is about $-53.2$.
-
 ## Representing Numbers in Logarithmic Form
 
 Represent a positive number $x$ by $\ell_x = \log x$:
@@ -532,6 +511,49 @@ $$\log(x - y) = \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right) 
 - Since $\ell_y - \ell_x < 0$, $e^{\ell_y-\ell_x}\in(0,1)$: no overflow.
 - When $x \approx y$, use `log1p(-exp(ly - lx))` to avoid the cancellation in $1 - e^{\ell_y-\ell_x}$.
 
+```{r}
+log_diff_exp <- function(lx, ly) lx + log1p(-exp(ly - lx))   # requires lx >= ly
+log_diff_exp(2020, 2000)
+```
+
+## No Need to Reinvent: **matrixStats** {.smaller}
+
+The log-sum-exp trick is already implemented, tested, and vectorized in the widely-used CRAN package **matrixStats** (a foundational dependency of hundreds of CRAN/Bioconductor packages):
+
+```{r}
+#| message: false
+c(mine = log_sum_exp(c(2000, 2001, 2002)),
+  matrixStats = matrixStats::logSumExp(c(2000, 2001, 2002)))
+```
+
+`matrixStats::logSumExp(lx)` implements exactly the max-shift identity above — prefer the package function in real code; write your own only to understand *why* it works.
+
+## Examples of R Functions that Handle Computation Errors {.smaller}
+
+Software provides functions written specifically to avoid cancellation and overflow.
+
+| instead of | use | reason |
+|:--|:--|:--|
+| `log(1 + x)` | `log1p(x)` | for tiny $x$, `1 + x` rounds to 1 |
+| `exp(x) - 1` | `expm1(x)` | for tiny $x$, `exp(x)` rounds to 1 |
+| `log(factorial(n))` | `lfactorial(n)`, `lgamma(n + 1)` | `factorial(n)` overflows |
+| `log(choose(n, k))` | `lchoose(n, k)` | overflow |
+| `log(dnorm(x))` | `dnorm(x, log = TRUE)` | `dnorm(x)` underflows |
+| `log(pnorm(x))` | `pnorm(x, log.p = TRUE)` | underflow |
+| `log(1 - pnorm(x))` | `pnorm(x, lower.tail = FALSE, log.p = TRUE)` | cancellation *and* underflow |
+
+## Examples of R Functions that Handle Computation Errors: Demo {.smaller}
+
+```{r}
+#| code-fold: true
+c(log(1 + 1e-20), log1p(1e-20))
+c(log(factorial(1000)), lfactorial(1000))
+c(naive = log(1 - pnorm(10)), log1p = log1p(-pnorm(10)),
+  stable = pnorm(10, lower.tail = FALSE, log.p = TRUE))
+```
+
+`1 - pnorm(10)` rounds to exactly `1 - 1 = 0` in double precision, so the naive answer is `-Inf`. Wrapping it in `log1p(-pnorm(10))` does **not** help — `pnorm(10)` itself already rounded to exactly `1` before `log1p` ever sees it. The true fix must avoid computing `pnorm(10)` at all: `pnorm(10, lower.tail = FALSE, log.p = TRUE)` gives the correct $-53.2$.
+
 ## Summary
 
 - Integers occupy a fixed number of bits; exceeding $2^{31}-1$ gives `NA` in R (not silent wraparound as in C).
@@ -540,20 +562,3 @@ $$\log(x - y) = \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right) 
 - Roundoff is amplified by **large + small** (fix: add small terms first, pairwise/Kahan summation) and **large − large** (fix: reformulate to combine same-sign, similar-magnitude quantities — $e^{-x}=1/e^x$, two-pass variance).
 - Overflow/underflow are avoided by choosing non-positive exponent arguments, using purpose-built functions (`log1p`, `expm1`, `lgamma`, `dnorm(log=TRUE)`), and working on the **log scale** with the log-sum-exp trick.
 
-## Practice Questions
-
-**Question 1.** How do you compute
-$$\log\left(\frac{1}{1+e^{-x}}\right)$$
-so as to avoid overflow and underflow of $e^{-x}$, for both large positive and large negative $x$?
-
-**Question 2 (log-softmax).** How do you compute
-$$\log\left(\frac{e^{x_k}}{\sum_{j=1}^{K} e^{x_j}}\right)$$
-so as to avoid underflow and overflow of $e^{x_j}$?
-
-**Question 3.** The one-pass variance formula fails for $x = (M+1, M+2, M+3)$ with $M = 10^{8}$. Predict the smallest $M$ (a power of 10) at which the one-pass result in R first differs from $2$, then verify.
-
-## Practice Questions (cont.)
-
-**Question 4.** Write `log_dbinom(k, n, p)` returning $\log\binom{n}{k}p^k(1-p)^{n-k}$ for $n = 10^5$ without overflow or underflow, using `lchoose` and `log1p`. Compare with `dbinom(k, n, p, log = TRUE)`.
-
-**Question 5.** Implement Welford's algorithm for the sample **covariance** of two variables, and check it against `cov()` on data shifted by $10^{10}$.

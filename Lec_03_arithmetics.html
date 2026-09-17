@@ -965,38 +965,6 @@ gap
 </div></div>
 <p><strong>Machine epsilon</strong> <span class="math inline">\epsilon</span> = the gap next to <span class="math inline">1</span> = the smallest increment the last mantissa box can register: here <span class="math inline">\epsilon = 0.1</span>. Below it, digits are lost — partly (middle) or wholly (right, at a higher zoom).</p>
 </section>
-<section id="roundoff-error-general-principle" class="slide level2 smaller">
-<h2>Roundoff Error: General Principle</h2>
-<ul>
-<li>The stored result of <span class="math inline">a+b</span> (or <span class="math inline">a\times b</span>, …) is the <strong>nearest representable number</strong> to the exact result — as in the addition examples above.</li>
-<li>Each operation has relative error up to about <span class="math inline">\epsilon</span>; the concern is when these errors <strong>accumulate</strong> or are <strong>amplified</strong>.</li>
-<li>Two patterns amplify roundoff error: adding a <strong>large + small</strong> number, and subtracting <strong>large − large</strong> nearly equal numbers (<strong>catastrophic cancellation</strong>).</li>
-<li>Doubles represent <strong>every integer exactly</strong> up to <span class="math inline">2^{53}</span>; beyond that the gap exceeds 1, so some integers are skipped.</li>
-</ul>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>.Machine<span class="sc">$</span>double.eps      <span class="co"># 2^-52</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2.220446e-16</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-16</span> <span class="sc">==</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] TRUE</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href=""></a><span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">+</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">53</span>          <span class="co"># gap is now 2: the +1 is lost</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] TRUE</code></pre>
-</div>
-</div>
-</section>
 <section id="largest-and-smallest-toy-numbers" class="slide level2">
 <h2>Largest and Smallest Toy Numbers</h2>
 <table class="caption-top">
@@ -1106,14 +1074,14 @@ gap
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a>.Machine<span class="sc">$</span>double.xmax</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>.Machine<span class="sc">$</span>double.xmax</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.797693e+308</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a><span class="dv">2</span><span class="sc">^</span><span class="dv">1024</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="dv">2</span><span class="sc">^</span><span class="dv">1024</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] Inf</code></pre>
@@ -1188,14 +1156,14 @@ exp
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a>.Machine<span class="sc">$</span>double.xmin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href=""></a>.Machine<span class="sc">$</span>double.xmin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2.225074e-308</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a><span class="dv">2</span><span class="sc">^-</span><span class="dv">1075</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a><span class="dv">2</span><span class="sc">^-</span><span class="dv">1075</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
@@ -1203,9 +1171,41 @@ exp
 </div>
 </section></section>
 <section>
-<section id="rounding-error-and-methods-for-preventing-it" class="title-slide slide level1 center" data-number="2">
-<h1><span class="header-section-number">2</span> Rounding Error and Methods for Preventing It</h1>
+<section id="methods-for-mitigating-rounding-error" class="title-slide slide level1 center" data-number="2">
+<h1><span class="header-section-number">2</span> Methods for Mitigating Rounding Error</h1>
 
+</section>
+<section id="roundoff-error-general-principle" class="slide level2 smaller">
+<h2>Roundoff Error: General Principle</h2>
+<ul>
+<li>The stored result of <span class="math inline">a+b</span> (or <span class="math inline">a\times b</span>, …) is the <strong>nearest representable number</strong> to the exact result — as in the addition examples above.</li>
+<li>Each operation has relative error up to about <span class="math inline">\epsilon</span>; the concern is when these errors <strong>accumulate</strong> or are <strong>amplified</strong>.</li>
+<li>Two patterns amplify roundoff error: adding a <strong>large + small</strong> number, and subtracting <strong>large − large</strong> nearly equal numbers (<strong>catastrophic cancellation</strong>).</li>
+<li>Doubles represent <strong>every integer exactly</strong> up to <span class="math inline">2^{53}</span>; beyond that the gap exceeds 1, so some integers are skipped.</li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a>.Machine<span class="sc">$</span>double.eps      <span class="co"># 2^-52</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.220446e-16</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a><span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-16</span> <span class="sc">==</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a><span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">+</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">53</span>          <span class="co"># gap is now 2: the +1 is lost</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
 </section>
 <section id="computing-sum-avoiding-large-small" class="slide level2">
 <h2>Computing Sum: Avoiding Large + Small</h2>
@@ -1340,7 +1340,7 @@ then 1.0 + 0.08 →
 </div>
 <p><strong>General principle</strong>: rearrange a formula so that quantities of similar magnitude and <strong>the same sign</strong> are combined; avoid computing a small result as the difference of two large numbers.</p>
 </section>
-<section id="computing-variance-avoiding-large-large" class="slide level2">
+<section id="computing-variance-avoiding-large-large" class="slide level2 smaller">
 <h2>Computing Variance: Avoiding Large − Large</h2>
 <p>Two algebraically identical formulas for the sum of squared deviations: <span class="math display">\underbrace{\sum_{i=1}^{n}(x_i - \bar{x})^2}_{\text{two-pass}}
 \;=\;
@@ -1545,86 +1545,6 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 </div>
 </div>
 </section>
-<section id="changing-algebraic-expression-built-in-functions" class="slide level2 smaller">
-<h2>Changing Algebraic Expression: Built-in Functions</h2>
-<p>Software provides functions written specifically to avoid cancellation and overflow.</p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">instead of</th>
-<th style="text-align: left;">use</th>
-<th style="text-align: left;">reason</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><code>log(1 + x)</code></td>
-<td style="text-align: left;"><code>log1p(x)</code></td>
-<td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>1 + x</code> rounds to 1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>exp(x) - 1</code></td>
-<td style="text-align: left;"><code>expm1(x)</code></td>
-<td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>exp(x)</code> rounds to 1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>log(factorial(n))</code></td>
-<td style="text-align: left;"><code>lfactorial(n)</code>, <code>lgamma(n + 1)</code></td>
-<td style="text-align: left;"><code>factorial(n)</code> overflows</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>log(choose(n, k))</code></td>
-<td style="text-align: left;"><code>lchoose(n, k)</code></td>
-<td style="text-align: left;">overflow</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>log(dnorm(x))</code></td>
-<td style="text-align: left;"><code>dnorm(x, log = TRUE)</code></td>
-<td style="text-align: left;"><code>dnorm(x)</code> underflows</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>log(pnorm(x))</code></td>
-<td style="text-align: left;"><code>pnorm(x, log.p = TRUE)</code></td>
-<td style="text-align: left;">underflow</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>log(1 - pnorm(x))</code></td>
-<td style="text-align: left;"><code>pnorm(x, lower.tail = FALSE, log.p = TRUE)</code></td>
-<td style="text-align: left;">cancellation <em>and</em> underflow</td>
-</tr>
-</tbody>
-</table>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-20</span>), <span class="fu">log1p</span>(<span class="fl">1e-20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0e+00 1e-20</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="fu">factorial</span>(<span class="dv">1000</span>)), <span class="fu">lfactorial</span>(<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1]      Inf 5912.128</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)), <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>    naive    stable 
-     -Inf -53.23129 </code></pre>
-</div>
-</div>
-<p><code>1 - pnorm(10)</code> rounds to exactly <code>1 - 1 = 0</code> in double precision, so the naive answer is <code>-Inf</code>; the true value is about <span class="math inline">-53.2</span>.</p>
-</section>
 <section id="representing-numbers-in-logarithmic-form" class="slide level2">
 <h2>Representing Numbers in Logarithmic Form</h2>
 <p>Represent a positive number <span class="math inline">x</span> by <span class="math inline">\ell_x = \log x</span>: <span class="math display">x = e^{2000} \iff \ell_x = 2000, \qquad x = e^{-2000} \iff \ell_x = -2000 .</span></p>
@@ -1639,7 +1559,7 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2000</span> <span class="sc">/</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2001</span>, <span class="at">log_scale =</span> <span class="fu">exp</span>(<span class="dv">2000</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="dv">2001</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2000</span> <span class="sc">/</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2001</span>, <span class="at">log_scale =</span> <span class="fu">exp</span>(<span class="dv">2000</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="dv">2001</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   direct log_scale 
@@ -1694,8 +1614,8 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href=""></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { m <span class="ot">&lt;-</span> <span class="fu">max</span>(l); m <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> m))) }</span>
-<span id="cb47-2"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))), <span class="at">lse =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { m <span class="ot">&lt;-</span> <span class="fu">max</span>(l); m <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> m))) }</span>
+<span id="cb41-2"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))), <span class="at">lse =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  direct      lse 
@@ -1711,6 +1631,116 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <li>Since <span class="math inline">\ell_y - \ell_x &lt; 0</span>, <span class="math inline">e^{\ell_y-\ell_x}\in(0,1)</span>: no overflow.</li>
 <li>When <span class="math inline">x \approx y</span>, use <code>log1p(-exp(ly - lx))</code> to avoid the cancellation in <span class="math inline">1 - e^{\ell_y-\ell_x}</span>.</li>
 </ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a>log_diff_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(lx, ly) lx <span class="sc">+</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">exp</span>(ly <span class="sc">-</span> lx))   <span class="co"># requires lx &gt;= ly</span></span>
+<span id="cb43-2"><a href=""></a><span class="fu">log_diff_exp</span>(<span class="dv">2020</span>, <span class="dv">2000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2020</code></pre>
+</div>
+</div>
+</section>
+<section id="no-need-to-reinvent-matrixstats" class="slide level2 smaller">
+<h2>No Need to Reinvent: <strong>matrixStats</strong></h2>
+<p>The log-sum-exp trick is already implemented, tested, and vectorized in the widely-used CRAN package <strong>matrixStats</strong> (a foundational dependency of hundreds of CRAN/Bioconductor packages):</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a><span class="fu">c</span>(<span class="at">mine =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)),</span>
+<span id="cb45-2"><a href=""></a>  <span class="at">matrixStats =</span> matrixStats<span class="sc">::</span><span class="fu">logSumExp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       mine matrixStats 
+   2002.408    2002.408 </code></pre>
+</div>
+</div>
+<p><code>matrixStats::logSumExp(lx)</code> implements exactly the max-shift identity above — prefer the package function in real code; write your own only to understand <em>why</em> it works.</p>
+</section>
+<section id="examples-of-r-functions-that-handle-computation-errors" class="slide level2 smaller">
+<h2>Examples of R Functions that Handle Computation Errors</h2>
+<p>Software provides functions written specifically to avoid cancellation and overflow.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">instead of</th>
+<th style="text-align: left;">use</th>
+<th style="text-align: left;">reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>log(1 + x)</code></td>
+<td style="text-align: left;"><code>log1p(x)</code></td>
+<td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>1 + x</code> rounds to 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>exp(x) - 1</code></td>
+<td style="text-align: left;"><code>expm1(x)</code></td>
+<td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>exp(x)</code> rounds to 1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>log(factorial(n))</code></td>
+<td style="text-align: left;"><code>lfactorial(n)</code>, <code>lgamma(n + 1)</code></td>
+<td style="text-align: left;"><code>factorial(n)</code> overflows</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>log(choose(n, k))</code></td>
+<td style="text-align: left;"><code>lchoose(n, k)</code></td>
+<td style="text-align: left;">overflow</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>log(dnorm(x))</code></td>
+<td style="text-align: left;"><code>dnorm(x, log = TRUE)</code></td>
+<td style="text-align: left;"><code>dnorm(x)</code> underflows</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>log(pnorm(x))</code></td>
+<td style="text-align: left;"><code>pnorm(x, log.p = TRUE)</code></td>
+<td style="text-align: left;">underflow</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>log(1 - pnorm(x))</code></td>
+<td style="text-align: left;"><code>pnorm(x, lower.tail = FALSE, log.p = TRUE)</code></td>
+<td style="text-align: left;">cancellation <em>and</em> underflow</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples-of-r-functions-that-handle-computation-errors-demo" class="slide level2 smaller">
+<h2>Examples of R Functions that Handle Computation Errors: Demo</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-20</span>), <span class="fu">log1p</span>(<span class="fl">1e-20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0e+00 1e-20</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="fu">factorial</span>(<span class="dv">1000</span>)), <span class="fu">lfactorial</span>(<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]      Inf 5912.128</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)), <span class="at">log1p =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="dv">10</span>)),</span>
+<span id="cb51-2"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>    naive     log1p    stable 
+     -Inf      -Inf -53.23129 </code></pre>
+</div>
+</div>
+<p><code>1 - pnorm(10)</code> rounds to exactly <code>1 - 1 = 0</code> in double precision, so the naive answer is <code>-Inf</code>. Wrapping it in <code>log1p(-pnorm(10))</code> does <strong>not</strong> help — <code>pnorm(10)</code> itself already rounded to exactly <code>1</code> before <code>log1p</code> ever sees it. The true fix must avoid computing <code>pnorm(10)</code> at all: <code>pnorm(10, lower.tail = FALSE, log.p = TRUE)</code> gives the correct <span class="math inline">-53.2</span>.</p>
 </section>
 <section id="summary" class="slide level2">
 <h2>Summary</h2>
@@ -1721,17 +1751,6 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <li>Roundoff is amplified by <strong>large + small</strong> (fix: add small terms first, pairwise/Kahan summation) and <strong>large − large</strong> (fix: reformulate to combine same-sign, similar-magnitude quantities — <span class="math inline">e^{-x}=1/e^x</span>, two-pass variance).</li>
 <li>Overflow/underflow are avoided by choosing non-positive exponent arguments, using purpose-built functions (<code>log1p</code>, <code>expm1</code>, <code>lgamma</code>, <code>dnorm(log=TRUE)</code>), and working on the <strong>log scale</strong> with the log-sum-exp trick.</li>
 </ul>
-</section>
-<section id="practice-questions" class="slide level2">
-<h2>Practice Questions</h2>
-<p><strong>Question 1.</strong> How do you compute <span class="math display">\log\left(\frac{1}{1+e^{-x}}\right)</span> so as to avoid overflow and underflow of <span class="math inline">e^{-x}</span>, for both large positive and large negative <span class="math inline">x</span>?</p>
-<p><strong>Question 2 (log-softmax).</strong> How do you compute <span class="math display">\log\left(\frac{e^{x_k}}{\sum_{j=1}^{K} e^{x_j}}\right)</span> so as to avoid underflow and overflow of <span class="math inline">e^{x_j}</span>?</p>
-<p><strong>Question 3.</strong> The one-pass variance formula fails for <span class="math inline">x = (M+1, M+2, M+3)</span> with <span class="math inline">M = 10^{8}</span>. Predict the smallest <span class="math inline">M</span> (a power of 10) at which the one-pass result in R first differs from <span class="math inline">2</span>, then verify.</p>
-</section>
-<section id="practice-questions-cont." class="slide level2">
-<h2>Practice Questions (cont.)</h2>
-<p><strong>Question 4.</strong> Write <code>log_dbinom(k, n, p)</code> returning <span class="math inline">\log\binom{n}{k}p^k(1-p)^{n-k}</span> for <span class="math inline">n = 10^5</span> without overflow or underflow, using <code>lchoose</code> and <code>log1p</code>. Compare with <code>dbinom(k, n, p, log = TRUE)</code>.</p>
-<p><strong>Question 5.</strong> Implement Welford’s algorithm for the sample <strong>covariance</strong> of two variables, and check it against <code>cov()</code> on data shifted by <span class="math inline">10^{10}</span>.</p>
 
 </section></section>
     </div>
