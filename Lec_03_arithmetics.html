@@ -1663,15 +1663,17 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <p>Software provides functions written specifically to avoid rounding error, underflow, and overflow.</p>
 <table class="caption-top">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
 </colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">instead of</th>
 <th style="text-align: left;">use</th>
 <th style="text-align: left;">reason</th>
+<th style="text-align: left;">solution</th>
 </tr>
 </thead>
 <tbody>
@@ -1679,36 +1681,43 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <td style="text-align: left;"><code>log(1 + x)</code></td>
 <td style="text-align: left;"><code>log1p(x)</code></td>
 <td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>1 + x</code> rounds to 1</td>
+<td style="text-align: left;">series <span class="math inline">x - x^2/2 + \cdots</span>; never forms <span class="math inline">1 + x</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>exp(x) - 1</code></td>
 <td style="text-align: left;"><code>expm1(x)</code></td>
 <td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>exp(x)</code> rounds to 1</td>
+<td style="text-align: left;">series <span class="math inline">x + x^2/2 + \cdots</span>; never forms <span class="math inline">e^x</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>log(factorial(n))</code></td>
 <td style="text-align: left;"><code>lfactorial(n)</code>, <code>lgamma(n + 1)</code></td>
 <td style="text-align: left;"><code>factorial(n)</code> overflows</td>
+<td style="text-align: left;">Stirling series for <span class="math inline">\log\Gamma</span>, evaluated on the log scale</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>log(choose(n, k))</code></td>
 <td style="text-align: left;"><code>lchoose(n, k)</code></td>
 <td style="text-align: left;">overflow</td>
+<td style="text-align: left;">differences of <span class="math inline">\log\Gamma</span> (or <span class="math inline">\log B</span>) terms</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>log(dnorm(x))</code></td>
 <td style="text-align: left;"><code>dnorm(x, log = TRUE)</code></td>
 <td style="text-align: left;"><code>dnorm(x)</code> underflows</td>
+<td style="text-align: left;">returns <span class="math inline">-x^2/2 - \log\sqrt{2\pi}</span> directly</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>log(pnorm(x))</code></td>
 <td style="text-align: left;"><code>pnorm(x, log.p = TRUE)</code></td>
 <td style="text-align: left;">underflow</td>
+<td style="text-align: left;">asymptotic expansion of <span class="math inline">\log\Phi(x)</span> for large <span class="math inline">\lvert x\rvert</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>log(1 - pnorm(x))</code></td>
 <td style="text-align: left;"><code>pnorm(x, lower.tail = FALSE, log.p = TRUE)</code></td>
 <td style="text-align: left;">cancellation <em>and</em> underflow</td>
+<td style="text-align: left;">computes <span class="math inline">1 - \Phi(x)</span> directly, never forming <span class="math inline">\Phi(x)</span>, and takes its log on the log scale</td>
 </tr>
 </tbody>
 </table>
