@@ -16,7 +16,14 @@ include-in-header:
     .pv td.e { background: #e7f6e0; }   /* exponent */
     .pv td.x { background: #ffd6d6; color: #b00000; font-weight: bold; } /* lost / invalid */
     .pv td.p { border: none; padding: 0; min-width: 0; font-weight: bold; } /* punctuation */
+    .pv td.z { color: #bbb; border-style: dashed; }     /* alignment zero, not stored */
+    .pv td.op { border: none; background: none; font-weight: bold; } /* operator */
+    .pv td.nb { border: none; background: none; }       /* blank, no border */
+    .pv tr.sum td.m, .pv tr.sum td.x { border-top: 3px solid #555; } /* sum row separator */
     .pv .cap { font-size: 0.6em; color: #444; text-align: center !important; margin-top: -0.3em; }
+    .zt table { border-collapse: collapse; margin: 0.6em auto; font-size: 0.85em; }
+    .zt td, .zt th { border: 1px solid #999; padding: 0.3em 0.6em; text-align: center !important; }
+    .zt tr.hl td { background: #ffd6d6; color: #b00000; font-weight: bold; }
     </style>
 ---
 
@@ -61,11 +68,20 @@ A 4-bit example: the largest storable integer is $1111_2 = 15$.
 <p class="cap">$15 + 1 = 16 = 10000_2$ needs a fifth box that does not exist → **integer overflow**</p>
 :::
 
+## Integers: Fixed Number of Boxes (Continued) {.smaller}
+
 R integers use 32 bits with one sign bit, so the largest is $2^{31}-1$:
 
 ```{r}
 .Machine$integer.max
-.Machine$integer.max + 1L
+.Machine$integer.max + 1L    # NA, with a warning
+```
+
+Unlike C, R does **not** wrap around silently — it returns `NA`. R also auto-promotes to `double` for most arithmetic, so overflow rarely bites *unless* both operands stay integer:
+
+```{r}
+50000L * 50000L   # integer * integer overflows
+50000 * 50000      # double: fine
 ```
 
 ## Floating Point Numbers: Scientific Notation in Boxes
@@ -88,64 +104,152 @@ Double precision (`double` in R) uses 64 bits:
 | mantissa | 52 | about 16 significant decimal digits |
 | exponent | 11 | $e \in [-1022,\ 1023]$, i.e. magnitudes from $10^{-308}$ to $10^{308}$ |
 
-## A Toy Floating Point System
+## A Toy Decimal Computer: Ruler and Zoom
 
-To see what goes wrong, use a **decimal** toy computer with a **4-digit mantissa** and a **1-digit exponent** ($e\in[-9,9]$):
+A floating point number is a **ruler** and a **zoom setting**:
 
-::: {.pv}
-<table>
-<tr><th>sign</th><th>1</th><th></th><th>10⁻¹</th><th>10⁻²</th><th>10⁻³</th><th></th><th>exp</th></tr>
-<tr><td class="s">+</td><td class="m">3</td><td class="p">.</td><td class="m">1</td><td class="m">4</td><td class="m">2</td><td class="p">×10^</td><td class="e">0</td></tr>
-</table>
-<p class="cap">$3.142\times10^{0}$ — the closest storable value to $\pi$</p>
-:::
+- The mantissa is a ruler with a **fixed number of equally spaced marks**.
+- The exponent **stretches** the ruler by $10^{e}$ over $[10^{e}, 10^{e+1})$.
+- Stretching adds no marks — the marks **spread apart** as the zoom (exponent) grows.
 
-Three things can go wrong, all caused by the boxes being finite:
-
-1. **Overflow**: the exponent box is too small for a *large* number.
-2. **Underflow**: the exponent box is too small for a *tiny* number.
-3. **Roundoff**: the mantissa boxes are too few for all the digits.
-
-## Floating Point Numbers Are Not Evenly Spaced
-
-In the toy system, consecutive storable numbers differ in the last mantissa box:
+Our toy computer stores six boxes: sign, a **2-digit mantissa** $d_1.d_2$ ($d_1\in\{1,\ldots,9\}$, $d_2\in\{0,\ldots,9\}$), and a signed 1-digit exponent, $e\in\{-9,\ldots,9\}$:
 
 ::: {.pv}
 <table>
-<tr><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">0</td>
-<td class="p" style="padding:0 1em">→ next:</td>
-<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">×10^</td><td class="e">0</td></tr>
+<tr><th>sign</th><th>1</th><th></th><th>10⁻¹</th><th></th><th>±</th><th>exp</th></tr>
+<tr><td class="s">+</td><td class="m">3</td><td class="p">.</td><td class="m">1</td><td class="p">×10^</td><td class="s">+</td><td class="e">0</td></tr>
 </table>
-<p class="cap">gap $= 0.001$ near $1$</p>
-<table>
-<tr><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">3</td>
-<td class="p" style="padding:0 1em">→ next:</td>
-<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">×10^</td><td class="e">3</td></tr>
-</table>
-<p class="cap">gap $= 1$ near $1000$</p>
+<p class="cap">$+3.1\times10^{+0}$ — the closest storable value to $\pi$</p>
 :::
 
-- The **absolute** gap grows with the magnitude; the **relative** gap is roughly constant.
-- The relative gap near 1 is the **machine epsilon** $\epsilon$: the smallest $\epsilon$ with $1+\epsilon \neq 1$ on the computer.
+## Zoom Levels: How Many Numbers Exist? {.smaller}
+
+Each of the **19 zoom levels** ($e = -9,\ldots,9$) is a ruler of **90 marks** ($1.0, 1.1, \ldots, 9.9$). At the lowest zoom ($e=-9$) the leading digit may also be $0$ — **subnormal** numbers — filling the gap between $0$ and $1.0\times10^{-9}$.
+
+::: {.zt}
+<table>
+<tr><th>zoom $e$</th><th>interval</th><th>mantissa</th><th>magnitude</th><th>gap</th></tr>
+<tr><td>$-9$ (subnormal)</td><td>$(0, 10^{-9})$</td><td>$0.1,\ldots,0.9$</td><td>$\times10^{-9}$</td><td>$10^{-10}$</td></tr>
+<tr><td>$-9$</td><td>$[10^{-9}, 10^{-8})$</td><td>$1.0,\ldots,9.9$</td><td>$\times10^{-9}$</td><td>$10^{-10}$</td></tr>
+<tr><td>$\vdots$</td><td>$\vdots$</td><td>$\vdots$</td><td>$\vdots$</td><td>$\vdots$</td></tr>
+<tr class="hl"><td>$0$</td><td>$[1, 10)$</td><td>$1.0, 1.1, \ldots, 9.9$</td><td>$\times10^{0}$</td><td>$0.1$</td></tr>
+<tr><td>$+1$</td><td>$[10, 100)$</td><td>$1.0,\ldots,9.9$</td><td>$\times10^{1}$</td><td>$1$</td></tr>
+<tr><td>$\vdots$</td><td>$\vdots$</td><td>$\vdots$</td><td>$\vdots$</td><td>$\vdots$</td></tr>
+<tr><td>$+9$</td><td>$[10^{9}, 10^{10})$</td><td>$1.0,\ldots,9.9$</td><td>$\times10^{9}$</td><td>$10^{8}$</td></tr>
+</table>
+:::
+
+
+## Visualizing the Zoom
+
+Stretching by $\times10$ multiplies the **gap** by $10$ — it does not add marks:
 
 ```{r}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 3.2
+par(mfrow = c(2, 1), mar = c(2.5, 1, 1.5, 1))
+m0 <- (10:99) / 10; m1 <- 10:99
+plot(NA, xlim = c(0, 10.5), ylim = c(0, 1), axes = FALSE, xlab = "", ylab = "",
+     main = "e = 0   (gap 0.1)", cex.main = 0.9)
+segments(m0, 0.3, m0, 0.7, col = "steelblue"); axis(1, at = 0:10)
+plot(NA, xlim = c(0, 105), ylim = c(0, 1), axes = FALSE, xlab = "", ylab = "",
+     main = "e = +1   (gap 1)", cex.main = 0.9)
+segments(m1, 0.3, m1, 0.7, col = "darkorange3"); axis(1, at = seq(0, 100, 10))
+```
+
+The **absolute** gap grows with magnitude; the **relative** gap stays roughly constant across zoom levels.
+
+## Rounding: Relative Error is Constant
+
+A number that falls between two marks is stored as the nearer mark. These three numbers share the same mantissa digits and differ only in exponent (zoom):
+
+| $x$ | stored | error |
+|:--|:--:|:--:|
+| $0.234$ | $0.23$ | $0.004$ (1.7%) |
+| $2.34$ | $2.3$ | $0.04$ (1.7%) |
+| $23.4$ | $23$ | $0.4$ (1.7%) |
+
+Absolute error scales with the zoom; **relative** error does not — it is set by how many mantissa digits exist, not by magnitude.
+
+## Rounding in Addition: Machine Epsilon
+
+To add, align by place value. Solid boxes are stored digits, dashed boxes are alignment zeros; digits beyond the mantissa (red) are rounded off.
+
+:::: {.columns}
+::: {.column width="33%"}
+::: {.pv}
+<table>
+<tr><th></th><th>10⁰</th><th></th><th>10⁻¹</th><th>10⁻²</th></tr>
+<tr><td class="op"></td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="nb"></td></tr>
+<tr><td class="op">+</td><td class="z">0</td><td class="p">.</td><td class="m">1</td><td class="m">0</td></tr>
+<tr class="sum"><td class="op"></td><td class="m">1</td><td class="p">.</td><td class="m">1</td><td class="x">0</td></tr>
+</table>
+<p class="cap">$1.0+0.10=1.1 \ne 1.0$</p>
+:::
+:::
+::: {.column width="33%"}
+::: {.pv}
+<table>
+<tr><th></th><th>10⁰</th><th></th><th>10⁻¹</th><th>10⁻²</th></tr>
+<tr><td class="op"></td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="nb"></td></tr>
+<tr><td class="op">+</td><td class="z">0</td><td class="p">.</td><td class="m">1</td><td class="m">4</td></tr>
+<tr class="sum"><td class="op"></td><td class="m">1</td><td class="p">.</td><td class="m">1</td><td class="x">4</td></tr>
+</table>
+<p class="cap">$1.0+0.14 \to 1.1$</p>
+:::
+:::
+::: {.column width="33%"}
+::: {.pv}
+<table>
+<tr><th></th><th>10¹</th><th>10⁰</th><th></th><th>10⁻¹</th><th>10⁻²</th></tr>
+<tr><td class="op"></td><td class="m">1</td><td class="m">0</td><td class="p">.</td><td class="nb"></td><td class="nb"></td></tr>
+<tr><td class="op">+</td><td class="z">0</td><td class="z">0</td><td class="p">.</td><td class="m">4</td><td class="m">0</td></tr>
+<tr class="sum"><td class="op"></td><td class="m">1</td><td class="m">0</td><td class="p">.</td><td class="x">4</td><td class="x">0</td></tr>
+</table>
+<p class="cap">$10+0.40 \to 10$</p>
+:::
+:::
+::::
+
+**Machine epsilon** $\epsilon$ = the gap next to $1$ = the smallest increment the last mantissa box can register: here $\epsilon = 0.1$. Below it, digits are lost — partly (middle) or wholly (right, at a higher zoom).
+
+
+## Roundoff Error: General Principle {.smaller}
+
+- The stored result of $a+b$ (or $a\times b$, …) is the **nearest representable number** to the exact result — as in the addition examples above.
+- Each operation has relative error up to about $\epsilon$; the concern is when these errors **accumulate** or are **amplified**.
+- Two patterns amplify roundoff error: adding a **large + small** number, and subtracting **large − large** nearly equal numbers (**catastrophic cancellation**).
+- Doubles represent **every integer exactly** up to $2^{53}$; beyond that the gap exceeds 1, so some integers are skipped.
+
+```{r}
+#| code-fold: true
 .Machine$double.eps      # 2^-52
 1 + 1e-16 == 1
+2^53 + 1 == 2^53          # gap is now 2: the +1 is lost
 ```
+
+## Largest and Smallest Toy Numbers
+
+| | sign | mantissa | exponent | value |
+|:--|:--:|:--:|:--:|:--:|
+| largest | + | $9.9$ | $+9$ | $9.9\times10^{9}$ |
+| smallest positive | + | $0.1$ | $-9$ | $0.1\times10^{-9}$ |
+| largest negative | − | $0.1$ | $-9$ | $-0.1\times10^{-9}$ |
+| smallest | − | $9.9$ | $+9$ | $-9.9\times10^{9}$ |
 
 ## Overflow
 
-The largest toy number fills every box with 9:
+Adding two large toy numbers can need an exponent the single digit cannot hold:
 
 ::: {.pv}
 <table>
-<tr><td class="s">+</td><td class="m">9</td><td class="p">.</td><td class="m">9</td><td class="m">9</td><td class="m">9</td><td class="p">×10^</td><td class="e">9</td></tr>
+<tr><th></th><th>10¹⁰</th><th>10⁹</th><th>10⁸</th></tr>
+<tr><td class="op"></td><td class="nb"></td><td class="m">6</td><td class="m">0</td></tr>
+<tr><td class="op">+</td><td class="nb"></td><td class="m">5</td><td class="m">0</td></tr>
+<tr class="sum"><td class="op"></td><td class="x">1</td><td class="m">1</td><td class="x">0</td></tr>
 </table>
-<p class="cap">$9.999\times10^{9}$</p>
-<table>
-<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="x">10</td></tr>
-</table>
-<p class="cap">$10^{10}$: the exponent "10" needs two boxes → **overflow**, stored as `Inf`</p>
+<p class="cap">$6.0\times10^{9} + 5.0\times10^{9} = 1.1\times10^{+10}$: exponent $10$ needs two digits → **overflow**, stored as `Inf`</p>
 :::
 
 For doubles the largest value is $\approx 1.8\times10^{308}$:
@@ -157,17 +261,14 @@ For doubles the largest value is $\approx 1.8\times10^{308}$:
 
 ## Underflow
 
-The smallest positive toy number:
+A tiny result can fall outside the mantissa entirely:
 
 ::: {.pv}
 <table>
-<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">-9</td></tr>
+<tr><th></th><th>sign</th><th>1</th><th></th><th>10⁻¹</th><th>10⁻²</th><th></th><th>±</th><th>exp</th></tr>
+<tr><td class="nb"></td><td class="s">+</td><td class="m">0</td><td class="p">.</td><td class="x">0</td><td class="x">1</td><td class="p">×10^</td><td class="s">−</td><td class="e">9</td></tr>
 </table>
-<p class="cap">$10^{-9}$</p>
-<table>
-<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="x">-10</td></tr>
-</table>
-<p class="cap">$10^{-10}$: the exponent needs two boxes → **underflow**, stored as `0`</p>
+<p class="cap">$(0.1\times10^{-9})\times0.1 = 0.01\times10^{-9}$: the digit $1$ falls outside the mantissa → **underflow**, stored as `0`</p>
 :::
 
 For doubles the smallest positive value is $2^{-1074}\approx 4.9\times10^{-324}$ (the smallest with full precision is $2^{-1022}\approx 2.2\times10^{-308}$):
@@ -177,49 +278,24 @@ For doubles the smallest positive value is $2^{-1074}\approx 4.9\times10^{-324}$
 2^-1075
 ```
 
-## Roundoff Error
-
-Compute $1 + 0.0001$ in the toy system. The exact answer $1.0001$ needs a fifth mantissa box:
-
-::: {.pv}
-<table>
-<tr><th></th><th>1</th><th></th><th>10⁻¹</th><th>10⁻²</th><th>10⁻³</th><th>10⁻⁴</th><th></th><th>exp</th></tr>
-<tr><td class="s">+</td><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">×10^</td><td class="e">0</td></tr>
-</table>
-<p class="cap">The red digit does not fit → rounded away → the stored result is exactly $1.000$</p>
-:::
-
-- The stored result of $a+b$ (or $a\times b$, …) is the **nearest representable number** to the exact result.
-- Each operation has relative error up to about $\epsilon$; the concern is when these errors **accumulate** or are **amplified**.
-- Two patterns amplify roundoff error: adding a **large + small** number, and subtracting **large − large** nearly equal numbers (**catastrophic cancellation**).
 
 # Rounding Error and Methods for Preventing It
 
 ## Computing Sum: Avoiding Large + Small
 
-Compute $1 + 0.0001 + 0.0001$ in the toy system (4 digits).
+Compute $1.0 + 0.04 + 0.04$ in our 2-digit-mantissa toy system (exact value $1.08$).
 
-**Left to right**, $(1 + 0.0001) + 0.0001$:
+**Left to right**, $(1.0 + 0.04) + 0.04$: each addition needs a third mantissa digit, so each rounds back to $1.0$ (the same loss as $1.0+0.40\to1.0$ shown earlier, just smaller). Both small terms are lost — result $1.0$.
 
-::: {.pv}
-<table>
-<tr><td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="x">1</td><td class="p">→</td>
-<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td>
-<td class="p" style="padding:0 0.6em">then + 0.0001 →</td>
-<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td></tr>
-</table>
-<p class="cap">Result $1.000$; both small terms are lost.</p>
-:::
-
-**Small terms first**, $1 + (0.0001 + 0.0001)$:
+**Small terms first**, $1.0 + (0.04 + 0.04)$:
 
 ::: {.pv}
 <table>
-<tr><td class="m">2</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="p">×10^</td><td class="e">-4</td>
-<td class="p" style="padding:0 0.6em">then 1 + 0.0002 →</td>
-<td class="m">1</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="x">0</td><td class="m">2</td></tr>
+<tr><td class="m">8</td><td class="p">.</td><td class="m">0</td><td class="p">×10^</td><td class="s">−</td><td class="e">2</td>
+<td class="p" style="padding:0 0.6em">then 1.0 + 0.08 →</td>
+<td class="m">1</td><td class="p">.</td><td class="m">1</td></tr>
 </table>
-<p class="cap">Result $1.000$ again — but the error is now one roundoff, not an accumulating one.</p>
+<p class="cap">$0.04+0.04=0.08$ exactly, then $1.0+0.08\to1.1$ — one roundoff, not an accumulating one.</p>
 :::
 
 ## Computing Sum: Why Order Matters
@@ -237,6 +313,21 @@ x <- c(1, rep(1e-16, 1e4))
 s <- 0; for (v in x) s <- s + v      # naive loop
 c(loop = s - 1, sorted = sum(sort(x)) - 1, exact = 1e-12)
 ```
+
+## Kahan Compensated Summation
+
+Track the part rounded away at each step, and add it back at the next step:
+
+```{r}
+kahan_sum <- function(x) {
+  s <- 0; c <- 0                       # c holds the running roundoff error
+  for (v in x) { y <- v - c; t <- s + y; c <- (t - s) - y; s <- t }
+  s
+}
+c(kahan = kahan_sum(x) - 1, builtin = sum(x) - 1, exact = 1e-12)
+```
+
+Kahan summation and R's `sum()` (pairwise + extended precision) both recover the answer to full precision, without needing to sort the data first.
 
 ## Computing $e^x$: Avoiding Large − Large
 
@@ -296,12 +387,33 @@ x <- c(1, 2, 3) + 1e8
 c(one_pass = sum(x^2) - sum(x)^2 / 3, two_pass = sum((x - mean(x))^2))
 ```
 
+## Computing Variance: Gradual Failure
+
+The one-pass error grows like $\epsilon M^2 n$, so it worsens continuously as the shift $M$ grows — eventually giving a **negative** "variance", which is impossible:
+
+```{r}
+var1 <- function(x) { n <- length(x); (sum(x^2) - sum(x)^2 / n) / (n - 1) }
+M <- 10^(0:10)
+t(sapply(M, function(m) { x <- c(1, 2, 3) + m; c(M = m, one_pass = var1(x)) }))
+```
+
 ## Computing Variance: Fixes
 
-- **Two-pass**: compute $\bar x$ first, then $\sum (x_i - \bar x)^2$. Deviations are small and of similar size, so no cancellation.
+- **Two-pass**: compute $\bar x$ first, then $\sum (x_i - \bar x)^2$. Deviations are small and of similar size, so no cancellation. (`var()` does this.)
 - **Shifted one-pass**: subtract any convenient constant $c \approx \bar x$ (e.g. $c = x_1$) before applying the one-pass formula:
 $$\sum (x_i-\bar x)^2 = \sum (x_i - c)^2 - \frac{\left(\sum (x_i - c)\right)^2}{n}$$
 - **Welford's online algorithm** updates $\bar x_k$ and $\sum_{i\le k}(x_i - \bar x_k)^2$ one observation at a time; use it for streaming data.
+
+```{r}
+var_shifted <- function(x) { n <- length(x); d <- x - x[1]; (sum(d^2) - sum(d)^2 / n) / (n - 1) }
+var_welford <- function(x) {
+  m <- 0; S <- 0
+  for (k in seq_along(x)) { m_old <- m; m <- m + (x[k] - m) / k; S <- S + (x[k] - m_old) * (x[k] - m) }
+  S / (length(x) - 1)
+}
+x <- c(1, 2, 3) + 1e10
+c(one_pass = var1(x), shifted = var_shifted(x), welford = var_welford(x))
+```
 
 # Methods for Mitigating Overflow and Underflow Errors
 
@@ -347,12 +459,16 @@ Software provides functions written specifically to avoid cancellation and overf
 | `log(choose(n, k))` | `lchoose(n, k)` | overflow |
 | `log(dnorm(x))` | `dnorm(x, log = TRUE)` | `dnorm(x)` underflows |
 | `log(pnorm(x))` | `pnorm(x, log.p = TRUE)` | underflow |
+| `log(1 - pnorm(x))` | `pnorm(x, lower.tail = FALSE, log.p = TRUE)` | cancellation *and* underflow |
 
 ```{r}
 #| code-fold: true
 c(log(1 + 1e-20), log1p(1e-20))
 c(log(factorial(1000)), lfactorial(1000))
+c(naive = log(1 - pnorm(10)), stable = pnorm(10, lower.tail = FALSE, log.p = TRUE))
 ```
+
+`1 - pnorm(10)` rounds to exactly `1 - 1 = 0` in double precision, so the naive answer is `-Inf`; the true value is about $-53.2$.
 
 ## Representing Numbers in Logarithmic Form
 
@@ -416,6 +532,14 @@ $$\log(x - y) = \log\left(e^{\ell_x}\left(1 - e^{\ell_y - \ell_x}\right)\right) 
 - Since $\ell_y - \ell_x < 0$, $e^{\ell_y-\ell_x}\in(0,1)$: no overflow.
 - When $x \approx y$, use `log1p(-exp(ly - lx))` to avoid the cancellation in $1 - e^{\ell_y-\ell_x}$.
 
+## Summary
+
+- Integers occupy a fixed number of bits; exceeding $2^{31}-1$ gives `NA` in R (not silent wraparound as in C).
+- Doubles store sign + 52-bit mantissa (~16 decimal digits) + 11-bit exponent ($10^{-308}$ to $10^{308}$); the relative spacing everywhere is $\epsilon = 2^{-52}$, and integers above $2^{53}$ are not all representable.
+- **Overflow** → `Inf`; **underflow** → `0` (silent, and thus more dangerous).
+- Roundoff is amplified by **large + small** (fix: add small terms first, pairwise/Kahan summation) and **large − large** (fix: reformulate to combine same-sign, similar-magnitude quantities — $e^{-x}=1/e^x$, two-pass variance).
+- Overflow/underflow are avoided by choosing non-positive exponent arguments, using purpose-built functions (`log1p`, `expm1`, `lgamma`, `dnorm(log=TRUE)`), and working on the **log scale** with the log-sum-exp trick.
+
 ## Practice Questions
 
 **Question 1.** How do you compute
@@ -427,3 +551,9 @@ $$\log\left(\frac{e^{x_k}}{\sum_{j=1}^{K} e^{x_j}}\right)$$
 so as to avoid underflow and overflow of $e^{x_j}$?
 
 **Question 3.** The one-pass variance formula fails for $x = (M+1, M+2, M+3)$ with $M = 10^{8}$. Predict the smallest $M$ (a power of 10) at which the one-pass result in R first differs from $2$, then verify.
+
+## Practice Questions (cont.)
+
+**Question 4.** Write `log_dbinom(k, n, p)` returning $\log\binom{n}{k}p^k(1-p)^{n-k}$ for $n = 10^5$ without overflow or underflow, using `lchoose` and `log1p`. Compare with `dbinom(k, n, p, log = TRUE)`.
+
+**Question 5.** Implement Welford's algorithm for the sample **covariance** of two variables, and check it against `cov()` on data shifted by $10^{10}$.
