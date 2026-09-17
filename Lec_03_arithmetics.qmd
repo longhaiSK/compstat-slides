@@ -528,9 +528,11 @@ c(mine = log_sum_exp(c(2000, 2001, 2002)),
 
 `matrixStats::logSumExp(lx)` implements exactly the max-shift identity above — prefer the package function in real code; write your own only to understand *why* it works.
 
-## Examples of R Functions that Handle Computation Errors {.smaller}
 
-Software provides functions written specifically to avoid cancellation and overflow.
+
+## Examples of Stable R Functions {.smaller}
+
+Software provides functions written specifically to avoid rounding error, underflow, and overflow.
 
 | instead of | use | reason |
 |:--|:--|:--|
@@ -542,17 +544,20 @@ Software provides functions written specifically to avoid cancellation and overf
 | `log(pnorm(x))` | `pnorm(x, log.p = TRUE)` | underflow |
 | `log(1 - pnorm(x))` | `pnorm(x, lower.tail = FALSE, log.p = TRUE)` | cancellation *and* underflow |
 
-## Examples of R Functions that Handle Computation Errors: Demo {.smaller}
+
+## Example: Computing $1-\Phi(10)$
 
 ```{r}
-#| code-fold: true
-c(log(1 + 1e-20), log1p(1e-20))
-c(log(factorial(1000)), lfactorial(1000))
-c(naive = log(1 - pnorm(10)), log1p = log1p(-pnorm(10)),
-  stable = pnorm(10, lower.tail = FALSE, log.p = TRUE))
+#| code-fold: false
+c(naive  = log(1 - pnorm(10)),     # pnorm(10) rounds to 1, so log(0) = -Inf
+  log1p  = log1p(-pnorm(10)),      # log1p cannot recover digits already lost
+  stable = pnorm(10, lower.tail = FALSE, log.p = TRUE))  # direct upper tail
 ```
 
-`1 - pnorm(10)` rounds to exactly `1 - 1 = 0` in double precision, so the naive answer is `-Inf`. Wrapping it in `log1p(-pnorm(10))` does **not** help — `pnorm(10)` itself already rounded to exactly `1` before `log1p` ever sees it. The true fix must avoid computing `pnorm(10)` at all: `pnorm(10, lower.tail = FALSE, log.p = TRUE)` gives the correct $-53.2$.
+The target is $\log\{1 - \Phi(10)\} \approx -53.23$, where $1 - \Phi(10) \approx 7.6 \times 10^{-24}$ is far below machine epsilon ($\approx 2.2 \times 10^{-16}$).
+
+- **`naive` and `log1p`.** `pnorm(10)` rounds to exactly 1, so the small difference is lost before any logarithm is taken. `log1p` preserves accuracy only for arguments that are themselves accurate.
+- **`stable`.** With `lower.tail = FALSE`, R computes $1 - \Phi(10)$ directly, never forming $\Phi(10)$, and `log.p = TRUE` returns its logarithm without underflow.
 
 ## Summary
 

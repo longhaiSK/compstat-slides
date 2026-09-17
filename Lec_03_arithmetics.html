@@ -1658,9 +1658,9 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 </div>
 <p><code>matrixStats::logSumExp(lx)</code> implements exactly the max-shift identity above — prefer the package function in real code; write your own only to understand <em>why</em> it works.</p>
 </section>
-<section id="examples-of-r-functions-that-handle-computation-errors" class="slide level2 smaller">
-<h2>Examples of R Functions that Handle Computation Errors</h2>
-<p>Software provides functions written specifically to avoid cancellation and overflow.</p>
+<section id="examples-of-stable-r-functions" class="slide level2 smaller">
+<h2>Examples of Stable R Functions</h2>
+<p>Software provides functions written specifically to avoid rounding error, underflow, and overflow.</p>
 <table class="caption-top">
 <colgroup>
 <col style="width: 33%">
@@ -1713,34 +1713,22 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 </tbody>
 </table>
 </section>
-<section id="examples-of-r-functions-that-handle-computation-errors-demo" class="slide level2 smaller">
-<h2>Examples of R Functions that Handle Computation Errors: Demo</h2>
+<section id="example-computing-1-phi10" class="slide level2">
+<h2>Example: Computing <span class="math inline">1-\Phi(10)</span></h2>
 <div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-20</span>), <span class="fu">log1p</span>(<span class="fl">1e-20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0e+00 1e-20</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href=""></a><span class="fu">c</span>(<span class="fu">log</span>(<span class="fu">factorial</span>(<span class="dv">1000</span>)), <span class="fu">lfactorial</span>(<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1]      Inf 5912.128</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)), <span class="at">log1p =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="dv">10</span>)),</span>
-<span id="cb51-2"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)),     <span class="co"># pnorm(10) rounds to 1, so log(0) = -Inf</span></span>
+<span id="cb47-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="dv">10</span>)),      <span class="co"># log1p cannot recover digits already lost</span></span>
+<span id="cb47-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    naive     log1p    stable 
      -Inf      -Inf -53.23129 </code></pre>
 </div>
 </div>
-<p><code>1 - pnorm(10)</code> rounds to exactly <code>1 - 1 = 0</code> in double precision, so the naive answer is <code>-Inf</code>. Wrapping it in <code>log1p(-pnorm(10))</code> does <strong>not</strong> help — <code>pnorm(10)</code> itself already rounded to exactly <code>1</code> before <code>log1p</code> ever sees it. The true fix must avoid computing <code>pnorm(10)</code> at all: <code>pnorm(10, lower.tail = FALSE, log.p = TRUE)</code> gives the correct <span class="math inline">-53.2</span>.</p>
+<p>The target is <span class="math inline">\log\{1 - \Phi(10)\} \approx -53.23</span>, where <span class="math inline">1 - \Phi(10) \approx 7.6 \times 10^{-24}</span> is far below machine epsilon (<span class="math inline">\approx 2.2 \times 10^{-16}</span>).</p>
+<ul>
+<li><strong><code>naive</code> and <code>log1p</code>.</strong> <code>pnorm(10)</code> rounds to exactly 1, so the small difference is lost before any logarithm is taken. <code>log1p</code> preserves accuracy only for arguments that are themselves accurate.</li>
+<li><strong><code>stable</code>.</strong> With <code>lower.tail = FALSE</code>, R computes <span class="math inline">1 - \Phi(10)</span> directly, never forming <span class="math inline">\Phi(10)</span>, and <code>log.p = TRUE</code> returns its logarithm without underflow.</li>
+</ul>
 </section>
 <section id="summary" class="slide level2">
 <h2>Summary</h2>
