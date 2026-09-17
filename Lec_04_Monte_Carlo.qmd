@@ -9,14 +9,14 @@ execute:
   echo: true
   fig-width: 7
   fig-height: 4
+filters:
+  - shinylive
 ---
 
 ```{r}
 #| echo: false
 set.seed(812)
 ```
-
-# Generating Random Numbers
 
 ## Pseudo Random Numbers
 
@@ -31,13 +31,27 @@ $$x_{i+1} = (a\,x_i + c) \bmod m, \qquad u_{i+1} = x_{i+1}/m$$
 
 ```{r}
 #| code-fold: true
-lcg <- function(n, seed, a = 1103515245, c = 12345, m = 2^31) {
+lcg <- function(n, seed, a = 69069, c = 1, m = 2^32) {
   x <- numeric(n); x[1] <- seed
   for (i in 2:n) x[i] <- (a * x[i - 1] + c) %% m
   x / m
 }
 round(lcg(5, seed = 812), 4)
 ```
+## Pseudo Random Numbers: A Trace
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+#| fig-height: 3
+u <- lcg(50, seed = 812)
+plot(u, type = "b", pch = 16, cex = 0.7, ylim = c(0, 1),
+     xlab = "i", ylab = expression(u[i]),
+     main = "Trace of 50 LCG draws")
+abline(h = c(0, 0.5, 1), lty = 3, col = "grey60")
+```
+
+The trace shows no visible trend, drift, or periodicity, and the points fill $(0,1)$ without clustering. This is what "behaves like iid uniform" means in practice, though a convincing assessment requires formal tests of uniformity and serial correlation rather than a single plot of 50 values.
 
 ## Seeds and Reproducibility
 
@@ -95,24 +109,137 @@ $$x = F_X^{-1}(u) = -\frac{1}{\lambda}\log(1-u).$$
 Since $1 - U \sim \mathrm{Unif}(0,1)$ as well, we may use $X = -\log(U)/\lambda$.
 
 ```{r}
-lambda <- 2; u <- runif(10000); x <- -log(u) / lambda
-hist(x, breaks = 40, freq = FALSE, main = "Exp(2) via inverse CDF")
-curve(dexp(x, lambda), add = TRUE, col = 2, lwd = 2)
+#| code-fold: false
+lambda <- 2
+u <- runif(10000)
+x <- -log(u) / lambda
 c(sample_mean = mean(x), true_mean = 1 / lambda)
 ```
 
-## Inverting the CDF (Discrete Case)
-
-For a discrete $X$ with values $x_1 < x_2 < \cdots$ and CDF $F$, set
-$$X = x_k \quad\text{where } F(x_{k-1}) < U \le F(x_k).$$
-
-That is, cut $(0,1)$ into intervals of lengths $P(X = x_k)$ and see which one $U$ lands in.
+## Example: Exponential Distribution (cont.)
 
 ```{r}
-p <- c(0.2, 0.5, 0.3); vals <- c(1, 2, 3)
-u <- runif(10000)
-x <- vals[findInterval(u, cumsum(p)) + 1]   # or sample(vals, n, TRUE, p)
-table(x) / length(x)
+#| code-fold: true
+#| fig-width: 8
+#| fig-height: 4
+hist(x, breaks = 40, freq = FALSE, main = "Exp(2) via inverse CDF")
+curve(dexp(x, lambda), add = TRUE, col = 2, lwd = 2)
+```
+
+## Shinylive  App: Inverse CDF Sampling
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 620
+#| code-fold: true
+
+library(shiny)
+
+lambda <- 1
+xmax   <- qexp(0.995, lambda)
+grid   <- seq(0, xmax, length.out = 400)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      width = 3,
+      sliderInput("n", "Points per step (n)", min = 1, max = 50, value = 10, step = 1),
+      sliderInput("speed", "Play interval (ms)", min = 200, max = 2000, value = 800, step = 100),
+      actionButton("draw", "Draw more samples", class = "btn-primary", width = "100%"),
+      br(), br(),
+      actionButton("play", "Play", width = "100%"),
+      br(), br(),
+      actionButton("reset", "Reset", width = "100%"),
+      hr(),
+      strong(textOutput("count")),
+      textOutput("moments")
+    ),
+    mainPanel(
+      width = 9,
+      plotOutput("cdfPlot",  height = "280px"),
+      plotOutput("histPlot", height = "260px")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+
+  rv <- reactiveValues(x = numeric(0), u_last = numeric(0), x_last = numeric(0))
+  playing <- reactiveVal(FALSE)
+
+  draw_step <- function() {
+    u  <- runif(input$n)
+    xs <- -log(u) / lambda
+    rv$u_last <- u
+    rv$x_last <- xs
+    rv$x      <- c(rv$x, xs)
+  }
+
+  observeEvent(input$draw, draw_step())
+
+  observeEvent(input$play, {
+    playing(!playing())
+    updateActionButton(session, "play", label = if (playing()) "Pause" else "Play")
+  })
+
+  observeEvent(input$reset, {
+    playing(FALSE)
+    updateActionButton(session, "play", label = "Play")
+    rv$x <- numeric(0); rv$u_last <- numeric(0); rv$x_last <- numeric(0)
+  })
+
+  observe({
+    if (playing()) {
+      invalidateLater(input$speed, session)
+      isolate(draw_step())
+    }
+  })
+
+  output$count <- renderText(paste0("Total draws: ", length(rv$x)))
+
+  output$moments <- renderText({
+    if (length(rv$x) < 2) return("")
+    sprintf("sample mean = %.3f  (true = %.3f)", mean(rv$x), 1 / lambda)
+  })
+
+  output$cdfPlot <- renderPlot({
+    par(mar = c(4, 4, 2.5, 1))
+    plot(grid, pexp(grid, lambda), type = "n", ylim = c(0, 1),
+         xlab = "x", ylab = "u = F(x)",
+         main = "Draw u on the vertical axis, read x off the CDF")
+    u <- rv$u_last; x <- rv$x_last
+    if (length(u) > 0) {
+      segments(0, u, pmin(x, xmax), u, col = "grey65")
+      inside <- x <= xmax
+      segments(x[inside], u[inside], x[inside], 0, col = "grey65")
+    }
+    lines(grid, pexp(grid, lambda), col = "steelblue", lwd = 2.5)
+    if (length(u) > 0) {
+      points(pmin(x, xmax), u, pch = 16, col = "firebrick", cex = 1.1)
+      rug(x[x <= xmax], side = 1, col = "firebrick", lwd = 2)
+      points(rep(0, length(u)), u, pch = 16, col = "grey35", cex = 0.8)
+    }
+  })
+
+  output$histPlot <- renderPlot({
+    par(mar = c(4, 4, 2.5, 1))
+    if (length(rv$x) < 2) {
+      plot.new()
+      title(main = "Draw some samples to see the histogram")
+      return(invisible())
+    }
+    hist(rv$x, breaks = 30, freq = FALSE, col = "grey85", border = "white",
+         xlim = c(0, xmax), xlab = "x", ylab = "density",
+         main = "Accumulated draws vs. the true Exp(1) density")
+    curve(dexp(x, lambda), add = TRUE, col = "steelblue", lwd = 2.5)
+    abline(v = mean(rv$x), col = "firebrick", lwd = 2, lty = 2)
+    legend("topright", bty = "n", lwd = 2, lty = c(1, 2),
+           col = c("steelblue", "firebrick"),
+           legend = c("true density", "sample mean"))
+  })
+}
+
+shinyApp(ui, server)
 ```
 
 ## A Special Transformation for Generating Normal Samples

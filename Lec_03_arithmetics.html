@@ -1661,6 +1661,10 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <section id="examples-of-stable-r-functions" class="slide level2 smaller">
 <h2>Examples of Stable R Functions</h2>
 <p>Software provides functions written specifically to avoid rounding error, underflow, and overflow.</p>
+</section>
+<section id="examples-of-stable-r-functions-1" class="slide level2 smaller">
+<h2>Examples of Stable R Functions</h2>
+<p>Software provides functions written specifically to avoid rounding error, underflow, and overflow.</p>
 <table class="caption-top">
 <colgroup>
 <col style="width: 25%">
@@ -1681,43 +1685,43 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <td style="text-align: left;"><code>log(1 + x)</code></td>
 <td style="text-align: left;"><code>log1p(x)</code></td>
 <td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>1 + x</code> rounds to 1</td>
-<td style="text-align: left;">series <span class="math inline">x - x^2/2 + \cdots</span>; never forms <span class="math inline">1 + x</span></td>
+<td style="text-align: left;">Taylor series <span class="math inline">x - \frac{x^2}{2} + \cdots</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>exp(x) - 1</code></td>
 <td style="text-align: left;"><code>expm1(x)</code></td>
 <td style="text-align: left;">for tiny <span class="math inline">x</span>, <code>exp(x)</code> rounds to 1</td>
-<td style="text-align: left;">series <span class="math inline">x + x^2/2 + \cdots</span>; never forms <span class="math inline">e^x</span></td>
+<td style="text-align: left;">Taylor series <span class="math inline">x + \frac{x^2}{2} + \cdots</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>log(factorial(n))</code></td>
 <td style="text-align: left;"><code>lfactorial(n)</code>, <code>lgamma(n + 1)</code></td>
 <td style="text-align: left;"><code>factorial(n)</code> overflows</td>
-<td style="text-align: left;">Stirling series for <span class="math inline">\log\Gamma</span>, evaluated on the log scale</td>
+<td style="text-align: left;">Stirling series</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>log(choose(n, k))</code></td>
 <td style="text-align: left;"><code>lchoose(n, k)</code></td>
 <td style="text-align: left;">overflow</td>
-<td style="text-align: left;">differences of <span class="math inline">\log\Gamma</span> (or <span class="math inline">\log B</span>) terms</td>
+<td style="text-align: left;">sum of <code>lgamma</code> terms</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>log(dnorm(x))</code></td>
 <td style="text-align: left;"><code>dnorm(x, log = TRUE)</code></td>
 <td style="text-align: left;"><code>dnorm(x)</code> underflows</td>
-<td style="text-align: left;">returns <span class="math inline">-x^2/2 - \log\sqrt{2\pi}</span> directly</td>
+<td style="text-align: left;">closed-form log density</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>log(pnorm(x))</code></td>
 <td style="text-align: left;"><code>pnorm(x, log.p = TRUE)</code></td>
 <td style="text-align: left;">underflow</td>
-<td style="text-align: left;">asymptotic expansion of <span class="math inline">\log\Phi(x)</span> for large <span class="math inline">\lvert x\rvert</span></td>
+<td style="text-align: left;">asymptotic expansion</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>log(1 - pnorm(x))</code></td>
 <td style="text-align: left;"><code>pnorm(x, lower.tail = FALSE, log.p = TRUE)</code></td>
 <td style="text-align: left;">cancellation <em>and</em> underflow</td>
-<td style="text-align: left;">computes <span class="math inline">1 - \Phi(x)</span> directly, never forming <span class="math inline">\Phi(x)</span>, and takes its log on the log scale</td>
+<td style="text-align: left;">upper tail computed directly</td>
 </tr>
 </tbody>
 </table>
@@ -1738,6 +1742,25 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <li><strong><code>naive</code> and <code>log1p</code>.</strong> <code>pnorm(10)</code> rounds to exactly 1, so the small difference is lost before any logarithm is taken. <code>log1p</code> preserves accuracy only for arguments that are themselves accurate.</li>
 <li><strong><code>stable</code>.</strong> With <code>lower.tail = FALSE</code>, R computes <span class="math inline">1 - \Phi(10)</span> directly, never forming <span class="math inline">\Phi(10)</span>, and <code>log.p = TRUE</code> returns its logarithm without underflow.</li>
 </ul>
+</section>
+<section id="example-computing-1-phi-10" class="slide level2 smaller">
+<h2>Example: Computing <span class="math inline">1-\Phi(-10)</span></h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),    <span class="co"># 1 - 7.6e-24 rounds to 1, so log gives 0</span></span>
+<span id="cb49-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),     <span class="co"># pnorm(-10) is accurate, so log1p is exact</span></span>
+<span id="cb49-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        naive         log1p        stable 
+ 0.000000e+00 -7.619853e-24 -7.619853e-24 </code></pre>
+</div>
+</div>
+<p>Here <span class="math inline">\Phi(-10) \approx 7.6 \times 10^{-24}</span> and the target is <span class="math inline">\log\{1 - \Phi(-10)\} \approx -7.6 \times 10^{-24}</span>, a tiny negative number rather than a large one.</p>
+<ul>
+<li><strong><code>naive</code>.</strong> The subtraction <span class="math inline">1 - 7.6 \times 10^{-24}</span> rounds to exactly 1, so every significant digit is destroyed and the answer is reported as <span class="math inline">0</span>.</li>
+<li><strong><code>log1p</code>.</strong> The argument <code>pnorm(-10)</code> is itself accurate, since a number near zero is represented with full relative precision. <code>log1p</code> then evaluates <span class="math inline">\log(1 + x)</span> by its Taylor series without ever forming <span class="math inline">1 + x</span>, recovering all digits.</li>
+<li><strong><code>stable</code>.</strong> Also correct, and preferable in general, but here it offers no advantage over <code>log1p</code>.</li>
+</ul>
+<p>The contrast with the <span class="math inline">1 - \Phi(10)</span> example is the location of the loss. There the damage occurred inside <code>pnorm(10)</code> before <code>log1p</code> was reached, so no reformulation of the outer expression could help. Here <code>pnorm(-10)</code> is exact and only the outer subtraction is unstable, which is precisely the situation <code>log1p</code> is designed for.</p>
 </section>
 <section id="summary" class="slide level2">
 <h2>Summary</h2>
