@@ -1175,48 +1175,53 @@ exp
 <h1><span class="header-section-number">2</span> Methods for Mitigating Rounding Error</h1>
 
 </section>
-<section id="roundoff-and-cancellation-errors-general-principle" class="slide level2 smaller">
-<h2>Roundoff and Cancellation Errors: General Principle</h2>
+<section id="roundoff-and-cancellation-errors" class="slide level2 smaller">
+<h2>Roundoff and Cancellation Errors</h2>
 <ul>
-<li>Each operation has relative error up to about <span class="math inline">\epsilon = 2^{-52}</span>; the concern is when these errors <strong>accumulate</strong> or are <strong>amplified</strong>.</li>
-<li><strong>Large + small</strong>: computing <span class="math inline">A + a</span> loses <span class="math inline">a</span>, partly or wholly, once <span class="math display">|a| &lt; A\times2^{-52}</span> — <span class="math inline">a</span> is smaller than the gap between consecutive representable numbers near <span class="math inline">A</span>, so it does not fit in <span class="math inline">A</span>’s mantissa.</li>
-<li><strong>Large − large</strong> (catastrophic cancellation): computing <span class="math inline">A - B</span> is unreliable once the true difference <span class="math display">b = A - B, \qquad |b| &lt; A\times2^{-52}</span> — <span class="math inline">b</span> is smaller than <span class="math inline">A</span>’s <em>own</em> rounding error, so <span class="math inline">B</span> is already indistinguishable from <span class="math inline">A</span> before the subtraction happens, and the result carries little or no correct information.</li>
-<li>Doubles represent <strong>every integer exactly</strong> up to <span class="math inline">2^{53}</span>; beyond that the gap exceeds 1, so some integers are skipped.</li>
+<li>Each elementary operation (<span class="math inline">+,-,\times,/</span>) carries a relative error of at most <span class="math inline">u = 2^{-53}</span>. One is harmless; the concern is that many <strong>accumulate</strong>, or that an existing error is <strong>amplified</strong>.</li>
+<li><strong>Large + small</strong>: <span class="math inline">A + a</span> returns exactly <span class="math inline">A</span> once <span class="math display">|a| &lt; |A| \times 2^{-53},</span> since <span class="math inline">a</span> falls below the gap between doubles near <span class="math inline">A</span>. For larger <span class="math inline">|a|/|A|</span> only the tail of <span class="math inline">a</span> is lost — harmless once, but such losses build up over many additions.</li>
+<li><strong>Large − large</strong>: what matters is the <strong>answer</strong> <span class="math inline">d = A - B</span>, not the size of <span class="math inline">A</span> and <span class="math inline">B</span>. If <span class="math display">|d| &lt; |A| \times 2^{-53},</span> the result is <span class="math inline">0</span>: <span class="math inline">A</span> and <span class="math inline">B</span> are already the same double. More generally, <span class="math inline">|d| \approx |A| \times 2^{-k}</span> means the leading <span class="math inline">k</span> bits cancel, leaving only <span class="math inline">53-k</span> meaningful bits — the subtraction adds no error, but the error already in <span class="math inline">A</span> and <span class="math inline">B</span> is now <span class="math inline">|A|/|d|</span> times larger relative to the answer.</li>
 </ul>
 </section>
-<section id="roundoff-and-cancellation-errors-examples" class="slide level2 smaller">
-<h2>Roundoff and Cancellation Errors: Examples</h2>
+<section id="extreme-examples" class="slide level2 smaller">
+<h2>Extreme Examples</h2>
+<ul>
+<li><strong>Machine epsilon.</strong> <span class="math inline">\epsilon = 2^{-52}</span> is the gap between <span class="math inline">1</span> and the next double; anything smaller than half that gap disappears when added to <span class="math inline">1</span>.</li>
+</ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a>.Machine<span class="sc">$</span>double.eps      <span class="co"># 2^-52</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2.220446e-16</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a><span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-16</span> <span class="sc">==</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] TRUE</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a><span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">+</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">53</span>          <span class="co"># gap is now 2: the +1 is lost</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a><span class="dv">1</span> <span class="sc">+</span> <span class="fl">1e-16</span> <span class="sc">==</span> <span class="dv">1</span>           <span class="co"># 1e-16 &lt; 2^-53, so the addition does nothing</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
 </div>
 </div>
-<p><strong><span class="math inline">A - B = 1-\Phi(10)</span></strong></p>
-<p>Take <span class="math inline">A = 1</span>, <span class="math inline">B = \Phi(10)</span> (<code>pnorm(10)</code>). The true difference is <span class="math display">b = A - B = 1-\Phi(10) \approx 7.62\times10^{-24},</span> while <span class="math inline">A</span>’s own rounding error is <span class="math inline">A\times2^{-52}\approx2.22\times10^{-16}</span>. Since <span class="math inline">b \ll A\times2^{-52}</span>, this is deep in <strong>large − large</strong> territory:</p>
+<ul>
+<li><strong>Large + small at integer scale.</strong> Past <span class="math inline">2^{53}</span> the spacing between doubles is <span class="math inline">2</span>, so adding <span class="math inline">1</span> to <span class="math inline">2^{53}</span> cannot be represented and is lost.</li>
+</ul>
 <div class="cell">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a>A <span class="ot">&lt;-</span> <span class="dv">1</span>; B <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>); true_b <span class="ot">=</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb25-2"><a href=""></a><span class="fu">c</span>(<span class="at">B =</span> B, <span class="st">`</span><span class="at">A - B</span><span class="st">`</span> <span class="ot">=</span> A <span class="sc">-</span> B, <span class="st">"True b"</span> <span class="ot">=</span> true_b)             <span class="co"># B already rounded to exactly 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a><span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">+</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">53</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>           B        A - B       True b 
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Large − large: <span class="math inline">1-\Phi(10)</span>.</strong> The true answer is <span class="math inline">d \approx 7.62\times10^{-24}</span>, far below <span class="math inline">|A|\times2^{-53} \approx 1.11\times10^{-16}</span>. So <code>pnorm(10)</code> already rounds to exactly <span class="math inline">1</span> <em>before</em> the subtraction, and the difference returns <span class="math inline">0</span> — not one correct digit survives.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a>A <span class="ot">&lt;-</span> <span class="dv">1</span>; B <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>);<span class="fu">c</span>(<span class="at">B =</span> B, <span class="st">`</span><span class="at">A - B</span><span class="st">`</span> <span class="ot">=</span> A <span class="sc">-</span> B, <span class="at">true_d =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           B        A - B       true_d 
 1.000000e+00 0.000000e+00 7.619853e-24 </code></pre>
 </div>
 </div>
-<p><span class="math inline">B</span> rounds to exactly <span class="math inline">1</span> in double precision <em>before</em> the subtraction — every digit of the true <span class="math inline">b\approx7.62\times10^{-24}</span> is gone, and <code>A - B</code> returns exactly <code>0</code>.</p>
+<p><code>pnorm(10, lower.tail = FALSE)</code> evaluates the tail directly and returns all 16 digits without evaluating <span class="math inline">B</span></p>
 </section>
-<section id="computing-sum-avoiding-large-small" class="slide level2">
-<h2>Computing Sum: Avoiding Large + Small</h2>
+<section id="example-computing-sum-by-avoiding-large-small" class="slide level2">
+<h2>Example: Computing Sum by Avoiding Large + Small</h2>
+<h3 id="illustration">Illustration</h3>
 <p>Compute <span class="math inline">1.0 + 0.04 + 0.04</span> in our 2-digit-mantissa toy system (exact value <span class="math inline">1.08</span>).</p>
 <p><strong>Left to right</strong>, <span class="math inline">(1.0 + 0.04) + 0.04</span>: each addition needs a third mantissa digit, so each rounds back to <span class="math inline">1.0</span> (the same loss as <span class="math inline">1.0+0.40\to1.0</span> shown earlier, just smaller). Both small terms are lost — result <span class="math inline">1.0</span>.</p>
 <p><strong>Small terms first</strong>, <span class="math inline">1.0 + (0.04 + 0.04)</span>:</p>
@@ -1259,78 +1264,37 @@ then 1.0 + 0.08 →
 <span class="math inline">0.04+0.04=0.08</span> exactly, then <span class="math inline">1.0+0.08\to1.1</span> — one roundoff, not an accumulating one.
 </p>
 </div>
-</section>
-<section id="computing-sum-why-order-matters" class="slide level2">
-<h2>Computing Sum: Why Order Matters</h2>
-<p>Summing <span class="math inline">n</span> terms in a loop <code>s &lt;- s + x[i]</code>: once <code>s</code> is large, every small <code>x[i]</code> is partly or wholly rounded away, and the errors accumulate over <span class="math inline">n</span> additions.</p>
-<p><strong>Rules for accurate summation</strong></p>
+<h3 id="computing-sum-why-order-matters">Computing Sum: Why Order Matters</h3>
+<p>Summing <span class="math inline">n</span> terms in a loop <code>s &lt;- s + x[i]</code>: once <code>s</code> is large, each small <code>x[i]</code> is partly or wholly rounded away, and these losses accumulate over <span class="math inline">n</span> additions. The remedies all work by keeping the operands of similar magnitude, or by recovering what was discarded.</p>
 <ul>
-<li>Add numbers of <strong>similar magnitude</strong> together; add the smallest terms first (sort ascending).</li>
-<li><strong>Pairwise summation</strong>: sum halves recursively, so partial sums stay of similar size (used by R’s <code>sum()</code>).</li>
-<li><strong>Kahan compensated summation</strong>: carry the rounded-away part to the next step.</li>
+<li><strong>Sort ascending.</strong> Add the smallest terms first, so that a partial sum never dwarfs the next term. Cheap, but requires the whole vector in advance, and still degrades for very long sums.</li>
+<li><strong>Pairwise summation.</strong> Sum halves recursively. Error grows like <span class="math inline">\log n</span> rather than <span class="math inline">n</span>, at no extra cost. This is what NumPy uses.</li>
+<li><strong>Kahan compensated summation.</strong> Carry the part rounded away at each step and add it back at the next: <span class="math display">y \leftarrow x_i - c, \quad t \leftarrow s + y, \quad c \leftarrow (t - s) - y, \quad s \leftarrow t.</span> Here <span class="math inline">c</span> holds the discarded low-order bits: <span class="math inline">(t-s)</span> is the part of <span class="math inline">y</span> that <em>was</em> absorbed, so subtracting <span class="math inline">y</span> leaves what was not. Roughly four times the work, but the error no longer grows with <span class="math inline">n</span>.</li>
+<li><strong>Extended precision.</strong> Accumulate in a wider type. R’s <code>sum()</code> uses a <code>long double</code> accumulator — 64-bit mantissa on x86, though only 53-bit on Apple Silicon, where it therefore behaves like the naive loop.</li>
 </ul>
+<h3 class="smaller" id="computing-sum-demonstration">Computing Sum: Demonstration</h3>
 <div class="cell">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fl">1e-16</span>, <span class="fl">1e4</span>))</span>
-<span id="cb27-2"><a href=""></a>s <span class="ot">&lt;-</span> <span class="dv">0</span>; <span class="cf">for</span> (v <span class="cf">in</span> x) s <span class="ot">&lt;-</span> s <span class="sc">+</span> v      <span class="co"># naive loop</span></span>
-<span id="cb27-3"><a href=""></a><span class="fu">c</span>(<span class="at">loop =</span> s <span class="sc">-</span> <span class="dv">1</span>, <span class="at">sorted =</span> <span class="fu">sum</span>(<span class="fu">sort</span>(x)) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">exact =</span> <span class="fl">1e-12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a>kahan_sum <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb27-2"><a href=""></a>  s <span class="ot">&lt;-</span> <span class="dv">0</span>; comp <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb27-3"><a href=""></a>  <span class="cf">for</span> (v <span class="cf">in</span> x) { y <span class="ot">&lt;-</span> v <span class="sc">-</span> comp; t <span class="ot">&lt;-</span> s <span class="sc">+</span> y; comp <span class="ot">&lt;-</span> (t <span class="sc">-</span> s) <span class="sc">-</span> y; s <span class="ot">&lt;-</span> t }</span>
+<span id="cb27-4"><a href=""></a>  s</span>
+<span id="cb27-5"><a href=""></a>}</span>
+<span id="cb27-6"><a href=""></a></span>
+<span id="cb27-7"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fl">1e-16</span>, <span class="fl">1e4</span>))           <span class="co"># exact sum: 1 + 1e-12</span></span>
+<span id="cb27-8"><a href=""></a></span>
+<span id="cb27-9"><a href=""></a>s <span class="ot">&lt;-</span> <span class="dv">0</span>; <span class="cf">for</span> (v <span class="cf">in</span> x) s <span class="ot">&lt;-</span> s <span class="sc">+</span> v      <span class="co"># naive loop</span></span>
+<span id="cb27-10"><a href=""></a></span>
+<span id="cb27-11"><a href=""></a><span class="fu">c</span>(<span class="at">naive   =</span> s <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb27-12"><a href=""></a>  <span class="at">sorted  =</span> <span class="fu">sum</span>(<span class="fu">sort</span>(x)) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb27-13"><a href=""></a>  <span class="at">kahan   =</span> <span class="fu">kahan_sum</span>(x) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb27-14"><a href=""></a>  <span class="at">builtin =</span> <span class="fu">sum</span>(x) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb27-15"><a href=""></a>  <span class="at">exact   =</span> <span class="fl">1e-12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        loop       sorted        exact 
-0.000000e+00 1.000089e-12 1.000000e-12 </code></pre>
+<pre><code>       naive       sorted        kahan      builtin        exact 
+0.000000e+00 1.000089e-12 1.000089e-12 0.000000e+00 1.000000e-12 </code></pre>
 </div>
 </div>
-</section>
-<section id="kahan-compensated-summation" class="slide level2">
-<h2>Kahan Compensated Summation</h2>
-<p>Track the part rounded away at each step, and add it back at the next step:</p>
-<div class="cell">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a>kahan_sum <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb29-2"><a href=""></a>  s <span class="ot">&lt;-</span> <span class="dv">0</span>; c <span class="ot">&lt;-</span> <span class="dv">0</span>                       <span class="co"># c holds the running roundoff error</span></span>
-<span id="cb29-3"><a href=""></a>  <span class="cf">for</span> (v <span class="cf">in</span> x) { y <span class="ot">&lt;-</span> v <span class="sc">-</span> c; t <span class="ot">&lt;-</span> s <span class="sc">+</span> y; c <span class="ot">&lt;-</span> (t <span class="sc">-</span> s) <span class="sc">-</span> y; s <span class="ot">&lt;-</span> t }</span>
-<span id="cb29-4"><a href=""></a>  s</span>
-<span id="cb29-5"><a href=""></a>}</span>
-<span id="cb29-6"><a href=""></a><span class="fu">c</span>(<span class="at">kahan =</span> <span class="fu">kahan_sum</span>(x) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">builtin =</span> <span class="fu">sum</span>(x) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">exact =</span> <span class="fl">1e-12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>       kahan      builtin        exact 
-1.000089e-12 0.000000e+00 1.000000e-12 </code></pre>
-</div>
-</div>
-<p>Kahan summation and R’s <code>sum()</code> (pairwise + extended precision) both recover the answer to full precision, without needing to sort the data first.</p>
-</section>
-<section id="computing-ex-avoiding-large-large" class="slide level2">
-<h2>Computing <span class="math inline">e^x</span>: Avoiding Large − Large</h2>
-<p>Taylor series: <span class="math display">e^x \approx \sum_{k=0}^{K}\frac{x^k}{k!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots</span></p>
-<p>For <span class="math inline">x = -20</span> the terms alternate in sign and are huge relative to the answer <span class="math inline">e^{-20}\approx 2\times10^{-9}</span>:</p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th style="text-align: left;"><span class="math inline">k</span></th>
-<th style="text-align: center;">0</th>
-<th style="text-align: center;">1</th>
-<th style="text-align: center;">2</th>
-<th style="text-align: center;">…</th>
-<th style="text-align: center;">20</th>
-<th style="text-align: center;">…</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><span class="math inline">x^k/k!</span></td>
-<td style="text-align: center;"><span class="math inline">1</span></td>
-<td style="text-align: center;"><span class="math inline">-20</span></td>
-<td style="text-align: center;"><span class="math inline">200</span></td>
-<td style="text-align: center;">…</td>
-<td style="text-align: center;"><span class="math inline">4.3\times10^{7}</span></td>
-<td style="text-align: center;">…</td>
-</tr>
-</tbody>
-</table>
-<p>Each term carries roundoff of relative size <span class="math inline">\epsilon \approx 10^{-16}</span>, i.e.&nbsp;absolute size <span class="math inline">\approx 4\times10^{-9}</span> for the largest terms — <strong>as large as the answer itself</strong>. Subtracting nearly equal large numbers leaves only their errors: <strong>catastrophic cancellation</strong>.</p>
+<p>Each small term is below <span class="math inline">2^{-53}</span> relative to the running total, so the naive loop discards all <span class="math inline">10^4</span> of them and returns exactly <span class="math inline">1</span> — the entire tail is lost. Sorting, compensation, and the wider accumulator each recover the answer.</p>
 </section>
 <section id="computing-ex-fix-by-reformulating" class="slide level2">
 <h2>Computing <span class="math inline">e^x</span>: Fix by Reformulating</h2>
@@ -1338,8 +1302,8 @@ then 1.0 + 0.08 →
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a>taylor_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">K =</span> <span class="dv">100</span>) <span class="fu">sum</span>(x<span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span>K) <span class="sc">/</span> <span class="fu">factorial</span>(<span class="dv">0</span><span class="sc">:</span>K))</span>
-<span id="cb31-2"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">taylor_exp</span>(<span class="sc">-</span><span class="dv">20</span>), <span class="at">reciprocal =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">taylor_exp</span>(<span class="dv">20</span>), <span class="at">true =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a>taylor_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">K =</span> <span class="dv">100</span>) <span class="fu">sum</span>(x<span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span>K) <span class="sc">/</span> <span class="fu">factorial</span>(<span class="dv">0</span><span class="sc">:</span>K))</span>
+<span id="cb29-2"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">taylor_exp</span>(<span class="sc">-</span><span class="dv">20</span>), <span class="at">reciprocal =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">taylor_exp</span>(<span class="dv">20</span>), <span class="at">true =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>       naive   reciprocal         true 
@@ -1348,8 +1312,8 @@ then 1.0 + 0.08 →
 </div>
 <p><strong>General principle</strong>: rearrange a formula so that quantities of similar magnitude and <strong>the same sign</strong> are combined; avoid computing a small result as the difference of two large numbers.</p>
 </section>
-<section id="computing-variance-avoiding-large-large" class="slide level2 smaller">
-<h2>Computing Variance: Avoiding Large − Large</h2>
+<section id="example-computing-variance-by-avoiding-large-large" class="slide level2 smaller">
+<h2>Example: Computing Variance by Avoiding Large − Large</h2>
 <p>Two algebraically identical formulas for the sum of squared deviations: <span class="math display">\underbrace{\sum_{i=1}^{n}(x_i - \bar{x})^2}_{\text{two-pass}}
 \;=\;
 \underbrace{\sum_{i=1}^{n} x_i^2 - \frac{\left(\sum_i x_i\right)^2}{n}}_{\text{one-pass}}</span></p>
@@ -1438,8 +1402,8 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fl">1e8</span></span>
-<span id="cb33-2"><a href=""></a><span class="fu">c</span>(<span class="at">one_pass =</span> <span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">sum</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>, <span class="at">two_pass =</span> <span class="fu">sum</span>((x <span class="sc">-</span> <span class="fu">mean</span>(x))<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fl">1e8</span></span>
+<span id="cb31-2"><a href=""></a><span class="fu">c</span>(<span class="at">one_pass =</span> <span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">sum</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>, <span class="at">two_pass =</span> <span class="fu">sum</span>((x <span class="sc">-</span> <span class="fu">mean</span>(x))<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>one_pass two_pass 
@@ -1453,9 +1417,9 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href=""></a>var1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); (<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">sum</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> n) <span class="sc">/</span> (n <span class="sc">-</span> <span class="dv">1</span>) }</span>
-<span id="cb35-2"><a href=""></a>M <span class="ot">&lt;-</span> <span class="dv">10</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">10</span>)</span>
-<span id="cb35-3"><a href=""></a><span class="fu">t</span>(<span class="fu">sapply</span>(M, <span class="cf">function</span>(m) { x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> m; <span class="fu">c</span>(<span class="at">M =</span> m, <span class="at">one_pass =</span> <span class="fu">var1</span>(x)) }))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href=""></a>var1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); (<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">sum</span>(x)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> n) <span class="sc">/</span> (n <span class="sc">-</span> <span class="dv">1</span>) }</span>
+<span id="cb33-2"><a href=""></a>M <span class="ot">&lt;-</span> <span class="dv">10</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb33-3"><a href=""></a><span class="fu">t</span>(<span class="fu">sapply</span>(M, <span class="cf">function</span>(m) { x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> m; <span class="fu">c</span>(<span class="at">M =</span> m, <span class="at">one_pass =</span> <span class="fu">var1</span>(x)) }))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          M one_pass
@@ -1483,14 +1447,14 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href=""></a>var_shifted <span class="ot">&lt;-</span> <span class="cf">function</span>(x) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); d <span class="ot">&lt;-</span> x <span class="sc">-</span> x[<span class="dv">1</span>]; (<span class="fu">sum</span>(d<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">sum</span>(d)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> n) <span class="sc">/</span> (n <span class="sc">-</span> <span class="dv">1</span>) }</span>
-<span id="cb37-2"><a href=""></a>var_welford <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb37-3"><a href=""></a>  m <span class="ot">&lt;-</span> <span class="dv">0</span>; S <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb37-4"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_along</span>(x)) { m_old <span class="ot">&lt;-</span> m; m <span class="ot">&lt;-</span> m <span class="sc">+</span> (x[k] <span class="sc">-</span> m) <span class="sc">/</span> k; S <span class="ot">&lt;-</span> S <span class="sc">+</span> (x[k] <span class="sc">-</span> m_old) <span class="sc">*</span> (x[k] <span class="sc">-</span> m) }</span>
-<span id="cb37-5"><a href=""></a>  S <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>)</span>
-<span id="cb37-6"><a href=""></a>}</span>
-<span id="cb37-7"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fl">1e10</span></span>
-<span id="cb37-8"><a href=""></a><span class="fu">c</span>(<span class="at">one_pass =</span> <span class="fu">var1</span>(x), <span class="at">shifted =</span> <span class="fu">var_shifted</span>(x), <span class="at">welford =</span> <span class="fu">var_welford</span>(x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href=""></a>var_shifted <span class="ot">&lt;-</span> <span class="cf">function</span>(x) { n <span class="ot">&lt;-</span> <span class="fu">length</span>(x); d <span class="ot">&lt;-</span> x <span class="sc">-</span> x[<span class="dv">1</span>]; (<span class="fu">sum</span>(d<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">sum</span>(d)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> n) <span class="sc">/</span> (n <span class="sc">-</span> <span class="dv">1</span>) }</span>
+<span id="cb35-2"><a href=""></a>var_welford <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb35-3"><a href=""></a>  m <span class="ot">&lt;-</span> <span class="dv">0</span>; S <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb35-4"><a href=""></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_along</span>(x)) { m_old <span class="ot">&lt;-</span> m; m <span class="ot">&lt;-</span> m <span class="sc">+</span> (x[k] <span class="sc">-</span> m) <span class="sc">/</span> k; S <span class="ot">&lt;-</span> S <span class="sc">+</span> (x[k] <span class="sc">-</span> m_old) <span class="sc">*</span> (x[k] <span class="sc">-</span> m) }</span>
+<span id="cb35-5"><a href=""></a>  S <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb35-6"><a href=""></a>}</span>
+<span id="cb35-7"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fl">1e10</span></span>
+<span id="cb35-8"><a href=""></a><span class="fu">c</span>(<span class="at">one_pass =</span> <span class="fu">var1</span>(x), <span class="at">shifted =</span> <span class="fu">var_shifted</span>(x), <span class="at">welford =</span> <span class="fu">var_welford</span>(x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>one_pass  shifted  welford 
@@ -1544,8 +1508,8 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb39-2"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">exp</span>(x) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x)), <span class="at">stable =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb37-2"><a href=""></a><span class="fu">c</span>(<span class="at">naive =</span> <span class="fu">exp</span>(x) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x)), <span class="at">stable =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> naive stable 
@@ -1567,7 +1531,7 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2000</span> <span class="sc">/</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2001</span>, <span class="at">log_scale =</span> <span class="fu">exp</span>(<span class="dv">2000</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="dv">2001</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2000</span> <span class="sc">/</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2001</span>, <span class="at">log_scale =</span> <span class="fu">exp</span>(<span class="dv">2000</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">-</span> <span class="dv">2001</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   direct log_scale 
@@ -1622,8 +1586,8 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { m <span class="ot">&lt;-</span> <span class="fu">max</span>(l); m <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> m))) }</span>
-<span id="cb43-2"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))), <span class="at">lse =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a>log_sum_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { m <span class="ot">&lt;-</span> <span class="fu">max</span>(l); m <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> m))) }</span>
+<span id="cb41-2"><a href=""></a><span class="fu">c</span>(<span class="at">direct =</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))), <span class="at">lse =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  direct      lse 
@@ -1642,8 +1606,8 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a>log_diff_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(lx, ly) lx <span class="sc">+</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">exp</span>(ly <span class="sc">-</span> lx))   <span class="co"># requires lx &gt;= ly</span></span>
-<span id="cb45-2"><a href=""></a><span class="fu">log_diff_exp</span>(<span class="dv">2020</span>, <span class="dv">2000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a>log_diff_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(lx, ly) lx <span class="sc">+</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">exp</span>(ly <span class="sc">-</span> lx))   <span class="co"># requires lx &gt;= ly</span></span>
+<span id="cb43-2"><a href=""></a><span class="fu">log_diff_exp</span>(<span class="dv">2020</span>, <span class="dv">2000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2020</code></pre>
@@ -1656,8 +1620,8 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href=""></a><span class="fu">c</span>(<span class="at">mine =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)),</span>
-<span id="cb47-2"><a href=""></a>  <span class="at">matrixStats =</span> matrixStats<span class="sc">::</span><span class="fu">logSumExp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a><span class="fu">c</span>(<span class="at">mine =</span> <span class="fu">log_sum_exp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)),</span>
+<span id="cb45-2"><a href=""></a>  <span class="at">matrixStats =</span> matrixStats<span class="sc">::</span><span class="fu">logSumExp</span>(<span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">2001</span>, <span class="dv">2002</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>       mine matrixStats 
@@ -1737,9 +1701,9 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <section id="example-computing-1-phi10" class="slide level2">
 <h2>Example: Computing <span class="math inline">1-\Phi(10)</span></h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)),     <span class="co"># pnorm(10) rounds to 1, so log(0) = -Inf</span></span>
-<span id="cb49-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="dv">10</span>)),      <span class="co"># log1p cannot recover digits already lost</span></span>
-<span id="cb49-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)),     <span class="co"># pnorm(10) rounds to 1, so log(0) = -Inf</span></span>
+<span id="cb47-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="dv">10</span>)),      <span class="co"># log1p cannot recover digits already lost</span></span>
+<span id="cb47-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    naive     log1p    stable 
      -Inf      -Inf -53.23129 </code></pre>
@@ -1754,9 +1718,9 @@ The true answer, <span class="math inline">2</span>, lives entirely in the lost 
 <section id="example-computing-1-phi-10" class="slide level2 smaller">
 <h2>Example: Computing <span class="math inline">1-\Phi(-10)</span></h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),    <span class="co"># 1 - 7.6e-24 rounds to 1, so log gives 0</span></span>
-<span id="cb51-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),     <span class="co"># pnorm(-10) is accurate, so log1p is exact</span></span>
-<span id="cb51-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),    <span class="co"># 1 - 7.6e-24 rounds to 1, so log gives 0</span></span>
+<span id="cb49-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),     <span class="co"># pnorm(-10) is accurate, so log1p is exact</span></span>
+<span id="cb49-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        naive         log1p        stable 
  0.000000e+00 -7.619853e-24 -7.619853e-24 </code></pre>

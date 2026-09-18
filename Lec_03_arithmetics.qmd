@@ -268,41 +268,46 @@ For doubles the smallest positive value is $2^{-1074}\approx 4.9\times10^{-324}$
 
 
 
-## Roundoff and Cancellation Errors: General Principle {.smaller}
+## Roundoff and Cancellation Errors {.smaller}
 
-- Each operation has relative error up to about $\epsilon = 2^{-52}$; the concern is when these errors **accumulate** or are **amplified**.
-- **Large + small**: computing $A + a$ loses $a$, partly or wholly, once
-$$|a| < A\times2^{-52}$$
-— $a$ is smaller than the gap between consecutive representable numbers near $A$, so it does not fit in $A$'s mantissa.
-- **Large − large** (catastrophic cancellation): computing $A - B$ is unreliable once the true difference
-$$b = A - B, \qquad |b| < A\times2^{-52}$$
-— $b$ is smaller than $A$'s *own* rounding error, so $B$ is already indistinguishable from $A$ before the subtraction happens, and the result carries little or no correct information.
-- Doubles represent **every integer exactly** up to $2^{53}$; beyond that the gap exceeds 1, so some integers are skipped.
+- Each elementary operation ($+,-,\times,/$) carries a relative error of at most $u = 2^{-53}$. One is harmless; the concern is that many **accumulate**, or that an existing error is **amplified**.
+- **Large + small**: $A + a$ returns exactly $A$ once
+$$|a| < |A| \times 2^{-53},$$
+since $a$ falls below the gap between doubles near $A$. For larger $|a|/|A|$ only the tail of $a$ is lost — harmless once, but such losses build up over many additions.
+- **Large − large**: what matters is the **answer** $d = A - B$, not the size of $A$ and $B$. If
+$$|d| < |A| \times 2^{-53},$$
+the result is $0$: $A$ and $B$ are already the same double. More generally, $|d| \approx |A| \times 2^{-k}$ means the leading $k$ bits cancel, leaving only $53-k$ meaningful bits — the subtraction adds no error, but the error already in $A$ and $B$ is now $|A|/|d|$ times larger relative to the answer.
 
-## Roundoff and Cancellation Errors: Examples {.smaller}
+## Extreme Examples {.smaller}
+
+
+- **Machine epsilon.** $\epsilon = 2^{-52}$ is the gap between $1$ and the next double; anything smaller than half that gap disappears when added to $1$.
 
 ```{r}
 #| code-fold: false
 .Machine$double.eps      # 2^-52
-1 + 1e-16 == 1
-2^53 + 1 == 2^53          # gap is now 2: the +1 is lost
+1 + 1e-16 == 1           # 1e-16 < 2^-53, so the addition does nothing
 ```
 
-**$A - B = 1-\Phi(10)$**
-
-Take $A = 1$, $B = \Phi(10)$ (`pnorm(10)`). The true difference is
-$$b = A - B = 1-\Phi(10) \approx 7.62\times10^{-24},$$
-while $A$'s own rounding error is $A\times2^{-52}\approx2.22\times10^{-16}$. Since $b \ll A\times2^{-52}$, this is deep in **large − large** territory:
+- **Large + small at integer scale.** Past $2^{53}$ the spacing between doubles is $2$, so adding $1$ to $2^{53}$ cannot be represented and is lost.
 
 ```{r}
-A <- 1; B <- pnorm(10); true_b = pnorm(10, lower.tail = FALSE)
-c(B = B, `A - B` = A - B, "True b" = true_b)             # B already rounded to exactly 1
+#| code-fold: false
+2^53 + 1 == 2^53
 ```
 
-$B$ rounds to exactly $1$ in double precision *before* the subtraction — every digit of the true $b\approx7.62\times10^{-24}$ is gone, and `A - B` returns exactly `0`.
+- **Large − large: $1-\Phi(10)$.** The true answer is $d \approx 7.62\times10^{-24}$, far below $|A|\times2^{-53} \approx 1.11\times10^{-16}$. So `pnorm(10)` already rounds to exactly $1$ *before* the subtraction, and the difference returns $0$ — not one correct digit survives.
 
+```{r}
+#| code-fold: false
+A <- 1; B <- pnorm(10);c(B = B, `A - B` = A - B, true_d = pnorm(10, lower.tail = FALSE))
+```
 
-## Computing Sum: Avoiding Large + Small
+`pnorm(10, lower.tail = FALSE)` evaluates the tail directly and returns all 16 digits without evaluating $B$
+
+## Example: Computing Sum by Avoiding Large + Small
+
+### Illustration
 
 Compute $1.0 + 0.04 + 0.04$ in our 2-digit-mantissa toy system (exact value $1.08$).
 
@@ -319,49 +324,39 @@ Compute $1.0 + 0.04 + 0.04$ in our 2-digit-mantissa toy system (exact value $1.0
 <p class="cap">$0.04+0.04=0.08$ exactly, then $1.0+0.08\to1.1$ — one roundoff, not an accumulating one.</p>
 :::
 
-## Computing Sum: Why Order Matters
+### Computing Sum: Why Order Matters
 
-Summing $n$ terms in a loop `s <- s + x[i]`: once `s` is large, every small `x[i]` is partly or wholly rounded away, and the errors accumulate over $n$ additions.
+Summing $n$ terms in a loop `s <- s + x[i]`: once `s` is large, each small `x[i]` is partly or wholly rounded away, and these losses accumulate over $n$ additions. The remedies all work by keeping the operands of similar magnitude, or by recovering what was discarded.
 
-**Rules for accurate summation**
+- **Sort ascending.** Add the smallest terms first, so that a partial sum never dwarfs the next term. Cheap, but requires the whole vector in advance, and still degrades for very long sums.
+- **Pairwise summation.** Sum halves recursively. Error grows like $\log n$ rather than $n$, at no extra cost. This is what NumPy uses.
+- **Kahan compensated summation.** Carry the part rounded away at each step and add it back at the next:
+$$y \leftarrow x_i - c, \quad t \leftarrow s + y, \quad c \leftarrow (t - s) - y, \quad s \leftarrow t.$$
+  Here $c$ holds the discarded low-order bits: $(t-s)$ is the part of $y$ that *was* absorbed, so subtracting $y$ leaves what was not. Roughly four times the work, but the error no longer grows with $n$.
+- **Extended precision.** Accumulate in a wider type. R's `sum()` uses a `long double` accumulator — 64-bit mantissa on x86, though only 53-bit on Apple Silicon, where it therefore behaves like the naive loop.
 
-- Add numbers of **similar magnitude** together; add the smallest terms first (sort ascending).
-- **Pairwise summation**: sum halves recursively, so partial sums stay of similar size (used by R's `sum()`).
-- **Kahan compensated summation**: carry the rounded-away part to the next step.
-
-```{r}
-x <- c(1, rep(1e-16, 1e4))
-s <- 0; for (v in x) s <- s + v      # naive loop
-c(loop = s - 1, sorted = sum(sort(x)) - 1, exact = 1e-12)
-```
-
-## Kahan Compensated Summation
-
-Track the part rounded away at each step, and add it back at the next step:
+### Computing Sum: Demonstration {.smaller}
 
 ```{r}
+#| code-fold: false
 kahan_sum <- function(x) {
-  s <- 0; c <- 0                       # c holds the running roundoff error
-  for (v in x) { y <- v - c; t <- s + y; c <- (t - s) - y; s <- t }
+  s <- 0; comp <- 0
+  for (v in x) { y <- v - comp; t <- s + y; comp <- (t - s) - y; s <- t }
   s
 }
-c(kahan = kahan_sum(x) - 1, builtin = sum(x) - 1, exact = 1e-12)
+
+x <- c(1, rep(1e-16, 1e4))           # exact sum: 1 + 1e-12
+
+s <- 0; for (v in x) s <- s + v      # naive loop
+
+c(naive   = s - 1,
+  sorted  = sum(sort(x)) - 1,
+  kahan   = kahan_sum(x) - 1,
+  builtin = sum(x) - 1,
+  exact   = 1e-12)
 ```
 
-Kahan summation and R's `sum()` (pairwise + extended precision) both recover the answer to full precision, without needing to sort the data first.
-
-## Computing $e^x$: Avoiding Large − Large
-
-Taylor series:
-$$e^x \approx \sum_{k=0}^{K}\frac{x^k}{k!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$$
-
-For $x = -20$ the terms alternate in sign and are huge relative to the answer $e^{-20}\approx 2\times10^{-9}$:
-
-| $k$ | 0 | 1 | 2 | … | 20 | … |
-|:--|:--:|:--:|:--:|:--:|:--:|:--:|
-| $x^k/k!$ | $1$ | $-20$ | $200$ | … | $4.3\times10^{7}$ | … |
-
-Each term carries roundoff of relative size $\epsilon \approx 10^{-16}$, i.e. absolute size $\approx 4\times10^{-9}$ for the largest terms — **as large as the answer itself**. Subtracting nearly equal large numbers leaves only their errors: **catastrophic cancellation**.
+Each small term is below $2^{-53}$ relative to the running total, so the naive loop discards all $10^4$ of them and returns exactly $1$ — the entire tail is lost. Sorting, compensation, and the wider accumulator each recover the answer.
 
 ## Computing $e^x$: Fix by Reformulating
 
@@ -375,7 +370,7 @@ c(naive = taylor_exp(-20), reciprocal = 1 / taylor_exp(20), true = exp(-20))
 
 **General principle**: rearrange a formula so that quantities of similar magnitude and **the same sign** are combined; avoid computing a small result as the difference of two large numbers.
 
-## Computing Variance: Avoiding Large − Large {.smaller}
+## Example: Computing Variance by Avoiding Large − Large {.smaller}
 
 Two algebraically identical formulas for the sum of squared deviations:
 $$\underbrace{\sum_{i=1}^{n}(x_i - \bar{x})^2}_{\text{two-pass}}
