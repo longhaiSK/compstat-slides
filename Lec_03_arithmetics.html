@@ -1221,7 +1221,9 @@ exp
 </section>
 <section id="example-computing-sum-by-avoiding-large-small" class="slide level2">
 <h2>Example: Computing Sum by Avoiding Large + Small</h2>
-<h3 id="illustration">Illustration</h3>
+</section>
+<section id="illustration" class="slide level2 sub">
+<h2>Illustration</h2>
 <p>Compute <span class="math inline">1.0 + 0.04 + 0.04</span> in our 2-digit-mantissa toy system (exact value <span class="math inline">1.08</span>).</p>
 <p><strong>Left to right</strong>, <span class="math inline">(1.0 + 0.04) + 0.04</span>: each addition needs a third mantissa digit, so each rounds back to <span class="math inline">1.0</span> (the same loss as <span class="math inline">1.0+0.40\to1.0</span> shown earlier, just smaller). Both small terms are lost — result <span class="math inline">1.0</span>.</p>
 <p><strong>Small terms first</strong>, <span class="math inline">1.0 + (0.04 + 0.04)</span>:</p>
@@ -1264,7 +1266,9 @@ then 1.0 + 0.08 →
 <span class="math inline">0.04+0.04=0.08</span> exactly, then <span class="math inline">1.0+0.08\to1.1</span> — one roundoff, not an accumulating one.
 </p>
 </div>
-<h3 id="computing-sum-why-order-matters">Computing Sum: Why Order Matters</h3>
+</section>
+<section id="computing-sum-why-order-matters" class="slide level2 sub">
+<h2>Computing Sum: Why Order Matters</h2>
 <p>Summing <span class="math inline">n</span> terms in a loop <code>s &lt;- s + x[i]</code>: once <code>s</code> is large, each small <code>x[i]</code> is partly or wholly rounded away, and these losses accumulate over <span class="math inline">n</span> additions. The remedies all work by keeping the operands of similar magnitude, or by recovering what was discarded.</p>
 <ul>
 <li><strong>Sort ascending.</strong> Add the smallest terms first, so that a partial sum never dwarfs the next term. Cheap, but requires the whole vector in advance, and still degrades for very long sums.</li>
@@ -1272,7 +1276,9 @@ then 1.0 + 0.08 →
 <li><strong>Kahan compensated summation.</strong> Carry the part rounded away at each step and add it back at the next: <span class="math display">y \leftarrow x_i - c, \quad t \leftarrow s + y, \quad c \leftarrow (t - s) - y, \quad s \leftarrow t.</span> Here <span class="math inline">c</span> holds the discarded low-order bits: <span class="math inline">(t-s)</span> is the part of <span class="math inline">y</span> that <em>was</em> absorbed, so subtracting <span class="math inline">y</span> leaves what was not. Roughly four times the work, but the error no longer grows with <span class="math inline">n</span>.</li>
 <li><strong>Extended precision.</strong> Accumulate in a wider type. R’s <code>sum()</code> uses a <code>long double</code> accumulator — 64-bit mantissa on x86, though only 53-bit on Apple Silicon, where it therefore behaves like the naive loop.</li>
 </ul>
-<h3 class="smaller" id="computing-sum-demonstration">Computing Sum: Demonstration</h3>
+</section>
+<section id="computing-sum-demonstration" class="slide level2 smaller sub">
+<h2>Computing Sum: Demonstration</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a>kahan_sum <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
 <span id="cb27-2"><a href=""></a>  s <span class="ot">&lt;-</span> <span class="dv">0</span>; comp <span class="ot">&lt;-</span> <span class="dv">0</span></span>

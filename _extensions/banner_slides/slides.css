@@ -1,7 +1,7 @@
 /* 1. Global Variables */
 :root {
   --frame-outline-color: #083ddb;   /* ## slides: frame + banner */
-  --sub-frame-color: #0b8a5c;       /* ### slides: frame only, no banner */
+  --sub-frame-color: #0b8a5c;       /* ## {.sub} slides: frame only, no banner */
   --link-color: #3c53ea;
   --font-size-root: 40px;
 }
@@ -103,14 +103,19 @@
 /* 5. Beamer-Style Frames
    Framed slides: every slide except the deck title slide, level-1 (#)
    section breaks, and the wrapper <section> that holds a vertical stack.
-   ## slides (level2, including empty section breaks) get the blue frame
-   with a banner; ### slides (level3) get a green frame and a plain heading. */
+   Note: Quarto's reveal writer does NOT turn a heading one level below
+   slide-level (###) into its own nested <section> the way raw Pandoc does
+   — it stays a plain in-slide <h3>. To get a genuine, separately-framed
+   "third level" slide, write it as a normal ## slide tagged with an extra
+   .sub class: `## Heading {.sub}`. Plain ## slides (level2, including
+   empty section breaks) get the blue frame with a banner; ## {.sub}
+   slides get a green frame with a plain underlined heading, no banner. */
 
 /* Fix framed slides to the full slide height so the frame does not vary */
 .reveal .slides section:not(#title-slide):not(.quarto-title-block):not(.level1):not(:has(section)) {
   height: 100%;
   box-sizing: border-box;
-}   
+}
 
 /* 5a. Frame (painted OUTSIDE via ::before) — default colour for ## slides */
 .reveal .slides section:not(#title-slide):not(.quarto-title-block):not(.level1):not(:has(section))::before {
@@ -127,14 +132,14 @@
   pointer-events: none;
 }
 
-/* 5b. ### slides: second frame colour */
-.reveal .slides section.level3::before {
+/* 5b. ## {.sub} slides: second frame colour */
+.reveal .slides section.sub::before {
   border-color: var(--sub-frame-color) !important;
   background-color: rgba(11, 138, 92, 0.05) !important;
 }
 
-/* 5c. Banner title box on ## slides */
-.reveal .slides section.level2:not(#title-slide):not(.quarto-title-block) > h2 {
+/* 5c. Banner title box on plain ## slides (not .sub) */
+.reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):not(.sub) > h2 {
   background-color: var(--frame-outline-color) !important;
   color: #ffffff !important;
   margin: -30px -30px 30px -30px !important;
@@ -149,7 +154,7 @@
 
 /* 5c'. Empty ## slides (section breaks): frame kept, banner moved to the
    vertical middle as a full-width band with centred text */
-.reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):has(> h2:only-child) > h2 {
+.reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):not(.sub):has(> h2:only-child) > h2 {
   position: absolute !important;
   top: 50% !important;
   left: -30px !important;
@@ -162,7 +167,7 @@
 }
 
 /* Toggle-off state for the same slides */
-body.hide-debug .reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):has(> h2:only-child) > h2 {
+body.hide-debug .reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):not(.sub):has(> h2:only-child) > h2 {
   left: 0 !important;
   width: 100% !important;
   background-color: transparent !important;
@@ -170,14 +175,18 @@ body.hide-debug .reveal .slides section.level2:not(#title-slide):not(.quarto-tit
   padding: 0 !important;
 }
 
-/* 5d. ### slides: no banner; heading in the frame colour with an underline */
-.reveal .slides section.level3 > h3 {
+/* 5d. ## {.sub} slides: no banner; heading in the frame colour with an underline */
+.reveal .slides section.sub > h2 {
+  background: none !important;
   color: var(--sub-frame-color) !important;
   font-size: var(--r-heading2-size) !important;
   text-align: left !important;
+  margin: 0 0 0.6em 0 !important;
+  padding: 0 0 0.1em 0 !important;
+  width: auto !important;
+  border-radius: 0 !important;
   border-bottom: 3px solid var(--sub-frame-color);
-  padding-bottom: 0.1em;
-  margin-bottom: 0.6em;
+  position: static;
 }
 
 /* 5e. Level-1 (#) section breaks stay centered and unframed */
@@ -189,13 +198,13 @@ body.hide-debug .reveal .slides section.level2:not(#title-slide):not(.quarto-tit
 body.hide-debug .reveal .slides section:not(#title-slide):not(.quarto-title-block):not(.level1):not(:has(section))::before {
   display: none !important;
 }
-body.hide-debug .reveal .slides section.level2:not(#title-slide):not(.quarto-title-block) > h2 {
+body.hide-debug .reveal .slides section.level2:not(#title-slide):not(.quarto-title-block):not(.sub) > h2 {
   background-color: transparent !important;
   color: var(--frame-outline-color) !important;
   margin: 0 0 30px 0 !important;
   padding: 0 !important;
   width: 100% !important;
 }
-body.hide-debug .reveal .slides section.level3 > h3 {
+body.hide-debug .reveal .slides section.sub > h2 {
   border-bottom: none;
 }

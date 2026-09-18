@@ -307,7 +307,7 @@ A <- 1; B <- pnorm(10);c(B = B, `A - B` = A - B, true_d = pnorm(10, lower.tail =
 
 ## Example: Computing Sum by Avoiding Large + Small
 
-### Illustration
+## Illustration {.sub}
 
 Compute $1.0 + 0.04 + 0.04$ in our 2-digit-mantissa toy system (exact value $1.08$).
 
@@ -324,7 +324,7 @@ Compute $1.0 + 0.04 + 0.04$ in our 2-digit-mantissa toy system (exact value $1.0
 <p class="cap">$0.04+0.04=0.08$ exactly, then $1.0+0.08\to1.1$ — one roundoff, not an accumulating one.</p>
 :::
 
-### Computing Sum: Why Order Matters
+## Computing Sum: Why Order Matters {.sub}
 
 Summing $n$ terms in a loop `s <- s + x[i]`: once `s` is large, each small `x[i]` is partly or wholly rounded away, and these losses accumulate over $n$ additions. The remedies all work by keeping the operands of similar magnitude, or by recovering what was discarded.
 
@@ -335,7 +335,7 @@ $$y \leftarrow x_i - c, \quad t \leftarrow s + y, \quad c \leftarrow (t - s) - y
   Here $c$ holds the discarded low-order bits: $(t-s)$ is the part of $y$ that *was* absorbed, so subtracting $y$ leaves what was not. Roughly four times the work, but the error no longer grows with $n$.
 - **Extended precision.** Accumulate in a wider type. R's `sum()` uses a `long double` accumulator — 64-bit mantissa on x86, though only 53-bit on Apple Silicon, where it therefore behaves like the naive loop.
 
-### Computing Sum: Demonstration {.smaller}
+## Computing Sum: Demonstration {.smaller .sub}
 
 ```{r}
 #| code-fold: false
