@@ -540,8 +540,7 @@ log_diff_exp(2020, 2000)
 log_diff_exp <- function(lx, ly) lx + log1p(-exp(ly - lx))   # requires lx >= ly
 log_diff_exp(2020, 2019)
 ```
-
-## Software implementation: **matrixStats** and **Rmpfr** {.smaller}
+## Software implementation: logSumExp in **matrixStats**  {.smaller}
 
 The log-sum-exp trick is already implemented in **matrixStats** (used by hundreds of CRAN/Bioconductor packages):
 
@@ -551,19 +550,33 @@ c(mine = log_sum_exp(c(2000, 2001, 2002)),
   matrixStats = matrixStats::logSumExp(c(2000, 2001, 2002)))
 ```
 
-The **difference** $\log(e^{a}-e^{b}) = a + \log(1 - e^{-u})$, $u = a-b > 0$, is not in matrixStats but is in **Rmpfr** as `log1mexp`. Both failure modes appear, so it switches at $u = \log 2$:
+## Software implementation: `log1mexp` in **copula** {.smaller}
 
-- $u$ **large**: $e^{-u}$ tiny → **large − small** → `log1p(-exp(-u))`.
-- $u$ **small**: $e^{-u}\approx 1$ → **large − large** → `log(-expm1(-u))`.
+The **difference** $\log(e^{a}-e^{b}) = a + \log(1-e^{-u})$, $u = a-b > 0$. The kernel $\log(1-e^{-u})$ can be written two algebraically identical ways, which fail in opposite regimes:
 
 ```{r}
-log1mexp <- function(u) ifelse(u <= log(2), log(-expm1(-u)), log1p(-exp(-u)))
+f_log1p <- function(u) log1p(-exp(-u))     # log(1 - exp(-u))
+f_expm1 <- function(u) log(-expm1(-u))     # log(1 - exp(-u))
+
+rbind(`u = 1e-20` = c(log1p = f_log1p(1e-20), expm1 = f_expm1(1e-20)),
+      `u = 50`    = c(log1p = f_log1p(50),    expm1 = f_expm1(50)))
+```
+
+- $u$ **small**: $e^{-u}\approx 1$, so $1-e^{-u}$ is **large − large** — `exp(-u)` has already rounded to $1$ and `log1p` receives $0$. Only `expm1` survives.
+- $u$ **large**: $e^{-u}$ is tiny, so $\log(1-e^{-u})$ is **large + small** — `expm1(-u)` rounds to $-1$ and `log` returns $0$. Only `log1p` survives.
+
+**copula** supplies the branched version as `log1mexp(a, cutoff = log(2))`, switching where $e^{-u} = 1/2$ — safely far from both traps:
+
+```{r}
+#| message: false
+library(copula)
 log_diff_exp <- function(a, b) a + log1mexp(a - b)
 
+c(small = log1mexp(1e-20), large = log1mexp(50))
 log_diff_exp(2000, 1999)                 # log(exp(2000) - exp(1999))
 ```
 
-Prefer the package functions in real code; write your own only to understand *why* they work.
+Prefer the package function in real code; write your own only to understand *why* it works.
 
 # Final Examples
 

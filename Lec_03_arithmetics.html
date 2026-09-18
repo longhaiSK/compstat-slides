@@ -1616,8 +1616,8 @@ The true answer, <span class="math inline">2</span>, lies entirely in the lost d
 </div>
 </div>
 </section>
-<section id="software-implementation-matrixstats-and-rmpfr" class="slide level2 smaller">
-<h2>Software implementation: <strong>matrixStats</strong> and <strong>Rmpfr</strong></h2>
+<section id="software-implementation-logsumexp-in-matrixstats" class="slide level2 smaller">
+<h2>Software implementation: logSumExp in <strong>matrixStats</strong></h2>
 <p>The log-sum-exp trick is already implemented in <strong>matrixStats</strong> (used by hundreds of CRAN/Bioconductor packages):</p>
 <div class="cell">
 <details open="" class="code-fold">
@@ -1630,24 +1630,51 @@ The true answer, <span class="math inline">2</span>, lies entirely in the lost d
    2002.408    2002.408 </code></pre>
 </div>
 </div>
-<p>The <strong>difference</strong> <span class="math inline">\log(e^{a}-e^{b}) = a + \log(1 - e^{-u})</span>, <span class="math inline">u = a-b &gt; 0</span>, is not in matrixStats but is in <strong>Rmpfr</strong> as <code>log1mexp</code>. Both failure modes appear, so it switches at <span class="math inline">u = \log 2</span>:</p>
-<ul>
-<li><span class="math inline">u</span> <strong>large</strong>: <span class="math inline">e^{-u}</span> tiny → <strong>large − small</strong> → <code>log1p(-exp(-u))</code>.</li>
-<li><span class="math inline">u</span> <strong>small</strong>: <span class="math inline">e^{-u}\approx 1</span> → <strong>large − large</strong> → <code>log(-expm1(-u))</code>.</li>
-</ul>
+</section>
+<section id="software-implementation-log1mexp-in-copula" class="slide level2 smaller">
+<h2>Software implementation: <code>log1mexp</code> in <strong>copula</strong></h2>
+<p>The <strong>difference</strong> <span class="math inline">\log(e^{a}-e^{b}) = a + \log(1-e^{-u})</span>, <span class="math inline">u = a-b &gt; 0</span>. The kernel <span class="math inline">\log(1-e^{-u})</span> can be written two algebraically identical ways, which fail in opposite regimes:</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a>log1mexp <span class="ot">&lt;-</span> <span class="cf">function</span>(u) <span class="fu">ifelse</span>(u <span class="sc">&lt;=</span> <span class="fu">log</span>(<span class="dv">2</span>), <span class="fu">log</span>(<span class="sc">-</span><span class="fu">expm1</span>(<span class="sc">-</span>u)), <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">exp</span>(<span class="sc">-</span>u)))</span>
-<span id="cb51-2"><a href=""></a>log_diff_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b) a <span class="sc">+</span> <span class="fu">log1mexp</span>(a <span class="sc">-</span> b)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a>f_log1p <span class="ot">&lt;-</span> <span class="cf">function</span>(u) <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">exp</span>(<span class="sc">-</span>u))     <span class="co"># log(1 - exp(-u))</span></span>
+<span id="cb51-2"><a href=""></a>f_expm1 <span class="ot">&lt;-</span> <span class="cf">function</span>(u) <span class="fu">log</span>(<span class="sc">-</span><span class="fu">expm1</span>(<span class="sc">-</span>u))     <span class="co"># log(1 - exp(-u))</span></span>
 <span id="cb51-3"><a href=""></a></span>
-<span id="cb51-4"><a href=""></a><span class="fu">log_diff_exp</span>(<span class="dv">2000</span>, <span class="dv">1999</span>)                 <span class="co"># log(exp(2000) - exp(1999))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb51-4"><a href=""></a><span class="fu">rbind</span>(<span class="st">`</span><span class="at">u = 1e-20</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="at">log1p =</span> <span class="fu">f_log1p</span>(<span class="fl">1e-20</span>), <span class="at">expm1 =</span> <span class="fu">f_expm1</span>(<span class="fl">1e-20</span>)),</span>
+<span id="cb51-5"><a href=""></a>      <span class="st">`</span><span class="at">u = 50</span><span class="st">`</span>    <span class="ot">=</span> <span class="fu">c</span>(<span class="at">log1p =</span> <span class="fu">f_log1p</span>(<span class="dv">50</span>),    <span class="at">expm1 =</span> <span class="fu">f_expm1</span>(<span class="dv">50</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 log1p    expm1
+u = 1e-20         -Inf -46.0517
+u = 50    -1.92875e-22   0.0000</code></pre>
+</div>
+</div>
+<ul>
+<li><span class="math inline">u</span> <strong>small</strong>: <span class="math inline">e^{-u}\approx 1</span>, so <span class="math inline">1-e^{-u}</span> is <strong>large − large</strong> — <code>exp(-u)</code> has already rounded to <span class="math inline">1</span> and <code>log1p</code> receives <span class="math inline">0</span>. Only <code>expm1</code> survives.</li>
+<li><span class="math inline">u</span> <strong>large</strong>: <span class="math inline">e^{-u}</span> is tiny, so <span class="math inline">\log(1-e^{-u})</span> is <strong>large + small</strong> — <code>expm1(-u)</code> rounds to <span class="math inline">-1</span> and <code>log</code> returns <span class="math inline">0</span>. Only <code>log1p</code> survives.</li>
+</ul>
+<p><strong>copula</strong> supplies the branched version as <code>log1mexp(a, cutoff = log(2))</code>, switching where <span class="math inline">e^{-u} = 1/2</span> — safely far from both traps:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href=""></a><span class="fu">library</span>(copula)</span>
+<span id="cb53-2"><a href=""></a>log_diff_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b) a <span class="sc">+</span> <span class="fu">log1mexp</span>(a <span class="sc">-</span> b)</span>
+<span id="cb53-3"><a href=""></a></span>
+<span id="cb53-4"><a href=""></a><span class="fu">c</span>(<span class="at">small =</span> <span class="fu">log1mexp</span>(<span class="fl">1e-20</span>), <span class="at">large =</span> <span class="fu">log1mexp</span>(<span class="dv">50</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       small        large 
+-4.60517e+01 -1.92875e-22 </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href=""></a><span class="fu">log_diff_exp</span>(<span class="dv">2000</span>, <span class="dv">1999</span>)                 <span class="co"># log(exp(2000) - exp(1999))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1999.541</code></pre>
 </div>
 </div>
-<p>Prefer the package functions in real code; write your own only to understand <em>why</em> they work.</p>
+<p>Prefer the package function in real code; write your own only to understand <em>why</em> it works.</p>
 </section></section>
 <section>
 <section id="final-examples" class="title-slide slide level1 center" data-number="4">
@@ -1721,9 +1748,9 @@ The true answer, <span class="math inline">2</span>, lies entirely in the lost d
 <section id="example-computing-1-phi10" class="slide level2">
 <h2>Example: Computing <span class="math inline">1-\Phi(10)</span></h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)),     <span class="co"># pnorm(10) rounds to 1, so log(0) = -Inf</span></span>
-<span id="cb53-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="dv">10</span>)),      <span class="co"># log1p cannot recover digits already lost</span></span>
-<span id="cb53-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="dv">10</span>)),     <span class="co"># pnorm(10) rounds to 1, so log(0) = -Inf</span></span>
+<span id="cb57-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="dv">10</span>)),      <span class="co"># log1p cannot recover digits already lost</span></span>
+<span id="cb57-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    naive     log1p    stable 
      -Inf      -Inf -53.23129 </code></pre>
@@ -1738,9 +1765,9 @@ The true answer, <span class="math inline">2</span>, lies entirely in the lost d
 <section id="example-computing-1-phi-10" class="slide level2 smaller">
 <h2>Example: Computing <span class="math inline">1-\Phi(-10)</span></h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),    <span class="co"># 1 - 7.6e-24 rounds to 1, so log gives 0</span></span>
-<span id="cb55-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),     <span class="co"># pnorm(-10) is accurate, so log1p is exact</span></span>
-<span id="cb55-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href=""></a><span class="fu">c</span>(<span class="at">naive  =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),    <span class="co"># 1 - 7.6e-24 rounds to 1, so log gives 0</span></span>
+<span id="cb59-2"><a href=""></a>  <span class="at">log1p  =</span> <span class="fu">log1p</span>(<span class="sc">-</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>)),     <span class="co"># pnorm(-10) is accurate, so log1p is exact</span></span>
+<span id="cb59-3"><a href=""></a>  <span class="at">stable =</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>, <span class="at">log.p =</span> <span class="cn">TRUE</span>))  <span class="co"># direct upper tail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        naive         log1p        stable 
  0.000000e+00 -7.619853e-24 -7.619853e-24 </code></pre>
