@@ -268,7 +268,7 @@ For doubles the smallest positive value is $2^{-1074}\approx 4.9\times10^{-324}$
 
 
 
-## Roundoff Error: General Principle {.smaller}
+## Roundoff and Cancellation Errors: General Principle {.smaller}
 
 - The stored result of $a+b$ (or $a\times b$, …) is the **nearest representable number** to the exact result — as in the addition examples above.
 - Each operation has relative error up to about $\epsilon$; the concern is when these errors **accumulate** or are **amplified**.
