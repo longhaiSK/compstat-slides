@@ -663,9 +663,9 @@ The third column is the whole story: the subtraction has been destroyed before `
 
 
 
-# Final Examples
+# A Final Example
 
-## Examples of Stable R Functions {.smaller}
+## A List of Stable R Functions {.smaller}
 
 Software provides functions written specifically to avoid rounding error, underflow, and overflow.
 
@@ -709,6 +709,7 @@ Here $\Phi(-10) \approx 7.6 \times 10^{-24}$ and the target is $\log\{1 - \Phi(-
 - **`stable`.** Also correct, and preferable in general, but here it offers no advantage over `log1p`.
 
 The contrast with the $1 - \Phi(10)$ example is the location of the loss. There the damage occurred inside `pnorm(10)` before `log1p` was reached, so no reformulation of the outer expression could help. Here `pnorm(-10)` is exact and only the outer subtraction is unstable, which is precisely the situation `log1p` is designed for.
+
 
 ## Summary
 
