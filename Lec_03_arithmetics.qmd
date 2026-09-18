@@ -270,17 +270,36 @@ For doubles the smallest positive value is $2^{-1074}\approx 4.9\times10^{-324}$
 
 ## Roundoff and Cancellation Errors: General Principle {.smaller}
 
-- The stored result of $a+b$ (or $a\times b$, …) is the **nearest representable number** to the exact result — as in the addition examples above.
-- Each operation has relative error up to about $\epsilon$; the concern is when these errors **accumulate** or are **amplified**.
-- Two patterns amplify roundoff error: adding a **large + small** number, and subtracting **large − large** nearly equal numbers (**catastrophic cancellation**).
+- Each operation has relative error up to about $\epsilon = 2^{-52}$; the concern is when these errors **accumulate** or are **amplified**.
+- **Large + small**: computing $A + a$ loses $a$, partly or wholly, once
+$$|a| < A\times2^{-52}$$
+— $a$ is smaller than the gap between consecutive representable numbers near $A$, so it does not fit in $A$'s mantissa.
+- **Large − large** (catastrophic cancellation): computing $A - B$ is unreliable once the true difference
+$$b = A - B, \qquad |b| < A\times2^{-52}$$
+— $b$ is smaller than $A$'s *own* rounding error, so $B$ is already indistinguishable from $A$ before the subtraction happens, and the result carries little or no correct information.
 - Doubles represent **every integer exactly** up to $2^{53}$; beyond that the gap exceeds 1, so some integers are skipped.
 
+## Roundoff and Cancellation Errors: Examples {.smaller}
+
 ```{r}
-#| code-fold: true
+#| code-fold: false
 .Machine$double.eps      # 2^-52
 1 + 1e-16 == 1
 2^53 + 1 == 2^53          # gap is now 2: the +1 is lost
 ```
+
+**$A - B = 1-\Phi(10)$**
+
+Take $A = 1$, $B = \Phi(10)$ (`pnorm(10)`). The true difference is
+$$b = A - B = 1-\Phi(10) \approx 7.62\times10^{-24},$$
+while $A$'s own rounding error is $A\times2^{-52}\approx2.22\times10^{-16}$. Since $b \ll A\times2^{-52}$, this is deep in **large − large** territory:
+
+```{r}
+A <- 1; B <- pnorm(10); true_b = pnorm(10, lower.tail = FALSE)
+c(B = B, `A - B` = A - B, "True b" = true_b)             # B already rounded to exactly 1
+```
+
+$B$ rounds to exactly $1$ in double precision *before* the subtraction — every digit of the true $b\approx7.62\times10^{-24}$ is gone, and `A - B` returns exactly `0`.
 
 
 ## Computing Sum: Avoiding Large + Small
