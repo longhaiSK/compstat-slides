@@ -324,16 +324,16 @@ Compute $1.0 + 0.04 + 0.04$ in our 2-digit-mantissa toy system (exact value $1.0
 <p class="cap">$0.04+0.04=0.08$ exactly, then $1.0+0.08\to1.1$ — one roundoff, not an accumulating one.</p>
 :::
 
-## Computing Sum: Why Order Matters {.sub}
+## Strategies for Computing Sum {.sub}
 
-Summing $n$ terms in a loop `s <- s + x[i]`: once `s` is large, each small `x[i]` is partly or wholly rounded away, and these losses accumulate over $n$ additions. The remedies all work by keeping the operands of similar magnitude, or by recovering what was discarded.
+
 
 - **Sort ascending.** Add the smallest terms first, so that a partial sum never dwarfs the next term. Cheap, but requires the whole vector in advance, and still degrades for very long sums.
 - **Pairwise summation.** Sum halves recursively. Error grows like $\log n$ rather than $n$, at no extra cost. This is what NumPy uses.
 - **Kahan compensated summation.** Carry the part rounded away at each step and add it back at the next:
 $$y \leftarrow x_i - c, \quad t \leftarrow s + y, \quad c \leftarrow (t - s) - y, \quad s \leftarrow t.$$
   Here $c$ holds the discarded low-order bits: $(t-s)$ is the part of $y$ that *was* absorbed, so subtracting $y$ leaves what was not. Roughly four times the work, but the error no longer grows with $n$.
-- **Extended precision.** Accumulate in a wider type. R's `sum()` uses a `long double` accumulator — 64-bit mantissa on x86, though only 53-bit on Apple Silicon, where it therefore behaves like the naive loop.
+- **Extended precision.** Accumulate in a wider type. R's `sum()` uses a `long double` accumulator — 64-bit mantissa on x86, though only 53-bit on **Apple Silicon**, where it therefore behaves like the naive loop.
 
 ## Computing Sum: Demonstration {.smaller .sub}
 
@@ -358,18 +358,6 @@ c(naive   = s - 1,
 
 Each small term is below $2^{-53}$ relative to the running total, so the naive loop discards all $10^4$ of them and returns exactly $1$ — the entire tail is lost. Sorting, compensation, and the wider accumulator each recover the answer.
 
-## Computing $e^x$: Fix by Reformulating
-
-For $x>0$ all terms are positive, so no cancellation occurs. Therefore compute
-$$e^{-x} = \frac{1}{e^{x}}, \qquad x > 0 .$$
-
-```{r}
-taylor_exp <- function(x, K = 100) sum(x^(0:K) / factorial(0:K))
-c(naive = taylor_exp(-20), reciprocal = 1 / taylor_exp(20), true = exp(-20))
-```
-
-**General principle**: rearrange a formula so that quantities of similar magnitude and **the same sign** are combined; avoid computing a small result as the difference of two large numbers.
-
 ## Example: Computing Variance by Avoiding Large − Large {.smaller}
 
 Two algebraically identical formulas for the sum of squared deviations:
@@ -380,7 +368,7 @@ $$\underbrace{\sum_{i=1}^{n}(x_i - \bar{x})^2}_{\text{two-pass}}
 - The one-pass formula needs only $\sum x_i$ and $\sum x_i^2$, computed in a single sweep of the data.
 - When the $x_i$ are large but close together, $\sum x_i^2$ and $(\sum x_i)^2/n$ are both huge and nearly equal: **large − large**.
 
-## Computing Variance: Cancellation Illustrated
+## Illustration {.sub}
 
 $x = (1, 2, 3)$: deviations $(-1, 0, 1)$, so $\sum(x_i-\bar x)^2 = 2$.
 
@@ -392,10 +380,10 @@ With 16 significant digits, $3\times10^{16}$ is stored with a gap of about $4$ b
 
 ::: {.pv}
 <table>
-<tr><th colspan="16">16 mantissa digits</th><th>lost</th></tr>
-<tr><td class="m">3</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">1</td><td class="m">2</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">1</td><td class="x">4</td><td class="p">×10^16</td></tr>
+<tr><th colspan="9">16 digits kept</th><th>lost</th></tr>
+<tr><td class="m">3</td><td class="p">.</td><td class="m">0</td><td class="m">0</td><td class="p">…</td><td class="m">0</td><td class="m">0</td><td class="m">1</td><td class="m">2</td><td class="x">4</td><td class="p">×10^16</td></tr>
 </table>
-<p class="cap">The true answer, $2$, lives entirely in the lost digits.</p>
+<p class="cap">The true answer, $2$, lies entirely in the lost digit.</p>
 :::
 
 ```{r}
@@ -403,7 +391,7 @@ x <- c(1, 2, 3) + 1e8
 c(one_pass = sum(x^2) - sum(x)^2 / 3, two_pass = sum((x - mean(x))^2))
 ```
 
-## Computing Variance: Gradual Failure
+## Computing Variance: Gradual Failure {.sub}
 
 The one-pass error grows like $\epsilon M^2 n$, so it worsens continuously as the shift $M$ grows — eventually giving a **negative** "variance", which is impossible:
 
@@ -413,7 +401,7 @@ M <- 10^(0:10)
 t(sapply(M, function(m) { x <- c(1, 2, 3) + m; c(M = m, one_pass = var1(x)) }))
 ```
 
-## Computing Variance: Fixes
+## Computing Variance: Fixes {.sub}
 
 - **Two-pass**: compute $\bar x$ first, then $\sum (x_i - \bar x)^2$. Deviations are small and of similar size, so no cancellation. (`var()` does this.)
 - **Shifted one-pass**: subtract any convenient constant $c \approx \bar x$ (e.g. $c = x_1$) before applying the one-pass formula:
@@ -430,6 +418,20 @@ var_welford <- function(x) {
 x <- c(1, 2, 3) + 1e10
 c(one_pass = var1(x), shifted = var_shifted(x), welford = var_welford(x))
 ```
+
+
+## Computing $e^x$: Fix by Reformulating
+
+For $x>0$ all terms are positive, so no cancellation occurs. Therefore compute
+$$e^{-x} = \frac{1}{e^{x}}, \qquad x > 0 .$$
+
+```{r}
+taylor_exp <- function(x, K = 100) sum(x^(0:K) / factorial(0:K))
+c(naive = taylor_exp(-20), reciprocal = 1 / taylor_exp(20), true = exp(-20))
+```
+
+**General principle**: rearrange a formula so that quantities of similar magnitude and **the same sign** are combined; avoid computing a small result as the difference of two large numbers.
+
 
 # Methods for Mitigating Overflow and Underflow Errors
 
@@ -455,9 +457,7 @@ $$\sigma(x) = \frac{e^{x}}{1+e^{x}} = \frac{1}{1+e^{-x}}$$
 | $+1000$ | $e^{x}=\infty$, $\infty/\infty = $ `NaN` ✗ | $e^{-x}=0$, $1/1 = 1$ ✓ |
 | $-1000$ | $e^{x}=0$, $0/1 = 0$ ✓ | $e^{-x}=\infty$, $1/\infty = 0$ ✓ |
 
-The second form never divides $\infty$ by $\infty$. Equivalently, pick the form where the exponential has a **non-positive** argument:
-$$\sigma(x) = \begin{cases} 1/(1+e^{-x}) & x \ge 0\\ e^{x}/(1+e^{x}) & x < 0\end{cases}$$
-
+The second form never divides $\infty$ by $\infty$. 
 ```{r}
 x <- 1000
 c(naive = exp(x) / (1 + exp(x)), stable = 1 / (1 + exp(-x)))
@@ -494,9 +494,15 @@ but the $e^{\ell_i}$ may overflow or underflow. Let $m = \max_i \ell_i$ and fact
 $$\log\left(\sum_{i=1}^{n} e^{\ell_i}\right)
 = \log\left(e^{m}\sum_{i=1}^{n} e^{\ell_i - m}\right)
 = m + \log\left(\sum_{i=1}^{n} e^{\ell_i - m}\right)$$
+**One dominant term**: the sum becomes $1 + (\text{tiny})$, and use `log1p`:
+$$\log(e^{a} + e^{b}) = m + \operatorname{log1p}\!\left(e^{-|a-b|}\right), \qquad m = \max(a,b).$$
 
-- Every $\ell_i - m \le 0$, so $e^{\ell_i - m} \in (0, 1]$: **no overflow**.
-- The largest term is $e^{0} = 1$, so the sum is at least 1: **no underflow** of the total.
+```{r}
+#| code-fold: true
+c(naive = log(exp(0) + exp(-50)),
+  log1p = log1p(exp(-50)),
+  exact = 1.93e-22)
+```
 
 ## Log-Sum-Exp: Illustration
 
@@ -530,9 +536,14 @@ log_diff_exp <- function(lx, ly) lx + log1p(-exp(ly - lx))   # requires lx >= ly
 log_diff_exp(2020, 2000)
 ```
 
-## No Need to Reinvent: **matrixStats** {.smaller}
+```{r}
+log_diff_exp <- function(lx, ly) lx + log1p(-exp(ly - lx))   # requires lx >= ly
+log_diff_exp(2020, 2019)
+```
 
-The log-sum-exp trick is already implemented, tested, and vectorized in the widely-used CRAN package **matrixStats** (a foundational dependency of hundreds of CRAN/Bioconductor packages):
+## Software implementation: **matrixStats** and **Rmpfr** {.smaller}
+
+The log-sum-exp trick is already implemented in **matrixStats** (used by hundreds of CRAN/Bioconductor packages):
 
 ```{r}
 #| message: false
@@ -540,12 +551,21 @@ c(mine = log_sum_exp(c(2000, 2001, 2002)),
   matrixStats = matrixStats::logSumExp(c(2000, 2001, 2002)))
 ```
 
-`matrixStats::logSumExp(lx)` implements exactly the max-shift identity above — prefer the package function in real code; write your own only to understand *why* it works.
+The **difference** $\log(e^{a}-e^{b}) = a + \log(1 - e^{-u})$, $u = a-b > 0$, is not in matrixStats but is in **Rmpfr** as `log1mexp`. Both failure modes appear, so it switches at $u = \log 2$:
 
+- $u$ **large**: $e^{-u}$ tiny → **large − small** → `log1p(-exp(-u))`.
+- $u$ **small**: $e^{-u}\approx 1$ → **large − large** → `log(-expm1(-u))`.
 
-## Examples of Stable R Functions {.smaller}
+```{r}
+log1mexp <- function(u) ifelse(u <= log(2), log(-expm1(-u)), log1p(-exp(-u)))
+log_diff_exp <- function(a, b) a + log1mexp(a - b)
 
-Software provides functions written specifically to avoid rounding error, underflow, and overflow.
+log_diff_exp(2000, 1999)                 # log(exp(2000) - exp(1999))
+```
+
+Prefer the package functions in real code; write your own only to understand *why* they work.
+
+# Final Examples
 
 ## Examples of Stable R Functions {.smaller}
 
@@ -594,9 +614,8 @@ The contrast with the $1 - \Phi(10)$ example is the location of the loss. There 
 
 ## Summary
 
-- Integers occupy a fixed number of bits; exceeding $2^{31}-1$ gives `NA` in R (not silent wraparound as in C).
-- Doubles store sign + 52-bit mantissa (~16 decimal digits) + 11-bit exponent ($10^{-308}$ to $10^{308}$); the relative spacing everywhere is $\epsilon = 2^{-52}$, and integers above $2^{53}$ are not all representable.
+- Integers occupy a fixed number of bits; exceeding $2^{31}-1$ gives `NA` with a warning in R (not silent wraparound as in C).
+- Doubles store sign + 52-bit stored mantissa (53 effective, ~16 decimal digits) + 11-bit exponent, covering roughly $10^{-308}$ to $10^{308}$. The relative spacing varies between $2^{-53}$ and $2^{-52}$ within each binade, and integers above $2^{53}$ are not all representable.
 - **Overflow** → `Inf`; **underflow** → `0` (silent, and thus more dangerous).
-- Roundoff is amplified by **large + small** (fix: add small terms first, pairwise/Kahan summation) and **large − large** (fix: reformulate to combine same-sign, similar-magnitude quantities — $e^{-x}=1/e^x$, two-pass variance).
-- Overflow/underflow are avoided by choosing non-positive exponent arguments, using purpose-built functions (`log1p`, `expm1`, `lgamma`, `dnorm(log=TRUE)`), and working on the **log scale** with the log-sum-exp trick.
-
+- Roundoff is amplified by **large + small** (fix: add small terms first, pairwise/Kahan summation) and **large − large** (fix: reformulate so the answer is never obtained as a difference of near-equal numbers — $\sqrt{x+1}-\sqrt{x} = 1/(\sqrt{x+1}+\sqrt{x})$, two-pass variance).
+- Overflow/underflow are avoided by working on the **log scale**, using purpose-built functions (`log1p`, `expm1`, `lgamma`, `dnorm(log=TRUE)`)(log-sum-exp).
