@@ -401,7 +401,7 @@ M <- 10^(0:10)
 t(sapply(M, function(m) { x <- c(1, 2, 3) + m; c(M = m, one_pass = var1(x)) }))
 ```
 
-## Computing Variance: Fixes {.sub}
+## Solutions {.sub}
 
 - **Two-pass**: compute $\bar x$ first, then $\sum (x_i - \bar x)^2$. Deviations are small and of similar size, so no cancellation. (`var()` does this.)
 - **Shifted one-pass**: subtract any convenient constant $c \approx \bar x$ (e.g. $c = x_1$) before applying the one-pass formula:
@@ -427,11 +427,84 @@ $$e^{-x} = \frac{1}{e^{x}}, \qquad x > 0 .$$
 
 ```{r}
 taylor_exp <- function(x, K = 100) sum(x^(0:K) / factorial(0:K))
-c(naive = taylor_exp(-20), reciprocal = 1 / taylor_exp(20), true = exp(-20))
+c(naive = taylor_exp(-50), reciprocal = 1 / taylor_exp(50), true = exp(-50))
 ```
 
 **General principle**: rearrange a formula so that quantities of similar magnitude and **the same sign** are combined; avoid computing a small result as the difference of two large numbers.
 
+## Example: Computing $\log(1-e^{-u})$ 
+
+
+## The problems {.sub}
+
+This kernel appears whenever a difference is taken on the log scale, since
+$$\log(e^{a} - e^{b}) = a + \log(1 - e^{-u}), \qquad u = a - b > 0.$$
+
+Evaluating it literally as `log(1 - exp(-u))` fails at **both** ends of the range:
+
+- $u$ **small**: $e^{-u}\approx 1$, so $1 - e^{-u}$ is **large − large**. The true value is $\approx u$, far below $e^{-u}$'s own rounding error, so the leading bits cancel and little survives — and for $u < 2^{-53}$, `exp(-u)` returns exactly $1$ and the result is $-\infty$.
+- $u$ **large**: $e^{-u}$ is tiny, so $1 - e^{-u}$ is **large + small**. The small term is absorbed, $1-e^{-u}$ rounds to exactly $1$, and `log` returns $0$ instead of $-e^{-u}$.
+
+## The two remedies {.sub .smaller}
+
+R provides two functions built precisely for arguments near the landmark $1$, each evaluating its series directly instead of forming the offending sum or difference:
+
+- `expm1(x)` computes $e^{x}-1$. For small $x$ it returns $\approx x$ with full precision, whereas `exp(x) - 1` first rounds $e^{x}$ to within $2^{-53}$ of $1$ and then subtracts.
+- `log1p(x)` computes $\log(1+x)$. For small $x$ it returns $\approx x$ with full precision, whereas `log(1 + x)` first rounds $1+x$ to exactly $1$ and then takes the log.
+
+Applied to our kernel, each removes one of the two failures — and neither removes the other:
+
+```{r}
+f_naive <- function(u) log(1 - exp(-u))    # both failures
+f_expm1 <- function(u) log(-expm1(-u))     # never forms the difference
+f_log1p <- function(u) log1p(-exp(-u))     # never forms the sum
+```
+
+`f_expm1` evaluates $-\operatorname{expm1}(-u) = 1-e^{-u}$ without subtraction, fixing **small** $u$; its outer `log` then receives a value near $u$, far from $1$, and is safe. `f_log1p` passes $-e^{-u}$ straight to `log1p`, fixing **large** $u$; but for small $u$ that argument has already rounded to $-1$.
+
+## Demonstration with Different $u$ {.sub .small}
+```{r}
+#| code-fold: true
+library(gt)
+log1mexp <- function(u) ifelse(u <= log(2), log(-expm1(-u)), log1p(-exp(-u)))
+
+u <- c(1e-100,1e-18, 1e-15,  1e-8, 1, 20, 50, 500)
+g <- function(x) formatC(x, format = "g", digits = 8)
+
+gt(data.frame(u = g(u), naive = g(f_naive(u)), expm1 = g(f_expm1(u)),
+              log1p = g(f_log1p(u)), correct = g(log1mexp(u)))) |>
+  tab_options(table.font.size = "30px")
+```
+
+
+- **Small $u$**: naive tracks `log1p` — both lose digits, then collapse to $-\infty$. Only `expm1` is right.
+- **Large $u$**: naive tracks `expm1` — both collapse to $0$. Only `log1p` is right.
+- **Middle** ($10^{-8} \le u \le 20$): all three agree; nothing is near a landmark.
+
+
+## Solution: `log1mexp` {.sub .smaller}
+
+Branch at $u = \log 2$, where $e^{-u} = 1/2$ — safely far from both traps:
+
+```{r}
+log1mexp <- function(u) ifelse(u <= log(2), log(-expm1(-u)), log1p(-exp(-u)))
+```
+
+The same function is shipped by several CRAN packages, all tracing to Mächler (2012).
+
+```{r}
+#| code-fold: true
+#| message: false
+gt(data.frame(u      = g(u),
+              naive  = g(f_naive(u)),
+              mine   = g(log1mexp(u)),
+              copula = g(copula::log1mexp(u)),
+              VGAM   = g(VGAM::log1mexp(u)),
+              DPQ    = g(DPQ::logspace.sub(0, -u)))) |>
+  tab_options(table.font.size = "22px")
+```
+
+All four implementations agree to full precision across eighteen orders of magnitude, while the naive form is wrong at both ends. Prefer the package function in real code; write your own only to understand *why* it works.
 
 # Methods for Mitigating Overflow and Underflow Errors
 
@@ -540,7 +613,8 @@ log_diff_exp(2020, 2000)
 log_diff_exp <- function(lx, ly) lx + log1p(-exp(ly - lx))   # requires lx >= ly
 log_diff_exp(2020, 2019)
 ```
-## Software implementation: logSumExp in **matrixStats**  {.smaller}
+
+## Software implementation: logSumExp in **matrixStats** {.smaller}
 
 The log-sum-exp trick is already implemented in **matrixStats** (used by hundreds of CRAN/Bioconductor packages):
 
@@ -550,33 +624,44 @@ c(mine = log_sum_exp(c(2000, 2001, 2002)),
   matrixStats = matrixStats::logSumExp(c(2000, 2001, 2002)))
 ```
 
-## Software implementation: `log1mexp` in **copula** {.smaller}
-
-The **difference** $\log(e^{a}-e^{b}) = a + \log(1-e^{-u})$, $u = a-b > 0$. The kernel $\log(1-e^{-u})$ can be written two algebraically identical ways, which fail in opposite regimes:
-
-```{r}
-f_log1p <- function(u) log1p(-exp(-u))     # log(1 - exp(-u))
-f_expm1 <- function(u) log(-expm1(-u))     # log(1 - exp(-u))
-
-rbind(`u = 1e-20` = c(log1p = f_log1p(1e-20), expm1 = f_expm1(1e-20)),
-      `u = 50`    = c(log1p = f_log1p(50),    expm1 = f_expm1(50)))
-```
-
-- $u$ **small**: $e^{-u}\approx 1$, so $1-e^{-u}$ is **large − large** — `exp(-u)` has already rounded to $1$ and `log1p` receives $0$. Only `expm1` survives.
-- $u$ **large**: $e^{-u}$ is tiny, so $\log(1-e^{-u})$ is **large + small** — `expm1(-u)` rounds to $-1$ and `log` returns $0$. Only `log1p` survives.
-
-**copula** supplies the branched version as `log1mexp(a, cutoff = log(2))`, switching where $e^{-u} = 1/2$ — safely far from both traps:
+For **two** terms, **DPQ** gives the log-scale counterpart of `+`, taken from R's own `pgamma()` C code:
 
 ```{r}
 #| message: false
-library(copula)
-log_diff_exp <- function(a, b) a + log1mexp(a - b)
-
-c(small = log1mexp(1e-20), large = log1mexp(50))
-log_diff_exp(2000, 1999)                 # log(exp(2000) - exp(1999))
+c(naive = log(exp(2000) + exp(1999)),          # Inf + Inf
+  DPQ   = DPQ::logspace.add(2000, 1999))
 ```
 
-Prefer the package function in real code; write your own only to understand *why* it works.
+Use `logspace.add()` for a pair, `logSumExp()` for a vector.
+
+## Software implementation: log-difference in **DPQ** {.smaller}
+
+`logspace.sub(lx, ly)` computes $\log(e^{lx} - e^{ly})$, the log-scale counterpart of subtraction, and `logspace.add()` does the same for the sum. Four extreme cases of $u = lx - ly$:
+
+
+```{r}
+#| message: false
+#| code-fold: true
+library(DPQ)
+lx <- c( 2000, 1e-20, -1000,   0)
+ly <- c( 1999,     0, -1001, -500)
+
+cbind(lx, ly, u = lx - ly,
+      naive = log(exp(lx) - exp(ly)),
+      DPQ   = logspace.sub(lx, ly))
+```
+::: {style="font-size: 30px"}
+| computing | $u = a-b$ | $e^{a} - e^{b}$ in doubles | naive `log()` | `logspace.sub` |
+|----|---|----|---|---|
+| $\log(e^{2000} - e^{1999})$ | $1$ | `Inf - Inf` → `NaN` | `NaN` | $1999.54$ |
+| $\log(e^{10^{-20}} - e^{0})$ | $10^{-20}$ | `1 - 1` → `0` | $-\infty$ | $-46.05$ |
+| $\log(e^{-1000} - e^{-1001})$ | $1$ | `0 - 0` → `0` | $-\infty$ | $-1000.46$ |
+| $\log(e^{0} - e^{-500})$ | $500$ | `1 - 1.93e-22` → `1` | $0$ | $-1.93\times10^{-22}$ |
+:::
+
+The third column is the whole story: the subtraction has been destroyed before `log` is ever called — by overflow, cancellation, underflow, and absorption respectively. The naive expression returns a wrong answer — silently, in three of four cases — across the whole range: for operands too large, too small, too close, and too far apart.
+
+
 
 # Final Examples
 
