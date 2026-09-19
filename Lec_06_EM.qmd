@@ -71,6 +71,104 @@ legend("bottomright", bty = "n", lwd = c(1, 3, 3), lty = c(1, 1, 2), col = c("gr
                   expression(Q(theta*"|"*hat(theta)^(t)) ~ "(exact expectation)")))
 ```
 
+## Kullback-Leibler Distance {.smaller}
+
+**Definition**: for densities $P(z)$ and $q(z)$ on the same space,
+$$KL(P\|q) = \int P(z)\log\frac{P(z)}{q(z)}\,dz = E_P\!\left[\log\frac{P(Z)}{q(Z)}\right]$$
+
+
+
+**Theorem (Gibbs' inequality)**: $KL(P\|q) \ge 0$, with equality iff $P = q$ (a.e.)
+
+**Proof.** Since $\log x \le x - 1$ (equality iff $x=1$),
+$$
+\begin{aligned}
+KL(P\|q) &= -\int P(z)\log\frac{q(z)}{P(z)}\,dz \ \ge\ -\int P(z)\Big(\frac{q(z)}{P(z)}-1\Big)\,dz \\
+&= -\int\big[q(z)-P(z)\big]\,dz = 0 \qquad\blacksquare
+\end{aligned}
+$$
+**Remarks:**
+
+- Measures how much $q$ diverges from $P$; not symmetric ($KL(P\|q)\ne KL(q\|P)$ in general).
+- This inequality is what forces the $H$-term to decrease in the ascending-property proof (next slides), and what makes $F(\tilde P,\theta)$ a lower bound on $\ell_{\text{obs}}(\theta)$ later on
+
+## Simulation Check: $E_P[\log P(X)] > E_P[\log q(X)]$
+
+$KL(P\|q) = E_P[\log P(X)] - E_P[\log q(X)] > 0$ whenever $q\ne P$: draw $x_1,\ldots,x_n\sim P$ and compare $\log P(x_i)$ (blue) to $\log q(x_i)$ (red) at the *same* sampled points.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.6
+par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
+mu_p <- 0; sd_p <- 1; mu_q <- 1.2; sd_q <- 1.6; nsamp <- 40
+x  <- rnorm(nsamp, mu_p, sd_p)                   # samples from P
+lp <- dnorm(x, mu_p, sd_p, log = TRUE)
+lq <- dnorm(x, mu_q, sd_q, log = TRUE)
+
+curve(dnorm(x, mu_p, sd_p), -4, 6, lwd = 3, col = "steelblue", xlab = "x", ylab = "density",
+      main = "P(x), q(x), and the samples")
+curve(dnorm(x, mu_q, sd_q), add = TRUE, lwd = 3, col = "firebrick")
+rug(x, col = "gray30", lwd = 1.5)
+legend("topright", bty = "n", lwd = 3, col = c("steelblue", "firebrick"),
+       legend = c(expression(P(x)), expression(q(x))))
+
+ord <- order(x)
+plot(x[ord], lp[ord], type = "b", pch = 19, col = "steelblue", lwd = 2,
+     xlab = "x (sorted)", ylab = "log-density at sample", ylim = range(c(lp, lq)),
+     main = expression(log~P(x[i])~vs.~log~q(x[i])))
+lines(x[ord], lq[ord], type = "b", pch = 19, col = "firebrick", lwd = 2)
+segments(x[ord], lp[ord], x[ord], lq[ord], col = "gray70")
+abline(h = mean(lp), col = "steelblue", lty = 2, lwd = 2)
+abline(h = mean(lq), col = "firebrick", lty = 2, lwd = 2)
+legend("bottomleft", bty = "n", lwd = 2, lty = c(1, 1, 2, 2), pch = c(19, 19, NA, NA),
+       col = c("steelblue", "firebrick", "steelblue", "firebrick"),
+       legend = c(expression(log~P(x[i])), expression(log~q(x[i])),
+                  bquote(mean(log~P(x[i])) == .(round(mean(lp), 2))),
+                  bquote(mean(log~q(x[i])) == .(round(mean(lq), 2)))))
+```
+
+- The blue dashed line (average of $\log P(x_i)$) always sits above the red one (average of $\log q(x_i)$); their gap is the (Monte Carlo estimate of the) $KL(P\|q)$
+
+
+## Ascending Property of EM
+
+Write $h(Y,Z\mid\theta) = P(Y,Z\mid\theta)$, $\;g(Y\mid\theta) = \int h(Y,Z\mid\theta)\,dZ$, $\;K(Z\mid Y,\theta) = h/g$.
+
+**Theorem.** $\;\ell_{\text{obs}}(\hat\theta^{(t+1)}) \ \ge\ \ell_{\text{obs}}(\hat\theta^{(t)})$.
+
+**Key identity.** Since $\log g(Y\mid\theta) = \log h(Y,Z\mid\theta) - \log K(Z\mid Y,\theta)$ for every $Z$, taking $E_{Z\mid Y,\theta_0}$ of both sides gives, for any $\theta_0$,
+$$
+\ell_{\text{obs}}(\theta) = \underbrace{E_{Z\mid Y,\theta_0}\big[\log h(Y,Z\mid\theta)\big]}_{Q(\theta\mid\theta_0)}
+- \underbrace{E_{Z\mid Y,\theta_0}\big[\log K(Z\mid Y,\theta)\big]}_{H(\theta\mid\theta_0)}
+$$
+
+Intuition: maximizing $Q$ makes the first term larger, and for *any* optimizer $\theta$ the second term $H$ (without the minus sign) is decreased — so $\ell_{\text{obs}}$ is increased.
+
+## Formal Proof: The $H$ Term via Gibbs' Inequality
+
+**Proof.** Set $\theta_0 = \hat\theta^{(t)}$ and subtract the identity at $\theta = \hat\theta^{(t)}$ from that at $\theta = \hat\theta^{(t+1)}$. The dropped term is exactly a KL divergence, $H(\hat\theta^{(t)}\mid\hat\theta^{(t)}) - H(\theta\mid\hat\theta^{(t)}) = KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\theta)\big)$, so
+$$
+\begin{aligned}
+\ell_{\text{obs}}(\hat\theta^{(t+1)}) - \ell_{\text{obs}}(\hat\theta^{(t)})
+&= \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}} \\
+&\quad + \underbrace{KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\hat\theta^{(t+1)})\big)}_{\ge 0 \text{ by Gibbs' inequality}} \ \ge\ 0. \qquad\blacksquare
+\end{aligned}
+$$
+
+## EM as Alternating Optimization {.smaller}
+
+Let $\tilde P(\cdot)$ be any distribution on the hidden data $Z$. Using $P(Y,z\mid\theta) = P(Y\mid\theta)P(z\mid Y,\theta)$, we can define and express $F(\tilde P,\theta)$ as:
+
+
+$$\begin{aligned} F(\tilde P,\theta) &= \int \tilde P(z)\log P(Y,z\mid\theta)\,dz - \int \tilde P(z)\log\tilde P(z)\,dz \\ &= \ell_{\text{obs}}(\theta) - KL\big(\tilde P\,\Vert{}\,P(\cdot\mid Y,\theta)\big) \end{aligned}$$
+
+
+where $KL(P\Vert{}q) = \int P(z)\log\frac{P(z)}{q(z)}\,dz \ge 0$.
+
+* **E-step** = maximize $F$ over $\tilde P$ with $\theta = \hat\theta^{(t)}$ fixed: $KL \ge 0$ with equality iff $\tilde P = P(\cdot\mid Y,\hat\theta^{(t)})$, so the E-step sets $\tilde P$ to the conditional distribution of $Z$
+* **M-step** = maximize $F$ over $\theta$ with $\tilde P$ fixed: the second term of $F$ is free of $\theta$, so this is $\arg\max_\theta Q(\theta\mid\hat\theta^{(t)})$
+* **Tight Bound** = at $\theta = \hat\theta^{(t)}$ (after the E-step), $KL=0$, meaning the lower bound exactly equals the observed log-likelihood: $F(\tilde P,\hat\theta^{(t)}) = \ell_{\text{obs}}(\hat\theta^{(t)})$
+
 ## $Q$ Functions as Tangent Lower Bounds
 
 Each $Q(\cdot\mid\hat\theta^{(t)})$, shifted by a constant, lies **below** $\ell_{\text{obs}}$ and **touches** it at $\hat\theta^{(t)}$; maximizing it moves uphill on $\ell_{\text{obs}}$.
@@ -96,62 +194,6 @@ legend("bottomright", bty = "n", lwd = c(3, 2), lty = c(1, 2),
        legend = c(expression(l[obs](theta)), expression(Q(theta*"|"*hat(theta)^(t)) + "const")))
 ```
 
-## Ascending Property of EM
-
-Write $h(Y,Z\mid\theta) = P(Y,Z\mid\theta)$, $\;g(Y\mid\theta) = \int h(Y,Z\mid\theta)\,dZ$, $\;K(Z\mid Y,\theta) = h/g$.
-
-**Theorem.** $\;\ell_{\text{obs}}(\hat\theta^{(t+1)}) \ \ge\ \ell_{\text{obs}}(\hat\theta^{(t)})$.
-
-**Key identity.** Since $\log g(Y\mid\theta) = \log h(Y,Z\mid\theta) - \log K(Z\mid Y,\theta)$ for every $Z$, taking $E_{Z\mid Y,\theta_0}$ of both sides gives, for any $\theta_0$,
-$$
-\ell_{\text{obs}}(\theta) = \underbrace{E_{Z\mid Y,\theta_0}\big[\log h(Y,Z\mid\theta)\big]}_{Q(\theta\mid\theta_0)}
-- \underbrace{E_{Z\mid Y,\theta_0}\big[\log K(Z\mid Y,\theta)\big]}_{H(\theta\mid\theta_0)}
-$$
-
-**Proof.** Set $\theta_0 = \hat\theta^{(t)}$ and subtract the identity at $\theta = \hat\theta^{(t)}$ from that at $\theta = \hat\theta^{(t+1)}$:
-$$
-\begin{aligned}
-\ell_{\text{obs}}(\hat\theta^{(t+1)}) - \ell_{\text{obs}}(\hat\theta^{(t)})
-&= \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}} \\
-&\quad - \underbrace{\big[H(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - H(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\le 0 \text{ (next slide)}}
-\end{aligned}
-$$
-
-## Proof: The $H$ Term via Jensen's Inequality
-
-Need: $H(\theta\mid\hat\theta^{(t)}) \le H(\hat\theta^{(t)}\mid\hat\theta^{(t)})$ for every $\theta$, i.e.
-$$E_{Z\mid Y,\hat\theta^{(t)}}\left[\log\frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\right] \le 0$$
-
-**Jensen**: $\log$ is concave, so $E[\log W] \le \log E[W]$. Hence
-$$
-\begin{aligned}
-E_{Z\mid Y,\hat\theta^{(t)}}\left[\log\frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\right]
-&\le \log \int \frac{K(Z\mid Y,\theta)}{K(Z\mid Y,\hat\theta^{(t)})}\,K(Z\mid Y,\hat\theta^{(t)})\,dZ \\
-&= \log \int K(Z\mid Y,\theta)\,dZ = \log 1 = 0. \qquad\blacksquare
-\end{aligned}
-$$
-
-- The quantity on the left is $-KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\theta)\big)$
-- EM never decreases the observed likelihood, but it may converge to a local maximum or a saddle point
-
-## EM as Alternating Optimization {.smaller}
-
-Let $\tilde P(\cdot)$ be any distribution on the hidden data $Z$ and define
-$$F\big(\tilde P,\theta\big) = \int \tilde P(z)\log P(Y,z\mid\theta)\,dz - \int \tilde P(z)\log\tilde P(z)\,dz$$
-
-Using $P(Y,z\mid\theta) = P(Y\mid\theta)P(z\mid Y,\theta)$,
-$$
-\begin{aligned}
-F(\tilde P,\theta) &= \ell_{\text{obs}}(\theta) - KL\big(\tilde P\,\|\,P(\cdot\mid Y,\theta)\big), \\
-KL(P\|q) &= \int P(z)\log\frac{P(z)}{q(z)}\,dz \ \ge 0
-\end{aligned}
-$$
-
-- **E-step** = maximize $F$ over $\tilde P$ with $\theta = \hat\theta^{(t)}$ fixed: $KL \ge 0$ with equality iff $\tilde P = P(\cdot\mid Y,\hat\theta^{(t)})$, so the E-step sets $\tilde P$ to the conditional distribution of $Z$
-- **M-step** = maximize $F$ over $\theta$ with $\tilde P$ fixed: the second term of $F$ is free of $\theta$, so this is $\arg\max_\theta Q(\theta\mid\hat\theta^{(t)})$
-
-**Remark**: $KL \ge 0$ follows from $\log x \le x - 1$:
-$$KL(P\|q) = -\int P(z)\log\frac{q(z)}{P(z)}\,dz \ \ge\ -\int P(z)\Big(\frac{q(z)}{P(z)}-1\Big)\,dz = -\int\big[q(z)-P(z)\big]\,dz = 0$$
 
 # 2. Example 1: Two-Component Normal Mixture
 
