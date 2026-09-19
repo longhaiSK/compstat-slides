@@ -248,15 +248,21 @@ KL(P\|q) &amp;= -\int P(z)\log\frac{q(z)}{P(z)}\,dz \ \ge\ -\int P(z)\Big(\frac{
 </span></p>
 <p>Intuition: maximizing <span class="math inline">Q</span> makes the first term larger, and for <em>any</em> optimizer <span class="math inline">\theta</span> the second term <span class="math inline">H</span> (without the minus sign) is decreased — so <span class="math inline">\ell_{\text{obs}}</span> is increased.</p>
 </section>
-<section id="formal-proof-the-h-term-via-gibbs-inequality" class="slide level2">
-<h2>Formal Proof: The <span class="math inline">H</span> Term via Gibbs’ Inequality</h2>
-<p><strong>Proof.</strong> Set <span class="math inline">\theta_0 = \hat\theta^{(t)}</span> and subtract the identity at <span class="math inline">\theta = \hat\theta^{(t)}</span> from that at <span class="math inline">\theta = \hat\theta^{(t+1)}</span>. The dropped term is exactly a KL divergence, <span class="math inline">H(\hat\theta^{(t)}\mid\hat\theta^{(t)}) - H(\theta\mid\hat\theta^{(t)}) = KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\theta)\big)</span>, so <span class="math display">
+<section id="formal-proof" class="slide level2" style="font-size: 30px">
+<h2>Formal Proof</h2>
+<p><strong>Proof.</strong> Set <span class="math inline">\theta_0 = \hat\theta^{(t)}</span> and subtract the identity <span class="math inline">\ell_{\text{obs}}(\theta) = Q(\theta\mid\hat\theta^{(t)}) - H(\theta\mid\hat\theta^{(t)})</span> evaluated at <span class="math inline">\theta = \hat\theta^{(t)}</span> from the same identity at <span class="math inline">\theta = \hat\theta^{(t+1)}</span>: <span class="math display">
 \begin{aligned}
 \ell_{\text{obs}}(\hat\theta^{(t+1)}) - \ell_{\text{obs}}(\hat\theta^{(t)})
-&amp;= \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}} \\
-&amp;\quad + \underbrace{KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\hat\theta^{(t+1)})\big)}_{\ge 0 \text{ by Gibbs' inequality}} \ \ge\ 0. \qquad\blacksquare
+&amp;= \big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]
+- \big[H(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - H(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big] \\[2mm]
+&amp;= \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}}
++ \underbrace{KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\big\|\,K(\cdot\mid Y,\hat\theta^{(t+1)})\big)}_{\ge 0 \text{ by Gibbs' inequality}} \ \ge\ 0,
 \end{aligned}
-</span></p>
+</span> where the second line uses <span class="math display">
+H(\hat\theta^{(t)}\mid\hat\theta^{(t)}) - H(\theta\mid\hat\theta^{(t)})
+= E_{\hat\theta^{(t)}}\!\left[\log \frac{K(Z\mid Y,\hat\theta^{(t)})}{K(Z\mid Y,\theta)} \,\Big|\, Y\right]
+= KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\big\|\,K(\cdot\mid Y,\theta)\big)
+</span> at <span class="math inline">\theta = \hat\theta^{(t+1)}</span>. <span class="math inline">\blacksquare</span></p>
 </section>
 <section id="em-as-alternating-optimization" class="slide level2 smaller">
 <h2>EM as Alternating Optimization</h2>

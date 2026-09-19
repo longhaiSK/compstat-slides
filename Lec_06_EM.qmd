@@ -144,16 +144,25 @@ $$
 
 Intuition: maximizing $Q$ makes the first term larger, and for *any* optimizer $\theta$ the second term $H$ (without the minus sign) is decreased — so $\ell_{\text{obs}}$ is increased.
 
-## Formal Proof: The $H$ Term via Gibbs' Inequality
+## Formal Proof {style="font-size: 30px"}
 
-**Proof.** Set $\theta_0 = \hat\theta^{(t)}$ and subtract the identity at $\theta = \hat\theta^{(t)}$ from that at $\theta = \hat\theta^{(t+1)}$. The dropped term is exactly a KL divergence, $H(\hat\theta^{(t)}\mid\hat\theta^{(t)}) - H(\theta\mid\hat\theta^{(t)}) = KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\theta)\big)$, so
+**Proof.** Set $\theta_0 = \hat\theta^{(t)}$ and subtract the identity $\ell_{\text{obs}}(\theta) = Q(\theta\mid\hat\theta^{(t)}) - H(\theta\mid\hat\theta^{(t)})$ evaluated at $\theta = \hat\theta^{(t)}$ from the same identity at $\theta = \hat\theta^{(t+1)}$:
 $$
 \begin{aligned}
 \ell_{\text{obs}}(\hat\theta^{(t+1)}) - \ell_{\text{obs}}(\hat\theta^{(t)})
-&= \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}} \\
-&\quad + \underbrace{KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\|\,K(\cdot\mid Y,\hat\theta^{(t+1)})\big)}_{\ge 0 \text{ by Gibbs' inequality}} \ \ge\ 0. \qquad\blacksquare
+&= \big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]
+- \big[H(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - H(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big] \\[2mm]
+&= \underbrace{\big[Q(\hat\theta^{(t+1)}\mid\hat\theta^{(t)}) - Q(\hat\theta^{(t)}\mid\hat\theta^{(t)})\big]}_{\ge 0 \text{ by the M-step}}
++ \underbrace{KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\big\|\,K(\cdot\mid Y,\hat\theta^{(t+1)})\big)}_{\ge 0 \text{ by Gibbs' inequality}} \ \ge\ 0,
 \end{aligned}
 $$
+where the second line uses
+$$
+H(\hat\theta^{(t)}\mid\hat\theta^{(t)}) - H(\theta\mid\hat\theta^{(t)})
+= E_{\hat\theta^{(t)}}\!\left[\log \frac{K(Z\mid Y,\hat\theta^{(t)})}{K(Z\mid Y,\theta)} \,\Big|\, Y\right]
+= KL\big(K(\cdot\mid Y,\hat\theta^{(t)})\,\big\|\,K(\cdot\mid Y,\theta)\big)
+$$
+at $\theta = \hat\theta^{(t+1)}$. $\blacksquare$
 
 ## EM as Alternating Optimization {.smaller}
 
