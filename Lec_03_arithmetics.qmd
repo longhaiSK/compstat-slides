@@ -512,6 +512,63 @@ gt(data.frame(u      = g(u),
 
 All four implementations agree to full precision across eighteen orders of magnitude, while the naive form is wrong at both ends. Prefer the package function in real code; write your own only to understand *why* it works.
 
+
+
+## The picture {.sub}
+
+```{r}
+#| label: fig-log1mexp
+#| fig-cap: "The three implementations against $u$ on a log scale. Curves are offset vertically by a small constant so that they remain distinguishable where they agree; `log1mexp` is the grey reference."
+#| fig-width: 10
+#| fig-height: 4.2
+#| code-fold: true
+
+fin <- function(y) replace(y, !is.finite(y), NA)   # -Inf: the curve simply stops
+## for the right panel: place y < 0 on a log axis without changing its sign,
+## by plotting log10(-y) against a reversed axis labelled -10^k
+negpow <- function(y) {
+  out <- rep(NA_real_, length(y)); ok <- is.finite(y) & y < 0
+  out[ok] <- log10(-y[ok]); out
+}
+cols <- c(naive = "#D62728", expm1 = "#1F5FBF", log1p = "#D9A400")
+par(mfrow = c(1, 2), mar = c(4.2, 5.2, 2.6, 1), cex = 1.05)
+
+## left: small u, value plotted directly; jitter in units of the response
+u <- 10^seq(-20, 0, length.out = 400)
+jit <- c(0.9, 0, -0.9)
+plot(u, log1mexp(u), type = "n", log = "x", ylim = c(-52, 2),
+     xlab = expression(u), ylab = expression(log(1 - e^-u)),
+     main = expression("Small" ~ u * ": only expm1 survives"))
+u_dead <- max(u[!is.finite(f_naive(u))])
+rect(min(u), -60, u_dead, 10, col = adjustcolor("gray50", 0.12), border = NA)
+text(sqrt(min(u) * u_dead), -24, "naive, log1p\nreturn -Inf", col = "gray30", cex = 0.8)
+lines(u, log1mexp(u), lwd = 9, col = "gray87")
+lines(u, fin(f_naive(u)) + jit[1], lwd = 2.5, col = cols["naive"])
+lines(u, fin(f_expm1(u)) + jit[2], lwd = 2.5, col = cols["expm1"])
+lines(u, fin(f_log1p(u)) + jit[3], lwd = 2.5, col = cols["log1p"])
+legend("topleft", bty = "n", cex = 0.8, lwd = c(9, 2.5, 2.5, 2.5),
+       col = c("gray87", cols), legend = c("exact", "naive", "expm1", "log1p"))
+
+## right: large u, same quantity on a log-magnitude axis (note the reversed ylim);
+## jitter is now in powers of ten, so it must be applied after negpow()
+u <- 10^seq(0, log10(700), length.out = 400)
+jit <- c(7, 0, -7)
+k <- seq(0, -300, by = -60)
+plot(u, negpow(log1mexp(u)), type = "n", log = "x", ylim = c(3, -320), yaxt = "n",
+     xlab = expression(u), ylab = expression(log(1 - e^-u)),
+     main = expression("Large" ~ u * ": only log1p survives"))
+axis(2, at = k, labels = parse(text = paste0("-10^", k)), las = 1, cex.axis = 0.8)
+u_dead <- min(u[f_naive(u) >= 0])
+rect(u_dead, 10, max(u), -330, col = adjustcolor("gray50", 0.12), border = NA)
+text(u_dead * 1.3, -150, "naive, expm1\nreturn 0", adj = c(0, 0.5), col = "gray30", cex = 0.8)
+lines(u, negpow(log1mexp(u)), lwd = 9, col = "gray87")
+lines(u, negpow(f_naive(u)) + jit[1], lwd = 2.5, col = cols["naive"])
+lines(u, negpow(f_expm1(u)) + jit[2], lwd = 2.5, col = cols["expm1"])
+lines(u, negpow(f_log1p(u)) + jit[3], lwd = 2.5, col = cols["log1p"])
+legend("topleft", bty = "n", cex = 0.8, lwd = c(9, 2.5, 2.5, 2.5),
+       col = c("gray87", cols), legend = c("exact", "naive", "expm1", "log1p"))
+```
+
 # Methods for Mitigating Overflow and Underflow Errors
 
 ## Overflow and Underflow in Statistical Computing
