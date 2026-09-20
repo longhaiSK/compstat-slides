@@ -234,6 +234,32 @@ fixed_point(function(l) mean(x) * (1 - exp(-l)), x0 = mean(x))
 
 Advantage: no derivatives. Disadvantage: a suitable $g$ must be found, and convergence can be slow or fail.
 
+## Fixed-Point Iteration: The Cobweb
+
+The iterates walk toward the intersection of $g$ with the $45^\circ$ line: from $\lambda_k$ move vertically to $g$, then horizontally back to the diagonal to start the next step.
+
+```{r}
+lam <- seq(0.2, 3, length.out = 300)
+g <- function(l) mean(x) * (1 - exp(-l))
+lstar <- uniroot(S, c(0.2, 5))$root
+
+plot(lam, g(lam), type = "l", lwd = 2, xlim = c(0.2, 3), ylim = c(0.2, 3),
+     xlab = expression(lambda[k]), ylab = expression(g(lambda[k])))
+abline(0, 1, lty = 2)
+x0 <- 2.8
+for (k in 1:5) {
+  x1 <- g(x0)
+  segments(x0, x0, x0, x1, col = 2, lwd = 2)   # up/down to the curve
+  segments(x0, x1, x1, x1, col = 2, lwd = 2)   # across to the diagonal
+  points(x0, x1, pch = 19, col = 2)
+  x0 <- x1
+}
+points(lstar, lstar, pch = 19, cex = 1.3)
+```
+
+The shallower $g$ is at the crossing — the smaller $|g'|$ — the larger each stride toward it; $|g'| > 1$ there would spiral outward instead of in.
+
+
 ## Bisection
 
 If $S$ is continuous and $S(a)$, $S(b)$ have opposite signs, a root lies in $[a, b]$. Evaluate $S$ at the midpoint and keep the half that still brackets the root.
@@ -251,26 +277,28 @@ bisection(S, 0.1, 10)
 
 - Needs only $S$, not $S'$. R's `uniroot()` uses a refined version (Brent's method).
 
-## Golden Section Search
-
-Works on $f(\theta) = -\ell(\theta)$ directly, **without any derivative**: keep a bracket $[a, b]$ containing the minimum of a unimodal $f$ and two interior points $a' < b'$ placed at the golden ratio ($\phi \approx 0.618$).
-
-- If $f(a') < f(b')$ the minimum is in $[a, b']$; otherwise in $[a', b]$.
-
-- The golden ratio placement lets the surviving interior point be **reused**, so each step costs one new evaluation and shrinks the bracket by $0.618$.
+## Bisection, Visualized
 
 ```{r}
-golden <- function(f, a, b, tol = 1e-8) {
-  phi <- (sqrt(5) - 1) / 2; k <- 0
-  x1 <- b - phi * (b - a); x2 <- a + phi * (b - a); f1 <- f(x1); f2 <- f(x2)
-  while (b - a > tol) {
-    if (f1 < f2) { b <- x2; x2 <- x1; f2 <- f1; x1 <- b - phi * (b - a); f1 <- f(x1) }
-    else         { a <- x1; x1 <- x2; f1 <- f2; x2 <- a + phi * (b - a); f2 <- f(x2) }
-    k <- k + 1 }
-  c(root = (a + b) / 2, iter = k)
+Sv <- S(lam); yr <- range(Sv); pad <- 0.3 * diff(yr)
+plot(lam, Sv, type = "l", lwd = 2, ylim = c(yr[1], yr[2] + pad),
+     xlab = expression(lambda), ylab = expression(S(lambda)))
+abline(h = 0, lty = 3); points(lstar, 0, pch = 19, cex = 1.3)
+
+a <- 0.3; b <- 3
+ylev <- seq(yr[2] + 0.05 * pad, yr[2] + 0.9 * pad, length.out = 4)
+for (k in 1:4) {
+  m <- (a + b) / 2
+  segments(a, ylev[k], b, ylev[k], col = 4, lwd = 3)      # the current bracket
+  points(c(a, b), rep(ylev[k], 2), pch = "|", col = 4)
+  segments(m, ylev[k], m, S(m), lty = 3, col = 2)         # midpoint mapped up to S
+  points(m, ylev[k], pch = 19, col = 2)
+  if (S(a) * S(m) <= 0) b <- m else a <- m
 }
-golden(function(l) -ll(l), 0.1, 10)      # R equivalent: optimize(function(l) -ll(l), c(0.1, 10))
 ```
+
+Each bar is the bracket at one iteration; the dot is its midpoint, carried up to $S$ to decide which half survives. The bracket halves every step regardless of the shape of $S$.
+
 
 ## Newton–Raphson: Derivation
 
@@ -288,6 +316,40 @@ l0 <- 3.5; l1 <- l0 - S(l0) / dS(l0)
 segments(l0, S(l0), l1, 0, col = 2, lwd = 2); points(c(l0, l1), c(S(l0), 0), pch = 19, col = 2)
 text(l0, S(l0), expression(lambda[k]), pos = 4); text(l1, 0, expression(lambda[k+1]), pos = 1)
 ```
+
+## Newton's Tangent, Three Steps
+
+```{r}
+par(mfrow = c(1, 2), mar = c(4, 4.5, 2.5, 1))
+
+## three Newton steps
+plot(lam, S(lam), type = "l", lwd = 2, xlab = expression(lambda), ylab = expression(S(lambda)),
+     main = "follow the tangent")
+abline(h = 0, lty = 3); points(lstar, 0, pch = 19, cex = 1.2)
+x0 <- 0.45
+for (k in 1:3) {
+  x1 <- x0 - S(x0) / dS(x0)
+  segments(x0, S(x0), x1, 0, col = 2, lwd = 2)
+  segments(x1, 0, x1, S(x1), lty = 3, col = "grey40")
+  points(c(x0, x1), c(S(x0), 0), pch = 19, col = 2, cex = 0.7)
+  x0 <- x1
+}
+
+## Newton step versus scoring step from the same point
+plot(lam, S(lam), type = "l", lwd = 2, xlab = expression(lambda), ylab = expression(S(lambda)),
+     main = "observed vs. expected curvature")
+abline(h = 0, lty = 3); points(lstar, 0, pch = 19, cex = 1.2)
+x0 <- 0.45
+x_nr <- x0 - S(x0) / dS(x0)     # slope  S'(lambda)
+x_fs <- x0 + S(x0) / nI(x0)     # slope -nI(lambda)
+segments(x0, S(x0), x_nr, 0, col = 2, lwd = 2)
+segments(x0, S(x0), x_fs, 0, col = 4, lwd = 2, lty = 5)
+points(c(x0, x_nr, x_fs), c(S(x0), 0, 0), pch = 19, cex = 0.7, col = c(1, 2, 4))
+legend("topright", bty = "n", lwd = 2, lty = c(1, 5), col = c(2, 4),
+       legend = c("Newton: slope S'", "scoring: slope -nI"))
+```
+
+Left: the tangent to $S$ is followed down to zero at each step; as the curve straightens near the root the steps land almost exactly on it. Right: Newton uses the actual slope $S'(\lambda_k)$, scoring uses $-nI(\lambda_k)$ averaged over hypothetical data — the two lines differ away from the root and coincide as $\lambda_k \to \hat\lambda$.
 
 ## Newton–Raphson: Interpretation as a Quadratic Model
 
@@ -369,6 +431,22 @@ tryCatch(newton(S, dS, 3.5), error = function(e) conditionMessage(e))
 
 Safeguards: start from a robust estimate (median for Cauchy), **halve the step** until $\ell$ increases, or fall back to bisection/golden section, which only need a bracket.
 
+## Newton's Failure Mode, Visualized {.smaller}
+
+A single-observation Cauchy likelihood shows exactly why: $f(\theta) = -\ell(\theta) = \log(1+\theta^2)$ has derivative $s(\theta) = 2\theta/(1+\theta^2)$, which rises, turns over at $\theta = 1$, then decays to zero — Newton's step blows up wherever $s$ is flat.
+
+```{r}
+lik <- function(t) log(1 + t^2)
+sder <- function(t) 2 * t / (1 + t^2)
+par(mfrow = c(1, 2))
+curve(lik, -5, 5, n = 400, lwd = 2, xlab = expression(theta), main = "negative log-likelihood")
+curve(sder, -5, 5, n = 400, lwd = 2, xlab = expression(theta), main = "derivative: flat tails")
+abline(h = 0, lty = 3); abline(v = c(-1, 1), col = 2, lty = 2)
+```
+
+From $\theta_0 = 0.5$ Newton converges quadratically; from $\theta_0 = 0.8$ it overshoots into the tail; from $\theta_0 = 1.2$, beyond the inflection point, it runs away — each step landing where the derivative is flatter still.
+
+
 ## Univariate Fisher Scoring
 
 Replace the observed curvature $-\ell''(\theta_k)$ by its expectation $nI(\theta_k)$:
@@ -387,6 +465,52 @@ fisher_scoring <- function(S, nI, x0, tol = 1e-8, maxit = 100) {
 }
 rbind(newton = newton(S, dS, 3), fisher = fisher_scoring(S, nI, 3))
 ```
+
+## Golden Section Search
+
+Works on $f(\theta) = -\ell(\theta)$ directly, **without any derivative**: keep a bracket $[a, b]$ containing the minimum of a unimodal $f$ and two interior points $a' < b'$ placed at the golden ratio ($\phi \approx 0.618$).
+
+- If $f(a') < f(b')$ the minimum is in $[a, b']$; otherwise in $[a', b]$.
+
+- The golden ratio placement lets the surviving interior point be **reused**, so each step costs one new evaluation and shrinks the bracket by $0.618$.
+
+```{r}
+golden <- function(f, a, b, tol = 1e-8) {
+  phi <- (sqrt(5) - 1) / 2; k <- 0
+  x1 <- b - phi * (b - a); x2 <- a + phi * (b - a); f1 <- f(x1); f2 <- f(x2)
+  while (b - a > tol) {
+    if (f1 < f2) { b <- x2; x2 <- x1; f2 <- f1; x1 <- b - phi * (b - a); f1 <- f(x1) }
+    else         { a <- x1; x1 <- x2; f1 <- f2; x2 <- a + phi * (b - a); f2 <- f(x2) }
+    k <- k + 1 }
+  c(root = (a + b) / 2, iter = k)
+}
+golden(function(l) -ll(l), 0.1, 10)      # R equivalent: optimize(function(l) -ll(l), c(0.1, 10))
+```
+
+## Golden Section, Visualized
+
+```{r}
+f <- function(l) -ll(l)
+fv <- f(lam); yr <- range(fv); pad <- 0.25 * diff(yr)
+plot(lam, fv, type = "l", lwd = 2, ylim = c(yr[1], yr[2] + pad),
+     xlab = expression(lambda), ylab = expression(-ell(lambda)))
+points(lstar, f(lstar), pch = 19, cex = 1.3)
+
+gr <- (3 - sqrt(5)) / 2; xl <- 0.3; xu <- 3
+ylev <- seq(yr[2] + 0.05 * pad, yr[2] + 0.9 * pad, length.out = 3)
+for (k in 1:3) {
+  xml <- xl + gr * (xu - xl); xmu <- xu - gr * (xu - xl)
+  segments(xl, ylev[k], xu, ylev[k], col = 4, lwd = 3)
+  points(c(xl, xu), rep(ylev[k], 2), pch = "|", col = 4)
+  keep_lower <- f(xml) < f(xmu)
+  points(xml, ylev[k], pch = 19, cex = 0.9, col = if (keep_lower) 4 else 2)
+  points(xmu, ylev[k], pch = 19, cex = 0.9, col = if (keep_lower) 2 else 4)
+  if (keep_lower) xu <- xmu else xl <- xml
+}
+```
+
+The point that survives (blue) is already correctly positioned for the next iteration, so only the red point costs a fresh evaluation.
+
 
 ## Standard Error from the Curvature
 
@@ -415,6 +539,33 @@ $$
 h <- 1e-5
 c(analytic = dS(lhat), numeric = (ll(lhat + h) - 2 * ll(lhat) + ll(lhat - h)) / h^2)
 ```
+
+## Does the Effort Pay Off? MLE vs. the Naive Estimator
+
+Simulating many truncated samples shows the naive estimator's bias never vanishes — it is the wrong model, not too little data — while the MLE is centred on the truth.
+
+```{r}
+mle_nzp <- function(n_obs)
+  uniroot(function(l) sum(n_obs) / l - length(n_obs) / (1 - exp(-l)),
+          c(1e-6, 50), tol = 1e-10)$root
+
+sim_nzp <- function(lambda, n_gen = 200, B = 500)
+  vapply(1:B, function(b) {
+    yb <- rpois(n_gen, lambda); nb <- yb[yb > 0]
+    c(naive = mean(nb), mle = mle_nzp(nb))
+  }, c(naive = 0, mle = 0))
+
+est <- sim_nzp(1.5)
+par(mfrow = c(1, 2))
+for (m in c("naive", "mle"))
+  { hist(est[m, ], breaks = 25, col = "grey90", xlim = range(est),
+         xlab = expression(hat(lambda)),
+         main = sprintf("%s, bias = %.3f", m, mean(est[m, ]) - 1.5))
+    abline(v = 1.5, col = 2, lwd = 2, lty = 2) }
+```
+
+The naive estimator's bias grows as $\lambda$ shrinks, since more mass sits on the discarded zero; the MLE's spread matches the information-based standard error from two slides ago.
+
 
 # Multivariate Newton–Raphson and Fisher Scoring
 
