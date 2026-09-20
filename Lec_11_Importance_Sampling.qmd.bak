@@ -87,7 +87,7 @@ $$
 
 ## The Estimators
 
-Draw $\theta_1,\ldots,\theta_{\mathrm{S}} \overset{iid}{\sim} g/C_g$ and compute $w_s = w(\theta_s) = f(\theta_s)/g(\theta_s)$.
+Draw $\theta_1,\ldots,\theta_S \overset{iid}{\sim} g/C_g$ and compute $w_s = w(\theta_s) = f(\theta_s)/g(\theta_s)$.
 
 **Ratio of normalizing constants**
 $$
@@ -236,6 +236,9 @@ legend("bottomright", bty = "n", cex = 1.0, text.col = "navy",
 
 The observed effective sample size reports near-perfect efficiency. The **exact** effective fraction $1/E_g(w^2)$ is smaller by forty orders of magnitude — a property of $f,g$ alone, invisible to any single sample. The variance is finite at $\sigma=1$ (it diverges only for $\sigma\le1/\sqrt2$), so the estimator is consistent — it would just need $S\sim10^{43}$ to look normal.
 
+## Example 1 (Continued): What to Look For
+
+Drag $\sigma$: below $1/\sqrt2$ the variance is infinite; between there and $\sigma\approx3$ the failure is **silent** (observed $S_{\text{eff}}$ near $S$, estimate stuck near $\tfrac12$); past $\sigma\approx4$ the proposal finally reaches $+d$, observed $S_{\text{eff}}$ *drops* — which looks like deterioration and is in fact the diagnostic finally working — and the estimate moves onto the truth.
 
 ## Example 1 (Continued): An Interactive View
 
@@ -399,7 +402,7 @@ The target $\log f_{t_\nu}$ is **not concave** at any finite $\nu$ — convex ou
 
 ## Example 2 (Continued): The Estimator
 
-Let $g$ be the normalized truncated normal on $(c_1,c_2)$, $f(x)=f_{t_\nu}(x)I(c_1<x<c_2)$. Draw $X_1,\ldots,X_{\mathrm{S}}\sim g$, weight by $w=f/g$, average:
+Let $g$ be the normalized truncated normal on $(c_1,c_2)$, $f(x)=f_{t_\nu}(x)I(c_1<x<c_2)$. Draw $X_1,\ldots,X_S\sim g$, weight by $w=f/g$, average:
 $$
 \widehat C = \frac1S\sum_{i=1}^S w(X_i),
 $$
@@ -456,6 +459,9 @@ knitr::kable(data.frame(
 
 A finite interval is well-behaved at any $\nu$; $c_2=\infty$ reproduces the divergence — badly at $\nu=1$, only *deceptively* well at $\nu=30$.
 
+## Example 2 (Continued): What the App Shows
+
+$c_1,c_2,\mu,\sigma,\nu$ under slider control (a checkbox sends $c_2\to\infty$). Legend: true $P$, estimate, 95% CI colored green/red by coverage.
 
 ## Example 2 (Continued): An Interactive View
 
@@ -598,7 +604,7 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
-## Example 2 (Continued):Observations {.smaller}
+## Example 2 (Continued): Settings to Try {.smaller}
 
 - **$c_2$ finite (default)**: weights have finite variance; raising $S$ improves the estimate at the usual $1/\sqrt S$ rate, and the 95% interval covers about as often as claimed
 
@@ -626,7 +632,6 @@ Contrast: sampling directly from the (wide, uninformative) **prior** is importan
 ```{r}
 #| label: marlik-functions
 #| echo: true
-#| code-fold: false
 log_lik   <- function(x, mu, w) sum(dnorm(x, mu, exp(w / 2), log = TRUE))
 log_prior <- function(mu, w, mu_0, sigma_mu, w_0, sigma_w) {
     dnorm(mu, mu_0, sigma_mu, log = TRUE) + dnorm(w, w_0, sigma_w, log = TRUE)

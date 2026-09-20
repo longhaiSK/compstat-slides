@@ -36,7 +36,8 @@
         "SST",
         "VIF",
         "WLS",
-        "_MLE"
+        "_MLE",
+        "_S"
     ],
     "blacklist": [
         "COR",
@@ -49,7 +50,11 @@
         "PR",
         "SIN",
         "TAN",
-        "VAR"
+        "TRUE",
+        "VAR",
+        "^K",
+        "^S",
+        "_K"
     ],
     "text_commands": [
         "mathbf",
