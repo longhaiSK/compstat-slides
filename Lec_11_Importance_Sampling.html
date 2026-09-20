@@ -6,11 +6,16 @@
 <script src="Lec_11_Importance_Sampling_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="Lec_11_Importance_Sampling_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="Lec_11_Importance_Sampling_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<meta name="shinylive:serviceworker_dir" content=".">
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/load-shinylive-sw.js" type="module"></script>
+<script src="Lec_11_Importance_Sampling_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/run-python-blocks.js" type="module"></script>
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-contrib/shinylive-0.10.12/shinylive/shinylive.css" rel="stylesheet">
+<link href="Lec_11_Importance_Sampling_files/libs/quarto-contrib/shinylive-quarto-css/shinylive-quarto.css" rel="stylesheet"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
   <meta name="author" content="Longhai Li">
-  <meta name="dcterms.date" content="2026-09-07">
+  <meta name="dcterms.date" content="2026-09-19">
   <title>Elements of Statistical Computation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -227,7 +232,7 @@ Longhai Li
 </div>
 </div>
 
-  <p class="date">2026-09-07</p>
+  <p class="date">2026-09-19</p>
 </section>
 <section>
 <section id="goal-and-idea" class="title-slide slide level1 center">
@@ -236,30 +241,31 @@ Longhai Li
 </section>
 <section id="the-goal" class="slide level2">
 <h2>The Goal</h2>
-<p>Two integrals with respect to an <strong>unnormalized</strong> function <span class="math inline">f(\theta)</span>, e.g.&nbsp;<span class="math inline">f(\theta) = \pi(\theta)P(x\mid\theta)</span>:</p>
+<p>Rejection sampling turns draws from an envelope <span class="math inline">g\ge f</span> into exact draws from <span class="math inline">f</span>, but every rejected proposal is wasted — and in the tails of a poor envelope, almost every proposal is rejected.</p>
+<p>Two integrals with respect to an <strong>unnormalized</strong> function <span class="math inline">f(\theta)</span>, e.g.&nbsp;<span class="math inline">f(\theta) = \pi(\theta)L(\theta)</span>:</p>
 <ol type="1">
 <li><p>A posterior expectation <span class="math display">A = \frac{\int a(\theta)\,f(\theta)\,d\theta}{\int f(\theta)\,d\theta} = E_f\big[a(\theta)\big], \qquad \theta\sim\frac{f(\theta)}{C_f}</span></p></li>
 <li><p>The normalizing constant (marginal likelihood) <span class="math display">C_f = \int f(\theta)\,d\theta</span></p></li>
 </ol>
 <p>Plain Monte Carlo needs draws from <span class="math inline">f/C_f</span>, which we cannot produce. Rejection sampling needs an envelope <span class="math inline">g\ge f</span>, which may be hard to find or very wasteful.</p>
 </section>
-<section id="the-idea-reweighting" class="slide level2">
+<section id="the-idea-reweighting" class="slide level2 smaller">
 <h2>The Idea: Reweighting</h2>
-<p><em>Reject, reweight, repeat.</em> Instead of rejecting proposals, keep all of them and <strong>weight</strong> each by how much <span class="math inline">f</span> favours it relative to the proposal.</p>
+<p><strong>Importance sampling</strong> keeps every proposal instead of discarding most of them: draw from an easier function <span class="math inline">g</span> and attach a <em>weight</em> that corrects for sampling from the wrong distribution. Nothing is ever thrown away, and no envelope condition <span class="math inline">g\ge f</span> is required — the price is that the sample is no longer an exact iid sample from <span class="math inline">f</span>, only a <em>weighted</em> one.</p>
 <ul>
 <li>Draw <span class="math inline">\theta\sim g(\theta)/C_g</span>, where <span class="math inline">g</span> is another (possibly unnormalized) function we can sample from</li>
 <li>Attach the <strong>importance weight</strong> <span class="math display">w(\theta) = \frac{f(\theta)}{g(\theta)}</span></li>
 <li>Hope that <span class="math inline">w(\theta)\approx</span> constant, i.e.&nbsp;<span class="math inline">g</span> has roughly the shape of <span class="math inline">f</span></li>
 </ul>
 <p><strong>Requirement on <span class="math inline">g</span></strong>: wherever <span class="math inline">f</span> is positive, <span class="math inline">g</span> must be positive too, <span class="math display">\{\theta: g(\theta)&gt;0\}\ \supseteq\ \{\theta: f(\theta)&gt;0\}</span></p>
-<p>Otherwise part of <span class="math inline">f</span> is never visited and the estimate is biased (Example 3).</p>
+<p>Otherwise part of <span class="math inline">f</span> is never visited and the estimate is biased (Example 2).</p>
 </section></section>
 <section>
 <section id="the-importance-reweighting-formula" class="title-slide slide level1 center">
 <h1>2. The Importance Reweighting Formula</h1>
 
 </section>
-<section id="derivation" class="slide level2">
+<section id="derivation" class="slide level2 smaller">
 <h2>Derivation</h2>
 <p>Let <span class="math inline">C_g = \int g(\theta)\,d\theta</span>. For any <span class="math inline">a</span>, <span class="math display">
 \begin{aligned}
@@ -275,185 +281,871 @@ E_f\big[a(\theta)\big] &amp;= \int a(\theta)\,\frac{f(\theta)}{C_f}\,d\theta
 </section>
 <section id="the-estimators" class="slide level2">
 <h2>The Estimators</h2>
-<p>Draw <span class="math inline">\theta_1,\ldots,\theta_n \overset{iid}{\sim} g/C_g</span> and compute <span class="math inline">w_i = w(\theta_i) = f(\theta_i)/g(\theta_i)</span>.</p>
-<p><strong>Normalizing constant ratio</strong> <span class="math display">\widehat{\frac{C_f}{C_g}} = \frac1n\sum_{i=1}^n w_i</span></p>
-<p>If <span class="math inline">g</span> is a normalized density (<span class="math inline">C_g = 1</span>), this estimates <span class="math inline">C_f</span> itself, e.g.&nbsp;the marginal likelihood.</p>
-<p><strong>Expectation</strong> (self-normalized importance sampling) <span class="math display">\hat A = \frac{\frac1n\sum_{i=1}^n a(\theta_i)\,w_i}{\frac1n\sum_{i=1}^n w_i}
-= \sum_{i=1}^n a(\theta_i)\,\tilde w_i, \qquad
-\tilde w_i = \frac{w_i}{\sum_{j=1}^n w_j}, \quad \sum_{i=1}^n\tilde w_i = 1</span></p>
-<p>The normalized weights <span class="math inline">\tilde w_i</span> turn the proposal sample into a <strong>weighted sample from <span class="math inline">f</span></strong>; unknown constants in <span class="math inline">f</span> and <span class="math inline">g</span> cancel.</p>
-<p>Example: <span class="math inline">w = (100, 40, 60)</span> gives <span class="math inline">\tilde w = (0.5, 0.2, 0.3)</span>.</p>
+<p>Draw <span class="math inline">\theta_1,\ldots,\theta_S \overset{iid}{\sim} g/C_g</span> and compute <span class="math inline">w_s = w(\theta_s) = f(\theta_s)/g(\theta_s)</span>.</p>
+<p><strong>Ratio of normalizing constants</strong> <span class="math display">\widehat{\frac{C_f}{C_g}} = \frac1S\sum_{s=1}^S w_s</span></p>
+<p>Unbiased for <span class="math inline">C_f/C_g</span>; if <span class="math inline">g</span> is a normalized density (<span class="math inline">C_g=1</span>) this estimates <span class="math inline">C_f</span> itself — e.g.&nbsp;the marginal likelihood.</p>
+<p><strong>Self-normalized expectation</strong> <span class="math display">\hat A = \frac{\frac1S\sum_s a(\theta_s)\,w_s}{\frac1S\sum_s w_s}
+= \sum_{s=1}^S a(\theta_s)\,\tilde w_s, \qquad
+\tilde w_s = \frac{w_s}{\sum_{j=1}^S w_j}, \quad \sum_s\tilde w_s = 1</span></p>
+<p><span class="math inline">\tilde w_s</span> turns the proposal sample into a <strong>weighted sample from <span class="math inline">f</span></strong>; unknown constants in <span class="math inline">f</span> and <span class="math inline">g</span> cancel. It is a ratio of two averages, so it is biased with bias <span class="math inline">O(1/S)</span>, but consistent.</p>
 </section>
-<section id="interpretation-and-properties" class="slide level2">
-<h2>Interpretation and Properties</h2>
-<ul>
-<li><span class="math inline">\hat A</span> is a weighted average of <span class="math inline">a(\theta_i)</span>: draws in regions where <span class="math inline">f\gg g</span> count more, draws where <span class="math inline">f\ll g</span> count less</li>
-<li><span class="math inline">\frac1n\sum_i w_i</span> is unbiased for <span class="math inline">C_f/C_g</span>; <span class="math inline">\hat A</span> is a ratio of two averages, so it is biased with bias <span class="math inline">O(1/n)</span> but consistent</li>
-<li>Nothing is discarded, unlike rejection sampling; no envelope condition <span class="math inline">g\ge f</span> is needed</li>
-<li>Everything hinges on the variance of the weights: if <span class="math inline">w(\theta)</span> varies wildly, a few draws dominate the sum</li>
-</ul>
-
-<img data-src="Lec_11_Importance_Sampling_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="864"></section>
 <section id="effective-sample-size" class="slide level2">
 <h2>Effective Sample Size</h2>
-<p>How many “equally informative” draws is a weighted sample worth? <span class="math display">S_{\text{eff}} = \frac{1}{\sum_{s=1}^S \tilde w(\theta_s)^2}, \qquad \tilde w(\theta_s) = \frac{w(\theta_s)}{\sum_{j=1}^S w(\theta_j)}</span></p>
-<p><strong>Special case</strong>: if <span class="math inline">w(\theta_s)\approx c</span> for all <span class="math inline">s</span> (proposal has the shape of the target), then <span class="math inline">\tilde w(\theta_s) = 1/S</span> and <span class="math display">S_{\text{eff}} = \frac{1}{\sum_{s=1}^S (1/S)^2} = \frac{1}{1/S} = S</span></p>
-<p>At the other extreme, one dominant weight gives <span class="math inline">S_{\text{eff}}\approx1</span>.</p>
-<p><strong>Variance heuristic.</strong> For iid draws from <span class="math inline">f</span>, <span class="math inline">\text{Var}_f\big(\tfrac1S\sum_s a(\theta_s)\big) = \text{Var}_f(a)/S</span>. For the importance estimator, <span class="math display">\text{Var}_g\left(\frac{\sum_s a(\theta_s)w(\theta_s)}{\sum_s w(\theta_s)}\right)\ \approx\ \frac{\text{Var}_f\big(a(\theta)\big)}{S_{\text{eff}}}</span></p>
-<p>We will see (Examples 2 and 3) that <span class="math inline">S_{\text{eff}}</span> is computed only from the weights <strong>observed</strong>, and can look excellent when the estimate is wrong.</p>
+<p>How many “equally informative” draws is a weighted sample worth? <span class="math display">S_{\text{eff}} = \frac{1}{\sum_{s=1}^S \tilde w_s^2}</span></p>
+<p>If <span class="math inline">w_s\approx</span> constant (proposal shaped like the target), <span class="math inline">\tilde w_s = 1/S</span> and <span class="math inline">S_{\text{eff}} = S</span>: full efficiency. If one weight dominates, <span class="math inline">S_{\text{eff}}\approx1</span>: only one draw is doing any work.</p>
+<p><strong>Variance heuristic</strong>: <span class="math inline">\operatorname{Var}_g(\hat A)\approx\operatorname{Var}_f(a)/S_{\text{eff}}</span>, the same form as for an iid sample of size <span class="math inline">S_{\text{eff}}</span> from <span class="math inline">f</span> itself.</p>
+<p>The catch, central to this lecture: <span class="math inline">S_{\text{eff}}</span> is computed <strong>only from the weights actually observed</strong>. A proposal that never visits the part of <span class="math inline">\theta</span>-space where <span class="math inline">f</span> and <span class="math inline">g</span> disagree most will report a reassuring <span class="math inline">S_{\text{eff}}</span> while being badly wrong.</p>
+</section>
+<section id="where-the-ess-formula-comes-from" class="slide level2 smaller">
+<h2>Where the ESS Formula Comes From</h2>
+<p>Write <span class="math inline">\hat A = \bar N/\bar D</span> with <span class="math inline">N_s = w_s a(\theta_s)</span>, <span class="math inline">D_s = w_s</span>. The delta method gives <span class="math display">\operatorname{Var}_g(\hat A) \approx \frac{1}{S}E_g\!\bigl[w^{2}(a-A)^{2}\bigr] = \frac{1}{S}E_f\!\bigl[w(a-A)^{2}\bigr],</span> using <span class="math inline">E_g[w\,h] = E_f[h]</span>. If <span class="math inline">w</span> varies little across the support of <span class="math inline">(a-A)^2</span>, this factors as <span class="math inline">E_g[w^2]\operatorname{Var}_f(a)/S</span>, giving <span class="math display">\operatorname{Var}_g(\hat A) \approx \frac{\operatorname{Var}_f(a)}{S_{\text{eff}}^{\star}}, \qquad S_{\text{eff}}^{\star} := \frac{S}{E_g[w^{2}]}</span></p>
+<p><span class="math inline">S_{\text{eff}}^{\star}</span> is a property of <span class="math inline">f</span> and <span class="math inline">g</span> alone — independent of <span class="math inline">a</span> or the sample — and it is the metric that reveals pathologies (missed modes, heavy tails) even when the <em>observed</em> <span class="math inline">S_{\text{eff}}</span> looks fine.</p>
+<p>Plugging in sample moments, <span class="math inline">\frac{1}{S}\sum w_s</span> for <span class="math inline">E_g[w]</span> and <span class="math inline">\frac{1}{S}\sum w_s^2</span> for <span class="math inline">E_g[w^2]</span>, turns <span class="math inline">S_{\text{eff}}^\star</span> into <strong>Kish’s formula</strong> <span class="math inline">(\sum w_s)^2/\sum w_s^2 = 1/\sum\tilde w_s^2</span> — a principled plug-in estimator, not an ad hoc heuristic.</p>
+</section>
+<section id="limitations-of-the-ess-diagnostic" class="slide level2 smaller">
+<h2>Limitations of the ESS Diagnostic</h2>
+<p>Kish’s approximation is not uniformly precise. With <span class="math inline">f=N(0,1)</span>, <span class="math inline">g=N(0,2^2)</span>, <span class="math inline">a(\theta)=\theta^2</span>, <span class="math inline">S=4000</span>:</p>
+<ul>
+<li>empirical <span class="math inline">\operatorname{Var}(\hat A)\approx 3.15\times10^{-4}</span>, matching exact delta-method calculations</li>
+<li>but <span class="math inline">\operatorname{Var}_f(a)/S_{\text{eff}}^\star \approx 7.56\times10^{-4}</span> — over twice as large, because <span class="math inline">w</span> and <span class="math inline">(a-A)^2</span> are negatively correlated here</li>
+</ul>
+<p>More critically: <span class="math inline">\widehat{S_{\text{eff}}}</span> is computed <strong>only from the observed weights</strong>. If the proposal never explores where <span class="math inline">f</span> and <span class="math inline">g</span> disagree most, the estimator reports a falsely reassuring <span class="math inline">\widehat{S_{\text{eff}}}</span> and masks a severe sampling inadequacy — the subject of Examples 1 and 2 below.</p>
 </section></section>
 <section>
-<section id="a-good-story" class="title-slide slide level1 center">
-<h1>3. A Good Story</h1>
+<section id="example-1-same-support-but-a-mode-is-missed" class="title-slide slide level1 center">
+<h1>3. Example 1: Same Support, but a Mode Is Missed</h1>
 
 </section>
-<section id="example-1-estimating-a-normal-tail-probability" class="slide level2">
-<h2>Example 1: Estimating a Normal Tail Probability</h2>
-<p>Estimate <span class="math display">I = \int_a^b \varphi(x)\,dx = P(a&lt;X&lt;b), \qquad X\sim N(0,1)</span></p>
-<p>and the conditional expectation <span class="math inline">E\big[a(X)\mid a&lt;X&lt;b\big]</span>. Set the target to the <strong>truncated</strong> density <span class="math display">f(x) = \varphi(x)\,I(a\le x\le b), \qquad C_f = \int_{-\infty}^{\infty}\varphi(x)\,I(a\le x\le b)\,dx = P(a&lt;X&lt;b)</span></p>
-<p>so that <span class="math display">E_f\big[a(x)\big] = \int_a^b a(x)\,\frac{\varphi(x)}{I}\,dx = E\big[a(X)\mid a&lt;X&lt;b\big]</span></p>
-<p>For a far tail (<span class="math inline">a = 4</span>), plain Monte Carlo from <span class="math inline">N(0,1)</span> almost never lands in <span class="math inline">[a,b]</span> (probability <span class="math inline">\approx 3\times10^{-5}</span>), so both <span class="math inline">C_f</span> and <span class="math inline">E_f[a]</span> are hopeless without a proposal concentrated on <span class="math inline">[a,b]</span>.</p>
+<section id="example-1-same-support-but-a-mode-is-missed-1" class="slide level2">
+<h2>Example 1: Same Support, but a Mode Is Missed</h2>
+<p><span class="math display">
+f(\theta) = \tfrac12\varphi(\theta+d) + \tfrac12\varphi(\theta-d), \qquad
+g_{\sigma}(\theta) = \tfrac{1}{\sigma}\varphi\!\left(\tfrac{\theta+d}{\sigma}\right),
+\qquad d = 5
+</span></p>
+<p>Both are positive on all of <span class="math inline">\mathbb{R}</span>, so the support requirement holds. But for <span class="math inline">\sigma</span> of order one the proposal concentrates around <span class="math inline">-d</span> and never produces draws near the second mode at <span class="math inline">+d</span>.</p>
+<p>For <span class="math inline">\theta</span> near <span class="math inline">-d</span> and <span class="math inline">\sigma=1</span>, <span class="math display">
+w(\theta) = \tfrac12 + \tfrac12\,\frac{\varphi(\theta-d)}{\varphi(\theta+d)}
+          = \tfrac12 + \tfrac12 e^{2d\theta} \;\approx\; \tfrac12
+</span></p>
+<p>so every observed weight is nearly equal, <span class="math inline">\tilde w_i\approx1/S</span> and <span class="math inline">S_{\text{eff}}\approx S</span>, while <span class="math inline">\widehat{C_f/C_g}\approx\tfrac12</span> (truth <span class="math inline">1</span>) and <span class="math inline">\hat E_f(\theta)\approx-d</span> (truth <span class="math inline">0</span>). The draws that would expose the error carry <span class="math inline">w\approx\tfrac12e^{2d\theta}\gg1</span> near <span class="math inline">\theta=+d</span> and have probability <span class="math inline">\Phi(-2d)\approx10^{-23}</span> under <span class="math inline">g_1</span>: they never appear.</p>
 </section>
-<section id="example-1-continued-choice-of-proposal" class="slide level2">
-<h2>Example 1 (Continued): Choice of Proposal</h2>
-<p>Any normalized <span class="math inline">g</span> supported on <span class="math inline">[a,b]</span> works, and then <span class="math inline">\frac1n\sum_i w_i</span> estimates <span class="math inline">I</span> directly:</p>
-<ul>
-<li><strong>Uniform</strong> <span class="math inline">g(x) = \dfrac{I(a\le x\le b)}{b-a}</span>: <span class="math inline">\;w(x) = (b-a)\,\varphi(x)</span>, so <span class="math inline">\hat I = (b-a)\,\frac1n\sum_i\varphi(x_i)</span>, the Monte Carlo version of the midpoint rule</li>
-<li><strong>Shifted exponential</strong> <span class="math inline">g(x) = \dfrac{\lambda e^{-\lambda(x-a)}}{1-e^{-\lambda(b-a)}}\,I(a\le x\le b)</span> with <span class="math inline">\lambda\approx a</span>: matches the decay of <span class="math inline">\varphi</span> on the tail, so <span class="math inline">w</span> is nearly constant and <span class="math inline">S_{\text{eff}}\approx n</span></li>
-</ul>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>a <span class="ot">&lt;-</span> <span class="dv">4</span>; b <span class="ot">&lt;-</span> <span class="dv">6</span>; n <span class="ot">&lt;-</span> <span class="fl">1e4</span>; exact <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(b) <span class="sc">-</span> <span class="fu">pnorm</span>(a)</span>
-<span id="cb3-2"><a href=""></a>x_u <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, a, b);  w_u <span class="ot">&lt;-</span> (b <span class="sc">-</span> a) <span class="sc">*</span> <span class="fu">dnorm</span>(x_u)</span>
-<span id="cb3-3"><a href=""></a>lam <span class="ot">&lt;-</span> a; x_e <span class="ot">&lt;-</span> a <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">runif</span>(n) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (b <span class="sc">-</span> a)))) <span class="sc">/</span> lam       <span class="co"># inverse CDF</span></span>
-<span id="cb3-4"><a href=""></a>g_e <span class="ot">&lt;-</span> lam <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (x_e <span class="sc">-</span> a)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>lam <span class="sc">*</span> (b <span class="sc">-</span> a))); w_e <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x_e) <span class="sc">/</span> g_e</span>
-<span id="cb3-5"><a href=""></a><span class="fu">rbind</span>(<span class="at">uniform =</span> <span class="fu">c</span>(<span class="at">I_hat =</span> <span class="fu">mean</span>(w_u), <span class="at">rel_error =</span> <span class="fu">mean</span>(w_u) <span class="sc">/</span> exact <span class="sc">-</span> <span class="dv">1</span>, <span class="at">S_eff =</span> <span class="fu">ess</span>(w_u),</span>
-<span id="cb3-6"><a href=""></a>                  <span class="at">E_X_given =</span> <span class="fu">sum</span>(x_u <span class="sc">*</span> w_u) <span class="sc">/</span> <span class="fu">sum</span>(w_u)),</span>
-<span id="cb3-7"><a href=""></a>      <span class="at">exponential =</span> <span class="fu">c</span>(<span class="fu">mean</span>(w_e), <span class="fu">mean</span>(w_e) <span class="sc">/</span> exact <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">ess</span>(w_e), <span class="fu">sum</span>(x_e <span class="sc">*</span> w_e) <span class="sc">/</span> <span class="fu">sum</span>(w_e)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                   I_hat   rel_error    S_eff E_X_given
-uniform     3.184127e-05 0.005399818 2325.597  4.226393
-exponential 3.172442e-05 0.001710140 9904.602  4.222298</code></pre>
-</div>
-</div>
-</section>
-<section id="example-1-continued" class="slide level2">
-<h2>Example 1 (Continued)</h2>
+<section id="example-1-continued-the-figure" class="slide level2">
+<h2>Example 1 (Continued): The Figure</h2>
 
-<img data-src="Lec_11_Importance_Sampling_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>The exponential proposal tracks the shape of the truncated normal; the uniform proposal wastes draws near <span class="math inline">b</span> where <span class="math inline">\varphi</span> is tiny, and its weights vary by a factor <span class="math inline">e^{(b^2-a^2)/2}\approx e^{10}</span>.</p>
+<img data-src="Lec_11_Importance_Sampling_files/figure-revealjs/fig-missed-mode-1.png" id="fig-missed-mode" class="quarto-figure quarto-figure-center r-stretch" width="864"><p class="caption">
+Figure&nbsp;1
+</p><p>The observed effective sample size reports near-perfect efficiency. The <strong>exact</strong> effective fraction <span class="math inline">1/E_g(w^2)</span> is smaller by forty orders of magnitude — a property of <span class="math inline">f,g</span> alone, invisible to any single sample. The variance is finite at <span class="math inline">\sigma=1</span> (it diverges only for <span class="math inline">\sigma\le1/\sqrt2</span>), so the estimator is consistent — it would just need <span class="math inline">S\sim10^{43}</span> to look normal.</p>
+</section>
+<section id="example-1-continued-what-to-look-for" class="slide level2">
+<h2>Example 1 (Continued): What to Look For</h2>
+<p>Drag <span class="math inline">\sigma</span>: below <span class="math inline">1/\sqrt2</span> the variance is infinite; between there and <span class="math inline">\sigma\approx3</span> the failure is <strong>silent</strong> (observed <span class="math inline">S_{\text{eff}}</span> near <span class="math inline">S</span>, estimate stuck near <span class="math inline">\tfrac12</span>); past <span class="math inline">\sigma\approx4</span> the proposal finally reaches <span class="math inline">+d</span>, observed <span class="math inline">S_{\text{eff}}</span> <em>drops</em> — which looks like deterioration and is in fact the diagnostic finally working — and the estimate moves onto the truth.</p>
+</section>
+<section id="example-1-continued-an-interactive-view" class="slide level2">
+<h2>Example 1 (Continued): An Interactive View</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-engine="r"><pre class="sourceCode numberSource shinylive-r number-lines code-with-copy"><code class="sourceCode"><span id="cb3-1"><a href=""></a>#| '!! shinylive warning !!': |</span>
+<span id="cb3-2"><a href=""></a>#|   shinylive does not work in self-contained HTML documents.</span>
+<span id="cb3-3"><a href=""></a>#|   Please set `embed-resources: false` in your metadata.</span>
+<span id="cb3-4"><a href=""></a>#| standalone: true</span>
+<span id="cb3-5"><a href=""></a>#| viewerHeight: 820</span>
+<span id="cb3-6"><a href=""></a></span>
+<span id="cb3-7"><a href=""></a>library(shiny)</span>
+<span id="cb3-8"><a href=""></a>library(latex2exp)</span>
+<span id="cb3-9"><a href=""></a></span>
+<span id="cb3-10"><a href=""></a>d &lt;- 5</span>
+<span id="cb3-11"><a href=""></a>log_f &lt;- function(th, d) {</span>
+<span id="cb3-12"><a href=""></a>    a &lt;- dnorm(th, -d, log = TRUE); b &lt;- dnorm(th, d, log = TRUE)</span>
+<span id="cb3-13"><a href=""></a>    m &lt;- pmax(a, b)</span>
+<span id="cb3-14"><a href=""></a>    m + log(exp(a - m) + exp(b - m)) - log(2)</span>
+<span id="cb3-15"><a href=""></a>}</span>
+<span id="cb3-16"><a href=""></a>log_Ew2 &lt;- function(d, sg) {</span>
+<span id="cb3-17"><a href=""></a>    A &lt;- 2 - 1 / sg^2</span>
+<span id="cb3-18"><a href=""></a>    if (A &lt;= 0) return(Inf)</span>
+<span id="cb3-19"><a href=""></a>    lterm &lt;- function(a, b) {</span>
+<span id="cb3-20"><a href=""></a>        m &lt;- (a + b) / 2</span>
+<span id="cb3-21"><a href=""></a>        B &lt;- 2 * m + d / sg^2</span>
+<span id="cb3-22"><a href=""></a>        C &lt;- 2 * m^2 - d^2 / sg^2</span>
+<span id="cb3-23"><a href=""></a>        dnorm(a, b, sqrt(2), log = TRUE) + log(sg) + 0.5 * log(2) +</span>
+<span id="cb3-24"><a href=""></a>            0.5 * log(2 * pi / A) - 0.5 * (C - B^2 / A)</span>
+<span id="cb3-25"><a href=""></a>    }</span>
+<span id="cb3-26"><a href=""></a>    lv &lt;- c(lterm(-d, -d), log(2) + lterm(-d, d), lterm(d, d))</span>
+<span id="cb3-27"><a href=""></a>    m  &lt;- max(lv)</span>
+<span id="cb3-28"><a href=""></a>    m + log(sum(exp(lv - m))) - log(4)</span>
+<span id="cb3-29"><a href=""></a>}</span>
+<span id="cb3-30"><a href=""></a></span>
+<span id="cb3-31"><a href=""></a>ui &lt;- fluidPage(</span>
+<span id="cb3-32"><a href=""></a>    titlePanel("A Failure Example of Importance Sampling"),</span>
+<span id="cb3-33"><a href=""></a>    sidebarLayout(</span>
+<span id="cb3-34"><a href=""></a>        sidebarPanel(</span>
+<span id="cb3-35"><a href=""></a>            width = 3,</span>
+<span id="cb3-36"><a href=""></a>            sliderInput("sg", HTML("proposal sd &amp;sigma;"), min = 0.25, max = 8,</span>
+<span id="cb3-37"><a href=""></a>                        value = 1, step = 0.05),</span>
+<span id="cb3-38"><a href=""></a>            selectInput("S", "sample size  S",</span>
+<span id="cb3-39"><a href=""></a>                        choices = c(500, 2000, 10000), selected = 2000),</span>
+<span id="cb3-40"><a href=""></a>            numericInput("seed", "seed", value = 11, min = 1, step = 1),</span>
+<span id="cb3-41"><a href=""></a>            actionButton("new", "New sample"),</span>
+<span id="cb3-42"><a href=""></a>            tags$hr(style = "margin:8px 0"),</span>
+<span id="cb3-43"><a href=""></a>            htmlOutput("readout")</span>
+<span id="cb3-44"><a href=""></a>        ),</span>
+<span id="cb3-45"><a href=""></a>        mainPanel(width = 9, plotOutput("panels", height = "660px"))</span>
+<span id="cb3-46"><a href=""></a>    )</span>
+<span id="cb3-47"><a href=""></a>)</span>
+<span id="cb3-48"><a href=""></a></span>
+<span id="cb3-49"><a href=""></a>server &lt;- function(input, output) {</span>
+<span id="cb3-50"><a href=""></a></span>
+<span id="cb3-51"><a href=""></a>    sim &lt;- reactive({</span>
+<span id="cb3-52"><a href=""></a>        S  &lt;- as.integer(input$S); sg &lt;- input$sg</span>
+<span id="cb3-53"><a href=""></a>        set.seed(input$seed + 1000 * input$new)</span>
+<span id="cb3-54"><a href=""></a></span>
+<span id="cb3-55"><a href=""></a>        th   &lt;- rnorm(S, -d, sg)</span>
+<span id="cb3-56"><a href=""></a>        logw &lt;- log_f(th, d) - dnorm(th, -d, sg, log = TRUE)</span>
+<span id="cb3-57"><a href=""></a>        mx   &lt;- max(logw); v &lt;- exp(logw - mx)</span>
+<span id="cb3-58"><a href=""></a>        wn   &lt;- v / sum(v)</span>
+<span id="cb3-59"><a href=""></a></span>
+<span id="cb3-60"><a href=""></a>        list(th = th, wn = wn, S = S, sg = sg,</span>
+<span id="cb3-61"><a href=""></a>             Chat = mean(v) * exp(mx),</span>
+<span id="cb3-62"><a href=""></a>             se   = sd(v) / sqrt(S) * exp(mx),</span>
+<span id="cb3-63"><a href=""></a>             ess  = 1 / sum(wn^2),</span>
+<span id="cb3-64"><a href=""></a>             Ehat = sum(wn * th),</span>
+<span id="cb3-65"><a href=""></a>             lsum = mx + log(sum(v)),</span>
+<span id="cb3-66"><a href=""></a>             ess_x = 100 * exp(-log_Ew2(d, sg)))</span>
+<span id="cb3-67"><a href=""></a>    })</span>
+<span id="cb3-68"><a href=""></a></span>
+<span id="cb3-69"><a href=""></a>    output$panels &lt;- renderPlot({</span>
+<span id="cb3-70"><a href=""></a>        s  &lt;- sim(); th &lt;- s$th; sg &lt;- s$sg</span>
+<span id="cb3-71"><a href=""></a>        xr &lt;- range(c(th, -d - 4, d + 4))</span>
+<span id="cb3-72"><a href=""></a>        xs &lt;- seq(xr[1], xr[2], length.out = 1000)</span>
+<span id="cb3-73"><a href=""></a>        fx &lt;- exp(log_f(xs, d)); gx &lt;- dnorm(xs, -d, sg)</span>
+<span id="cb3-74"><a href=""></a>        lwc &lt;- log_f(xs, d) - dnorm(xs, -d, sg, log = TRUE) - s$lsum</span>
+<span id="cb3-75"><a href=""></a></span>
+<span id="cb3-76"><a href=""></a>        layout(matrix(1:2, 2), heights = c(3, 2))</span>
+<span id="cb3-77"><a href=""></a></span>
+<span id="cb3-78"><a href=""></a>        par(mar = c(0.4, 5, 3, 1))</span>
+<span id="cb3-79"><a href=""></a>        yl &lt;- c(1e-10, max(fx, gx) * 2)</span>
+<span id="cb3-80"><a href=""></a>        plot(xs, fx, type = "n", log = "y", ylim = yl, xlim = xr, xaxt = "n",</span>
+<span id="cb3-81"><a href=""></a>             xlab = "", ylab = "density (log scale)",</span>
+<span id="cb3-82"><a href=""></a>             main = "bimodal target and a proposal centred on one mode")</span>
+<span id="cb3-83"><a href=""></a>        lines(xs, fx, lwd = 4, col = "red")</span>
+<span id="cb3-84"><a href=""></a>        lines(xs, gx, lwd = 3, col = "grey60")</span>
+<span id="cb3-85"><a href=""></a>        rug(th, col = adjustcolor("grey45", 0.35))</span>
+<span id="cb3-86"><a href=""></a>        legend("bottomright", bty = "n", cex = 1.05, text.col = "navy",</span>
+<span id="cb3-87"><a href=""></a>               lwd = c(4, 3, NA, NA, NA),</span>
+<span id="cb3-88"><a href=""></a>               col = c("grey25", "grey60", NA, NA, NA),</span>
+<span id="cb3-89"><a href=""></a>               legend = TeX(c(</span>
+<span id="cb3-90"><a href=""></a>                   r"(target $f$)",</span>
+<span id="cb3-91"><a href=""></a>                   sprintf(r"(proposal $g$, sd $= %.2f$)", sg),</span>
+<span id="cb3-92"><a href=""></a>                   sprintf(r"($C_f/C_g$: true 1, est. %.3f)", s$Chat),</span>
+<span id="cb3-93"><a href=""></a>                   sprintf(r"(95%% CI $(%.3f, %.3f)$)", s$Chat - 1.96 * s$se, s$Chat + 1.96 * s$se),</span>
+<span id="cb3-94"><a href=""></a>                   sprintf(r"($E_f(\theta)$: true 0, est. %.2f)", s$Ehat))))</span>
+<span id="cb3-95"><a href=""></a></span>
+<span id="cb3-96"><a href=""></a>        par(mar = c(4.5, 5, 0.4, 1))</span>
+<span id="cb3-97"><a href=""></a>        wn &lt;- s$wn</span>
+<span id="cb3-98"><a href=""></a>        wl &lt;- c(min(wn) / 5, max(wn) * 5)</span>
+<span id="cb3-99"><a href=""></a>        plot(th, wn, type = "n", log = "y", ylim = wl, xlim = xr,</span>
+<span id="cb3-100"><a href=""></a>             xlab = expression(theta), ylab = "normalized weight (log scale)")</span>
+<span id="cb3-101"><a href=""></a>        lines(xs, exp(pmin(lwc, 700)), lwd = 2, col = "grey25")</span>
+<span id="cb3-102"><a href=""></a>        segments(th, wl[1], th, wn, col = adjustcolor("grey45", 0.5))</span>
+<span id="cb3-103"><a href=""></a>        abline(h = 1 / s$S, lty = 2, col = "grey55", lwd = 2)</span>
+<span id="cb3-104"><a href=""></a>        legend("bottomright", bty = "n", cex = 1.05, text.col = "navy",</span>
+<span id="cb3-105"><a href=""></a>               lty = c(2, 1, NA, NA), lwd = c(2, 2, NA, NA),</span>
+<span id="cb3-106"><a href=""></a>               col = c("grey55", "grey25", NA, NA),</span>
+<span id="cb3-107"><a href=""></a>               legend = TeX(c(</span>
+<span id="cb3-108"><a href=""></a>                   r"($1/S$)",</span>
+<span id="cb3-109"><a href=""></a>                   r"(normalized weight function)",</span>
+<span id="cb3-110"><a href=""></a>                   sprintf(r"(observed $S_{eff}$ = %.1f%% of S)", 100 * s$ess / s$S),</span>
+<span id="cb3-111"><a href=""></a>                   sprintf(r"(exact $S_{eff}$ = %.3g%% of S)", s$ess_x))))</span>
+<span id="cb3-112"><a href=""></a>    })</span>
+<span id="cb3-113"><a href=""></a></span>
+<span id="cb3-114"><a href=""></a>    output$readout &lt;- renderUI({</span>
+<span id="cb3-115"><a href=""></a>        s &lt;- sim()</span>
+<span id="cb3-116"><a href=""></a>        HTML(sprintf(</span>
+<span id="cb3-117"><a href=""></a>            "&lt;b&gt;C&lt;sub&gt;f&lt;/sub&gt;/C&lt;sub&gt;g&lt;/sub&gt;&lt;/b&gt;&lt;br&gt;true 1, est. %.4f&lt;br&gt;</span>
+<span id="cb3-118"><a href=""></a>             &lt;b&gt;95%% CI&lt;/b&gt; (%.4f, %.4f)&lt;br&gt;</span>
+<span id="cb3-119"><a href=""></a>             &lt;b&gt;E&lt;sub&gt;f&lt;/sub&gt;(theta)&lt;/b&gt;&lt;br&gt;true 0, est. %.3f&lt;br&gt;</span>
+<span id="cb3-120"><a href=""></a>             &lt;b&gt;observed ESS&lt;/b&gt; %.1f%%&lt;br&gt;</span>
+<span id="cb3-121"><a href=""></a>             &lt;b&gt;exact ESS&lt;/b&gt; %.3g%%&lt;br&gt;</span>
+<span id="cb3-122"><a href=""></a>             &lt;b&gt;Var&lt;sub&gt;f&lt;/sub&gt;(w)&lt;/b&gt; %s",</span>
+<span id="cb3-123"><a href=""></a>            s$Chat, s$Chat - 1.96 * s$se, s$Chat + 1.96 * s$se, s$Ehat,</span>
+<span id="cb3-124"><a href=""></a>            100 * s$ess / s$S, s$ess_x,</span>
+<span id="cb3-125"><a href=""></a>            if (s$sg &lt;= 1 / sqrt(2)) "infinite" else "finite"))</span>
+<span id="cb3-126"><a href=""></a>    })</span>
+<span id="cb3-127"><a href=""></a>}</span>
+<span id="cb3-128"><a href=""></a></span>
+<span id="cb3-129"><a href=""></a>shinyApp(ui, server)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section></section>
 <section>
-<section id="two-bad-stories" class="title-slide slide level1 center">
-<h1>4. Two Bad Stories</h1>
+<section id="example-2-tail-probability-of-a-student-t-distribution" class="title-slide slide level1 center">
+<h1>4. Example 2: Tail Probability of a Student-<span class="math inline">t</span> Distribution</h1>
 
 </section>
-<section id="example-2-same-support-but-a-mode-is-missed" class="slide level2">
-<h2>Example 2: Same Support, but a Mode Is Missed</h2>
-<p><span class="math display">f(\theta) = \tfrac12\varphi(\theta+5) + \tfrac12\varphi(\theta-5), \qquad g(\theta) = \varphi(\theta+5)</span></p>
-<p>Both are positive on all of <span class="math inline">\mathbb R</span>, so the support requirement holds. But <span class="math inline">g</span> concentrates around <span class="math inline">-5</span> and never produces draws near the second mode at <span class="math inline">+5</span>.</p>
-<p>For <span class="math inline">\theta</span> near <span class="math inline">-5</span>, <span class="math display">w(\theta) = \frac{f(\theta)}{g(\theta)} = \tfrac12 + \tfrac12\,\frac{\varphi(\theta-5)}{\varphi(\theta+5)} = \tfrac12 + \tfrac12 e^{10\theta}\ \approx\ \tfrac12</span></p>
-<p>so all observed weights are nearly equal: <span class="math inline">\tilde w_i\approx 1/S</span> and <span class="math inline">S_{\text{eff}}\approx S</span>. Yet</p>
+<section id="example-2-tail-probability-of-a-student-t-distribution-1" class="slide level2">
+<h2>Example 2: Tail Probability of a Student-<span class="math inline">t</span> Distribution</h2>
+<p>The target is a standard Student-<span class="math inline">t_\nu</span>: <span class="math inline">\nu=1</span> is the Cauchy, <span class="math inline">\nu\to\infty</span> recovers the normal — <span class="math inline">\nu</span> is a <strong>tuning parameter of the target’s tail weight</strong>. Goal: <span class="math inline">P(c_1&lt;X&lt;c_2)</span> for an interval <span class="math inline">(c_1,c_2)</span>, possibly one-sided (<span class="math inline">c_2=\infty</span>), from a truncated-normal proposal sampled by adaptive rejection sampling (ARS).</p>
+<p><span class="math inline">\log\varphi</span> is concave, and restricting to <span class="math inline">(c_1,c_2)</span> preserves concavity, so the <code>ars</code> package applies directly to the <em>proposal</em>.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>rtnorm_ars <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">sigma =</span> <span class="dv">1</span>, <span class="at">lo =</span> <span class="dv">0</span>, <span class="at">hi =</span> <span class="cn">Inf</span>) {</span>
+<span id="cb4-2"><a href=""></a>    logf   <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">dnorm</span>(x, mu, sigma, <span class="at">log =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-3"><a href=""></a>    fprima <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="sc">-</span>(x <span class="sc">-</span> mu) <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-4"><a href=""></a>    <span class="cf">if</span> (<span class="fu">is.finite</span>(hi)) {</span>
+<span id="cb4-5"><a href=""></a>        x0 <span class="ot">&lt;-</span> lo <span class="sc">+</span> (hi <span class="sc">-</span> lo) <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>)</span>
+<span id="cb4-6"><a href=""></a>    } <span class="cf">else</span> {</span>
+<span id="cb4-7"><a href=""></a>        right <span class="ot">&lt;-</span> <span class="fu">max</span>(mu, lo) <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> sigma</span>
+<span id="cb4-8"><a href=""></a>        x0 <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">c</span>(lo <span class="sc">+</span> <span class="fl">0.1</span> <span class="sc">*</span> sigma, <span class="fu">max</span>(lo <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> sigma, mu <span class="sc">+</span> <span class="fl">1e-6</span>), right)))</span>
+<span id="cb4-9"><a href=""></a>    }</span>
+<span id="cb4-10"><a href=""></a>    <span class="fu">ars</span>(n, <span class="at">f =</span> logf, <span class="at">fprima =</span> fprima, <span class="at">x =</span> x0,</span>
+<span id="cb4-11"><a href=""></a>        <span class="at">lb =</span> <span class="cn">TRUE</span>, <span class="at">xlb =</span> lo, <span class="at">ub =</span> <span class="fu">is.finite</span>(hi), <span class="at">xub =</span> <span class="cf">if</span> (<span class="fu">is.finite</span>(hi)) hi <span class="cf">else</span> <span class="dv">0</span>)</span>
+<span id="cb4-12"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The <code>ars</code> package is itself available inside the browser (webR fetches it live), so the interactive app below calls this <em>exact</em> function.</p>
+<p>The target <span class="math inline">\log f_{t_\nu}</span> is <strong>not concave</strong> at any finite <span class="math inline">\nu</span> — convex out in the tails, concave everywhere only in the <span class="math inline">\nu\to\infty</span> limit — so ARS cannot sample it directly. The truncated-normal proposal is a substitute, which is exactly why the sample needs importance weights.</p>
+</section>
+<section id="example-2-continued-the-estimator" class="slide level2">
+<h2>Example 2 (Continued): The Estimator</h2>
+<p>Let <span class="math inline">g</span> be the normalized truncated normal on <span class="math inline">(c_1,c_2)</span>, <span class="math inline">f(x)=f_{t_\nu}(x)I(c_1&lt;x&lt;c_2)</span>. Draw <span class="math inline">X_1,\ldots,X_S\sim g</span>, weight by <span class="math inline">w=f/g</span>, average: <span class="math display">\widehat C = \frac1S\sum_{i=1}^S w(X_i)</span> unbiased for <span class="math inline">C_f=P(c_1&lt;X&lt;c_2)</span> for <em>any</em> <span class="math inline">g</span> positive wherever <span class="math inline">f</span> is — regardless of <span class="math inline">c_1,c_2,\mu,\sigma,\nu</span>.</p>
+</section>
+<section id="example-2-continued-when-its-variance-is-infinite" class="slide level2 smaller">
+<h2>Example 2 (Continued): When Its Variance Is Infinite</h2>
+<p><em>Precision</em> is a different question: <span class="math display">\operatorname{Var}_g\bigl(w(X)\bigr) = \int_{c_1}^{c_2}\frac{f_{t_\nu}(x)^2}{g(x)}\,dx - C_f^2</span></p>
 <ul>
-<li><span class="math inline">\widehat{C_f/C_g} = \frac1S\sum_i w_i \approx \tfrac12</span>, while the truth is <span class="math inline">1</span></li>
-<li><span class="math inline">\hat E_f(\theta) \approx -5</span>, while the truth is <span class="math inline">0</span></li>
+<li><strong><span class="math inline">c_2</span> finite</strong>: <span class="math inline">f,g</span> share the same bounded interval, <span class="math inline">f/g</span> is bounded on it, the integral is finite — well-behaved at <em>any</em> <span class="math inline">\nu</span>.</li>
+<li><strong><span class="math inline">c_2\to\infty</span></strong>: <span class="math inline">f_{t_\nu}(x)^2</span> decays only polynomially (<span class="math inline">\propto x^{-2(\nu+1)}</span>), <span class="math inline">g</span>’s Gaussian tail decays much faster — the integrand grows without bound and the integral <strong>diverges</strong>, for every <span class="math inline">\mu,\sigma</span> and every finite <span class="math inline">\nu</span>.</li>
 </ul>
-<p>The draws that would reveal the error (those with <span class="math inline">w\approx \tfrac12 e^{10\theta}\gg1</span>, near <span class="math inline">\theta = 5</span>) have probability <span class="math inline">\approx \Phi(-10)\approx 10^{-23}</span> under <span class="math inline">g</span>: they never appear.</p>
+<p><span class="math inline">S_{\text{eff}}</span> need not warn you which regime you are in.</p>
 </section>
-<section id="example-2-continued" class="slide level2">
-<h2>Example 2 (Continued)</h2>
-
-<img data-src="Lec_11_Importance_Sampling_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p><strong>Lesson</strong>: near-constant weights show only that <span class="math inline">g</span> matches <span class="math inline">f</span> <strong>where <span class="math inline">g</span> has mass</strong>. They say nothing about regions <span class="math inline">g</span> never visits. Use a proposal wide enough to cover all modes, or a mixture proposal, and compare results across different <span class="math inline">g</span>.</p>
+<section id="example-2-continued-is_t_interval" class="slide level2">
+<h2>Example 2 (Continued): <code>is_t_interval()</code></h2>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>is_t_interval <span class="ot">&lt;-</span> <span class="cf">function</span>(S, df, c1, c2, mu, sigma, <span class="at">seed =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb5-2"><a href=""></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(seed)) <span class="fu">set.seed</span>(seed)</span>
+<span id="cb5-3"><a href=""></a>    X <span class="ot">&lt;-</span> <span class="fu">rtnorm_ars</span>(S, mu, sigma, c1, c2)</span>
+<span id="cb5-4"><a href=""></a></span>
+<span id="cb5-5"><a href=""></a>    lZ   <span class="ot">&lt;-</span> <span class="fu">log</span>(<span class="fu">pnorm</span>(c2, mu, sigma) <span class="sc">-</span> <span class="fu">pnorm</span>(c1, mu, sigma))</span>
+<span id="cb5-6"><a href=""></a>    logw <span class="ot">&lt;-</span> <span class="fu">dt</span>(X, df, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">-</span> (<span class="fu">dnorm</span>(X, mu, sigma, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">-</span> lZ)</span>
+<span id="cb5-7"><a href=""></a></span>
+<span id="cb5-8"><a href=""></a>    m    <span class="ot">&lt;-</span> <span class="fu">max</span>(logw); v <span class="ot">&lt;-</span> <span class="fu">exp</span>(logw <span class="sc">-</span> m)</span>
+<span id="cb5-9"><a href=""></a>    Chat <span class="ot">&lt;-</span> <span class="fu">mean</span>(v) <span class="sc">*</span> <span class="fu">exp</span>(m); se <span class="ot">&lt;-</span> <span class="fu">sd</span>(v) <span class="sc">/</span> <span class="fu">sqrt</span>(S) <span class="sc">*</span> <span class="fu">exp</span>(m)</span>
+<span id="cb5-10"><a href=""></a>    wn   <span class="ot">&lt;-</span> v <span class="sc">/</span> <span class="fu">sum</span>(v)</span>
+<span id="cb5-11"><a href=""></a></span>
+<span id="cb5-12"><a href=""></a>    <span class="fu">list</span>(<span class="at">X =</span> X, <span class="at">wn =</span> wn, <span class="at">Chat =</span> Chat, <span class="at">se =</span> se, <span class="at">ess =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sum</span>(wn<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb5-13"><a href=""></a>         <span class="at">truth =</span> <span class="fu">pt</span>(c2, df) <span class="sc">-</span> <span class="fu">pt</span>(c1, df))</span>
+<span id="cb5-14"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>settings <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">df =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">1</span>, <span class="dv">30</span>), <span class="at">c1 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">c2 =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="cn">Inf</span>, <span class="cn">Inf</span>))</span>
+<span id="cb6-2"><a href=""></a>res <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(settings)), <span class="cf">function</span>(i) <span class="fu">with</span>(settings[i, ],</span>
+<span id="cb6-3"><a href=""></a>    <span class="fu">is_t_interval</span>(<span class="at">S =</span> <span class="dv">5000</span>, <span class="at">df =</span> df, <span class="at">c1 =</span> c1, <span class="at">c2 =</span> c2, <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">sigma =</span> <span class="dv">1</span>, <span class="at">seed =</span> <span class="dv">1</span>)))</span>
+<span id="cb6-4"><a href=""></a></span>
+<span id="cb6-5"><a href=""></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb6-6"><a href=""></a>    <span class="at">df =</span> settings<span class="sc">$</span>df, <span class="at">c1 =</span> settings<span class="sc">$</span>c1,</span>
+<span id="cb6-7"><a href=""></a>    <span class="at">c2 =</span> <span class="fu">ifelse</span>(<span class="fu">is.finite</span>(settings<span class="sc">$</span>c2), <span class="fu">as.character</span>(settings<span class="sc">$</span>c2), <span class="st">"Inf"</span>),</span>
+<span id="cb6-8"><a href=""></a>    <span class="at">truth =</span> <span class="fu">sapply</span>(res, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">"truth"</span>), <span class="at">estimate =</span> <span class="fu">sapply</span>(res, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">"Chat"</span>),</span>
+<span id="cb6-9"><a href=""></a>    <span class="at">se =</span> <span class="fu">sapply</span>(res, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">"se"</span>), <span class="at">ess_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">sapply</span>(res, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">"ess"</span>) <span class="sc">/</span> <span class="dv">5000</span></span>
+<span id="cb6-10"><a href=""></a>), <span class="at">digits =</span> <span class="dv">4</span>, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"df"</span>, <span class="st">"c1"</span>, <span class="st">"c2"</span>, <span class="st">"truth"</span>, <span class="st">"estimate"</span>, <span class="st">"s.e."</span>, <span class="st">"ESS %"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-is-t-examples" class="cell quarto-float quarto-figure quarto-figure-center" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-is-t-examples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1
+</figcaption>
+<div aria-describedby="tbl-is-t-examples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">df</th>
+<th style="text-align: right;">c1</th>
+<th style="text-align: left;">c2</th>
+<th style="text-align: right;">truth</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">s.e.</th>
+<th style="text-align: right;">ESS %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">0.1476</td>
+<td style="text-align: right;">0.1490</td>
+<td style="text-align: right;">0.0014</td>
+<td style="text-align: right;">68.7656</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">0.1638</td>
+<td style="text-align: right;">0.1642</td>
+<td style="text-align: right;">0.0004</td>
+<td style="text-align: right;">96.8918</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Inf</td>
+<td style="text-align: right;">0.2500</td>
+<td style="text-align: right;">0.1821</td>
+<td style="text-align: right;">0.0128</td>
+<td style="text-align: right;">3.9146</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Inf</td>
+<td style="text-align: right;">0.1627</td>
+<td style="text-align: right;">0.1627</td>
+<td style="text-align: right;">0.0003</td>
+<td style="text-align: right;">98.5371</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>A finite interval is well-behaved at any <span class="math inline">\nu</span>; <span class="math inline">c_2=\infty</span> reproduces the divergence — badly at <span class="math inline">\nu=1</span>, only <em>deceptively</em> well at <span class="math inline">\nu=30</span>.</p>
 </section>
-<section id="example-3-violating-the-support-requirement" class="slide level2">
-<h2>Example 3: Violating the Support Requirement</h2>
-<p><span class="math display">f(\theta) = I(0\le\theta\le2), \qquad g(\theta) = I(0\le\theta\le1)</span></p>
-<p>Here <span class="math inline">\text{supp}(g)\subset\text{supp}(f)</span>: the proposal never visits <span class="math inline">(1,2]</span>. True ratio: <span class="math inline">C_f/C_g = 2/1 = 2</span>.</p>
-<p>Draw <span class="math inline">\theta_s\sim g</span>, i.e.&nbsp;<span class="math inline">\text{Unif}(0,1)</span>. For every draw, <span class="math inline">w(\theta_s) = f(\theta_s)/g(\theta_s) = 1</span>, so <span class="math display">\widehat{\frac{C_f}{C_g}} = \frac1S\sum_{s=1}^S w(\theta_s) = 1 \ \ne\ 2, \qquad S_{\text{eff}} = S</span></p>
-<p>The estimate is wrong <strong>regardless of <span class="math inline">S</span></strong>, with perfect-looking weights. Example 2 is the smooth version of the same failure. The reverse situation (<span class="math inline">g</span> wider than <span class="math inline">f</span>) is harmless: draws outside <span class="math inline">\text{supp}(f)</span> simply receive weight <span class="math inline">0</span>.</p>
-
-<img data-src="Lec_11_Importance_Sampling_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="768"></section>
-<section id="the-opposite-failure-heavy-tailed-weights" class="slide level2">
-<h2>The Opposite Failure: Heavy-Tailed Weights</h2>
-<p>Examples 2 and 3 fail silently because <span class="math inline">g</span> is too <strong>narrow</strong>. A <span class="math inline">g</span> with lighter tails than <span class="math inline">f</span> fails noisily: <span class="math inline">w = f/g</span> is unbounded, <span class="math inline">\text{Var}_g(w)</span> may be infinite, and a rare tail draw arrives with a huge weight.</p>
-
-<img data-src="Lec_11_Importance_Sampling_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p><strong>Practical rules</strong>: give <span class="math inline">g</span> tails at least as heavy as <span class="math inline">f</span> (a <span class="math inline">t</span> rather than a normal); centre and inflate <span class="math inline">g</span> using a mode and Hessian (a Laplace approximation is a natural start); report <span class="math inline">S_{\text{eff}}</span> and <span class="math inline">\max_i\tilde w_i</span>; rerun with different <span class="math inline">g</span> and distrust diverging answers.</p>
+<section id="example-2-continued-what-the-app-shows" class="slide level2">
+<h2>Example 2 (Continued): What the App Shows</h2>
+<p><span class="math inline">c_1,c_2,\mu,\sigma,\nu</span> under slider control (a checkbox sends <span class="math inline">c_2\to\infty</span>). Legend: true <span class="math inline">P</span>, estimate, 95% CI colored green/red by coverage.</p>
+</section>
+<section id="example-2-continued-an-interactive-view" class="slide level2">
+<h2>Example 2 (Continued): An Interactive View</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-engine="r"><pre class="sourceCode numberSource shinylive-r number-lines code-with-copy"><code class="sourceCode"><span id="cb7-1"><a href=""></a>#| '!! shinylive warning !!': |</span>
+<span id="cb7-2"><a href=""></a>#|   shinylive does not work in self-contained HTML documents.</span>
+<span id="cb7-3"><a href=""></a>#|   Please set `embed-resources: false` in your metadata.</span>
+<span id="cb7-4"><a href=""></a>#| standalone: true</span>
+<span id="cb7-5"><a href=""></a>#| viewerHeight: 850</span>
+<span id="cb7-6"><a href=""></a></span>
+<span id="cb7-7"><a href=""></a>library(shiny)</span>
+<span id="cb7-8"><a href=""></a>library(ars)</span>
+<span id="cb7-9"><a href=""></a></span>
+<span id="cb7-10"><a href=""></a>rtnorm_ars &lt;- function(n, mu = 0, sigma = 1, lo = 0, hi = Inf) {</span>
+<span id="cb7-11"><a href=""></a>    logf   &lt;- function(x) dnorm(x, mu, sigma, log = TRUE)</span>
+<span id="cb7-12"><a href=""></a>    fprima &lt;- function(x) -(x - mu) / sigma^2</span>
+<span id="cb7-13"><a href=""></a>    if (is.finite(hi)) {</span>
+<span id="cb7-14"><a href=""></a>        x0 &lt;- lo + (hi - lo) * c(0.1, 0.5, 0.9)</span>
+<span id="cb7-15"><a href=""></a>    } else {</span>
+<span id="cb7-16"><a href=""></a>        right &lt;- max(mu, lo) + 3 * sigma</span>
+<span id="cb7-17"><a href=""></a>        x0 &lt;- sort(unique(c(lo + 0.1 * sigma, max(lo + 0.2 * sigma, mu + 1e-6), right)))</span>
+<span id="cb7-18"><a href=""></a>    }</span>
+<span id="cb7-19"><a href=""></a>    ars(n, f = logf, fprima = fprima, x = x0,</span>
+<span id="cb7-20"><a href=""></a>        lb = TRUE, xlb = lo, ub = is.finite(hi), xub = if (is.finite(hi)) hi else 0)</span>
+<span id="cb7-21"><a href=""></a>}</span>
+<span id="cb7-22"><a href=""></a></span>
+<span id="cb7-23"><a href=""></a>is_t_interval &lt;- function(S, df, c1, c2, mu, sigma, seed = NULL) {</span>
+<span id="cb7-24"><a href=""></a>    if (!is.null(seed)) set.seed(seed)</span>
+<span id="cb7-25"><a href=""></a>    X &lt;- rtnorm_ars(S, mu, sigma, c1, c2)</span>
+<span id="cb7-26"><a href=""></a></span>
+<span id="cb7-27"><a href=""></a>    lZ   &lt;- log(pnorm(c2, mu, sigma) - pnorm(c1, mu, sigma))</span>
+<span id="cb7-28"><a href=""></a>    logw &lt;- dt(X, df, log = TRUE) - (dnorm(X, mu, sigma, log = TRUE) - lZ)</span>
+<span id="cb7-29"><a href=""></a></span>
+<span id="cb7-30"><a href=""></a>    m    &lt;- max(logw); v &lt;- exp(logw - m)</span>
+<span id="cb7-31"><a href=""></a>    Chat &lt;- mean(v) * exp(m); se &lt;- sd(v) / sqrt(S) * exp(m)</span>
+<span id="cb7-32"><a href=""></a>    wn   &lt;- v / sum(v)</span>
+<span id="cb7-33"><a href=""></a></span>
+<span id="cb7-34"><a href=""></a>    list(X = X, wn = wn, Chat = Chat, se = se, ess = 1 / sum(wn^2),</span>
+<span id="cb7-35"><a href=""></a>         truth = pt(c2, df) - pt(c1, df))</span>
+<span id="cb7-36"><a href=""></a>}</span>
+<span id="cb7-37"><a href=""></a></span>
+<span id="cb7-38"><a href=""></a>ui &lt;- fluidPage(</span>
+<span id="cb7-39"><a href=""></a>    titlePanel("Importance sampling for a Student-t interval with a truncated-normal proposal"),</span>
+<span id="cb7-40"><a href=""></a>    sidebarLayout(</span>
+<span id="cb7-41"><a href=""></a>        sidebarPanel(</span>
+<span id="cb7-42"><a href=""></a>            width = 3,</span>
+<span id="cb7-43"><a href=""></a>            sliderInput("df", HTML("target df &amp;nu;"), min = 1, max = 30, value = 3, step = 1),</span>
+<span id="cb7-44"><a href=""></a>            sliderInput("c1", HTML("c&lt;sub&gt;1&lt;/sub&gt;"), min = -5, max = 10, value = 1, step = 0.25),</span>
+<span id="cb7-45"><a href=""></a>            sliderInput("c2", HTML("c&lt;sub&gt;2&lt;/sub&gt;"), min = -5, max = 15, value = 3, step = 0.25),</span>
+<span id="cb7-46"><a href=""></a>            checkboxInput("c2inf", HTML("c&lt;sub&gt;2&lt;/sub&gt; = &amp;infin;  (infinite-variance case)"), FALSE),</span>
+<span id="cb7-47"><a href=""></a>            sliderInput("mu", HTML("proposal &amp;mu;"), min = -5, max = 20, value = 0, step = 0.25),</span>
+<span id="cb7-48"><a href=""></a>            sliderInput("sg", HTML("proposal &amp;sigma;"), min = 0.25, max = 10, value = 1, step = 0.25),</span>
+<span id="cb7-49"><a href=""></a>            selectInput("S", "sample size  S",</span>
+<span id="cb7-50"><a href=""></a>                        choices = c(200, 1000, 5000, 20000), selected = 1000),</span>
+<span id="cb7-51"><a href=""></a>            actionButton("new", "New sample"),</span>
+<span id="cb7-52"><a href=""></a>            checkboxInput("logw", "log scale for weights", FALSE)</span>
+<span id="cb7-53"><a href=""></a>        ),</span>
+<span id="cb7-54"><a href=""></a>        mainPanel(width = 9, plotOutput("panels", height = "680px"))</span>
+<span id="cb7-55"><a href=""></a>    )</span>
+<span id="cb7-56"><a href=""></a>)</span>
+<span id="cb7-57"><a href=""></a></span>
+<span id="cb7-58"><a href=""></a>server &lt;- function(input, output) {</span>
+<span id="cb7-59"><a href=""></a></span>
+<span id="cb7-60"><a href=""></a>    sim &lt;- reactive({</span>
+<span id="cb7-61"><a href=""></a>        S  &lt;- as.integer(input$S)</span>
+<span id="cb7-62"><a href=""></a>        c1 &lt;- input$c1</span>
+<span id="cb7-63"><a href=""></a>        c2 &lt;- if (input$c2inf) Inf else input$c2</span>
+<span id="cb7-64"><a href=""></a>        validate(need(c2 &gt; c1, "c2 must be greater than c1"))</span>
+<span id="cb7-65"><a href=""></a>        mu &lt;- input$mu; sg &lt;- input$sg; df &lt;- input$df</span>
+<span id="cb7-66"><a href=""></a></span>
+<span id="cb7-67"><a href=""></a>        r &lt;- is_t_interval(S, df, c1, c2, mu, sg, seed = input$new + 1)</span>
+<span id="cb7-68"><a href=""></a>        c(r, list(S = S, c1 = c1, c2 = c2, mu = mu, sg = sg, df = df))</span>
+<span id="cb7-69"><a href=""></a>    })</span>
+<span id="cb7-70"><a href=""></a></span>
+<span id="cb7-71"><a href=""></a>    output$panels &lt;- renderPlot({</span>
+<span id="cb7-72"><a href=""></a>        s  &lt;- sim()</span>
+<span id="cb7-73"><a href=""></a>        c1 &lt;- s$c1; c2 &lt;- s$c2; X &lt;- s$X</span>
+<span id="cb7-74"><a href=""></a>        lo &lt;- c1</span>
+<span id="cb7-75"><a href=""></a>        hi &lt;- if (is.finite(c2)) c2 else max(max(X) + 0.5, c1 + 5)</span>
+<span id="cb7-76"><a href=""></a>        xs &lt;- seq(lo, hi, length.out = 800)</span>
+<span id="cb7-77"><a href=""></a></span>
+<span id="cb7-78"><a href=""></a>        ft &lt;- dt(xs, s$df) / s$truth</span>
+<span id="cb7-79"><a href=""></a>        gt &lt;- dnorm(xs, s$mu, s$sg) / (pnorm(c2, s$mu, s$sg) - pnorm(c1, s$mu, s$sg))</span>
+<span id="cb7-80"><a href=""></a>        yl &lt;- range(c(ft, gt)[c(ft, gt) &gt; 0])</span>
+<span id="cb7-81"><a href=""></a>        yl[1] &lt;- max(yl[1], 1e-12)</span>
+<span id="cb7-82"><a href=""></a></span>
+<span id="cb7-83"><a href=""></a>        lwr &lt;- s$Chat - 1.96 * s$se</span>
+<span id="cb7-84"><a href=""></a>        upr &lt;- s$Chat + 1.96 * s$se</span>
+<span id="cb7-85"><a href=""></a>        covered &lt;- lwr &lt;= s$truth &amp;&amp; s$truth &lt;= upr</span>
+<span id="cb7-86"><a href=""></a>        ci_col  &lt;- if (covered) "darkgreen" else "firebrick"</span>
+<span id="cb7-87"><a href=""></a></span>
+<span id="cb7-88"><a href=""></a>        layout(matrix(1:2, 2), heights = c(3, 2))</span>
+<span id="cb7-89"><a href=""></a></span>
+<span id="cb7-90"><a href=""></a>        par(mar = c(0.4, 5, 3, 1))</span>
+<span id="cb7-91"><a href=""></a>        plot(xs, ft, type = "n", log = "y", ylim = yl, xlim = c(lo, hi),</span>
+<span id="cb7-92"><a href=""></a>             xaxt = "n", xlab = "", ylab = "density (log scale)",</span>
+<span id="cb7-93"><a href=""></a>             main = "target and proposal, both normalized on (c1, c2)")</span>
+<span id="cb7-94"><a href=""></a>        if (!is.finite(c2)) {</span>
+<span id="cb7-95"><a href=""></a>            rect(max(X), yl[1], hi, yl[2] * 10,</span>
+<span id="cb7-96"><a href=""></a>                 col = adjustcolor("grey60", 0.18), border = NA)</span>
+<span id="cb7-97"><a href=""></a>            text(max(X), yl[2], "  no draw ever reached here", adj = c(0, 1.4),</span>
+<span id="cb7-98"><a href=""></a>                 col = "grey35", cex = 0.95)</span>
+<span id="cb7-99"><a href=""></a>        }</span>
+<span id="cb7-100"><a href=""></a>        lines(xs, ft, lwd = 4, col = "firebrick")</span>
+<span id="cb7-101"><a href=""></a>        lines(xs, gt, lwd = 3, col = "steelblue")</span>
+<span id="cb7-102"><a href=""></a>        rug(X, col = adjustcolor("steelblue", 0.25))</span>
+<span id="cb7-103"><a href=""></a>        legend("bottomleft", inset = c(0.02, 0.05), bty = "n", cex = 1.05,</span>
+<span id="cb7-104"><a href=""></a>               lwd = c(4, 3, NA, NA, NA),</span>
+<span id="cb7-105"><a href=""></a>               col = c("firebrick", "steelblue", NA, NA, NA),</span>
+<span id="cb7-106"><a href=""></a>               text.col = c("black", "black", "black", "black", ci_col),</span>
+<span id="cb7-107"><a href=""></a>               legend = c(</span>
+<span id="cb7-108"><a href=""></a>                   sprintf("target: t(df=%g) on (c1, c2)", s$df),</span>
+<span id="cb7-109"><a href=""></a>                   sprintf("proposal: N(%.2f, %.2f^2) on (c1, c2)", s$mu, s$sg),</span>
+<span id="cb7-110"><a href=""></a>                   sprintf("true  P = %.5g", s$truth),</span>
+<span id="cb7-111"><a href=""></a>                   sprintf("est.   P = %.5g", s$Chat),</span>
+<span id="cb7-112"><a href=""></a>                   sprintf("95%% CI = (%.5g, %.5g)", lwr, upr)))</span>
+<span id="cb7-113"><a href=""></a></span>
+<span id="cb7-114"><a href=""></a>        par(mar = c(4.5, 5, 0.4, 1))</span>
+<span id="cb7-115"><a href=""></a>        wn &lt;- s$wn</span>
+<span id="cb7-116"><a href=""></a>        if (input$logw) {</span>
+<span id="cb7-117"><a href=""></a>            wl &lt;- c(max(min(wn[wn &gt; 0]), 1e-12), max(wn))</span>
+<span id="cb7-118"><a href=""></a>            plot(X, wn, type = "n", log = "y", ylim = wl, xlim = c(lo, hi),</span>
+<span id="cb7-119"><a href=""></a>                 xlab = "x", ylab = "normalized weight (log scale)")</span>
+<span id="cb7-120"><a href=""></a>            segments(X, wl[1], X, wn, col = adjustcolor("grey50", 0.6))</span>
+<span id="cb7-121"><a href=""></a>        } else {</span>
+<span id="cb7-122"><a href=""></a>            plot(X, wn, type = "n", ylim = c(0, max(wn) * 1.08),</span>
+<span id="cb7-123"><a href=""></a>                 xlim = c(lo, hi), xlab = "x", ylab = "normalized weight")</span>
+<span id="cb7-124"><a href=""></a>            segments(X, 0, X, wn, col = adjustcolor("grey50", 0.6))</span>
+<span id="cb7-125"><a href=""></a>        }</span>
+<span id="cb7-126"><a href=""></a>        abline(h = 1 / s$S, lty = 2, col = "darkgreen", lwd = 2)</span>
+<span id="cb7-127"><a href=""></a>        legend("topright", inset = c(0.02, 0.05), bty = "n", cex = 1.05,</span>
+<span id="cb7-128"><a href=""></a>               lty = c(2, NA, NA), lwd = c(2, NA, NA),</span>
+<span id="cb7-129"><a href=""></a>               col = c("darkgreen", NA, NA),</span>
+<span id="cb7-130"><a href=""></a>               text.col = "blue",</span>
+<span id="cb7-131"><a href=""></a>               legend = c("1 / S  (perfectly balanced weights)",</span>
+<span id="cb7-132"><a href=""></a>                          sprintf("ESS = %.1f   (%.2f%% of S = %d)",</span>
+<span id="cb7-133"><a href=""></a>                                  s$ess, 100 * s$ess / s$S, s$S),</span>
+<span id="cb7-134"><a href=""></a>                          sprintf("largest weight = %.1f%% of the total",</span>
+<span id="cb7-135"><a href=""></a>                                  100 * max(wn))))</span>
+<span id="cb7-136"><a href=""></a>    })</span>
+<span id="cb7-137"><a href=""></a>}</span>
+<span id="cb7-138"><a href=""></a></span>
+<span id="cb7-139"><a href=""></a>shinyApp(ui, server)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-2-continued-settings-to-try" class="slide level2 smaller">
+<h2>Example 2 (Continued): Settings to Try</h2>
+<ul>
+<li><strong><span class="math inline">c_2</span> finite (default)</strong>: weights have finite variance; raising <span class="math inline">S</span> improves the estimate at the usual <span class="math inline">1/\sqrt S</span> rate, and the 95% interval covers about as often as claimed</li>
+<li><strong>Check “<span class="math inline">c_2=\infty</span>”</strong>: reproduces the divergent case. Raising <span class="math inline">S</span> no longer shrinks a variance that doesn’t exist; repeated <em>New sample</em> draws swing far more than the SE admits. Large <span class="math inline">\nu</span> can still look fine by chance; small <span class="math inline">\nu</span> (Cauchy) bites often — but <span class="math inline">S_{\text{eff}}</span> warns you either way only sometimes</li>
+<li><strong>Small <span class="math inline">\sigma</span>, or <span class="math inline">\mu</span> far outside <span class="math inline">(c_1,c_2)</span></strong>: draws pile up wherever the proposal has mass, weights nearly equal, <span class="math inline">S_{\text{eff}}</span> stays high, estimate can still miss badly</li>
+<li><strong>Large <span class="math inline">\sigma</span></strong>: one draw’s weight can dominate, <span class="math inline">S_{\text{eff}}</span> collapses toward <span class="math inline">1</span> — visibly unreliable, an improvement on invisibly unreliable</li>
+</ul>
 </section></section>
 <section>
-<section id="two-advanced-applications" class="title-slide slide level1 center">
-<h1>5. Two Advanced Applications</h1>
+<section id="example-3-marginal-likelihood-via-importance-sampling" class="title-slide slide level1 center">
+<h1>5. Example 3: Marginal Likelihood via Importance Sampling</h1>
 
 </section>
-<section id="example-4-free-energy-and-the-marginal-likelihood" class="slide level2 smaller">
-<h2>Example 4: Free Energy and the Marginal Likelihood</h2>
-<p>In statistical physics, a system with energy <span class="math inline">U(x)</span> at inverse temperature <span class="math inline">\beta</span> has <span class="math display">Z(\beta) = \int e^{-\beta U(x)}\,dx, \qquad F(\beta) = -\frac1\beta\log Z(\beta) \ \ (\text{free energy})</span></p>
-<p>Importance sampling from <span class="math inline">\beta_0</span> to <span class="math inline">\beta_1</span> with <span class="math inline">g = e^{-\beta_0 U}</span>, <span class="math inline">f = e^{-\beta_1 U}</span>, <span class="math inline">w(x) = e^{-(\beta_1-\beta_0)U(x)}</span>: <span class="math display">\frac{Z(\beta_1)}{Z(\beta_0)} = E_{\beta_0}\Big[e^{-(\beta_1-\beta_0)U(x)}\Big]</span></p>
-<p><strong>Bayesian analogue.</strong> With <span class="math inline">U(\theta) = -\log L(\theta)</span> and <span class="math inline">g = \pi(\theta)</span> (prior, <span class="math inline">\beta_0 = 0</span>), <span class="math inline">f = L(\theta)\pi(\theta)</span> (posterior, <span class="math inline">\beta_1 = 1</span>): <span class="math display">P(y) = \frac{C_f}{C_g} = E_\pi\big[L(\theta)\big] \approx \frac1S\sum_{s=1}^S L(\theta_s), \qquad \theta_s\sim\pi</span></p>
-<p><span class="math inline">-\log P(y)</span> is the free energy of the posterior. This “prior sampling” estimator is exactly Example 2 in disguise: the prior is diffuse, the likelihood is a narrow spike, weights are <span class="math inline">L(\theta_s)</span>, and almost all prior draws have negligible weight.</p>
+<section id="example-3-marginal-likelihood-via-importance-sampling-1" class="slide level2">
+<h2>Example 3: Marginal Likelihood via Importance Sampling</h2>
+<p>Model: unknown mean <span class="math inline">\mu</span> and <span class="math inline">w=\log\sigma^2</span>, independent normal priors. Importance sampling estimates <span class="math inline">P(y)=\int L(\theta)\pi(\theta)\,d\theta</span> with a built-in diagnostic (<span class="math inline">S_{\text{eff}}</span>).</p>
+<p>Take <span class="math inline">g(\mu,w)</span> to be the <strong>Gaussian approximation to the posterior</strong> from a Laplace fit: mode <span class="math inline">(\hat\mu,\hat w)</span>, <span class="math inline">g=N_2\big((\hat\mu,\hat w), H^{-1}\big)</span> for <span class="math inline">H</span> the Hessian of <span class="math inline">-\log[L\pi]</span> at the mode: <span class="math display">
+\widehat{P(y)} = \frac1S\sum_{s=1}^S w_s, \qquad
+w_s = \frac{L(\theta_s)\pi(\theta_s)}{g(\theta_s)}, \qquad \theta_s\sim g
+</span></p>
+<p>Contrast: sampling directly from the (wide, uninformative) <strong>prior</strong> is importance sampling with <span class="math inline">g=\pi</span> and weights <span class="math inline">L(\theta_s)</span> — a “good story” versus a proposal built with no information about where the likelihood actually lives.</p>
 </section>
-<section id="example-4-continued-prior-sampling-fails-tempering-helps" class="slide level2">
-<h2>Example 4 (Continued): Prior Sampling Fails, Tempering Helps</h2>
+<section id="example-3-continued-implementation" class="slide level2 smaller">
+<h2>Example 3 (Continued): Implementation</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">1</span>, <span class="dv">1</span>); n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)                       <span class="co"># data; model N(theta, 1), prior N(0, 10^2)</span></span>
-<span id="cb5-2"><a href=""></a>logL <span class="ot">&lt;-</span> <span class="cf">function</span>(th) <span class="fu">sapply</span>(th, <span class="cf">function</span>(t) <span class="fu">sum</span>(<span class="fu">dnorm</span>(y, t, <span class="at">log =</span> <span class="cn">TRUE</span>)))</span>
-<span id="cb5-3"><a href=""></a>s2p <span class="ot">&lt;-</span> <span class="dv">100</span>; ybar <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)                                <span class="co"># exact log P(y): y ~ N(0, I + s2p * 11')</span></span>
-<span id="cb5-4"><a href=""></a>exact <span class="ot">&lt;-</span> <span class="sc">-</span>n <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sum</span>((y <span class="sc">-</span> ybar)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> n <span class="sc">*</span> s2p) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> n <span class="sc">*</span> ybar<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> n <span class="sc">*</span> s2p)</span>
-<span id="cb5-5"><a href=""></a>S <span class="ot">&lt;-</span> <span class="fl">1e5</span>; lse <span class="ot">&lt;-</span> <span class="cf">function</span>(l) { M <span class="ot">&lt;-</span> <span class="fu">max</span>(l); M <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(l <span class="sc">-</span> M))) }</span>
-<span id="cb5-6"><a href=""></a>th <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, <span class="dv">0</span>, <span class="dv">10</span>); lw <span class="ot">&lt;-</span> <span class="fu">logL</span>(th)                       <span class="co"># prior sampling: log weights = log L</span></span>
-<span id="cb5-7"><a href=""></a><span class="fu">c</span>(<span class="at">exact =</span> exact, <span class="at">prior_sampling =</span> <span class="fu">lse</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S), <span class="at">S_eff =</span> <span class="fu">ess</span>(<span class="fu">exp</span>(lw <span class="sc">-</span> <span class="fu">max</span>(lw))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         exact prior_sampling          S_eff 
-     -45.66509      -45.67049     2550.01439 </code></pre>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>log_lik   <span class="ot">&lt;-</span> <span class="cf">function</span>(x, mu, w) <span class="fu">sum</span>(<span class="fu">dnorm</span>(x, mu, <span class="fu">exp</span>(w <span class="sc">/</span> <span class="dv">2</span>), <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb8-2"><a href=""></a>log_prior <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, w, mu_0, sigma_mu, w_0, sigma_w) {</span>
+<span id="cb8-3"><a href=""></a>    <span class="fu">dnorm</span>(mu, mu_0, sigma_mu, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">dnorm</span>(w, w_0, sigma_w, <span class="at">log =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-4"><a href=""></a>}</span>
+<span id="cb8-5"><a href=""></a>neg_log_post <span class="ot">&lt;-</span> <span class="cf">function</span>(theta, x, mu_0, sigma_mu, w_0, sigma_w) {</span>
+<span id="cb8-6"><a href=""></a>    <span class="sc">-</span><span class="fu">log_lik</span>(x, theta[<span class="dv">1</span>], theta[<span class="dv">2</span>]) <span class="sc">-</span></span>
+<span id="cb8-7"><a href=""></a>        <span class="fu">log_prior</span>(theta[<span class="dv">1</span>], theta[<span class="dv">2</span>], mu_0, sigma_mu, w_0, sigma_w)</span>
+<span id="cb8-8"><a href=""></a>}</span>
+<span id="cb8-9"><a href=""></a>log_dmvnorm_batch <span class="ot">&lt;-</span> <span class="cf">function</span>(Theta, mu, A) {           <span class="co"># log N(mu, A^-1) at every column at once</span></span>
+<span id="cb8-10"><a href=""></a>    Tc <span class="ot">&lt;-</span> Theta <span class="sc">-</span> mu</span>
+<span id="cb8-11"><a href=""></a>    quad <span class="ot">&lt;-</span> <span class="fu">colSums</span>((A <span class="sc">%*%</span> Tc) <span class="sc">*</span> Tc)</span>
+<span id="cb8-12"><a href=""></a>    <span class="fl">0.5</span> <span class="sc">*</span> (<span class="sc">-</span><span class="fu">nrow</span>(Theta) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">svd</span>(A)<span class="sc">$</span>d)) <span class="sc">-</span> quad)</span>
+<span id="cb8-13"><a href=""></a>}</span>
+<span id="cb8-14"><a href=""></a>log_marlik_imps <span class="ot">&lt;-</span> <span class="cf">function</span>(x, mu_0, sigma_mu, w_0, sigma_w, S) {</span>
+<span id="cb8-15"><a href=""></a>    fit <span class="ot">&lt;-</span> <span class="fu">nlm</span>(neg_log_post, <span class="fu">c</span>(<span class="fu">mean</span>(x), <span class="fu">log</span>(stats<span class="sc">::</span><span class="fu">var</span>(x))), <span class="at">hessian =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-16"><a href=""></a>               <span class="at">x =</span> x, <span class="at">mu_0 =</span> mu_0, <span class="at">sigma_mu =</span> sigma_mu, <span class="at">w_0 =</span> w_0, <span class="at">sigma_w =</span> sigma_w)</span>
+<span id="cb8-17"><a href=""></a>    mu_hat <span class="ot">&lt;-</span> fit<span class="sc">$</span>estimate; H <span class="ot">&lt;-</span> fit<span class="sc">$</span>hessian</span>
+<span id="cb8-18"><a href=""></a>    L <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">chol</span>(<span class="fu">solve</span>(H)))</span>
+<span id="cb8-19"><a href=""></a>    Theta <span class="ot">&lt;-</span> L <span class="sc">%*%</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> S), <span class="dv">2</span>, S) <span class="sc">+</span> mu_hat</span>
+<span id="cb8-20"><a href=""></a>    log_g <span class="ot">&lt;-</span> <span class="fu">log_dmvnorm_batch</span>(Theta, mu_hat, H)</span>
+<span id="cb8-21"><a href=""></a>    log_f <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">apply</span>(Theta, <span class="dv">2</span>, neg_log_post, <span class="at">x =</span> x, <span class="at">mu_0 =</span> mu_0, <span class="at">sigma_mu =</span> sigma_mu,</span>
+<span id="cb8-22"><a href=""></a>                     <span class="at">w_0 =</span> w_0, <span class="at">sigma_w =</span> sigma_w)</span>
+<span id="cb8-23"><a href=""></a>    lw <span class="ot">&lt;-</span> log_f <span class="sc">-</span> log_g</span>
+<span id="cb8-24"><a href=""></a>    m  <span class="ot">&lt;-</span> <span class="fu">max</span>(lw); v <span class="ot">&lt;-</span> <span class="fu">exp</span>(lw <span class="sc">-</span> m)</span>
+<span id="cb8-25"><a href=""></a>    <span class="fu">structure</span>(<span class="fu">log_sum_exp</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S), <span class="at">ess =</span> <span class="fu">log_ess</span>(lw), <span class="at">se =</span> <span class="fu">sd</span>(v) <span class="sc">/</span> (<span class="fu">sqrt</span>(S) <span class="sc">*</span> <span class="fu">mean</span>(v)))</span>
+<span id="cb8-26"><a href=""></a>}</span>
+<span id="cb8-27"><a href=""></a>log_marlik_prior <span class="ot">&lt;-</span> <span class="cf">function</span>(x, mu_0, sigma_mu, w_0, sigma_w, S) {</span>
+<span id="cb8-28"><a href=""></a>    mus <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, mu_0, sigma_mu); ws <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, w_0, sigma_w)</span>
+<span id="cb8-29"><a href=""></a>    lw <span class="ot">&lt;-</span> <span class="fu">vapply</span>(<span class="fu">seq_len</span>(S), <span class="cf">function</span>(i) <span class="fu">log_lik</span>(x, mus[i], ws[i]), <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb8-30"><a href=""></a>    m  <span class="ot">&lt;-</span> <span class="fu">max</span>(lw); v <span class="ot">&lt;-</span> <span class="fu">exp</span>(lw <span class="sc">-</span> m)</span>
+<span id="cb8-31"><a href=""></a>    <span class="fu">structure</span>(<span class="fu">log_sum_exp</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S), <span class="at">ess =</span> <span class="fu">log_ess</span>(lw), <span class="at">se =</span> <span class="fu">sd</span>(v) <span class="sc">/</span> (<span class="fu">sqrt</span>(S) <span class="sc">*</span> <span class="fu">mean</span>(v)))</span>
+<span id="cb8-32"><a href=""></a>}</span>
+<span id="cb8-33"><a href=""></a>log_marlik_grid <span class="ot">&lt;-</span> <span class="cf">function</span>(x, mu_0, sigma_mu, w_0, sigma_w, <span class="at">n_grid =</span> <span class="dv">400</span>, <span class="at">width =</span> <span class="dv">8</span>) {</span>
+<span id="cb8-34"><a href=""></a>    n   <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb8-35"><a href=""></a>    fit <span class="ot">&lt;-</span> <span class="fu">nlm</span>(neg_log_post, <span class="fu">c</span>(<span class="fu">mean</span>(x), <span class="fu">log</span>(stats<span class="sc">::</span><span class="fu">var</span>(x))), <span class="at">hessian =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-36"><a href=""></a>               <span class="at">x =</span> x, <span class="at">mu_0 =</span> mu_0, <span class="at">sigma_mu =</span> sigma_mu, <span class="at">w_0 =</span> w_0, <span class="at">sigma_w =</span> sigma_w)</span>
+<span id="cb8-37"><a href=""></a>    se  <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(fit<span class="sc">$</span>hessian)))</span>
+<span id="cb8-38"><a href=""></a>    mu_grid <span class="ot">&lt;-</span> fit<span class="sc">$</span>estimate[<span class="dv">1</span>] <span class="sc">+</span> <span class="fu">seq</span>(<span class="sc">-</span>width, width, <span class="at">length.out =</span> n_grid) <span class="sc">*</span> se[<span class="dv">1</span>]</span>
+<span id="cb8-39"><a href=""></a>    w_grid  <span class="ot">&lt;-</span> fit<span class="sc">$</span>estimate[<span class="dv">2</span>] <span class="sc">+</span> <span class="fu">seq</span>(<span class="sc">-</span>width, width, <span class="at">length.out =</span> n_grid) <span class="sc">*</span> se[<span class="dv">2</span>]</span>
+<span id="cb8-40"><a href=""></a>    SS <span class="ot">&lt;-</span> <span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> mu_grid <span class="sc">*</span> <span class="fu">sum</span>(x) <span class="sc">+</span> n <span class="sc">*</span> mu_grid<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb8-41"><a href=""></a>    log_lik_grid   <span class="ot">&lt;-</span> <span class="fu">outer</span>(SS, w_grid,</span>
+<span id="cb8-42"><a href=""></a>                             <span class="cf">function</span>(ss, w) <span class="sc">-</span><span class="fl">0.5</span> <span class="sc">*</span> n <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span> <span class="sc">*</span> pi) <span class="sc">-</span> n <span class="sc">*</span> w <span class="sc">/</span> <span class="dv">2</span> <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>w) <span class="sc">*</span> ss)</span>
+<span id="cb8-43"><a href=""></a>    log_prior_grid <span class="ot">&lt;-</span> <span class="fu">outer</span>(<span class="fu">dnorm</span>(mu_grid, mu_0, sigma_mu, <span class="at">log =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-44"><a href=""></a>                             <span class="fu">dnorm</span>(w_grid, w_0, sigma_w, <span class="at">log =</span> <span class="cn">TRUE</span>), <span class="st">"+"</span>)</span>
+<span id="cb8-45"><a href=""></a>    h_mu <span class="ot">&lt;-</span> <span class="fu">diff</span>(mu_grid[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]); h_w <span class="ot">&lt;-</span> <span class="fu">diff</span>(w_grid[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb8-46"><a href=""></a>    <span class="fu">log_sum_exp</span>(<span class="fu">as.vector</span>(log_lik_grid <span class="sc">+</span> log_prior_grid)) <span class="sc">+</span> <span class="fu">log</span>(h_mu) <span class="sc">+</span> <span class="fu">log</span>(h_w)</span>
+<span id="cb8-47"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
-</div>
+<p><code>log_marlik_grid()</code> supplies ground truth by quadrature — a midpoint grid centred and scaled by the Laplace fit, vectorized via the sufficient statistic <span class="math inline">\sum(x-\mu)^2</span>.</p>
+</section>
+<section id="example-3-continued-results-across-sample-sizes" class="slide level2 smaller">
+<h2>Example 3 (Continued): Results Across Sample Sizes</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>betas <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.1</span>); logZ <span class="ot">&lt;-</span> <span class="dv">0</span>                     <span class="co"># stepping stones: chain of small steps</span></span>
-<span id="cb7-2"><a href=""></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(betas)) {                                <span class="co"># draw from tempered posterior beta_{k-1} (conjugate here)</span></span>
-<span id="cb7-3"><a href=""></a>  b0 <span class="ot">&lt;-</span> betas[k <span class="sc">-</span> <span class="dv">1</span>]; v <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">/</span> s2p <span class="sc">+</span> b0 <span class="sc">*</span> n); m <span class="ot">&lt;-</span> v <span class="sc">*</span> b0 <span class="sc">*</span> n <span class="sc">*</span> ybar</span>
-<span id="cb7-4"><a href=""></a>  th <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(S, m, <span class="fu">sqrt</span>(v)); lw <span class="ot">&lt;-</span> (betas[k] <span class="sc">-</span> b0) <span class="sc">*</span> <span class="fu">logL</span>(th)</span>
-<span id="cb7-5"><a href=""></a>  logZ <span class="ot">&lt;-</span> logZ <span class="sc">+</span> <span class="fu">lse</span>(lw) <span class="sc">-</span> <span class="fu">log</span>(S) }</span>
-<span id="cb7-6"><a href=""></a><span class="fu">c</span>(<span class="at">exact =</span> exact, <span class="at">stepping_stones =</span> logZ)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          exact stepping_stones 
-      -45.66509       -45.66597 </code></pre>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">4</span>)</span>
+<span id="cb9-2"><a href=""></a>ns <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">20</span>, <span class="dv">100</span>, <span class="dv">400</span>); S <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb9-3"><a href=""></a></span>
+<span id="cb9-4"><a href=""></a>summarize_is <span class="ot">&lt;-</span> <span class="cf">function</span>(fn, x, S) {</span>
+<span id="cb9-5"><a href=""></a>    est <span class="ot">&lt;-</span> <span class="fu">fn</span>(x, <span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">5</span>, S); se <span class="ot">&lt;-</span> <span class="fu">attr</span>(est, <span class="st">"se"</span>)</span>
+<span id="cb9-6"><a href=""></a>    <span class="fu">c</span>(<span class="at">estimate =</span> <span class="fu">sprintf</span>(<span class="st">"%.2f"</span>, <span class="fu">as.numeric</span>(est)),</span>
+<span id="cb9-7"><a href=""></a>      <span class="at">ci       =</span> <span class="fu">sprintf</span>(<span class="st">"(%.2f, %.2f)"</span>, <span class="fu">as.numeric</span>(est) <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> se, <span class="fu">as.numeric</span>(est) <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> se),</span>
+<span id="cb9-8"><a href=""></a>      <span class="at">ess      =</span> <span class="fu">sprintf</span>(<span class="st">"%.1f"</span>, <span class="dv">100</span> <span class="sc">*</span> <span class="fu">attr</span>(est, <span class="st">"ess"</span>) <span class="sc">/</span> S))</span>
+<span id="cb9-9"><a href=""></a>}</span>
+<span id="cb9-10"><a href=""></a>merged_tbl <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(ns, <span class="cf">function</span>(n) {</span>
+<span id="cb9-11"><a href=""></a>    x   <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb9-12"><a href=""></a>    lap <span class="ot">&lt;-</span> <span class="fu">summarize_is</span>(log_marlik_imps,  x, S)</span>
+<span id="cb9-13"><a href=""></a>    pri <span class="ot">&lt;-</span> <span class="fu">summarize_is</span>(log_marlik_prior, x, S)</span>
+<span id="cb9-14"><a href=""></a>    <span class="fu">data.frame</span>(<span class="at">n =</span> n, <span class="at">truth =</span> <span class="fu">sprintf</span>(<span class="st">"%.2f"</span>, <span class="fu">log_marlik_grid</span>(x, <span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">5</span>)),</span>
+<span id="cb9-15"><a href=""></a>               <span class="at">lap_estimate =</span> lap[[<span class="st">"estimate"</span>]], <span class="at">lap_ci =</span> lap[[<span class="st">"ci"</span>]], <span class="at">lap_ess =</span> lap[[<span class="st">"ess"</span>]],</span>
+<span id="cb9-16"><a href=""></a>               <span class="at">pri_estimate =</span> pri[[<span class="st">"estimate"</span>]], <span class="at">pri_ci =</span> pri[[<span class="st">"ci"</span>]], <span class="at">pri_ess =</span> pri[[<span class="st">"ess"</span>]],</span>
+<span id="cb9-17"><a href=""></a>               <span class="at">row.names =</span> <span class="cn">NULL</span>)</span>
+<span id="cb9-18"><a href=""></a>}))</span>
+<span id="cb9-19"><a href=""></a><span class="fu">names</span>(merged_tbl) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"n"</span>, <span class="st">"truth"</span>, <span class="st">"Laplace: est."</span>, <span class="st">"Laplace: 95% CI"</span>, <span class="st">"Laplace: ESS %"</span>,</span>
+<span id="cb9-20"><a href=""></a>                       <span class="st">"prior: est."</span>, <span class="st">"prior: 95% CI"</span>, <span class="st">"prior: ESS %"</span>)</span>
+<span id="cb9-21"><a href=""></a>knitr<span class="sc">::</span><span class="fu">kable</span>(merged_tbl, <span class="at">align =</span> <span class="st">"r"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-marlik-merged" class="cell quarto-float quarto-figure quarto-figure-center" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-marlik-merged-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2
+</figcaption>
+<div aria-describedby="tbl-marlik-merged-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="caption-top">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 14%">
+<col style="width: 11%">
+<col style="width: 18%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">truth</th>
+<th style="text-align: right;">Laplace: est.</th>
+<th style="text-align: right;">Laplace: 95% CI</th>
+<th style="text-align: right;">Laplace: ESS %</th>
+<th style="text-align: right;">prior: est.</th>
+<th style="text-align: right;">prior: 95% CI</th>
+<th style="text-align: right;">prior: ESS %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">-10.09</td>
+<td style="text-align: right;">-10.16</td>
+<td style="text-align: right;">(-10.21, -10.11)</td>
+<td style="text-align: right;">43.3</td>
+<td style="text-align: right;">-10.00</td>
+<td style="text-align: right;">(-10.31, -9.69)</td>
+<td style="text-align: right;">1.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">-37.29</td>
+<td style="text-align: right;">-37.31</td>
+<td style="text-align: right;">(-37.33, -37.29)</td>
+<td style="text-align: right;">84.9</td>
+<td style="text-align: right;">-36.86</td>
+<td style="text-align: right;">(-37.32, -36.40)</td>
+<td style="text-align: right;">0.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">-153.02</td>
+<td style="text-align: right;">-153.01</td>
+<td style="text-align: right;">(-153.02, -153.01)</td>
+<td style="text-align: right;">96.3</td>
+<td style="text-align: right;">-153.94</td>
+<td style="text-align: right;">(-155.12, -152.76)</td>
+<td style="text-align: right;">0.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">400</td>
+<td style="text-align: right;">-531.18</td>
+<td style="text-align: right;">-531.18</td>
+<td style="text-align: right;">(-531.18, -531.18)</td>
+<td style="text-align: right;">99.2</td>
+<td style="text-align: right;">-534.74</td>
+<td style="text-align: right;">(-536.43, -533.05)</td>
+<td style="text-align: right;">0.1</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-<p>Each small temperature step has near-constant weights (a good story), and the log ratios add up: <span class="math inline">\log Z(1) - \log Z(0) = \sum_k \log\frac{Z(\beta_k)}{Z(\beta_{k-1})}</span>.</p>
+</figure>
+</div>
+</div>
+<p>Laplace-shaped: tight interval centred on truth at every <span class="math inline">n</span>, <span class="math inline">S_{\text{eff}}</span> near nominal. Prior sampling degrades monotonically as the posterior concentrates at rate <span class="math inline">n^{-1/2}</span> while the prior stays put — <span class="math inline">S_{\text{eff}}</span> falls to a fraction of one percent, and its (still sometimes-covering) interval is only as trustworthy as those few dominant draws.</p>
 </section>
-<section id="example-5-bayesian-cross-validation" class="slide level2">
-<h2>Example 5: Bayesian Cross-Validation</h2>
-<p>Leave-one-out predictive density, the Bayesian analogue of cross-validation error: <span class="math display">p(y_i\mid y_{-i}) = \int p(y_i\mid\theta)\,p(\theta\mid y_{-i})\,d\theta</span></p>
-<p>Refitting the model <span class="math inline">n</span> times is expensive. Instead, reuse draws <span class="math inline">\theta_s\sim p(\theta\mid y)</span> from the <strong>full</strong> posterior as the proposal. The target is the leave-one-out posterior, <span class="math display">f(\theta) = p(\theta\mid y_{-i}) \propto \frac{p(\theta\mid y)}{p(y_i\mid\theta)}, \qquad
-w_i(\theta) = \frac{f(\theta)}{g(\theta)} = \frac{1}{p(y_i\mid\theta)}</span></p>
-<p>Then <span class="math display">\hat p(y_i\mid y_{-i}) = \frac{\sum_s p(y_i\mid\theta_s)\,w_i(\theta_s)}{\sum_s w_i(\theta_s)}
-= \frac{S}{\sum_{s=1}^S 1/p(y_i\mid\theta_s)}</span></p>
-<p>the harmonic mean of <span class="math inline">p(y_i\mid\theta_s)</span> over posterior draws (Gelfand, Dey &amp; Chang, 1992).</p>
+<section id="example-3-continued-what-to-look-for" class="slide level2">
+<h2>Example 3 (Continued): What to Look For</h2>
+<p>Sorted, normalized weights, largest first, one panel per proposal (their scales differ by orders of magnitude) — a good proposal gives a flat curve near <span class="math inline">1/S</span>; a bad one falls off a cliff.</p>
 </section>
-<section id="example-5-continued-when-it-works-and-when-it-breaks" class="slide level2">
-<h2>Example 5 (Continued): When It Works and When It Breaks</h2>
-<ul>
-<li>The full posterior is <strong>narrower</strong> than the leave-one-out posterior (it has one more observation), so <span class="math inline">g</span> has lighter tails than <span class="math inline">f</span>: the heavy-tailed-weight failure</li>
-<li>For a typical <span class="math inline">y_i</span> the two posteriors nearly coincide and the weights are stable</li>
-<li>For an <strong>influential</strong> <span class="math inline">y_i</span> (an outlier, a high-leverage point) the weights <span class="math inline">1/p(y_i\mid\theta_s)</span> have infinite variance and the estimate is dominated by a few draws</li>
-</ul>
-<p><strong>Diagnostics and fixes</strong></p>
-<ul>
-<li>Report <span class="math inline">S_{\text{eff}}</span> per observation; a small value flags an influential point</li>
-<li><strong>Pareto-smoothed importance sampling</strong> (Vehtari, Gelman &amp; Gabry, 2017): fit a generalized Pareto distribution to the largest weights, replace them by smoothed values, and use the estimated shape <span class="math inline">\hat k</span> as a diagnostic (<span class="math inline">\hat k&gt;0.7</span> unreliable)</li>
-<li>Fall back to actual refitting for the flagged observations only</li>
-</ul>
-</section>
-<section id="example-5-continued" class="slide level2">
-<h2>Example 5 (Continued)</h2>
-<p>Normal model, <span class="math inline">\theta\sim N(0,10^2)</span>, 30 observations plus one outlier at <span class="math inline">y = 6</span>. Weight distributions for a typical point and for the outlier.</p>
+<section id="example-3-continued-seeing-it-sorted-weights" class="slide level2">
+<h2>Example 3 (Continued): Seeing It — Sorted Weights</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-engine="r"><pre class="sourceCode numberSource shinylive-r number-lines code-with-copy"><code class="sourceCode"><span id="cb10-1"><a href=""></a>#| '!! shinylive warning !!': |</span>
+<span id="cb10-2"><a href=""></a>#|   shinylive does not work in self-contained HTML documents.</span>
+<span id="cb10-3"><a href=""></a>#|   Please set `embed-resources: false` in your metadata.</span>
+<span id="cb10-4"><a href=""></a>#| standalone: true</span>
+<span id="cb10-5"><a href=""></a>#| viewerHeight: 820</span>
+<span id="cb10-6"><a href=""></a></span>
+<span id="cb10-7"><a href=""></a>library(shiny)</span>
+<span id="cb10-8"><a href=""></a></span>
+<span id="cb10-9"><a href=""></a>log_sum_exp &lt;- function(lx) { m &lt;- max(lx); m + log(sum(exp(lx - m))) }</span>
+<span id="cb10-10"><a href=""></a>log_lik   &lt;- function(x, mu, w) sum(dnorm(x, mu, exp(w / 2), log = TRUE))</span>
+<span id="cb10-11"><a href=""></a>log_prior &lt;- function(mu, w, mu_0, sigma_mu, w_0, sigma_w) {</span>
+<span id="cb10-12"><a href=""></a>    dnorm(mu, mu_0, sigma_mu, log = TRUE) + dnorm(w, w_0, sigma_w, log = TRUE)</span>
+<span id="cb10-13"><a href=""></a>}</span>
+<span id="cb10-14"><a href=""></a>neg_log_post &lt;- function(theta, x, mu_0, sigma_mu, w_0, sigma_w) {</span>
+<span id="cb10-15"><a href=""></a>    -log_lik(x, theta[1], theta[2]) -</span>
+<span id="cb10-16"><a href=""></a>        log_prior(theta[1], theta[2], mu_0, sigma_mu, w_0, sigma_w)</span>
+<span id="cb10-17"><a href=""></a>}</span>
+<span id="cb10-18"><a href=""></a>log_dmvnorm_batch &lt;- function(Theta, mu, A) {</span>
+<span id="cb10-19"><a href=""></a>    Tc &lt;- Theta - mu</span>
+<span id="cb10-20"><a href=""></a>    quad &lt;- colSums((A %*% Tc) * Tc)</span>
+<span id="cb10-21"><a href=""></a>    0.5 * (-nrow(Theta) * log(2 * pi) + sum(log(svd(A)$d)) - quad)</span>
+<span id="cb10-22"><a href=""></a>}</span>
+<span id="cb10-23"><a href=""></a>marlik_truth &lt;- function(x, mu_0, sigma_mu, w_0, sigma_w, n_grid = 400, width = 8) {</span>
+<span id="cb10-24"><a href=""></a>    n   &lt;- length(x)</span>
+<span id="cb10-25"><a href=""></a>    fit &lt;- nlm(neg_log_post, c(mean(x), log(stats::var(x))), hessian = TRUE,</span>
+<span id="cb10-26"><a href=""></a>               x = x, mu_0 = mu_0, sigma_mu = sigma_mu, w_0 = w_0, sigma_w = sigma_w)</span>
+<span id="cb10-27"><a href=""></a>    se  &lt;- sqrt(diag(solve(fit$hessian)))</span>
+<span id="cb10-28"><a href=""></a>    mu_grid &lt;- fit$estimate[1] + seq(-width, width, length.out = n_grid) * se[1]</span>
+<span id="cb10-29"><a href=""></a>    w_grid  &lt;- fit$estimate[2] + seq(-width, width, length.out = n_grid) * se[2]</span>
+<span id="cb10-30"><a href=""></a>    SS &lt;- sum(x^2) - 2 * mu_grid * sum(x) + n * mu_grid^2</span>
+<span id="cb10-31"><a href=""></a>    log_lik_grid   &lt;- outer(SS, w_grid,</span>
+<span id="cb10-32"><a href=""></a>                             function(ss, w) -0.5 * n * log(2 * pi) - n * w / 2 - 0.5 * exp(-w) * ss)</span>
+<span id="cb10-33"><a href=""></a>    log_prior_grid &lt;- outer(dnorm(mu_grid, mu_0, sigma_mu, log = TRUE),</span>
+<span id="cb10-34"><a href=""></a>                             dnorm(w_grid, w_0, sigma_w, log = TRUE), "+")</span>
+<span id="cb10-35"><a href=""></a>    h_mu &lt;- diff(mu_grid[1:2]); h_w &lt;- diff(w_grid[1:2])</span>
+<span id="cb10-36"><a href=""></a>    log_sum_exp(as.vector(log_lik_grid + log_prior_grid)) + log(h_mu) + log(h_w)</span>
+<span id="cb10-37"><a href=""></a>}</span>
+<span id="cb10-38"><a href=""></a>sim_laplace &lt;- function(x, mu_0, sigma_mu, w_0, sigma_w, S) {</span>
+<span id="cb10-39"><a href=""></a>    fit &lt;- nlm(neg_log_post, c(mean(x), log(stats::var(x))), hessian = TRUE,</span>
+<span id="cb10-40"><a href=""></a>               x = x, mu_0 = mu_0, sigma_mu = sigma_mu, w_0 = w_0, sigma_w = sigma_w)</span>
+<span id="cb10-41"><a href=""></a>    mu_hat &lt;- fit$estimate; H &lt;- fit$hessian</span>
+<span id="cb10-42"><a href=""></a>    L &lt;- t(chol(solve(H)))</span>
+<span id="cb10-43"><a href=""></a>    Theta &lt;- L %*% matrix(rnorm(2 * S), 2, S) + mu_hat</span>
+<span id="cb10-44"><a href=""></a>    log_g &lt;- log_dmvnorm_batch(Theta, mu_hat, H)</span>
+<span id="cb10-45"><a href=""></a>    log_f &lt;- -apply(Theta, 2, neg_log_post, x = x, mu_0 = mu_0, sigma_mu = sigma_mu,</span>
+<span id="cb10-46"><a href=""></a>                     w_0 = w_0, sigma_w = sigma_w)</span>
+<span id="cb10-47"><a href=""></a>    lw &lt;- log_f - log_g</span>
+<span id="cb10-48"><a href=""></a>    m  &lt;- max(lw); v &lt;- exp(lw - m); wn &lt;- v / sum(v)</span>
+<span id="cb10-49"><a href=""></a>    list(est = log_sum_exp(lw) - log(S), se = sd(v) / (sqrt(S) * mean(v)),</span>
+<span id="cb10-50"><a href=""></a>         ess = 1 / sum(wn^2), wn = sort(wn, decreasing = TRUE))</span>
+<span id="cb10-51"><a href=""></a>}</span>
+<span id="cb10-52"><a href=""></a>sim_prior &lt;- function(x, mu_0, sigma_mu, w_0, sigma_w, S) {</span>
+<span id="cb10-53"><a href=""></a>    mus &lt;- rnorm(S, mu_0, sigma_mu); ws &lt;- rnorm(S, w_0, sigma_w)</span>
+<span id="cb10-54"><a href=""></a>    lw  &lt;- vapply(seq_len(S), function(i) log_lik(x, mus[i], ws[i]), numeric(1))</span>
+<span id="cb10-55"><a href=""></a>    m   &lt;- max(lw); v &lt;- exp(lw - m); wn &lt;- v / sum(v)</span>
+<span id="cb10-56"><a href=""></a>    list(est = log_sum_exp(lw) - log(S), se = sd(v) / (sqrt(S) * mean(v)),</span>
+<span id="cb10-57"><a href=""></a>         ess = 1 / sum(wn^2), wn = sort(wn, decreasing = TRUE))</span>
+<span id="cb10-58"><a href=""></a>}</span>
+<span id="cb10-59"><a href=""></a></span>
+<span id="cb10-60"><a href=""></a>ui &lt;- fluidPage(</span>
+<span id="cb10-61"><a href=""></a>    titlePanel("Sorted importance weights: Laplace-shaped proposal vs. prior"),</span>
+<span id="cb10-62"><a href=""></a>    sidebarLayout(</span>
+<span id="cb10-63"><a href=""></a>        sidebarPanel(</span>
+<span id="cb10-64"><a href=""></a>            width = 3,</span>
+<span id="cb10-65"><a href=""></a>            sliderInput("n", "data size  n", min = 5, max = 200, value = 20, step = 5),</span>
+<span id="cb10-66"><a href=""></a>            sliderInput("sig_mu", HTML("prior sd on &amp;mu;"), min = 1, max = 10, value = 5, step = 0.5),</span>
+<span id="cb10-67"><a href=""></a>            sliderInput("sig_w", HTML("prior sd on w"), min = 1, max = 10, value = 5, step = 0.5),</span>
+<span id="cb10-68"><a href=""></a>            selectInput("S", "importance sample size  S",</span>
+<span id="cb10-69"><a href=""></a>                        choices = c(500, 2000, 5000, 20000), selected = 2000),</span>
+<span id="cb10-70"><a href=""></a>            actionButton("new", "New sample"),</span>
+<span id="cb10-71"><a href=""></a>            checkboxInput("logw", "log scale for weights", TRUE)</span>
+<span id="cb10-72"><a href=""></a>        ),</span>
+<span id="cb10-73"><a href=""></a>        mainPanel(width = 9, plotOutput("panel", height = "680px"))</span>
+<span id="cb10-74"><a href=""></a>    )</span>
+<span id="cb10-75"><a href=""></a>)</span>
+<span id="cb10-76"><a href=""></a></span>
+<span id="cb10-77"><a href=""></a>server &lt;- function(input, output) {</span>
+<span id="cb10-78"><a href=""></a></span>
+<span id="cb10-79"><a href=""></a>    sim &lt;- reactive({</span>
+<span id="cb10-80"><a href=""></a>        n &lt;- input$n; S &lt;- as.integer(input$S)</span>
+<span id="cb10-81"><a href=""></a>        sig_mu &lt;- input$sig_mu; sig_w &lt;- input$sig_w</span>
+<span id="cb10-82"><a href=""></a>        set.seed(input$new + 1)</span>
+<span id="cb10-83"><a href=""></a>        x &lt;- rnorm(n)</span>
+<span id="cb10-84"><a href=""></a></span>
+<span id="cb10-85"><a href=""></a>        list(S = S,</span>
+<span id="cb10-86"><a href=""></a>             truth = marlik_truth(x, 0, sig_mu, 0, sig_w),</span>
+<span id="cb10-87"><a href=""></a>             lap   = sim_laplace(x, 0, sig_mu, 0, sig_w, S),</span>
+<span id="cb10-88"><a href=""></a>             pri   = sim_prior(x, 0, sig_mu, 0, sig_w, S))</span>
+<span id="cb10-89"><a href=""></a>    })</span>
+<span id="cb10-90"><a href=""></a></span>
+<span id="cb10-91"><a href=""></a>    output$panel &lt;- renderPlot({</span>
+<span id="cb10-92"><a href=""></a>        s &lt;- sim(); S &lt;- s$S</span>
+<span id="cb10-93"><a href=""></a>        rank_frac &lt;- seq_len(S) / S</span>
+<span id="cb10-94"><a href=""></a>        uselog &lt;- input$logw</span>
+<span id="cb10-95"><a href=""></a></span>
+<span id="cb10-96"><a href=""></a>        lwr_lap &lt;- s$lap$est - 1.96 * s$lap$se; upr_lap &lt;- s$lap$est + 1.96 * s$lap$se</span>
+<span id="cb10-97"><a href=""></a>        lwr_pri &lt;- s$pri$est - 1.96 * s$pri$se; upr_pri &lt;- s$pri$est + 1.96 * s$pri$se</span>
+<span id="cb10-98"><a href=""></a>        cov_lap &lt;- if (lwr_lap &lt;= s$truth &amp;&amp; s$truth &lt;= upr_lap) "darkgreen" else "firebrick"</span>
+<span id="cb10-99"><a href=""></a>        cov_pri &lt;- if (lwr_pri &lt;= s$truth &amp;&amp; s$truth &lt;= upr_pri) "darkgreen" else "firebrick"</span>
+<span id="cb10-100"><a href=""></a></span>
+<span id="cb10-101"><a href=""></a>        draw_panel &lt;- function(wn, col, title, xlab, est, lwr, upr, ess_pct, cov_col) {</span>
+<span id="cb10-102"><a href=""></a>            if (uselog) {</span>
+<span id="cb10-103"><a href=""></a>                floor &lt;- max(min(wn[wn &gt; 0]), 1e-300)</span>
+<span id="cb10-104"><a href=""></a>                wn    &lt;- pmax(wn, floor)</span>
+<span id="cb10-105"><a href=""></a>                ylim  &lt;- range(wn)</span>
+<span id="cb10-106"><a href=""></a>                ylab  &lt;- "normalized weight (log scale)"</span>
+<span id="cb10-107"><a href=""></a>            } else {</span>
+<span id="cb10-108"><a href=""></a>                ylim &lt;- c(0, max(wn))</span>
+<span id="cb10-109"><a href=""></a>                ylab &lt;- "normalized weight"</span>
+<span id="cb10-110"><a href=""></a>            }</span>
+<span id="cb10-111"><a href=""></a>            plot(rank_frac, wn, type = "n", log = if (uselog) "y" else "",</span>
+<span id="cb10-112"><a href=""></a>                 ylim = ylim, xlab = xlab, ylab = ylab, main = title)</span>
+<span id="cb10-113"><a href=""></a>            lines(rank_frac, wn, lwd = 3, col = col)</span>
+<span id="cb10-114"><a href=""></a>            abline(h = 1 / S, lty = 2, col = "darkgreen", lwd = 2)</span>
+<span id="cb10-115"><a href=""></a>            legend("topright", inset = c(0.02, 0.05), bty = "n", cex = 1.05,</span>
+<span id="cb10-116"><a href=""></a>                   text.col = c("black", cov_col),</span>
+<span id="cb10-117"><a href=""></a>                   legend = c(</span>
+<span id="cb10-118"><a href=""></a>                       sprintf("truth: log P(y) = %.3f", s$truth),</span>
+<span id="cb10-119"><a href=""></a>                       sprintf("est=%.3f  CI=(%.3f,%.3f)  ESS=%.2f%%", est, lwr, upr, ess_pct)))</span>
+<span id="cb10-120"><a href=""></a>        }</span>
+<span id="cb10-121"><a href=""></a></span>
+<span id="cb10-122"><a href=""></a>        layout(matrix(1:2, 2))</span>
+<span id="cb10-123"><a href=""></a>        par(mar = c(2.5, 5, 3, 1))</span>
+<span id="cb10-124"><a href=""></a>        draw_panel(s$lap$wn, "steelblue", "Laplace-shaped proposal", "",</span>
+<span id="cb10-125"><a href=""></a>                   s$lap$est, lwr_lap, upr_lap, 100 * s$lap$ess / S, cov_lap)</span>
+<span id="cb10-126"><a href=""></a>        par(mar = c(4.5, 5, 2.5, 1))</span>
+<span id="cb10-127"><a href=""></a>        draw_panel(s$pri$wn, "firebrick", "prior proposal",</span>
+<span id="cb10-128"><a href=""></a>                   "rank / S  (draws sorted by weight, largest first)",</span>
+<span id="cb10-129"><a href=""></a>                   s$pri$est, lwr_pri, upr_pri, 100 * s$pri$ess / S, cov_pri)</span>
+<span id="cb10-130"><a href=""></a>    })</span>
+<span id="cb10-131"><a href=""></a>}</span>
+<span id="cb10-132"><a href=""></a></span>
+<span id="cb10-133"><a href=""></a>shinyApp(ui, server)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="advanced-applications-of-importance-sampling" class="title-slide slide level1 center">
+<h1>6. Advanced Applications of Importance Sampling</h1>
 
-<img data-src="Lec_11_Importance_Sampling_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="summary" class="slide level2">
-<h2>Summary</h2>
+</section>
+<section id="free-energy-and-the-marginal-likelihood" class="slide level2">
+<h2>Free Energy and the Marginal Likelihood</h2>
+<p>A system with energy <span class="math inline">U(x)</span> at inverse temperature <span class="math inline">\beta</span> has <span class="math display">Z(\beta) = \int e^{-\beta U(x)}\,dx, \qquad F(\beta) = -\frac1\beta\log Z(\beta)</span></p>
+<p>Importance sampling from <span class="math inline">\beta_0</span> to <span class="math inline">\beta_1</span> with <span class="math inline">g=e^{-\beta_0U}</span>, <span class="math inline">f=e^{-\beta_1U}</span>, <span class="math inline">w(x)=e^{-(\beta_1-\beta_0)U(x)}</span>: <span class="math display">\frac{Z(\beta_1)}{Z(\beta_0)} = E_{\beta_0}\Big[e^{-(\beta_1-\beta_0)U(x)}\Big]</span></p>
+</section>
+<section id="the-bayesian-analogue" class="slide level2 smaller">
+<h2>The Bayesian Analogue</h2>
+<p><span class="math inline">U(\theta)=-\log L(\theta)</span>, <span class="math inline">g=\pi(\theta)</span> (prior, <span class="math inline">\beta_0=0</span>), <span class="math inline">f=L(\theta)\pi(\theta)</span> (posterior, <span class="math inline">\beta_1=1</span>): <span class="math display">P(y) = \frac{C_f}{C_g} = E_\pi\big[L(\theta)\big] \approx \frac1S\sum_{s=1}^S L(\theta_s), \qquad \theta_s\sim\pi</span></p>
+<p><span class="math inline">-\log P(y)</span> is the free energy of the posterior. “Prior sampling” is exactly Example 1’s failure in disguise: the prior is diffuse, the likelihood a narrow spike, weights are <span class="math inline">L(\theta_s)</span>, and almost all prior draws carry negligible weight — jumping straight from <span class="math inline">\beta=0</span> to <span class="math inline">\beta=1</span> asks one importance-sampling step to bridge the <em>entire</em> temperature range at once.</p>
+</section>
+<section id="stepping-stones-many-small-jumps-instead-of-one-big-one" class="slide level2 smaller">
+<h2>Stepping Stones: Many Small Jumps Instead of One Big One</h2>
+<p>Chain intermediate temperatures <span class="math inline">\beta_0=0&lt;\beta_1&lt;\cdots&lt;\beta_K=1</span>: <span class="math display">
+\frac{Z(1)}{Z(0)} = \prod_{k=1}^K \frac{Z(\beta_k)}{Z(\beta_{k-1})}, \qquad
+\log Z(1)-\log Z(0) = \sum_{k=1}^K \log\frac{Z(\beta_k)}{Z(\beta_{k-1})}
+</span></p>
+<p>Each factor is its own small importance-sampling problem: sample from the tempered distribution at <span class="math inline">\beta_{k-1}</span>, weight by <span class="math inline">e^{-(\beta_k-\beta_{k-1})U(\theta)}</span>. If temperatures are close together, <span class="math inline">g_{\beta_{k-1}}</span> and <span class="math inline">f_{\beta_k}</span> nearly coincide and every step is a good-story proposal with near-constant weights — the same principle as building an envelope from many well-fitting pieces rather than one loose one.</p>
+<p>This chain is a <strong>stepping-stones</strong> estimator — a discretization of thermodynamic integration, and the schedule idea behind simulated annealing and parallel tempering. The prior-vs-posterior mismatch has not gone away; spreading it over many small, well-matched steps rather than absorbing it in one large jump is what makes tempering-based samplers practical where a direct jump is not.</p>
+</section>
+<section id="bayesian-leave-one-out-cross-validation" class="slide level2">
+<h2>Bayesian Leave-One-Out Cross-Validation</h2>
+<p>The Bayesian analogue of a cross-validation fold is the <strong>leave-one-out predictive density</strong> <span class="math display">p(y_i\mid y_{-i}) = \int p(y_i\mid\theta)\,p(\theta\mid y_{-i})\,d\theta</span></p>
+<p>the posterior predictive density for <span class="math inline">y_i</span> under the posterior that never saw <span class="math inline">y_i</span>. Refitting the model <span class="math inline">n</span> times — one full posterior per left-out observation — is exactly the cost importance sampling is suited to avoid.</p>
+</section>
+<section id="reusing-the-full-posterior-as-the-proposal" class="slide level2 smaller">
+<h2>Reusing the Full Posterior as the Proposal</h2>
+<p>Take <span class="math inline">g(\theta)=p(\theta\mid y)</span>, the <strong>full</strong> posterior (already available from one fit), as the proposal for the leave-one-out posterior <span class="math inline">f(\theta)=p(\theta\mid y_{-i})</span>. Since <span class="math inline">p(\theta\mid y)\propto p(y_i\mid\theta)\,p(\theta\mid y_{-i})</span>, <span class="math display">
+f(\theta) = p(\theta\mid y_{-i}) \propto \frac{p(\theta\mid y)}{p(y_i\mid\theta)}, \qquad
+w_i(\theta) = \frac{f(\theta)}{g(\theta)} \propto \frac{1}{p(y_i\mid\theta)}
+</span></p>
+<p>The self-normalized estimator with <span class="math inline">a(\theta)=p(y_i\mid\theta)</span> collapses to a <strong>harmonic mean</strong>: <span class="math display">
+\hat p(y_i\mid y_{-i}) = \frac{\sum_s p(y_i\mid\theta_s)\,w_i(\theta_s)}{\sum_s w_i(\theta_s)}
+= \frac{S}{\sum_{s=1}^S 1/p(y_i\mid\theta_s)}
+</span></p>
+<p>over draws from the <em>full</em> posterior (Gelfand, Dey &amp; Chang, 1992) — one weighted average per left-out observation, all reusing the same <span class="math inline">S</span> draws from a single fit.</p>
+</section>
+<section id="when-it-works-and-when-it-breaks" class="slide level2 smaller">
+<h2>When It Works, and When It Breaks</h2>
+<p>The full posterior is <strong>narrower</strong> than any leave-one-out posterior (it has one more observation), so <span class="math inline">g</span> has lighter tails than <span class="math inline">f</span>: the <em>heavy-tailed-weight</em> failure from Example 2, not the missed-mode failure from Example 1. Typical points: the two posteriors nearly coincide, weights stable. Influential points (outliers, high leverage): <span class="math inline">1/p(y_i\mid\theta_s)</span> can have infinite variance, and the estimate is dominated by a few draws.</p>
+<p><strong>Diagnostics and fixes</strong>: report <span class="math inline">S_{\text{eff}}</span> <em>per observation</em>; <strong>Pareto-smoothed importance sampling</strong> (Vehtari, Gelman &amp; Gabry, 2017) fits a generalized Pareto distribution to the largest weights and uses the shape <span class="math inline">\hat k</span> as a diagnostic (<span class="math inline">\hat k&gt;0.7</span> unreliable); fall back to exact refitting only for the flagged observations.</p>
+</section>
+<section id="summary-12" class="slide level2">
+<h2>Summary (1/2)</h2>
 <ul>
-<li>Importance sampling estimates <span class="math inline">E_f[a(\theta)]</span> and <span class="math inline">C_f = \int f(\theta)\,d\theta</span> from draws <span class="math inline">\theta_i\sim g</span> using weights <span class="math inline">w_i = f(\theta_i)/g(\theta_i)</span>: <span class="math display">\widehat{C_f/C_g} = \frac1n\sum_i w_i, \qquad \hat A = \sum_i a(\theta_i)\,\tilde w_i, \quad \tilde w_i = \frac{w_i}{\sum_j w_j}</span></li>
-<li>Good story: a proposal shaped like the target on its support (Example 1) gives near-constant weights and <span class="math inline">S_{\text{eff}}\approx n</span></li>
-<li>Bad stories: a proposal that misses a mode (Example 2) or part of the support (Example 3) fails <strong>silently</strong>, with perfect-looking weights; a proposal with lighter tails fails <strong>noisily</strong>, with a few huge weights</li>
-<li><span class="math inline">S_{\text{eff}} = 1/\sum_i\tilde w_i^2</span> diagnoses only the second kind of failure</li>
-<li>Advanced uses: normalizing-constant ratios (free energy, marginal likelihood) via tempering steps; leave-one-out cross-validation from full-posterior draws with <span class="math inline">w_i = 1/p(y_i\mid\theta)</span></li>
+<li>Importance sampling reweights draws from a proposal <span class="math inline">g</span> by <span class="math inline">w(\theta)=f(\theta)/g(\theta)</span> instead of accepting/rejecting them: <span class="math display">\widehat{C_f/C_g} = \frac1S\sum_s w_s, \qquad \hat A = \sum_s a(\theta_s)\,\tilde w_s, \quad \tilde w_s = \frac{w_s}{\sum_j w_j}</span> only the support condition <span class="math inline">\{g&gt;0\}\supseteq\{f&gt;0\}</span> is required, not an envelope <span class="math inline">g\ge f</span></li>
+<li>A good proposal shaped like the target on its support gives near-constant weights and <span class="math inline">S_{\text{eff}}\approx S</span> (Examples 2 and 3), and a single weighted sample can answer several questions about the same target</li>
+</ul>
+</section>
+<section id="summary-22" class="slide level2">
+<h2>Summary (2/2)</h2>
+<ul>
+<li>A proposal that misses a mode or part of the support fails <strong>silently</strong> (Example 1): observed weights look healthy while the estimate is badly wrong, and no amount of extra sampling fixes it — <span class="math inline">S_{\text{eff}}</span> diagnoses only the <em>noisy</em> failure, never the silent one</li>
+<li>The marginal likelihood: a Laplace-shaped proposal stays efficient as data accumulate and the posterior sharpens; the prior does not</li>
+<li>Advanced uses: normalizing-constant ratios (free energy, marginal likelihood) via tempering/stepping-stones; leave-one-out cross-validation from full-posterior draws with <span class="math inline">w_i=1/p(y_i\mid\theta)</span>, diagnosed per observation by Pareto-smoothed importance sampling</li>
 </ul>
 
 </section></section>
