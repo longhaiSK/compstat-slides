@@ -177,6 +177,7 @@ Methods differ in **what they need** and **how fast they converge**:
 | **Newton–Raphson** | $S(\theta)$ and $S'(\theta) = \ell''(\theta)$ | **quadratic** near root |
 | Fisher scoring | $S(\theta)$ and $I(\theta)$ | linear–quadratic |
 
+Every method below is illustrated on the same zero-truncated Poisson likelihood, so the pictures are directly comparable.
 
 ## Running Example: Zero-Truncated Poisson {.smaller}
 
@@ -202,62 +203,147 @@ $$
 ## Zero-Truncated Poisson in R
 
 ```{r}
-y <- rpois(200, 1.5); x <- y[y > 0]; n <- length(x); sx <- sum(x)
+#| label: ztp-setup
+library(latex2exp)
+set.seed(812)
+y <- rpois(200, 1.5); x <- y[y > 0]; n <- length(x); sx <- sum(x); xbar <- mean(x)
 ll <- function(l) -n * l + sx * log(l) - n * log(1 - exp(-l))
 S  <- function(l) sx / l - n / (1 - exp(-l))
 dS <- function(l) -sx / l^2 + n * exp(-l) / (1 - exp(-l))^2
 nI <- function(l) n / (l * (1 - exp(-l))) - n * exp(-l) / (1 - exp(-l))^2
-par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
-curve(ll, 0.3, 4, lwd = 2, main = "log-likelihood", xlab = expression(lambda))
-curve(S, 0.3, 4, lwd = 2, main = "score", xlab = expression(lambda)); abline(h = 0, lty = 3)
-c(naive_mean = mean(x), true_lambda = 1.5)
+lhat <- uniroot(S, c(1e-6, 20), tol = 1e-12)$root   # reference value for the pictures
+lam  <- seq(0.4, 4, length.out = 400)               # plotting grid used throughout
+c(naive_mean = xbar, mle = lhat, true_lambda = 1.5)
 ```
 
-The plain sample mean **overestimates** $\lambda$ because the zeros are missing; the MLE corrects for this.
+```{r}
+#| label: ztp-curves
+#| fig-width: 9
+#| fig-height: 3.6
+par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.2, 1))
+plot(lam, ll(lam) - ll(lhat), type = "l", lwd = 2, main = "log-likelihood",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$\\ell(\\lambda) - \\ell(\\hat{\\lambda})$"))
+abline(v = lhat, lty = 3); abline(v = xbar, col = 4, lty = 5)
+legend("bottomleft", bty = "n", lty = c(3, 5), col = c(1, 4), legend = c("MLE", "sample mean"))
+plot(lam, S(lam), type = "l", lwd = 2, main = "score",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
+```
 
-## Fixed-Point (Simple) Iteration
+The plain sample mean **overestimates** $\lambda$ because the zeros are missing; the MLE sits where the score crosses zero.
 
-Rearrange $S(\lambda) = 0$ into the form $\lambda = g(\lambda)$:
+<!-- Replaces "## Fixed-Point (Simple) Iteration" and "## Fixed-Point: Two Rearrangements".
+     Depends on the ztp-setup chunk: ll, S, lam, lhat, xbar. -->
+
+## Fixed-Point Iteration: Two Rearrangements {.smaller}
+
+The score equation $S(\lambda) = 0$ can be written as
 $$
-\frac{\overline x}{\lambda} = \frac{1}{1 - e^{-\lambda}} \iff \lambda = \overline x\,(1 - e^{-\lambda}) =: g(\lambda).
+\frac{\overline x}{\lambda} = \frac{1}{1 - e^{-\lambda}} .
 $$
 
-Iterate $\lambda_{k+1} = g(\lambda_k)$. Converges to a fixed point $\lambda^* = g(\lambda^*)$ if $|g'(\lambda^*)| < 1$; the error shrinks by the factor $|g'(\lambda^*)|$ each step (**linear** convergence).
+Solving for the $\lambda$ on the left gives one rearrangement; solving for the exponential gives another:
+$$
+\lambda = \overline x\,(1 - e^{-\lambda}) =: g_1(\lambda),
+\qquad
+\lambda = -\log\!\Big(1 - \frac{\lambda}{\overline x}\Big) =: g_2(\lambda) .
+$$
+
+Both have exactly the same fixed points, $\hat\lambda$ and the spurious root $\lambda = 0$, and indeed $g_2 = g_1^{-1}$.
+
+## Fixed-Point Iteration: The Method {.smaller}
+
+Pick a rearrangement $\lambda = g(\lambda)$ and iterate
+$$
+\lambda_{k+1} = g(\lambda_k), \qquad k = 0, 1, 2, \ldots
+$$
+
+Writing $e_k = \lambda_k - \lambda^*$ and expanding $g$ about the fixed point, $e_{k+1} \approx g'(\lambda^*) e_k$:
+
+- the iteration converges to $\lambda^*$ when $|g'(\lambda^*)| < 1$, and the error then shrinks by that **constant factor** each step — **linear** convergence;
+- it is repelled from $\lambda^*$ when $|g'(\lambda^*)| > 1$.
+
+Here $g_1'(\lambda) = \overline x\, e^{-\lambda}$ and $g_2'(\lambda) = (\overline x - \lambda)^{-1}$. Since $g_2 = g_1^{-1}$, the slopes are reciprocal at every fixed point, so **at most one** of the two rearrangements can converge to $\hat\lambda$.
 
 ```{r}
+#| label: fixed-point
 fixed_point <- function(g, x0, tol = 1e-8, maxit = 500) {
   for (k in 1:maxit) { x1 <- g(x0); if (abs(x1 - x0) < tol) return(c(root = x1, iter = k)); x0 <- x1 }
   stop("not converged")
 }
-fixed_point(function(l) mean(x) * (1 - exp(-l)), x0 = mean(x))
+g1 <- function(l) xbar * (1 - exp(-l))
+g2 <- function(l) -log(1 - l / xbar)
+fixed_point(g1, x0 = xbar)
+c(g1_slope = xbar * exp(-lhat), g2_slope = 1 / (xbar - lhat))    # reciprocals
 ```
 
-Advantage: no derivatives. Disadvantage: a suitable $g$ must be found, and convergence can be slow or fail.
+Advantage: no derivatives. Disadvantage: a suitable $g$ must be found, and the rearrangement alone decides the outcome.
 
-## Fixed-Point Iteration: The Cobweb
-
-The iterates walk toward the intersection of $g$ with the $45^\circ$ line: from $\lambda_k$ move vertically to $g$, then horizontally back to the diagonal to start the next step.
+## Fixed-Point: The Cobweb {.smaller}
 
 ```{r}
-lam <- seq(0.2, 3, length.out = 300)
-g <- function(l) mean(x) * (1 - exp(-l))
-lstar <- uniroot(S, c(0.2, 5))$root
-
-plot(lam, g(lam), type = "l", lwd = 2, xlim = c(0.2, 3), ylim = c(0.2, 3),
-     xlab = expression(lambda[k]), ylab = expression(g(lambda[k])))
-abline(0, 1, lty = 2)
-x0 <- 2.8
-for (k in 1:5) {
-  x1 <- g(x0)
-  segments(x0, x0, x0, x1, col = 2, lwd = 2)   # up/down to the curve
-  segments(x0, x1, x1, x1, col = 2, lwd = 2)   # across to the diagonal
-  points(x0, x1, pch = 19, col = 2)
-  x0 <- x1
+#| label: fixed-point-cobweb
+#| fig-width: 9
+#| fig-height: 4
+cobweb <- function(g, x0, nstep, main) {
+  gg <- seq(0.05, 1.9, length.out = 300)
+  plot(gg, g(gg), type = "l", lwd = 2, xlim = c(0, 1.9), ylim = c(0, 1.9),
+       xlab = TeX("$\\lambda_k$"), ylab = TeX("$g(\\lambda_k)$"), main = main)
+  abline(0, 1, lty = 2); points(lhat, lhat, pch = 19, cex = 1.3)
+  for (k in 1:nstep) {
+    x1 <- g(x0); if (!is.finite(x1) || x1 < 0) break
+    segments(x0, x0, x0, x1, col = 2, lwd = 2)     # up (or down) to the curve
+    segments(x0, x1, x1, x1, col = 2, lwd = 2)     # across to the diagonal
+    points(x0, x1, pch = 19, col = 2, cex = 0.8)
+    x0 <- x1
+  }
 }
-points(lstar, lstar, pch = 19, cex = 1.3)
+par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.4, 1))
+cobweb(g1, x0 = 1.85, nstep = 6, main = TeX("$g_1$: converges, $|g_1'| < 1$"))
+cobweb(g2, x0 = 1.40, nstep = 6, main = TeX("$g_2$: repelled, $|g_2'| > 1$"))
 ```
 
-The shallower $g$ is at the crossing — the smaller $|g'|$ — the larger each stride toward it; $|g'| > 1$ there would spiral outward instead of in.
+The staircase walks to the intersection of $g$ with the $45^\circ$ line. For $g_1$ the crossing is shallow and each step strides toward it; $g_2$ is the inverse map, its slope there is the reciprocal, and the iterates are pushed away from $\hat\lambda$ toward the fixed point at $\lambda = 0$.
+
+## Fixed-Point: Traces of the Iterates {.smaller}
+
+```{r}
+#| label: fixed-point-trace
+#| fig-width: 9.5
+#| fig-height: 4
+trace_fp <- function(g, x0, nstep) {
+  p <- x0
+  for (k in 1:nstep) {
+    xn <- g(p[k])
+    if (!is.finite(xn) || xn <= 0) break
+    p <- c(p, xn)
+  }
+  p
+}
+t1 <- trace_fp(g1, 1.85, 14); t2 <- trace_fp(g2, 1.40, 14)
+par(mfrow = c(1, 2), mar = c(4.2, 4.4, 2.4, 1))
+
+## (a) the iterates themselves
+plot(seq_along(t1) - 1, t1, type = "b", pch = 19, lwd = 2, ylim = c(0, 2),
+     xlim = c(0, 14), xlab = "iteration $k$", ylab = TeX("$\\lambda_k$"), main = "traces")
+lines(seq_along(t2) - 1, t2, type = "b", pch = 19, lwd = 2, col = 2)
+abline(h = lhat, lty = 3); abline(h = 0, lty = 3)
+mtext(TeX("$\\hat{\\lambda}$"), side = 4, at = lhat, las = 1, line = 0.3, cex = 0.9)
+legend("topright", bty = "n", lwd = 2, pch = 19, col = c(1, 2),
+       legend = c(TeX("$g_1$"), TeX("$g_2$")))
+
+## (b) the errors, on a log scale
+e1 <- pmax(abs(t1 - lhat), 1e-16); e2 <- pmax(abs(t2 - lhat), 1e-16)
+plot(seq_along(e1) - 1, e1, type = "b", pch = 19, lwd = 2, log = "y",
+     ylim = c(1e-10, 5), xlim = c(0, 14),
+     xlab = "iteration $k$", ylab = TeX("$|\\lambda_k - \\hat{\\lambda}|$"), main = "errors")
+lines(seq_along(e2) - 1, e2, type = "b", pch = 19, lwd = 2, col = 2)
+lines(0:14, e1[1] * (xbar * exp(-lhat))^(0:14), lty = 5, col = 4, lwd = 2)
+legend("bottomleft", bty = "n", lwd = 2, lty = c(1, 1, 5), pch = c(19, 19, NA),
+       col = c(1, 2, 4), legend = c(TeX("$g_1$"), TeX("$g_2$"), TeX("rate $|g_1'(\\hat{\\lambda})|^k$")))
+```
+
+Left: $g_1$ settles onto $\hat\lambda$ within a few steps, while $g_2$ slides past it and decays toward the spurious fixed point at zero. Right: the $g_1$ error falls along a straight line on the log scale, with the slope predicted by $|g_1'(\hat\lambda)|$ — one fixed number of digits gained per iteration, against Newton's doubling. The $g_2$ error rises and then flattens at $\hat\lambda$, the distance from the limit $0$ to the root it failed to find.
 
 
 ## Bisection
@@ -265,6 +351,7 @@ The shallower $g$ is at the crossing — the smaller $|g'|$ — the larger each 
 If $S$ is continuous and $S(a)$, $S(b)$ have opposite signs, a root lies in $[a, b]$. Evaluate $S$ at the midpoint and keep the half that still brackets the root.
 
 ```{r}
+#| label: bisection
 bisection <- function(S, a, b, tol = 1e-8) {
   k <- 0
   while (b - a > tol) { m <- (a + b) / 2; if (S(a) * S(m) <= 0) b <- m else a <- m; k <- k + 1 }
@@ -280,25 +367,27 @@ bisection(S, 0.1, 10)
 ## Bisection, Visualized
 
 ```{r}
-Sv <- S(lam); yr <- range(Sv); pad <- 0.3 * diff(yr)
+#| label: bisection-plot
+#| fig-width: 8
+#| fig-height: 4
+Sv <- S(lam); yr <- range(Sv); pad <- 0.35 * diff(yr)
 plot(lam, Sv, type = "l", lwd = 2, ylim = c(yr[1], yr[2] + pad),
-     xlab = expression(lambda), ylab = expression(S(lambda)))
-abline(h = 0, lty = 3); points(lstar, 0, pch = 19, cex = 1.3)
+     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.3)
 
-a <- 0.3; b <- 3
-ylev <- seq(yr[2] + 0.05 * pad, yr[2] + 0.9 * pad, length.out = 4)
+a <- 0.5; b <- 3.6
+ylev <- seq(yr[2] + 0.08 * pad, yr[2] + 0.95 * pad, length.out = 4)
 for (k in 1:4) {
   m <- (a + b) / 2
   segments(a, ylev[k], b, ylev[k], col = 4, lwd = 3)      # the current bracket
   points(c(a, b), rep(ylev[k], 2), pch = "|", col = 4)
-  segments(m, ylev[k], m, S(m), lty = 3, col = 2)         # midpoint mapped up to S
+  segments(m, ylev[k], m, S(m), lty = 3, col = 2)         # midpoint carried down to S
   points(m, ylev[k], pch = 19, col = 2)
   if (S(a) * S(m) <= 0) b <- m else a <- m
 }
 ```
 
-Each bar is the bracket at one iteration; the dot is its midpoint, carried up to $S$ to decide which half survives. The bracket halves every step regardless of the shape of $S$.
-
+Each bar is the bracket at one iteration; the dot is its midpoint, mapped onto $S$ to decide which half survives. The bracket halves every step regardless of the shape of $S$ — no faster near the root than far from it.
 
 ## Newton–Raphson: Derivation
 
@@ -310,67 +399,66 @@ S(\theta) \approx S(\theta_k) + S'(\theta_k)(\theta - \theta_k) = 0
 $$
 
 ```{r}
+#| label: nr-one-step
 #| echo: false
-curve(S, 0.5, 4, lwd = 2, xlab = expression(lambda), ylab = expression(S(lambda)), main = "one Newton step"); abline(h = 0, lty = 3)
-l0 <- 3.5; l1 <- l0 - S(l0) / dS(l0)
-segments(l0, S(l0), l1, 0, col = 2, lwd = 2); points(c(l0, l1), c(S(l0), 0), pch = 19, col = 2)
-text(l0, S(l0), expression(lambda[k]), pos = 4); text(l1, 0, expression(lambda[k+1]), pos = 1)
+#| fig-width: 7
+#| fig-height: 3.4
+par(mar = c(4.2, 4.2, 2.2, 1))
+l0 <- 3.0; l1 <- l0 - S(l0) / dS(l0)
+plot(lam, S(lam), type = "l", lwd = 2, main = "one Newton step",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
+xt <- c(l1 - 0.3, l0 + 0.3)                      # draw the whole tangent, not just the step
+lines(xt, S(l0) + dS(l0) * (xt - l0), col = 2, lwd = 2)
+points(c(l0, l1), c(S(l0), 0), pch = 19, col = 2)
+segments(l1, 0, l1, S(l1), lty = 3, col = "grey40")
+text(l0, S(l0), TeX("$\\lambda_k$"), pos = 4)
+text(l1, 0, TeX("$\\lambda_{k+1}$"), pos = 1)
 ```
 
-## Newton's Tangent, Three Steps
+## Newton–Raphson: The Tangent Steps {.smaller}
 
 ```{r}
-par(mfrow = c(1, 2), mar = c(4, 4.5, 2.5, 1))
+#| label: nr-tangent-steps
+#| fig-width: 10
+#| fig-height: 4.2
+it <- 0.5                                        # starting value
+for (k in 1:3) it <- c(it, it[k] - S(it[k]) / dS(it[k]))
+par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.4, 1))
 
-## three Newton steps
-plot(lam, S(lam), type = "l", lwd = 2, xlab = expression(lambda), ylab = expression(S(lambda)),
-     main = "follow the tangent")
-abline(h = 0, lty = 3); points(lstar, 0, pch = 19, cex = 1.2)
-x0 <- 0.45
+## (a) tangents to the score
+plot(lam, S(lam), type = "l", lwd = 2, main = "tangents to the score",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
 for (k in 1:3) {
-  x1 <- x0 - S(x0) / dS(x0)
-  segments(x0, S(x0), x1, 0, col = 2, lwd = 2)
-  segments(x1, 0, x1, S(x1), lty = 3, col = "grey40")
-  points(c(x0, x1), c(S(x0), 0), pch = 19, col = 2, cex = 0.7)
-  x0 <- x1
+  xt <- range(c(it[k], it[k + 1])) + c(-0.15, 0.15)
+  lines(xt, S(it[k]) + dS(it[k]) * (xt - it[k]), col = 2, lwd = 2)
+  segments(it[k + 1], 0, it[k + 1], S(it[k + 1]), lty = 3, col = "grey40")
+  points(it[k], S(it[k]), pch = 19, col = 2, cex = 0.9)
+  mtext(TeX(sprintf("$\\lambda_%d$", k - 1)), side = 1, at = it[k], line = -1, col = 2, cex = 0.8)
 }
 
-## Newton step versus scoring step from the same point
-plot(lam, S(lam), type = "l", lwd = 2, xlab = expression(lambda), ylab = expression(S(lambda)),
-     main = "observed vs. expected curvature")
-abline(h = 0, lty = 3); points(lstar, 0, pch = 19, cex = 1.2)
-x0 <- 0.45
-x_nr <- x0 - S(x0) / dS(x0)     # slope  S'(lambda)
-x_fs <- x0 + S(x0) / nI(x0)     # slope -nI(lambda)
-segments(x0, S(x0), x_nr, 0, col = 2, lwd = 2)
-segments(x0, S(x0), x_fs, 0, col = 4, lwd = 2, lty = 5)
-points(c(x0, x_nr, x_fs), c(S(x0), 0, 0), pch = 19, cex = 0.7, col = c(1, 2, 4))
-legend("topright", bty = "n", lwd = 2, lty = c(1, 5), col = c(2, 4),
-       legend = c("Newton: slope S'", "scoring: slope -nI"))
+## (b) the quadratic model that each step maximizes
+llc <- function(l) ll(l) - ll(lhat)
+plot(lam, llc(lam), type = "l", lwd = 2, main = "the quadratic model behind each step",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$\\ell(\\lambda) - \\ell(\\hat{\\lambda})$"))
+for (k in 1:3) {
+  w <- seq(it[k] - 1, it[k] + 1, length.out = 200)
+  lines(w, llc(it[k]) + S(it[k]) * (w - it[k]) + 0.5 * dS(it[k]) * (w - it[k])^2,
+        col = 2, lwd = 1.5, lty = 5)
+  segments(it[k + 1], par("usr")[3], it[k + 1], llc(it[k + 1]), lty = 3, col = "grey40")
+  points(it[k], llc(it[k]), pch = 19, col = 2, cex = 0.9)
+}
+points(lhat, 0, pch = 19, cex = 1.2)
 ```
 
-Left: the tangent to $S$ is followed down to zero at each step; as the curve straightens near the root the steps land almost exactly on it. Right: Newton uses the actual slope $S'(\lambda_k)$, scoring uses $-nI(\lambda_k)$ averaged over hypothetical data — the two lines differ away from the root and coincide as $\lambda_k \to \hat\lambda$.
+Left: each red line is the tangent to $S$ at the current iterate, followed down to the axis to give the next one. Right: the same steps seen on $\ell$ — the dashed parabola is the second-order Taylor expansion at $\lambda_k$, and $\lambda_{k+1}$ is its vertex. As the iterates approach $\hat\lambda$ the parabola hugs the log-likelihood and the vertex lands essentially on the MLE.
 
-## Newton–Raphson: Interpretation as a Quadratic Model
-
-Equivalently, approximate $\ell$ by its second-order Taylor expansion at $\theta_k$ and maximize that quadratic:
-$$
-\ell(\theta) \approx \ell(\theta_k) + \ell'(\theta_k)(\theta - \theta_k) + \tfrac12 \ell''(\theta_k)(\theta - \theta_k)^2 .
-$$
-
-For a quadratic $\ell(\theta) = -a(\theta - u)^2 + C$ with $a > 0$: $\ell' = -2a(\theta - u)$, $\ell'' = -2a$, so
-$$
-\theta_{k+1} = \theta_k - \frac{-2a(\theta_k - u)}{-2a} = u \quad\text{in one step}.
-$$
-
-- $-\ell''(\theta_k)^{-1}$ is the **perfect step size** for slope $\ell'(\theta_k)$ when $\ell$ is quadratic.
-
-- Log-likelihoods are approximately quadratic near the MLE (this is what asymptotic normality says), so Newton's method is extremely fast there.
-- The normal-mean example is exactly quadratic: Newton converges in one step from anywhere.
 
 ## Newton–Raphson in R
 
 ```{r}
+#| label: nr-code
 newton <- function(S, dS, x0, tol = 1e-8, maxit = 100, trace = FALSE) {
   for (k in 1:maxit) {
     x1 <- x0 - S(x0) / dS(x0)
@@ -380,10 +468,10 @@ newton <- function(S, dS, x0, tol = 1e-8, maxit = 100, trace = FALSE) {
     x0 <- x1 }
   stop("not converged")
 }
-newton(S, dS, x0 = mean(x), trace = TRUE)
+newton(S, dS, x0 = xbar, trace = TRUE)
 ```
 
-Compare iteration counts: fixed point `r fixed_point(function(l) mean(x) * (1 - exp(-l)), mean(x))["iter"]`, bisection 30, golden 40, Newton just a handful.
+Iteration counts on the same problem: fixed point `r fixed_point(g1, xbar)["iter"]`, bisection 30, golden 40, Newton `r newton(S, dS, xbar)["iter"]`.
 
 ## Convergence Rate of Newton–Raphson
 
@@ -394,58 +482,85 @@ $$
 e_{k+1} = e_k - \frac{S(\theta_k)}{S'(\theta_k)} = \frac{S''(\xi)}{2S'(\theta_k)}\,e_k^2 .
 $$
 
-**Quadratic convergence**: the error is squared each step, so the number of correct digits roughly **doubles**. Linear methods (bisection, fixed point) gain a fixed number of digits per step.
+**Quadratic convergence**: the error is squared each step, so the number of correct digits roughly **doubles**. Linear methods gain a fixed number of digits per step.
 
 ```{r}
+#| label: nr-error
 #| echo: false
-lhat <- newton(S, dS, mean(x))["root"]
+#| fig-width: 7
+#| fig-height: 3.4
+par(mar = c(4.2, 4.2, 1.5, 1))
 err_newton <- {e <- c(); x0 <- 3; for (k in 1:6) { x0 <- x0 - S(x0)/dS(x0); e <- c(e, abs(x0 - lhat)) }; e}
-err_bisec <- {a <- 0.1; b <- 10; e <- c(); for (k in 1:6) { m <- (a+b)/2; if (S(a)*S(m) <= 0) b <- m else a <- m; e <- c(e, abs((a+b)/2 - lhat)) }; e}
-plot(1:6, pmax(err_newton, 1e-16), log = "y", type = "b", pch = 19, ylim = c(1e-16, 10), xlab = "iteration", ylab = "|error| (log scale)")
-lines(1:6, err_bisec, type = "b", col = 2, pch = 19); legend("bottomleft", c("Newton", "bisection"), col = 1:2, pch = 19, bty = "n")
+err_bisec  <- {a <- 0.1; b <- 10; e <- c(); for (k in 1:6) { m <- (a+b)/2; if (S(a)*S(m) <= 0) b <- m else a <- m; e <- c(e, abs((a+b)/2 - lhat)) }; e}
+plot(1:6, pmax(err_newton, 1e-16), log = "y", type = "b", pch = 19, ylim = c(1e-16, 10),
+     xlab = "iteration", ylab = "|error| (log scale)")
+lines(1:6, err_bisec, type = "b", col = 2, pch = 19)
+legend("bottomleft", c("Newton", "bisection"), col = 1:2, pch = 19, bty = "n")
 ```
 
 ## When Newton–Raphson Fails {.smaller}
 
 Newton uses only **local** information, so it can misbehave:
 
-- **Wrong curvature**: if $\ell''(\theta_k) > 0$ (a convex region), the step moves toward a *minimum* or diverges.
-
+- **Wrong curvature**: if $\ell''(\theta_k) > 0$, the step moves toward a *minimum* or diverges.
 - **Overshooting**: a flat score ($S'(\theta_k) \approx 0$) gives a huge step.
 - **Multiple roots**: it converges to whichever root is nearest the start, possibly a local maximum.
 
+The truncated Poisson overshoots from a poor start: at $\lambda_0 = 3.5$ the score is already flat, so the tangent crosses zero outside the parameter space.
+
 ```{r}
-Sc  <- function(t) sum(2 * (x_c - t) / (1 + (x_c - t)^2))       # Cauchy score
-dSc <- function(t) sum(2 * ((x_c - t)^2 - 1) / (1 + (x_c - t)^2)^2)
-x_c <- rcauchy(8, 3)
-starts <- c(-5, 0, median(x_c), 8)
-sapply(starts, function(s) tryCatch(newton(Sc, dSc, s)["root"], error = function(e) NA))
+#| label: nr-overshoot
+#| fig-width: 8
+#| fig-height: 3.8
+l0 <- 3.5; l_nr <- l0 - S(l0) / dS(l0)
+par(mar = c(4.2, 4.2, 1.5, 1))
+plot(NA, xlim = c(-0.8, 4), ylim = range(S(lam)),
+     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+rect(-0.8, par("usr")[3], 0, par("usr")[4], col = "grey90", border = NA)
+text(-0.4, 0.55 * par("usr")[4], TeX("$\\lambda < 0$"), col = "grey30", cex = 0.9)
+lines(lam, S(lam), lwd = 2); abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
+xt <- c(l_nr - 0.2, l0 + 0.3)
+lines(xt, S(l0) + dS(l0) * (xt - l0), col = 2, lwd = 2)
+points(c(l0, l_nr), c(S(l0), 0), pch = 19, col = 2)
+mtext(TeX("$\\lambda_0$"), side = 1, at = l0, line = -1, col = 2, cex = 0.9)
+mtext(TeX("$\\lambda_1$"), side = 1, at = l_nr, line = -1, col = 2, cex = 0.9)
 ```
 
-Even the well-behaved truncated Poisson overshoots from a poor start: at $\lambda_0 = 3.5$ the score is flat, the step is huge, and the iterate goes negative.
-
 ```{r}
-c(step_from_3.5 = 3.5 - S(3.5) / dS(3.5))
-tryCatch(newton(S, dS, 3.5), error = function(e) conditionMessage(e))
+#| label: nr-overshoot-num
+c(lambda_1 = l_nr)
+tryCatch(newton(S, dS, l0), error = function(e) conditionMessage(e))
 ```
 
-Safeguards: start from a robust estimate (median for Cauchy), **halve the step** until $\ell$ increases, or fall back to bisection/golden section, which only need a bracket.
+Safeguards: start from a robust estimate, **halve the step** until $\ell$ increases, or fall back to bisection/golden section, which only need a bracket.
 
-## Newton's Failure Mode, Visualized {.smaller}
+## Flat Tails: The Cauchy Location Model {.smaller}
 
-A single-observation Cauchy likelihood shows exactly why: $f(\theta) = -\ell(\theta) = \log(1+\theta^2)$ has derivative $s(\theta) = 2\theta/(1+\theta^2)$, which rises, turns over at $\theta = 1$, then decays to zero — Newton's step blows up wherever $s$ is flat.
+A single-observation Cauchy likelihood shows the same failure in pure form: $f(\theta) = -\ell(\theta) = \log(1+\theta^2)$ has derivative $s(\theta) = 2\theta/(1+\theta^2)$, which rises, turns over at $\theta = 1$, then decays — the Newton step blows up wherever $s$ is flat.
 
 ```{r}
+#| label: cauchy-flat
+#| fig-width: 9
+#| fig-height: 3.4
 lik <- function(t) log(1 + t^2)
 sder <- function(t) 2 * t / (1 + t^2)
-par(mfrow = c(1, 2))
-curve(lik, -5, 5, n = 400, lwd = 2, xlab = expression(theta), main = "negative log-likelihood")
-curve(sder, -5, 5, n = 400, lwd = 2, xlab = expression(theta), main = "derivative: flat tails")
+par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.2, 1))
+curve(lik, -5, 5, n = 400, lwd = 2, xlab = TeX("$\\theta$"), main = "negative log-likelihood")
+curve(sder, -5, 5, n = 400, lwd = 2, xlab = TeX("$\\theta$"), main = "derivative: flat tails")
 abline(h = 0, lty = 3); abline(v = c(-1, 1), col = 2, lty = 2)
 ```
 
-From $\theta_0 = 0.5$ Newton converges quadratically; from $\theta_0 = 0.8$ it overshoots into the tail; from $\theta_0 = 1.2$, beyond the inflection point, it runs away — each step landing where the derivative is flatter still.
+From $\theta_0 = 0.5$ Newton converges quadratically; from $\theta_0 = 1.2$, beyond the inflection point, it runs away — each step landing where the derivative is flatter still.
 
+```{r}
+#| label: cauchy-starts
+set.seed(2024)
+x_c <- rcauchy(8, 3)
+Sc  <- function(t) sum(2 * (x_c - t) / (1 + (x_c - t)^2))       # Cauchy score
+dSc <- function(t) sum(2 * ((x_c - t)^2 - 1) / (1 + (x_c - t)^2)^2)
+starts <- c(-5, 0, median(x_c), 8)
+sapply(starts, function(s) tryCatch(newton(Sc, dSc, s)["root"], error = function(e) NA))
+```
 
 ## Univariate Fisher Scoring
 
@@ -455,26 +570,69 @@ $$
 $$
 
 - $nI(\theta) > 0$ always, so the step is always in an ascent direction — more robust than Newton far from the optimum.
-
 - Near the MLE $nI(\hat\theta) \approx -\ell''(\hat\theta)$, so the two methods behave alike.
 - Requires the expectation in closed form.
 
 ```{r}
+#| label: scoring-code
 fisher_scoring <- function(S, nI, x0, tol = 1e-8, maxit = 100) {
   for (k in 1:maxit) { x1 <- x0 + S(x0) / nI(x0); if (abs(x1 - x0) < tol) return(c(root = x1, iter = k)); x0 <- x1 }
+  stop("not converged")
 }
-rbind(newton = newton(S, dS, 3), fisher = fisher_scoring(S, nI, 3))
+rbind(newton = newton(S, dS, 3), scoring = fisher_scoring(S, nI, 3))
 ```
+
+## Newton vs. Scoring from the Same Point {.smaller}
+
+```{r}
+#| label: scoring-vs-newton
+#| fig-width: 10
+#| fig-height: 4.2
+par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.4, 1))
+
+## (a) the two lines from the bad start
+l_fs <- l0 + S(l0) / nI(l0)
+plot(NA, xlim = c(-0.8, 4), ylim = range(S(lam)), main = "observed vs. expected curvature",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+rect(-0.8, par("usr")[3], 0, par("usr")[4], col = "grey90", border = NA)
+lines(lam, S(lam), lwd = 2); abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
+xn <- c(l_nr - 0.2, l0 + 0.3); xf <- c(l_fs - 0.3, l0 + 0.3)
+lines(xn, S(l0) + dS(l0) * (xn - l0), col = 2, lwd = 2)
+lines(xf, S(l0) - nI(l0) * (xf - l0), col = 4, lwd = 2, lty = 5)
+points(c(l0, l_nr, l_fs), c(S(l0), 0, 0), pch = 19, col = c(1, 2, 4))
+legend("topright", bty = "n", lwd = 2, lty = c(1, 5), col = c(2, 4),
+       legend = c(TeX("Newton: slope $S'$"), TeX("scoring: slope $-nI$")))
+
+## (b) the scoring path from the same start
+plot(lam, S(lam), type = "l", lwd = 2, main = "scoring converges from the bad start",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
+fs <- l0
+for (k in 1:4) fs <- c(fs, fs[k] + S(fs[k]) / nI(fs[k]))
+for (k in 1:4) {
+  xt <- range(c(fs[k], fs[k + 1])) + c(-0.1, 0.1)
+  lines(xt, S(fs[k]) - nI(fs[k]) * (xt - fs[k]), col = 4, lwd = 1.8, lty = 5)
+  segments(fs[k + 1], 0, fs[k + 1], S(fs[k + 1]), lty = 3, col = "grey40")
+  points(fs[k], S(fs[k]), pch = 19, col = 4, cex = 0.9)
+}
+```
+
+```{r}
+#| label: scoring-vs-newton-num
+c(newton_step = l_nr, scoring_step = l_fs)
+```
+
+The two lines pass through the same point with different slopes. Newton uses the actual slope $S'(\lambda_0)$, which is nearly flat here and throws the iterate out of the parameter space; scoring uses $-nI(\lambda_0)$, an average over hypothetical data, which stays steep and negative and keeps every iterate positive. The slopes agree as $\lambda_k \to \hat\lambda$, so the two methods finish at the same speed.
 
 ## Golden Section Search
 
 Works on $f(\theta) = -\ell(\theta)$ directly, **without any derivative**: keep a bracket $[a, b]$ containing the minimum of a unimodal $f$ and two interior points $a' < b'$ placed at the golden ratio ($\phi \approx 0.618$).
 
 - If $f(a') < f(b')$ the minimum is in $[a, b']$; otherwise in $[a', b]$.
-
-- The golden ratio placement lets the surviving interior point be **reused**, so each step costs one new evaluation and shrinks the bracket by $0.618$.
+- The golden placement lets the surviving interior point be **reused**, so each step costs one new evaluation and shrinks the bracket by $0.618$.
 
 ```{r}
+#| label: golden
 golden <- function(f, a, b, tol = 1e-8) {
   phi <- (sqrt(5) - 1) / 2; k <- 0
   x1 <- b - phi * (b - a); x2 <- a + phi * (b - a); f1 <- f(x1); f2 <- f(x2)
@@ -490,14 +648,17 @@ golden(function(l) -ll(l), 0.1, 10)      # R equivalent: optimize(function(l) -l
 ## Golden Section, Visualized
 
 ```{r}
+#| label: golden-plot
+#| fig-width: 8
+#| fig-height: 4
 f <- function(l) -ll(l)
-fv <- f(lam); yr <- range(fv); pad <- 0.25 * diff(yr)
+fv <- f(lam); yr <- range(fv); pad <- 0.3 * diff(yr)
 plot(lam, fv, type = "l", lwd = 2, ylim = c(yr[1], yr[2] + pad),
-     xlab = expression(lambda), ylab = expression(-ell(lambda)))
-points(lstar, f(lstar), pch = 19, cex = 1.3)
+     xlab = TeX("$\\lambda$"), ylab = TeX("$-\\ell(\\lambda)$"))
+points(lhat, f(lhat), pch = 19, cex = 1.3)
 
-gr <- (3 - sqrt(5)) / 2; xl <- 0.3; xu <- 3
-ylev <- seq(yr[2] + 0.05 * pad, yr[2] + 0.9 * pad, length.out = 3)
+gr <- (3 - sqrt(5)) / 2; xl <- 0.5; xu <- 3.6
+ylev <- seq(yr[2] + 0.08 * pad, yr[2] + 0.95 * pad, length.out = 3)
 for (k in 1:3) {
   xml <- xl + gr * (xu - xl); xmu <- xu - gr * (xu - xl)
   segments(xl, ylev[k], xu, ylev[k], col = 4, lwd = 3)
@@ -509,7 +670,8 @@ for (k in 1:3) {
 }
 ```
 
-The point that survives (blue) is already correctly positioned for the next iteration, so only the red point costs a fresh evaluation.
+The point that survives (blue) is already correctly placed for the next iteration, so only the red point costs a fresh evaluation.
+
 
 
 ## Standard Error from the Curvature
@@ -517,7 +679,7 @@ The point that survives (blue) is already correctly positioned for the next iter
 At the MLE $\hat\lambda$, the observed information $J(\hat\lambda) = -\ell''(\hat\lambda) = -S'(\hat\lambda)$ and the expected information $nI(\hat\lambda)$ both estimate the precision:
 
 ```{r}
-lhat <- newton(S, dS, mean(x))["root"]
+#| label: standard-error
 c(mle = lhat, se_observed = 1 / sqrt(-dS(lhat)), se_expected = 1 / sqrt(nI(lhat)))
 lhat + c(-1.96, 1.96) / sqrt(-dS(lhat))    # 95% Wald interval
 ```
@@ -530,12 +692,12 @@ $$
 \ell''(\theta) \approx \frac{\ell(\theta + h) - 2\ell(\theta) + \ell(\theta - h)}{h^2}.
 $$
 
-- $h$ too large: truncation error; $h$ too small: roundoff error (large − large). Typical choice $h \approx \sqrt{\epsilon}\,(1 + \lvert\theta
-\rvert) \approx 10^{-8}$ for the first derivative, $\epsilon^{1/3}$ for the second.
+- $h$ too large: truncation error; $h$ too small: roundoff error (large − large). Typical choice $h \approx \sqrt{\epsilon}\,(1 + \lvert\theta\rvert) \approx 10^{-8}$ for the first derivative, $\epsilon^{1/3}$ for the second.
 
 - R's `nlm()` and `optim(method = "BFGS")` use numerical gradients unless you supply analytic ones; `numDeriv::grad()` and `hessian()` are more accurate.
 
 ```{r}
+#| label: numerical-derivative
 h <- 1e-5
 c(analytic = dS(lhat), numeric = (ll(lhat + h) - 2 * ll(lhat) + ll(lhat - h)) / h^2)
 ```
@@ -545,6 +707,9 @@ c(analytic = dS(lhat), numeric = (ll(lhat + h) - 2 * ll(lhat) + ll(lhat - h)) / 
 Simulating many truncated samples shows the naive estimator's bias never vanishes — it is the wrong model, not too little data — while the MLE is centred on the truth.
 
 ```{r}
+#| label: mle-vs-naive
+#| fig-width: 9
+#| fig-height: 3.6
 mle_nzp <- function(n_obs)
   uniroot(function(l) sum(n_obs) / l - length(n_obs) / (1 - exp(-l)),
           c(1e-6, 50), tol = 1e-10)$root
@@ -556,16 +721,15 @@ sim_nzp <- function(lambda, n_gen = 200, B = 500)
   }, c(naive = 0, mle = 0))
 
 est <- sim_nzp(1.5)
-par(mfrow = c(1, 2))
+par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.2, 1))
 for (m in c("naive", "mle"))
   { hist(est[m, ], breaks = 25, col = "grey90", xlim = range(est),
-         xlab = expression(hat(lambda)),
+         xlab = TeX("$\\hat{\\lambda}$"),
          main = sprintf("%s, bias = %.3f", m, mean(est[m, ]) - 1.5))
     abline(v = 1.5, col = 2, lwd = 2, lty = 2) }
 ```
 
 The naive estimator's bias grows as $\lambda$ shrinks, since more mass sits on the discarded zero; the MLE's spread matches the information-based standard error from two slides ago.
-
 
 # Multivariate Newton–Raphson and Fisher Scoring
 
@@ -1300,6 +1464,40 @@ nm <- optim(c(-1.2, 1), rosen, method = "Nelder-Mead"); c(nm$par, evals = nm$cou
 ```
 
 Robust and derivative-free (R's `optim` default), but slow in high dimensions and offers no standard errors.
+
+## Nelder–Mead: The Simplex Moves {.smaller}
+
+Golden section needs a bracket, which exists only in one dimension. Nelder–Mead generalizes the idea: keep $d+1$ points (a **simplex**) in $\mathbb{R}^d$ and replace the worst one at each iteration, using **function values only** — no derivative, no bracket.
+
+Order the vertices $f(v_1) \le \cdots \le f(v_{d+1})$, let $c$ be the centroid of all but the worst, and try in turn
+$$
+x_r = c + \alpha(c - v_{d+1}), \quad
+x_e = c + \gamma(x_r - c), \quad
+x_c = c + \rho(v_{d+1} - c),
+$$
+with the R defaults $\alpha = 1$, $\gamma = 2$, $\rho = \sigma = 1/2$. If even $x_c$ fails, **shrink** every vertex halfway toward $v_1$.
+
+```{r}
+#| label: nm-moves
+#| echo: false
+#| fig-width: 7
+#| fig-height: 3.6
+par(mar = c(0, 0, 0, 0))
+B <- c(0.2, 0.3); G <- c(2.2, 0.6); W <- c(1.0, 2.0)
+cen <- (B + G) / 2
+xr <- cen + (cen - W); xe <- cen + 2 * (xr - cen); xc <- cen + 0.5 * (W - cen)
+plot(NA, xlim = c(-0.4, 2.7), ylim = c(-2.9, 2.3), axes = FALSE, ann = FALSE, asp = 1)
+polygon(rbind(B, G, W), lwd = 2, border = "grey30")
+segments(W[1], W[2], xe[1], xe[2], lty = 3, col = "grey50")
+points(rbind(B, G, W), pch = 19)
+points(rbind(xr, xe, xc), pch = 19, col = c(2, 4, "orange3"))
+points(cen[1], cen[2], pch = 4, lwd = 2)
+text(B[1], B[2], TeX("$v_1$"), pos = 2); text(G[1], G[2], TeX("$v_2$"), pos = 4)
+text(W[1], W[2], TeX("$v_3$ (worst)"), pos = 3); text(cen[1], cen[2], TeX("$c$"), pos = 4)
+text(xr[1], xr[2], TeX("$x_r$ reflect"), pos = 4, col = 2)
+text(xe[1], xe[2], TeX("$x_e$ expand"), pos = 4, col = 4)
+text(xc[1], xc[2], TeX("$x_c$ contract"), pos = 2, col = "orange3")
+```
 
 
 ## Animation for Nelder-Mead Algorithm
