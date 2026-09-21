@@ -41,22 +41,67 @@ ul.task-list li input[type="checkbox"] {
 <link href="index_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <link href="index_files/libs/quarto-contrib/fontawesome6-6.7.2/all.min.css" rel="stylesheet">
 <link href="index_files/libs/quarto-contrib/fontawesome6-6.7.2/latex-fontsize.css" rel="stylesheet">
+<base target="_blank">
 <style>
-  li {
-    margin-bottom: 15px; /* Adjust value as needed */
-    font-weight: bold;
-  }
-  li a {
-    font-weight: bold; /* Forces the link to be bold */
-  }
-  ol {
-    margin-left: 1em;
-  }
   main {
     margin-top: 3em;
   }
   h2, h3 {
     margin-top: 3em;
+  }
+  table.toc {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 18px;
+    margin-left: -18px;
+  }
+  table.toc td {
+    border: none;
+    padding: 0;
+    vertical-align: top;
+  }
+  table.toc a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    transition: transform .15s, box-shadow .15s;
+  }
+  table.toc a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
+  }
+  table.toc img {
+    display: block;
+    width: 100%;
+    height: 170px;
+    object-fit: contain;
+    background: #fff;
+    padding: 8px;
+  }
+  table.toc .cap {
+    display: block;
+    padding: 8px 12px;
+    font-weight: bold;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+  }
+  table.toc td:empty a { display: none; }
+  .credits {
+    font-size: .8em;
+    color: #6c757d;
+  }
+  @media (max-width: 600px) {
+    table.toc, table.toc tbody, table.toc tr, table.toc td {
+      display: block;
+      width: 100%;
+    }
+    table.toc { border-spacing: 0; margin-left: 0; }
+    table.toc td { margin-bottom: 18px; }
   }
 </style>
 
@@ -102,19 +147,54 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="table-of-content" class="level3">
 <h3 class="anchored" data-anchor-id="table-of-content">Table of Content</h3>
-<ol type="1">
-<li><p><a href="Lec_01_intro-course.html" target="_blank">Introduction</a></p></li>
-<li><p><a href="Lec_03_arithmetics.html" target="_blank">Computer Arithmetic</a></p></li>
-<li><p><a href="Lec_04_Monte_Carlo.html" target="_blank">Monte Carlo</a></p></li>
-<li><p><a href="Lec_05_MLE.html" target="_blank">Maximum Likelihood</a></p></li>
-<li><p><a href="Lec_06_EM.html" target="_blank">EM Algorithm</a></p></li>
-<li><p><a href="Lec_07_bayesian_inference.html" target="_blank">Bayesian Inference</a></p></li>
-<li><p><a href="Lec_08_numerical_quadrature.html" target="_blank">Numerical Quadrature</a></p></li>
-<li><p><a href="Lec_09_laplace_approximation.html" target="_blank">Laplace Approximation</a></p></li>
-<li><p><a href="Lec_10_Rejection_sampling.html" target="_blank">Rejection Sampling</a></p></li>
-<li><p><a href="Lec_11_Importance_Sampling.html" target="_blank">Importance Sampling</a></p></li>
-<li><p><a href="Lec_12_mcmc.html" target="_blank">Markov Chain Monte Carlo</a></p></li>
-</ol>
+<table class="toc">
+<tbody><tr>
+<td>
+<a href="Lec_01_intro-course.html"><img src="index_images/01-intro.png" alt="Venn diagram of data science disciplines: statistics, computer science and domain expertise"><span class="cap">1. Introduction</span></a>
+</td>
+<td>
+<a href="Lec_03_arithmetics.html"><img src="index_images/02-arithmetic.png" alt="IEEE 754 single-precision floating-point layout"><span class="cap">2. Computer Arithmetic</span></a>
+</td>
+<td>
+<a href="Lec_04_Monte_Carlo.html"><img src="index_images/03-monte-carlo.gif" alt="Monte Carlo estimation of pi"><span class="cap">3. Monte Carlo</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="Lec_05_MLE.html"><img src="index_images/04-mle.png" alt="Gradient ascent on a likelihood surface"><span class="cap">4. Maximum Likelihood</span></a>
+</td>
+<td>
+<a href="Lec_06_EM.html"><img src="index_images/05-em.gif" alt="EM clustering of Old Faithful data"><span class="cap">5. EM Algorithm</span></a>
+</td>
+<td>
+<a href="Lec_07_bayesian_inference.html"><img src="index_images/06-bayes.jpg" alt="Bayes' theorem"><span class="cap">6. Bayesian Inference</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="Lec_08_numerical_quadrature.html"><img src="index_images/07-quadrature.png" alt="Simpson's rule illustration"><span class="cap">7. Numerical Quadrature</span></a>
+</td>
+<td>
+<a href="Lec_09_laplace_approximation.html"><img src="index_images/08-laplace.jpg" alt="Portrait of Pierre-Simon Laplace"><span class="cap">8. Laplace Approximation</span></a>
+</td>
+<td>
+<a href="Lec_10_Rejection_sampling.html"><img src="index_images/09-rejection.png" alt="Rejection sampling of a bounded distribution"><span class="cap">9. Rejection Sampling</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="Lec_11_Importance_Sampling.html"><img src="index_images/10-importance.png" alt="Draws from a proposal density reweighted by p/q: dot size grows with importance weight"><span class="cap">10. Importance Sampling</span></a>
+</td>
+<td>
+<a href="Lec_12_mcmc.html"><img src="index_images/11-mcmc.png" alt="Trace plot of three MCMC chains converging to the same distribution"><span class="cap">11. Markov Chain Monte Carlo</span></a>
+</td>
+<td>
+</td>
+</tr>
+</tbody></table>
+<p class="credits">
+Image credits: (1) Data science disciplines Venn diagram, Colohisto, CC BY 4.0; (2) Float example, Stannered, CC BY-SA 3.0; (3) Pi 30K, nicoguaro, CC BY 3.0; (4) Gradient descent maximum likelihood, Justinkunimune, CC0; (5) EM Clustering of Old Faithful data, Chire, CC BY-SA 3.0; (6) Bayes’ Theorem MMB 01, mattbuck, CC BY-SA 3.0; (7) Simpson’s method illustration, Popletibus, CC BY-SA 4.0; (8) Pierre-Simon Laplace, Paulin Jean-Baptiste Guérin, public domain; (9) Rejection sampling of a bounded distribution with finite support, Armavica, CC BY-SA 4.0; (10) importance-weights figure generated in R for this page; (11) trace plot generated in R for this page. Images (1)–(9) are from Wikimedia Commons.
+</p>
 </section>
 
 </main>
