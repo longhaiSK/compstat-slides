@@ -1,6 +1,6 @@
 ---
-title: "Elements of Statistical Computation  "
-subtitle: Lecture Slides [{{< fa brands github >}}](https://github.com/longhaiSK/compstat-slides/)
+title: "Slides for `Elements of Statistical Computation' [{{< fa brands github >}}](https://github.com/longhaiSK/compstat-slides/) "
+
 author: Longhai Li
 date: last-modified
 format:
