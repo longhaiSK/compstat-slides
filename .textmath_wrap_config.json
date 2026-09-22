@@ -37,7 +37,7 @@
         "VIF",
         "WLS",
         "_MLE",
-        "_S"
+        "pv"
     ],
     "blacklist": [
         "COR",
