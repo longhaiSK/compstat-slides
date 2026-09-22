@@ -640,7 +640,7 @@ $$
 
 ```{r}
 c(size = mean(pv0 < 0.05), power = mean(pv1 < 0.05),
-  exact_power = power.t.test(n = 20, delta = 0.5, sd = 1)$power)
+  exact_power = power.t.test(n = 20, delta = 0.5, sd = 1, type = "one.sample")$power)
 ```
 
 Each estimate is a proportion, so its Monte Carlo standard error is $\sqrt{\hat p(1-\hat p)/N}$ — about $0.003$ for the size with $N = 5000$.
@@ -907,17 +907,6 @@ hist_reject(pv_perm1, "perm_lm_sel p-values under H1")
 
 Under $H_0$ the permutation p-values are uniform and the size is close to 0.05; under $H_1$ they pile up near 0, and the proportion below 0.05 is an honest power.
 
-### Comparing the Two Tests
-
-```{r}
-#| label: perm-lm-sel-compare
-rbind(test_lm_sel = c(size = mean(pv_sel0 < 0.05),  power = mean(pv_sel1 < 0.05)),
-      permutation = c(size = mean(pv_perm0 < 0.05), power = mean(pv_perm1 < 0.05)))
-```
-
-- `test_lm_sel` has a higher rejection rate under $H_1$ only because it also rejects far too often under $H_0$.
-
-- Power comparisons are only meaningful **between tests of the same size**.
 
 ## Summary
 
