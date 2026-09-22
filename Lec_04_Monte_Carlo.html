@@ -958,62 +958,214 @@ P\big(\text{p-value}(T) &lt; t\big) &amp;= P\big(1 - F_{H_0}(T) &lt; t\big) = P\
 <p>Under <span class="math inline">H_0</span>, <strong>every pairing of the <span class="math inline">X</span> values with the <span class="math inline">Y</span> values is equally likely</strong>, so the null distribution of <span class="math inline">T</span> is obtained by re-computing <span class="math inline">T</span> after randomly permuting <span class="math inline">Y</span>:</p>
 <ol type="1">
 <li><p>Compute <span class="math inline">\rho^{obs} = \hat\rho(X, Y)</span>.</p></li>
-<li><p>For <span class="math inline">j = 1, \ldots, N</span>: permute <span class="math inline">Y</span> to get <span class="math inline">Y^{(j)}</span>, compute <span class="math inline">\rho^{(j)} = \hat\rho(X, Y^{(j)})</span>.</p></li>
+<li><p>For <span class="math inline">j = 1, \ldots, m</span>: permute <span class="math inline">Y</span> to get <span class="math inline">Y^{(j)}</span>, compute <span class="math inline">\rho^{(j)} = \hat\rho(X, Y^{(j)})</span>.</p></li>
 <li><p><span class="math inline">\widehat{\text{p-value}} = \dfrac{1 + \# \{j : \lvert\rho^{(j)}
 \rvert \ge \lvert\rho^{obs}
-\rvert\}}{N+1}</span>.</p></li>
+\rvert\}}{m+1}</span>.</p></li>
 </ol>
 <p>No normality assumption is needed; the null distribution is generated <strong>from the data itself</strong>.</p>
+</section>
+<section id="replicated-datasets-by-permutation" class="slide level3">
+<h3>Replicated Datasets by Permutation</h3>
+<p><span class="math inline">X</span> is held fixed; each of the <span class="math inline">m</span> permutations re-shuffles the <span class="math inline">Y</span> column (shown for <span class="math inline">n = 5</span>):</p>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;"><span class="math inline">X</span></th>
+<th style="text-align: center;">observed <span class="math inline">Y</span></th>
+<th style="text-align: center;"><span class="math inline">Y^{(1)}</span></th>
+<th style="text-align: center;"><span class="math inline">Y^{(2)}</span></th>
+<th style="text-align: center;"><span class="math inline">\cdots</span></th>
+<th style="text-align: center;"><span class="math inline">Y^{(m)}</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">i = 1</span></td>
+<td style="text-align: center;"><span class="math inline">x_1</span></td>
+<td style="text-align: center;"><span class="math inline">y_1</span></td>
+<td style="text-align: center;"><span class="math inline">y_3</span></td>
+<td style="text-align: center;"><span class="math inline">y_5</span></td>
+<td style="text-align: center;"><span class="math inline">\cdots</span></td>
+<td style="text-align: center;"><span class="math inline">y_2</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">i = 2</span></td>
+<td style="text-align: center;"><span class="math inline">x_2</span></td>
+<td style="text-align: center;"><span class="math inline">y_2</span></td>
+<td style="text-align: center;"><span class="math inline">y_1</span></td>
+<td style="text-align: center;"><span class="math inline">y_4</span></td>
+<td style="text-align: center;"><span class="math inline">\cdots</span></td>
+<td style="text-align: center;"><span class="math inline">y_5</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">i = 3</span></td>
+<td style="text-align: center;"><span class="math inline">x_3</span></td>
+<td style="text-align: center;"><span class="math inline">y_3</span></td>
+<td style="text-align: center;"><span class="math inline">y_5</span></td>
+<td style="text-align: center;"><span class="math inline">y_1</span></td>
+<td style="text-align: center;"><span class="math inline">\cdots</span></td>
+<td style="text-align: center;"><span class="math inline">y_4</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">i = 4</span></td>
+<td style="text-align: center;"><span class="math inline">x_4</span></td>
+<td style="text-align: center;"><span class="math inline">y_4</span></td>
+<td style="text-align: center;"><span class="math inline">y_2</span></td>
+<td style="text-align: center;"><span class="math inline">y_3</span></td>
+<td style="text-align: center;"><span class="math inline">\cdots</span></td>
+<td style="text-align: center;"><span class="math inline">y_1</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">i = 5</span></td>
+<td style="text-align: center;"><span class="math inline">x_5</span></td>
+<td style="text-align: center;"><span class="math inline">y_5</span></td>
+<td style="text-align: center;"><span class="math inline">y_4</span></td>
+<td style="text-align: center;"><span class="math inline">y_2</span></td>
+<td style="text-align: center;"><span class="math inline">\cdots</span></td>
+<td style="text-align: center;"><span class="math inline">y_3</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>statistic</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\rho^{obs}</span></td>
+<td style="text-align: center;"><span class="math inline">\rho^{(1)}</span></td>
+<td style="text-align: center;"><span class="math inline">\rho^{(2)}</span></td>
+<td style="text-align: center;"><span class="math inline">\cdots</span></td>
+<td style="text-align: center;"><span class="math inline">\rho^{(m)}</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>as extreme?</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">I(\lvert\rho^{(1)}\rvert \ge \lvert\rho^{obs}\rvert)</span></td>
+<td style="text-align: center;"><span class="math inline">I(\lvert\rho^{(2)}\rvert \ge \lvert\rho^{obs}\rvert)</span></td>
+<td style="text-align: center;"><span class="math inline">\cdots</span></td>
+<td style="text-align: center;"><span class="math inline">I(\lvert\rho^{(m)}\rvert \ge \lvert\rho^{obs}\rvert)</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\rho^{(1)}, \ldots, \rho^{(m)}</span> are draws from the null distribution of <span class="math inline">\hat\rho</span>. The p-value is <span class="math inline">1</span> plus the sum of the last row, divided by <span class="math inline">m + 1</span>.</p>
 </section>
 <section id="implementation-in-r" class="slide level3">
 <h3>Implementation in R</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a>perm_cor_test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, <span class="at">N =</span> <span class="dv">2000</span>) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a>perm_cor_test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, <span class="at">m =</span> <span class="dv">2000</span>) {</span>
 <span id="cb39-2"><a href=""></a>  robs <span class="ot">&lt;-</span> <span class="fu">cor</span>(x, y)</span>
-<span id="cb39-3"><a href=""></a>  rperm <span class="ot">&lt;-</span> <span class="fu">replicate</span>(N, <span class="fu">cor</span>(x, <span class="fu">sample</span>(y)))</span>
-<span id="cb39-4"><a href=""></a>  <span class="fu">list</span>(<span class="at">rho =</span> robs, <span class="at">pv =</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">abs</span>(rperm) <span class="sc">&gt;=</span> <span class="fu">abs</span>(robs))) <span class="sc">/</span> (N <span class="sc">+</span> <span class="dv">1</span>), <span class="at">rperm =</span> rperm)</span>
-<span id="cb39-5"><a href=""></a>}</span>
-<span id="cb39-6"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">rexp</span>(<span class="dv">30</span>); y <span class="ot">&lt;-</span> <span class="fl">0.4</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rexp</span>(<span class="dv">30</span>)     <span class="co"># non-normal, dependent</span></span>
-<span id="cb39-7"><a href=""></a>out <span class="ot">&lt;-</span> <span class="fu">perm_cor_test</span>(x, y)</span>
-<span id="cb39-8"><a href=""></a><span class="fu">hist</span>(out<span class="sc">$</span>rperm, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">main =</span> <span class="st">"permutation distribution of rho"</span>, <span class="at">xlab =</span> <span class="st">"rho"</span>)</span>
-<span id="cb39-9"><a href=""></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">abs</span>(out<span class="sc">$</span>rho), <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href=""></a><span class="fu">c</span>(<span class="at">rho_obs =</span> out<span class="sc">$</span>rho, <span class="at">perm_pv =</span> out<span class="sc">$</span>pv, <span class="at">pearson_pv =</span> <span class="fu">cor.test</span>(x, y)<span class="sc">$</span>p.value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   rho_obs    perm_pv pearson_pv 
- 0.2313295  0.2018991  0.2187076 </code></pre>
+<span id="cb39-3"><a href=""></a>  rperm <span class="ot">&lt;-</span> <span class="fu">replicate</span>(m, <span class="fu">cor</span>(x, <span class="fu">sample</span>(y)))</span>
+<span id="cb39-4"><a href=""></a>  <span class="fu">list</span>(<span class="at">rho =</span> robs, <span class="at">pv =</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">abs</span>(rperm) <span class="sc">&gt;=</span> <span class="fu">abs</span>(robs))) <span class="sc">/</span> (m <span class="sc">+</span> <span class="dv">1</span>), <span class="at">rperm =</span> rperm)</span>
+<span id="cb39-5"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/perm-cor-1.png" width="672" class="r-stretch"></section>
-<section id="evaluation-under-h_0" class="slide level3">
-<h3>Evaluation Under <span class="math inline">H_0</span></h3>
-<p>Generate independent non-normal <span class="math inline">X</span> and <span class="math inline">Y</span>, and test whether the permutation p-values are uniform and the size is <span class="math inline">\alpha</span>; the Pearson <span class="math inline">t</span>-test p-value is included for comparison.</p>
+</section>
+<section id="evaluation-under-h_0-and-h_1-1" class="slide level3 smaller">
+<h3>Evaluation Under <span class="math inline">H_0</span> and <span class="math inline">H_1</span> (1)</h3>
+<p>Generate non-normal <span class="math inline">(X, Y)</span>: independent under <span class="math inline">H_0</span>, and <span class="math inline">Y = 0.4X + \epsilon</span> under <span class="math inline">H_1</span>. Check that the permutation p-values are uniform with size <span class="math inline">\alpha</span> under <span class="math inline">H_0</span>, and estimate the power under <span class="math inline">H_1</span>.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 20%">
+<col style="width: 14%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">dataset</th>
+<th style="text-align: center;">data under <span class="math inline">H_0</span> (or <span class="math inline">H_1</span>)</th>
+<th style="text-align: center;"><span class="math inline">\rho^{obs}</span></th>
+<th style="text-align: center;">permutation test</th>
+<th style="text-align: center;">p-value</th>
+<th style="text-align: center;">reject?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">k = 1</span></td>
+<td style="text-align: center;"><span class="math inline">(X^{[1]}, Y^{[1]})</span></td>
+<td style="text-align: center;"><span class="math inline">\rho^{obs}_{1}</span></td>
+<td style="text-align: center;"><span class="math inline">m</span> permutations of <span class="math inline">Y^{[1]}</span></td>
+<td style="text-align: center;"><span class="math inline">pv_1</span></td>
+<td style="text-align: center;"><span class="math inline">I(pv_1 &lt; \alpha)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">k = 2</span></td>
+<td style="text-align: center;"><span class="math inline">(X^{[2]}, Y^{[2]})</span></td>
+<td style="text-align: center;"><span class="math inline">\rho^{obs}_{2}</span></td>
+<td style="text-align: center;"><span class="math inline">m</span> permutations of <span class="math inline">Y^{[2]}</span></td>
+<td style="text-align: center;"><span class="math inline">pv_2</span></td>
+<td style="text-align: center;"><span class="math inline">I(pv_2 &lt; \alpha)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">k = N</span></td>
+<td style="text-align: center;"><span class="math inline">(X^{[N]}, Y^{[N]})</span></td>
+<td style="text-align: center;"><span class="math inline">\rho^{obs}_{N}</span></td>
+<td style="text-align: center;"><span class="math inline">m</span> permutations of <span class="math inline">Y^{[N]}</span></td>
+<td style="text-align: center;"><span class="math inline">pv_N</span></td>
+<td style="text-align: center;"><span class="math inline">I(pv_N &lt; \alpha)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>summary</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">histogram</td>
+<td style="text-align: center;"><span class="math inline">\widehat{\text{size}}</span> (or <span class="math inline">\widehat{\text{power}}</span>) <span class="math inline">= \frac{1}{N}\sum_k I(pv_k &lt; \alpha)</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="evaluation-under-h_0-and-h_1-2" class="slide level3">
+<h3>Evaluation Under <span class="math inline">H_0</span> and <span class="math inline">H_1</span> (2)</h3>
+<p>Below, <span class="math inline">N = 500</span> and <span class="math inline">m = 500</span>.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href=""></a>sim_cor_h0 <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n =</span> <span class="dv">30</span>) <span class="fu">list</span>(<span class="at">x =</span> <span class="fu">rexp</span>(n), <span class="at">y =</span> <span class="fu">rexp</span>(n))   <span class="co"># independent</span></span>
-<span id="cb42-2"><a href=""></a>res <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">500</span>, {</span>
-<span id="cb42-3"><a href=""></a>  d <span class="ot">&lt;-</span> <span class="fu">sim_cor_h0</span>()</span>
-<span id="cb42-4"><a href=""></a>  <span class="fu">c</span>(<span class="at">perm =</span> <span class="fu">perm_cor_test</span>(d<span class="sc">$</span>x, d<span class="sc">$</span>y, <span class="at">N =</span> <span class="dv">500</span>)<span class="sc">$</span>pv,</span>
-<span id="cb42-5"><a href=""></a>    <span class="at">pearson =</span> <span class="fu">cor.test</span>(d<span class="sc">$</span>x, d<span class="sc">$</span>y)<span class="sc">$</span>p.value)</span>
-<span id="cb42-6"><a href=""></a>})</span>
-<span id="cb42-7"><a href=""></a><span class="fu">c</span>(<span class="at">size_perm =</span> <span class="fu">mean</span>(res[<span class="st">"perm"</span>, ] <span class="sc">&lt;</span> <span class="fl">0.05</span>), <span class="at">size_pearson =</span> <span class="fu">mean</span>(res[<span class="st">"pearson"</span>, ] <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>   size_perm size_pearson 
-       0.054        0.052 </code></pre>
-</div>
-</div>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb44-2"><a href=""></a><span class="fu">hist</span>(res[<span class="st">"perm"</span>, ], <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"permutation p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span>
-<span id="cb44-3"><a href=""></a><span class="fu">hist</span>(res[<span class="st">"pearson"</span>, ], <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"Pearson p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href=""></a>sim_cor <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n =</span> <span class="dv">30</span>, <span class="at">b =</span> <span class="dv">0</span>) { x <span class="ot">&lt;-</span> <span class="fu">rexp</span>(n); <span class="fu">list</span>(<span class="at">x =</span> x, <span class="at">y =</span> b <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rexp</span>(n)) }</span>
+<span id="cb40-2"><a href=""></a>eval_perm_cor <span class="ot">&lt;-</span> <span class="cf">function</span>(b, <span class="at">N =</span> <span class="dv">500</span>) <span class="fu">replicate</span>(N, {</span>
+<span id="cb40-3"><a href=""></a>  d <span class="ot">&lt;-</span> <span class="fu">sim_cor</span>(<span class="at">b =</span> b)</span>
+<span id="cb40-4"><a href=""></a>  <span class="fu">perm_cor_test</span>(d<span class="sc">$</span>x, d<span class="sc">$</span>y, <span class="at">m =</span> <span class="dv">500</span>)<span class="sc">$</span>pv</span>
+<span id="cb40-5"><a href=""></a>})</span>
+<span id="cb40-6"><a href=""></a>pv_cor0 <span class="ot">&lt;-</span> <span class="fu">eval_perm_cor</span>(<span class="at">b =</span> <span class="dv">0</span>)      <span class="co"># H0: independent</span></span>
+<span id="cb40-7"><a href=""></a>pv_cor1 <span class="ot">&lt;-</span> <span class="fu">eval_perm_cor</span>(<span class="at">b =</span> <span class="fl">0.4</span>)    <span class="co"># H1: dependent</span></span>
+<span id="cb40-8"><a href=""></a></span>
+<span id="cb40-9"><a href=""></a>hist_reject <span class="ot">&lt;-</span> <span class="cf">function</span>(pv, main, <span class="at">alpha =</span> <span class="fl">0.05</span>) {</span>
+<span id="cb40-10"><a href=""></a>  br <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> alpha)                  <span class="co"># first bar = rejection region</span></span>
+<span id="cb40-11"><a href=""></a>  ymax <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">hist</span>(pv, <span class="at">breaks =</span> br, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>counts)</span>
+<span id="cb40-12"><a href=""></a>  <span class="fu">hist</span>(pv, <span class="at">breaks =</span> br, <span class="at">main =</span> main, <span class="at">xlab =</span> <span class="st">"p-value"</span>,</span>
+<span id="cb40-13"><a href=""></a>       <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1.3</span> <span class="sc">*</span> ymax),                <span class="co"># headroom for the legend</span></span>
+<span id="cb40-14"><a href=""></a>       <span class="at">col =</span> <span class="fu">ifelse</span>(br[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">&lt;=</span> alpha, <span class="st">"red"</span>, <span class="st">"grey80"</span>))</span>
+<span id="cb40-15"><a href=""></a>  <span class="fu">abline</span>(<span class="at">v =</span> alpha, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb40-16"><a href=""></a>  <span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">fill =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="cn">NA</span>), <span class="at">border =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="cn">NA</span>),</span>
+<span id="cb40-17"><a href=""></a>         <span class="at">lty =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">2</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="st">"red"</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">2</span>),</span>
+<span id="cb40-18"><a href=""></a>         <span class="at">legend =</span> <span class="fu">c</span>(<span class="fu">sprintf</span>(<span class="st">"rejected: %.3f"</span>, <span class="fu">mean</span>(pv <span class="sc">&lt;</span> alpha)),</span>
+<span id="cb40-19"><a href=""></a>                    <span class="fu">as.expression</span>(<span class="fu">bquote</span>(alpha <span class="sc">==</span> .(alpha)))))</span>
+<span id="cb40-20"><a href=""></a>}</span>
+<span id="cb40-21"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb40-22"><a href=""></a><span class="fu">hist_reject</span>(pv_cor0, <span class="st">"permutation p-values under H0"</span>)</span>
+<span id="cb40-23"><a href=""></a><span class="fu">hist_reject</span>(pv_cor1, <span class="st">"permutation p-values under H1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 
 </div>
-<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/perm-cor-h0-1.png" width="672" class="r-stretch"><p>The permutation p-values are uniform on <span class="math inline">[0,1]</span> and the size is close to 0.05, with no distributional assumption on <span class="math inline">(X, Y)</span>.</p>
+<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/cal-perm-cor-h0-1.png" width="672" class="r-stretch"><p>Under <span class="math inline">H_0</span> the permutation p-values are uniform on <span class="math inline">[0,1]</span> and the size is close to 0.05, with no distributional assumption on <span class="math inline">(X, Y)</span>. Under <span class="math inline">H_1</span> they pile up near 0; the proportion below 0.05 is the power.</p>
 </section>
 
 <section id="example-2-testing-for-post-selection-regression" class="title-slide slide level2 center">
@@ -1033,66 +1185,154 @@ P\big(\text{p-value}(T) &lt; t\big) &amp;= P\big(1 - F_{H_0}(T) &lt; t\big) = P\
 <section id="a-test-with-post-selection-fitting" class="slide level3">
 <h3>A Test With Post-Selection Fitting</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a>test_lm_sel <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X) {</span>
-<span id="cb45-2"><a href=""></a>  k <span class="ot">&lt;-</span> <span class="fu">which.max</span>(<span class="fu">abs</span>(<span class="fu">cor</span>(X, y)))</span>
-<span id="cb45-3"><a href=""></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> X[, k]))<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">4</span>]    <span class="co"># t-test p-value of selected slope</span></span>
-<span id="cb45-4"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a>test_lm_sel <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X) {</span>
+<span id="cb41-2"><a href=""></a>  k <span class="ot">&lt;-</span> <span class="fu">which.max</span>(<span class="fu">abs</span>(<span class="fu">cor</span>(X, y)))</span>
+<span id="cb41-3"><a href=""></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> X[, k]))<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">4</span>]    <span class="co"># t-test p-value of selected slope</span></span>
+<span id="cb41-4"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <span class="math inline">t</span>-test p-value assumes <span class="math inline">X_{k^*}</span> was <strong>chosen in advance</strong>. Selecting the best of 20 predictors <em>after</em> looking at the data means that, even under <span class="math inline">H_0</span>, <span class="math inline">\max_k \lvert\hat\rho_k
 \rvert</span> tends to be large. The reported p-value ignores this selection.</p>
 </section>
 <section id="simulation-for-evaluating-test_lm_sel" class="slide level3">
 <h3>Simulation for Evaluating <code>test_lm_sel</code></h3>
+<p>Simulate <span class="math inline">N = 2000</span> datasets with <span class="math inline">Y = \beta X_1 + \epsilon</span>: <span class="math inline">\beta = 0</span> under <span class="math inline">H_0</span>, and <span class="math inline">\beta = 0.5</span> under <span class="math inline">H_1</span>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href=""></a>sim_null <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n =</span> <span class="dv">50</span>, <span class="at">p =</span> <span class="dv">20</span>) <span class="fu">list</span>(<span class="at">y =</span> <span class="fu">rnorm</span>(n), <span class="at">X =</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p))</span>
-<span id="cb46-2"><a href=""></a>pv_sel <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2000</span>, { d <span class="ot">&lt;-</span> <span class="fu">sim_null</span>(); <span class="fu">test_lm_sel</span>(d<span class="sc">$</span>y, d<span class="sc">$</span>X) })</span>
-<span id="cb46-3"><a href=""></a><span class="fu">hist</span>(pv_sel, <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"test_lm_sel p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href=""></a>sim_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n =</span> <span class="dv">50</span>, <span class="at">p =</span> <span class="dv">20</span>, <span class="at">beta =</span> <span class="dv">0</span>) {</span>
+<span id="cb42-2"><a href=""></a>  X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p); <span class="fu">list</span>(<span class="at">y =</span> beta <span class="sc">*</span> X[, <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(n), <span class="at">X =</span> X)</span>
+<span id="cb42-3"><a href=""></a>}</span>
+<span id="cb42-4"><a href=""></a>pv_sel0 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2000</span>, { d <span class="ot">&lt;-</span> <span class="fu">sim_lm</span>(<span class="at">beta =</span> <span class="dv">0</span>);   <span class="fu">test_lm_sel</span>(d<span class="sc">$</span>y, d<span class="sc">$</span>X) })</span>
+<span id="cb42-5"><a href=""></a>pv_sel1 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2000</span>, { d <span class="ot">&lt;-</span> <span class="fu">sim_lm</span>(<span class="at">beta =</span> <span class="fl">0.5</span>); <span class="fu">test_lm_sel</span>(d<span class="sc">$</span>y, d<span class="sc">$</span>X) })</span>
+<span id="cb42-6"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb42-7"><a href=""></a><span class="fu">hist_reject</span>(pv_sel0, <span class="st">"test_lm_sel p-values under H0"</span>)</span>
+<span id="cb42-8"><a href=""></a><span class="fu">hist_reject</span>(pv_sel1, <span class="st">"test_lm_sel p-values under H1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href=""></a><span class="fu">c</span>(<span class="at">size_at_0.05 =</span> <span class="fu">mean</span>(pv_sel <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>size_at_0.05 
-       0.649 </code></pre>
 </div>
-</div>
-<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/test-lm-sel-h0-1.png" width="672" class="r-stretch"><p>The true size is far above 0.05: <code>test_lm_sel</code> rejects a true <span class="math inline">H_0</span> far too often. Under <span class="math inline">H_0</span> its p-value is <strong>not</strong> uniform, which is a general diagnostic for an invalid test.</p>
+<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/test-lm-sel-h0-1.png" width="672" class="r-stretch"><p>The true size is far above 0.05: <code>test_lm_sel</code> rejects a true <span class="math inline">H_0</span> far too often. Under <span class="math inline">H_0</span> its p-value is <strong>not</strong> uniform, which is a general diagnostic for an invalid test. Its high rejection rate under <span class="math inline">H_1</span> is not real power, since the test does not have size <span class="math inline">\alpha</span>.</p>
 </section>
 <section id="permutation-test-for-post-selection-regression" class="slide level3">
 <h3>Permutation Test for Post-selection Regression</h3>
 <p>Fix: repeat the <strong>whole procedure</strong> — select the most correlated variable, fit the linear model, report its p-value — on permuted responses, and compare the observed p-value with the permutation distribution of p-values.</p>
 <ol type="1">
 <li><p>Compute <span class="math inline">p^{obs}</span> = p-value of <code>test_lm_sel</code> on <span class="math inline">(Y, X)</span>.</p></li>
-<li><p>For <span class="math inline">j = 1, \ldots, N</span>: permute <span class="math inline">Y</span>, compute <span class="math inline">p^{(j)}</span> = p-value of <code>test_lm_sel</code> on <span class="math inline">(Y^{(j)}, X)</span> (<strong>re-doing the selection</strong> each time).</p></li>
-<li><p><span class="math inline">\widehat{\text{p-value}} = \dfrac{1 + \# \{j : p^{(j)} \le p^{obs}\}}{N+1}</span>, the proportion of permuted p-values at least as small as the observed one.</p></li>
+<li><p>For <span class="math inline">j = 1, \ldots, m</span>: permute <span class="math inline">Y</span>, compute <span class="math inline">p^{(j)}</span> = p-value of <code>test_lm_sel</code> on <span class="math inline">(Y^{(j)}, X)</span> (<strong>re-doing the selection</strong> each time).</p></li>
+<li><p><span class="math inline">\widehat{\text{p-value}} = \dfrac{1 + \# \{j : p^{(j)} \le p^{obs}\}}{m+1}</span>, the proportion of permuted p-values at least as small as the observed one.</p></li>
 </ol>
+</section>
+<section id="tree-diagram-re-selecting-the-predictor-with-permuated-y" class="slide level3">
+<h3>Tree Diagram: Re-selecting the Predictor with Permuated <span class="math inline">Y</span></h3>
+<p><span class="math inline">k^*(Y) = \arg\max_k \lvert\hat\rho(X_k, Y)\rvert</span> is the index of the column of <span class="math inline">X</span> most correlated with the response. It is a function of the response, so each permuted <span class="math inline">Y^{(j)}</span> gets its <strong>own</strong> selected predictor <span class="math inline">X_{k^*(Y^{(j)})}</span>:</p>
+
+<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/perm-lm-sel-tree-1.png" width="1536" class="r-stretch"><p>Keeping <span class="math inline">X_{k^*(Y)}</span> fixed and only permuting <span class="math inline">Y</span> would <strong>not</strong> reproduce the selection step, and the resulting test would still be invalid.</p>
+</section>
+<section id="implementation-in-r-1" class="slide level3">
+<h3>Implementation in R</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href=""></a>perm_lm_sel <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, <span class="at">N =</span> <span class="dv">500</span>) {</span>
-<span id="cb49-2"><a href=""></a>  pobs <span class="ot">&lt;-</span> <span class="fu">test_lm_sel</span>(y, X)</span>
-<span id="cb49-3"><a href=""></a>  pperm <span class="ot">&lt;-</span> <span class="fu">replicate</span>(N, <span class="fu">test_lm_sel</span>(<span class="fu">sample</span>(y), X))</span>
-<span id="cb49-4"><a href=""></a>  (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">sum</span>(pperm <span class="sc">&lt;=</span> pobs)) <span class="sc">/</span> (N <span class="sc">+</span> <span class="dv">1</span>)</span>
-<span id="cb49-5"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a>perm_lm_sel <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, <span class="at">m =</span> <span class="dv">500</span>) {</span>
+<span id="cb43-2"><a href=""></a>  pobs <span class="ot">&lt;-</span> <span class="fu">test_lm_sel</span>(y, X)</span>
+<span id="cb43-3"><a href=""></a>  pperm <span class="ot">&lt;-</span> <span class="fu">replicate</span>(m, <span class="fu">test_lm_sel</span>(<span class="fu">sample</span>(y), X))</span>
+<span id="cb43-4"><a href=""></a>  (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">sum</span>(pperm <span class="sc">&lt;=</span> pobs)) <span class="sc">/</span> (m <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb43-5"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="size-and-power-of-the-permutation-test" class="slide level3">
-<h3>Size and Power of the Permutation Test</h3>
+<section id="evaluation-under-h_0-and-h_1-1-1" class="slide level3 smaller">
+<h3>Evaluation Under <span class="math inline">H_0</span> and <span class="math inline">H_1</span> (1)</h3>
+<p>Simulate <span class="math inline">(Y, X)</span> from <code>sim_lm</code>: <span class="math inline">\beta = 0</span> under <span class="math inline">H_0</span>, and <span class="math inline">\beta = 0.5</span> under <span class="math inline">H_1</span>. Check that the permutation p-values are uniform with size <span class="math inline">\alpha</span> under <span class="math inline">H_0</span>, and estimate the power under <span class="math inline">H_1</span>.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 20%">
+<col style="width: 14%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">dataset</th>
+<th style="text-align: center;">data under <span class="math inline">H_0</span> (or <span class="math inline">H_1</span>)</th>
+<th style="text-align: center;"><span class="math inline">p^{obs}</span></th>
+<th style="text-align: center;">permutation test</th>
+<th style="text-align: center;">p-value</th>
+<th style="text-align: center;">reject?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">k = 1</span></td>
+<td style="text-align: center;"><span class="math inline">(Y^{[1]}, X^{[1]})</span></td>
+<td style="text-align: center;"><span class="math inline">p^{obs}_{1}</span></td>
+<td style="text-align: center;"><span class="math inline">m</span> permutations of <span class="math inline">Y^{[1]}</span></td>
+<td style="text-align: center;"><span class="math inline">pv_1</span></td>
+<td style="text-align: center;"><span class="math inline">I(pv_1 &lt; \alpha)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">k = 2</span></td>
+<td style="text-align: center;"><span class="math inline">(Y^{[2]}, X^{[2]})</span></td>
+<td style="text-align: center;"><span class="math inline">p^{obs}_{2}</span></td>
+<td style="text-align: center;"><span class="math inline">m</span> permutations of <span class="math inline">Y^{[2]}</span></td>
+<td style="text-align: center;"><span class="math inline">pv_2</span></td>
+<td style="text-align: center;"><span class="math inline">I(pv_2 &lt; \alpha)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+<td style="text-align: center;"><span class="math inline">\vdots</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">k = N</span></td>
+<td style="text-align: center;"><span class="math inline">(Y^{[N]}, X^{[N]})</span></td>
+<td style="text-align: center;"><span class="math inline">p^{obs}_{N}</span></td>
+<td style="text-align: center;"><span class="math inline">m</span> permutations of <span class="math inline">Y^{[N]}</span></td>
+<td style="text-align: center;"><span class="math inline">pv_N</span></td>
+<td style="text-align: center;"><span class="math inline">I(pv_N &lt; \alpha)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>summary</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">histogram</td>
+<td style="text-align: center;"><span class="math inline">\widehat{\text{size}}</span> (or <span class="math inline">\widehat{\text{power}}</span>) <span class="math inline">= \frac{1}{N}\sum_k I(pv_k &lt; \alpha)</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="evaluation-under-h_0-and-h_1-2-1" class="slide level3">
+<h3>Evaluation Under <span class="math inline">H_0</span> and <span class="math inline">H_1</span> (2)</h3>
+<p>Below, <span class="math inline">N = 300</span> and <span class="math inline">m = 500</span>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href=""></a>sim_alt <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n =</span> <span class="dv">50</span>, <span class="at">p =</span> <span class="dv">20</span>, <span class="at">beta =</span> <span class="fl">0.5</span>) {</span>
-<span id="cb50-2"><a href=""></a>  X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p); <span class="fu">list</span>(<span class="at">y =</span> beta <span class="sc">*</span> X[, <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(n), <span class="at">X =</span> X)</span>
-<span id="cb50-3"><a href=""></a>}</span>
-<span id="cb50-4"><a href=""></a>pv_perm0 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">300</span>, { d <span class="ot">&lt;-</span> <span class="fu">sim_null</span>(); <span class="fu">perm_lm_sel</span>(d<span class="sc">$</span>y, d<span class="sc">$</span>X) })</span>
-<span id="cb50-5"><a href=""></a>pv_perm1 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">300</span>, { d <span class="ot">&lt;-</span> <span class="fu">sim_alt</span>();  <span class="fu">perm_lm_sel</span>(d<span class="sc">$</span>y, d<span class="sc">$</span>X) })</span>
-<span id="cb50-6"><a href=""></a>pv_sel1  <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">300</span>, { d <span class="ot">&lt;-</span> <span class="fu">sim_alt</span>();  <span class="fu">test_lm_sel</span>(d<span class="sc">$</span>y, d<span class="sc">$</span>X) })</span>
-<span id="cb50-7"><a href=""></a><span class="fu">hist</span>(pv_perm0, <span class="at">breaks =</span> <span class="dv">20</span>, <span class="at">main =</span> <span class="st">"perm_lm_sel p-values under H0"</span>, <span class="at">xlab =</span> <span class="st">"p-value"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href=""></a>eval_perm_lm_sel <span class="ot">&lt;-</span> <span class="cf">function</span>(beta, <span class="at">N =</span> <span class="dv">300</span>) <span class="fu">replicate</span>(N, {</span>
+<span id="cb44-2"><a href=""></a>  d <span class="ot">&lt;-</span> <span class="fu">sim_lm</span>(<span class="at">beta =</span> beta)</span>
+<span id="cb44-3"><a href=""></a>  <span class="fu">perm_lm_sel</span>(d<span class="sc">$</span>y, d<span class="sc">$</span>X, <span class="at">m =</span> <span class="dv">500</span>)</span>
+<span id="cb44-4"><a href=""></a>})</span>
+<span id="cb44-5"><a href=""></a>pv_perm0 <span class="ot">&lt;-</span> <span class="fu">eval_perm_lm_sel</span>(<span class="at">beta =</span> <span class="dv">0</span>)      <span class="co"># H0: Y unrelated to X</span></span>
+<span id="cb44-6"><a href=""></a>pv_perm1 <span class="ot">&lt;-</span> <span class="fu">eval_perm_lm_sel</span>(<span class="at">beta =</span> <span class="fl">0.5</span>)    <span class="co"># H1: Y depends on X1</span></span>
+<span id="cb44-7"><a href=""></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb44-8"><a href=""></a><span class="fu">hist_reject</span>(pv_perm0, <span class="st">"perm_lm_sel p-values under H0"</span>)</span>
+<span id="cb44-9"><a href=""></a><span class="fu">hist_reject</span>(pv_perm1, <span class="st">"perm_lm_sel p-values under H1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a><span class="fu">rbind</span>(<span class="at">test_lm_sel =</span> <span class="fu">c</span>(<span class="at">size =</span> <span class="fu">mean</span>(pv_sel <span class="sc">&lt;</span> <span class="fl">0.05</span>),   <span class="at">power =</span> <span class="fu">mean</span>(pv_sel1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)),</span>
-<span id="cb51-2"><a href=""></a>      <span class="at">permutation =</span> <span class="fu">c</span>(<span class="at">size =</span> <span class="fu">mean</span>(pv_perm0 <span class="sc">&lt;</span> <span class="fl">0.05</span>), <span class="at">power =</span> <span class="fu">mean</span>(pv_perm1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/perm-lm-sel-size-power-1.png" width="672" class="r-stretch"><p>Under <span class="math inline">H_0</span> the permutation p-values are uniform and the size is close to 0.05; under <span class="math inline">H_1</span> they pile up near 0, and the proportion below 0.05 is an honest power.</p>
+</section>
+<section id="comparing-the-two-tests" class="slide level3">
+<h3>Comparing the Two Tests</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a><span class="fu">rbind</span>(<span class="at">test_lm_sel =</span> <span class="fu">c</span>(<span class="at">size =</span> <span class="fu">mean</span>(pv_sel0 <span class="sc">&lt;</span> <span class="fl">0.05</span>),  <span class="at">power =</span> <span class="fu">mean</span>(pv_sel1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)),</span>
+<span id="cb45-2"><a href=""></a>      <span class="at">permutation =</span> <span class="fu">c</span>(<span class="at">size =</span> <span class="fu">mean</span>(pv_perm0 <span class="sc">&lt;</span> <span class="fl">0.05</span>), <span class="at">power =</span> <span class="fu">mean</span>(pv_perm1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  size     power
-test_lm_sel 0.62900000 0.9633333
-permutation 0.05333333 0.6333333</code></pre>
+test_lm_sel 0.63200000 0.9730000
+permutation 0.05666667 0.6433333</code></pre>
 </div>
 </div>
-<img data-src="Lec_04_Monte_Carlo_files/figure-revealjs/perm-lm-sel-size-power-1.png" width="672" class="r-stretch"><ul>
-<li><p>Under <span class="math inline">H_0</span> the permutation p-values are uniform and the size is close to 0.05; the power is honest, whereas the “power” of <code>test_lm_sel</code> is inflated by its false positives.</p></li>
+<ul>
+<li><p><code>test_lm_sel</code> has a higher rejection rate under <span class="math inline">H_1</span> only because it also rejects far too often under <span class="math inline">H_0</span>.</p></li>
 <li><p>Power comparisons are only meaningful <strong>between tests of the same size</strong>.</p></li>
 </ul>
 </section>
