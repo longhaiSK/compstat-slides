@@ -84,15 +84,15 @@ format:
 <tr>
 <td><a href="Lec_05_MLE.html"><img src="index_images/04-mle.png" alt="Gradient ascent on a likelihood surface"><span class="cap">4. Maximum Likelihood</span></a></td>
 <td><a href="Lec_06_EM.html"><img src="index_images/05-em.gif" alt="EM clustering of Old Faithful data"><span class="cap">5. EM Algorithm</span></a></td>
-<td><a href="Lec_07_bayesian_inference.html"><img src="index_images/06-bayes.jpg" alt="Bayes' theorem"><span class="cap">6. Bayesian Inference</span></a></td>
+<td><a href="Lec_07_bayesian_inference.html"><img src="index_images/06_bayes.png" alt="Bayes' theorem"><span class="cap">6. Bayesian Inference</span></a></td>
 </tr>
 <tr>
 <td><a href="Lec_08_numerical_quadrature.html"><img src="index_images/07-quadrature.png" alt="Simpson's rule illustration"><span class="cap">7. Numerical Quadrature</span></a></td>
 <td><a href="Lec_09_laplace_approximation.html"><img src="index_images/08-normal_approx_posterior.png" alt="Laplace Approximations"><span class="cap">8. Laplace Approximation</span></a></td>
-<td><a href="Lec_10_Rejection_sampling.html"><img src="index_images/09-rejection.png" alt="Rejection sampling of a bounded distribution"><span class="cap">9. Rejection Sampling</span></a></td>
+<td><a href="Lec_10_Rejection_sampling.html"><img src="index_images/09_rejection.jpeg" alt="Rejection sampling of a bounded distribution"><span class="cap">9. Rejection Sampling</span></a></td>
 </tr>
 <tr>
-<td><a href="Lec_11_Importance_Sampling.html"><img src="index_images/10-importance.png" alt="Draws from a proposal density reweighted by p/q: dot size grows with importance weight"><span class="cap">10. Importance Sampling</span></a></td>
+<td><a href="Lec_11_Importance_Sampling.html"><img src="index_images/10-is-disk.jpeg" alt="Draws from a proposal density reweighted by p/q: dot size grows with importance weight"><span class="cap">10. Importance Sampling</span></a></td>
 <td><a href="Lec_12_mcmc.html"><img src="index_images/11-mcmc.png" alt="Trace plot of three MCMC chains converging to the same distribution"><span class="cap">11. Markov Chain Monte Carlo</span></a></td>
 <td></td>
 </tr>
