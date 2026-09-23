@@ -731,6 +731,7 @@ P\big((X,Y) \in C\big) = \frac{\text{area}(C)}{\text{area}(S)} = \frac{\pi}{4}.
 </section>
 </section>
 <section>
+<<<<<<< Updated upstream
 <section id="evaluating-a-point-estimator-by-simulation" class="title-slide slide level1 center" data-number="3">
 <h1><span class="header-section-number">3</span> Evaluating a Point Estimator by Simulation</h1>
 <p>A point estimator <span class="math inline">\hat\theta = \hat\theta(X_1, \ldots, X_n)</span> is judged by its <strong>mean squared error</strong> <span class="math display">
@@ -743,6 +744,18 @@ P\big((X,Y) \in C\big) = \frac{\text{area}(C)}{\text{area}(S)} = \frac{\pi}{4}.
 \widehat{\mathrm{Bias}} = \overline{\hat\theta} - \theta, \qquad
 \widehat{\mathrm{Var}} = \frac{1}{N}\sum_{j=1}^N \big(\hat\theta^{(j)} - \overline{\hat\theta}\big)^2 .
 </span></p>
+=======
+<section id="evaluating-a-point-estimator" class="title-slide slide level1 center" data-number="3">
+<h1><span class="header-section-number">3</span> Evaluating a Point Estimator</h1>
+
+</section>
+<section id="point-estimators" class="title-slide slide level2 center">
+<h2>Point Estimators</h2>
+<p>A point estimator <span class="math inline">\hat\theta = \hat\theta(X_1, \ldots, X_n)</span> is judged by its <strong>mean squared error</strong> <span class="math display">\mathrm{MSE}(\hat\theta) = E\big[(\hat\theta - \theta)^2\big] = \mathrm{Var}(\hat\theta) + \big[\mathrm{Bias}(\hat\theta)\big]^2 .</span></p>
+<p>MSE is an expectation, so it is estimated by Monte Carlo: simulate <span class="math inline">N</span> independent data sets from a model with <strong>known</strong> <span class="math inline">\theta</span>, <span class="math display">\hat\theta^{(j)} = \hat\theta\big(X_1^{(j)}, \ldots, X_n^{(j)}\big), \qquad j = 1, \ldots, N,</span> and compute <span class="math display">\widehat{\mathrm{MSE}} = \frac{1}{N}\sum_{j=1}^N \big(\hat\theta^{(j)} - \theta\big)^2, \qquad
+\widehat{\mathrm{Bias}} = \bar{\hat\theta} - \theta, \qquad
+\widehat{\mathrm{Var}} = \frac{1}{N}\sum_{j=1}^N \big(\hat\theta^{(j)} - \bar{\hat\theta}\big)^2 .</span></p>
+>>>>>>> Stashed changes
 <p>Two sample sizes appear: <span class="math inline">n</span> (data per replicate, fixed by the problem) and <span class="math inline">N</span> (replicates, chosen large enough that the Monte Carlo error is negligible).</p>
 </section>
 <section id="example-mean-vs.-median-vs.-trimmed-mean" class="title-slide slide level2 center">

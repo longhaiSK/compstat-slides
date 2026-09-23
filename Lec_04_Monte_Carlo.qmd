@@ -509,7 +509,14 @@ abline(h = pi, col = 4)
 
 The red band is $\pi \pm 1.96\,\sigma/\sqrt n$; the running estimate stays inside it most of the time.
 
+<<<<<<< Updated upstream
 # Evaluating a Point Estimator by Simulation
+=======
+
+# Evaluating a Point Estimator
+
+## Point Estimators
+>>>>>>> Stashed changes
 
 A point estimator $\hat\theta = \hat\theta(X_1, \ldots, X_n)$ is judged by its **mean squared error**
 $$
