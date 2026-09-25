@@ -50,6 +50,7 @@ format:
             padding: 8px;
           }
           table.toc .cap {
+            font-size: 0.8em;
             display: block;
             padding: 8px 12px;
             font-weight: bold;
