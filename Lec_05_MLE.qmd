@@ -36,12 +36,23 @@ $$
 
 We work with the **log-likelihood** $\ell(\theta)$ to avoid underflow of the product and because sums are easier to differentiate.
 
-## Maximum Likelihood Estimator
+## Maximum Likelihood (Minimum Loss) Estimator
 $$
-\hat\theta_{\mathrm{MLE}} = \arg\max_\theta L(\theta; D) = \arg\max_\theta \ell(\theta).
+\hat\theta_{\mathrm{MLE}} = \arg\max_\theta L(\theta; D) = \arg\max_\theta \ell(\theta)
+= \arg\min_\theta \mathcal{L}(\theta), \qquad \mathcal{L}(\theta) = -\ell(\theta).
 $$
 
-**Example:** 
+Every algorithm in this lecture **minimizes** the negative log-likelihood
+$\mathcal{L}$ (`nll` in code). Three quantities recur:
+
+- the **gradient** $g(\theta) = \mathcal{L}'(\theta) = -\ell'(\theta)$, whose root locates the minimum;
+- the **observed information** $J(\theta) = g'(\theta) = \mathcal{L}''(\theta) = -\ell''(\theta)$;
+- the **expected information** $nI(\theta) = E_D[\,g'(\theta; D)\,]$.
+
+The classical **score** is $\ell'(\theta) = -g(\theta)$; we work with $g$ throughout so that
+every method is a minimization.
+
+## Bernoulli Likelihood
 
 $Y_1, Y_2, Y_3 \overset{iid}{\sim} \mathrm{Bern}(\theta)$, observed $y = (1, 1, 0)$.
 
@@ -73,58 +84,60 @@ $$
 L(\theta) = \theta^{n_1}(1-\theta)^{n_0}, \qquad \ell(\theta) = n_1\log\theta + n_0\log(1-\theta).
 $$
 
-**Score function** $S(\theta) = \ell'(\theta)$. The MLE solves the **score equation** $S(\theta) = 0$:
+The negative log-likelihood and its gradient are
 $$
-S(\theta) = \frac{n_1}{\theta} - \frac{n_0}{1-\theta} = 0 \iff \hat\theta = \frac{n_1}{n} = \overline y.
+\mathcal{L}(\theta) = -n_1\log\theta - n_0\log(1-\theta), \qquad
+g(\theta) = \mathcal{L}'(\theta) = \frac{n_0}{1-\theta} - \frac{n_1}{\theta} .
 $$
 
-**Second derivative** $\ell''(\theta) = -\dfrac{n_1}{\theta^2} - \dfrac{n_0}{(1-\theta)^2} < 0$, so this is a maximum.
+The MLE solves $g(\theta) = 0 \iff \hat\theta = \dfrac{n_1}{n} = \overline y$, and the curvature
+$J(\theta) = g'(\theta) = \dfrac{n_1}{\theta^2} + \dfrac{n_0}{(1-\theta)^2} > 0$ confirms a **minimum** of $\mathcal{L}$.
 
 ## Example: Normal Mean with Known Variance
 
 $X_1, \ldots, X_n \overset{iid}{\sim} N(\mu, \sigma_0^2)$:
 $$
-\ell(\mu) = -\frac{n}{2}\log(2\pi\sigma_0^2) - \frac{1}{2\sigma_0^2}\sum_{i=1}^n (x_i - \mu)^2
-= C - \frac{n}{2\sigma_0^2}(\mu - \overline x)^2,
+\mathcal{L}(\mu) = \frac{n}{2}\log(2\pi\sigma_0^2) + \frac{1}{2\sigma_0^2}\sum_{i=1}^n (x_i - \mu)^2
+= C + \frac{n}{2\sigma_0^2}(\mu - \overline x)^2,
 $$
 using $\sum(x_i - \mu)^2 = \sum(x_i - \overline x)^2 + n(\overline x - \mu)^2$.
 $$
-S(\mu) = \frac{n}{\sigma_0^2}(\overline x - \mu) = 0 \implies \hat\mu = \overline x, \qquad -\ell''(\mu) = \frac{n}{\sigma_0^2}.
+g(\mu) = \frac{n}{\sigma_0^2}(\mu - \overline x) = 0 \implies \hat\mu = \overline x, \qquad J(\mu) = g'(\mu) = \frac{n}{\sigma_0^2}.
 $$
 
-- The log-likelihood is exactly **quadratic** in $\mu$; the score is **linear**; the curvature is **constant** and grows with $n$.
+- $\mathcal{L}$ is exactly **quadratic** in $\mu$; the gradient $g$ is **linear**; the curvature $J$ is **constant** and grows with $n$.
 
-- $-\ell''$ measures how sharply the data pin down $\mu$: it is the **Fisher information**.
+- $J = \mathcal{L}'' = -\ell''$ measures how sharply the data pin down $\mu$: it is the **Fisher information**.
 
-## Log-likelihood, Score and Curvature
+## Negative Log-likelihood, Gradient and Curvature
 
 ```{r}
 #| echo: false
 par(mfrow = c(1, 3), mar = c(4, 4, 2, 1))
 x20 <- rnorm(20, 1); x50 <- rnorm(50, 1); mu <- seq(0, 2, length = 200)
-ll <- function(mu, x) sapply(mu, function(m) sum(dnorm(x, m, log = TRUE)))
-plot(mu, ll(mu, x20) - max(ll(mu, x20)), type = "l", lwd = 2, ylab = expression(l(mu) - max), main = "log-likelihood")
-lines(mu, ll(mu, x50) - max(ll(mu, x50)), lwd = 2, col = 2); legend("bottomright", c("n = 20", "n = 50"), col = 1:2, lwd = 2, bty = "n")
-plot(mu, 20 * (mean(x20) - mu), type = "l", lwd = 2, ylab = expression(S(mu)), main = "score"); lines(mu, 50 * (mean(x50) - mu), lwd = 2, col = 2); abline(h = 0, lty = 3)
-plot(mu, rep(20, 200), type = "l", lwd = 2, ylim = c(0, 60), ylab = expression(-l*minute*minute(mu)), main = "curvature"); lines(mu, rep(50, 200), lwd = 2, col = 2)
+nll <- function(mu, x) sapply(mu, function(m) -sum(dnorm(x, m, log = TRUE)))
+plot(mu, nll(mu, x20) - min(nll(mu, x20)), type = "l", lwd = 2, ylab = expression(L(mu) - min), main = "negative log-likelihood")
+lines(mu, nll(mu, x50) - min(nll(mu, x50)), lwd = 2, col = 2); legend("bottomright", c("n = 20", "n = 50"), col = 1:2, lwd = 2, bty = "n")
+plot(mu, 20 * (mu - mean(x20)), type = "l", lwd = 2, ylab = expression(g(mu)), main = "gradient"); lines(mu, 50 * (mu - mean(x50)), lwd = 2, col = 2); abline(h = 0, lty = 3)
+plot(mu, rep(20, 200), type = "l", lwd = 2, ylim = c(0, 60), ylab = expression(J(mu)), main = "curvature"); lines(mu, rep(50, 200), lwd = 2, col = 2)
 ```
 
-The score crosses zero where $\ell$ is maximized; larger $n$ makes $\ell$ more peaked, the score steeper, and $-\ell''$ larger.
+The gradient crosses zero where $\mathcal{L}$ is minimized; larger $n$ makes $\mathcal{L}$ more sharply curved, $g$ steeper, and $J$ larger.
 
 ## Example: Cauchy Location
 
 $X_1, \ldots, X_n \overset{iid}{\sim} \mathrm{Cauchy}(\theta)$, $f(x \mid \theta) = \dfrac{1}{\pi\,[1 + (x-\theta)^2]}$:
 $$
-\ell(\theta) = -n\log\pi - \sum_{i=1}^n \log\!\big(1 + (x_i - \theta)^2\big), \qquad
-S(\theta) = \sum_{i=1}^n \frac{2(x_i - \theta)}{1 + (x_i - \theta)^2}.
+\mathcal{L}(\theta) = n\log\pi + \sum_{i=1}^n \log\!\big(1 + (x_i - \theta)^2\big), \qquad
+g(\theta) = \sum_{i=1}^n \frac{2(\theta - x_i)}{1 + (x_i - \theta)^2}.
 $$
 
-The score equation has **no closed-form solution** and may have **several roots**:
+The equation $g(\theta) = 0$ has **no closed-form solution** and may have **several roots**:
 
 ```{r}
 xc <- rcauchy(8, location = 3)
-llc <- function(th, dat) sapply(th, function(t) sum(dcauchy(dat, t, log = TRUE)))
-curve(llc(x, xc), -10, 15, lwd = 2, xlab = expression(theta), ylab = expression(l(theta)), main = "Cauchy log-likelihood, n = 8")
+nllc <- function(th, dat) sapply(th, function(t) -sum(dcauchy(dat, t, log = TRUE)))
+curve(nllc(x, xc), -10, 15, lwd = 2, xlab = expression(theta), ylab = expression(L(theta)), main = "Cauchy negative log-likelihood, n = 8")
 ```
 
 This is why we need **numerical optimization**.
@@ -144,7 +157,7 @@ the **expected Fisher information** per observation ($p \times p$ for a $p$-dime
 
 3. **Asymptotic efficiency**: no consistent estimator has smaller asymptotic variance (Cramér–Rao bound).
 
-Note $n I(\theta) = -E_D\big[\ell''(\theta; D)\big]$: the expected curvature of the log-likelihood.
+Note $n I(\theta) = E_D\big[\mathcal{L}''(\theta; D)\big] = -E_D\big[\ell''(\theta; D)\big]$: the expected curvature of $\mathcal{L}$.
 
 ## Observed and Expected Fisher Information
 
@@ -152,30 +165,31 @@ $\theta_*$ is unknown, so the variance $[nI(\theta_*)]^{-1}$ is estimated by plu
 
 - **Expected information** $n I(\hat\theta)$: requires computing $E_X[\cdot]$ analytically.
 
-- **Observed information** $J(\hat\theta) = -\ell''(\hat\theta; D) = -\sum_{i=1}^n \frac{\partial^2}{\partial\theta\partial\theta'}\log f(x_i \mid \hat\theta)$: the actual curvature at the MLE, no expectation needed.
+- **Observed information** $J(\hat\theta) = \mathcal{L}''(\hat\theta; D) = g'(\hat\theta) = -\sum_{i=1}^n \frac{\partial^2}{\partial\theta\partial\theta'}\log f(x_i \mid \hat\theta)$: the actual curvature at the MLE, no expectation needed.
 
 By the LLN, $J(\hat\theta)/n \approx I(\hat\theta)$. Both give
 $$
 \widehat{\mathrm{Var}}(\hat\theta) \approx J(\hat\theta)^{-1} \quad\text{or}\quad [nI(\hat\theta)]^{-1}, \qquad \widehat{\mathrm{SE}}(\hat\theta_j) = \sqrt{\big[\widehat{\mathrm{Var}}(\hat\theta)\big]_{jj}} .
 $$
 
-**Computational consequence**: the Hessian of $\ell$ at the optimum, which Newton-type optimizers compute anyway, gives the standard errors for free.
+**Computational consequence**: the Hessian of $\mathcal{L}$ at the optimum, which Newton-type optimizers compute anyway, gives the standard errors for free.
 
 # Univariate Optimization
 
 ## The Problem
 
-Find $\hat\theta$ maximizing $\ell(\theta)$, $\theta \in \mathbb{R}$. Equivalently, minimize $f(\theta) = -\ell(\theta)$, or find a root of $S(\theta) = \ell'(\theta)$.
+Minimize $\mathcal{L}(\theta) = -\ell(\theta)$, $\theta \in \mathbb{R}$; equivalently, find a root of
+$g(\theta) = \mathcal{L}'(\theta)$, or rearrange that root equation into a fixed point $\theta = \varphi(\theta)$.
 
 Methods differ in **what they need** and **how fast they converge**:
 
 | method | needs | convergence |
 |:--|:--|:--|
-| fixed-point iteration | a rearrangement $\theta = g(\theta)$ | linear, if at all |
-| bisection | $S(\theta)$ and a sign-changing bracket | linear (halves bracket) |
-| golden section | $\ell(\theta)$ only, and a bracket | linear |
-| **Newton–Raphson** | $S(\theta)$ and $S'(\theta) = \ell''(\theta)$ | **quadratic** near root |
-| Fisher scoring | $S(\theta)$ and $I(\theta)$ | linear–quadratic |
+| fixed-point iteration | a rearrangement $\theta = \varphi(\theta)$ | linear, if at all |
+| bisection | $g(\theta)$ and a sign-changing bracket | linear (halves bracket) |
+| golden section | $\mathcal{L}(\theta)$ only, and a bracket | linear |
+| **Newton–Raphson** | $g(\theta)$ and $g'(\theta) = \mathcal{L}''(\theta)$ | **quadratic** near root |
+| Fisher scoring | $g(\theta)$ and $I(\theta)$ | linear–quadratic |
 
 Every method below is illustrated on the same zero-truncated Poisson likelihood, so the pictures are directly comparable.
 
@@ -186,18 +200,18 @@ $$
 P(x \mid \lambda) = \frac{e^{-\lambda}\lambda^x}{x!}\cdot\frac{1}{1 - e^{-\lambda}}, \qquad x = 1, 2, \ldots
 $$
 $$
-\ell(\lambda) = -n\lambda + \sum x_i \log\lambda - n\log(1 - e^{-\lambda}) + C
+\mathcal{L}(\lambda) = n\lambda - \sum x_i \log\lambda + n\log(1 - e^{-\lambda}) + C
 $$
 $$
-S(\lambda) = \frac{\sum x_i}{\lambda} - \frac{n}{1 - e^{-\lambda}}
+g(\lambda) = \frac{n}{1 - e^{-\lambda}} - \frac{\sum x_i}{\lambda}
 $$
 $$
-S'(\lambda) = -\frac{\sum x_i}{\lambda^2} + \frac{n e^{-\lambda}}{(1 - e^{-\lambda})^2}.
+g'(\lambda) = \frac{\sum x_i}{\lambda^2} - \frac{n e^{-\lambda}}{(1 - e^{-\lambda})^2}.
 $$
 
 Using $E(X) = \dfrac{\lambda}{1 - e^{-\lambda}}$,
 $$
-nI(\lambda) = -E[S'(\lambda)] = \frac{n}{\lambda(1 - e^{-\lambda})} - \frac{n e^{-\lambda}}{(1 - e^{-\lambda})^2}.
+nI(\lambda) = E[g'(\lambda)] = \frac{n}{\lambda(1 - e^{-\lambda})} - \frac{n e^{-\lambda}}{(1 - e^{-\lambda})^2}.
 $$
 
 ## Zero-Truncated Poisson in R
@@ -207,11 +221,11 @@ $$
 library(latex2exp)
 set.seed(812)
 y <- rpois(200, 1.5); x <- y[y > 0]; n <- length(x); sx <- sum(x); xbar <- mean(x)
-ll <- function(l) -n * l + sx * log(l) - n * log(1 - exp(-l))
-S  <- function(l) sx / l - n / (1 - exp(-l))
-dS <- function(l) -sx / l^2 + n * exp(-l) / (1 - exp(-l))^2
-nI <- function(l) n / (l * (1 - exp(-l))) - n * exp(-l) / (1 - exp(-l))^2
-lhat <- uniroot(S, c(1e-6, 20), tol = 1e-12)$root   # reference value for the pictures
+nll <- function(l) n * l - sx * log(l) + n * log(1 - exp(-l))   # the objective
+g   <- function(l) n / (1 - exp(-l)) - sx / l                   # gradient  L'(lambda)
+dg  <- function(l) sx / l^2 - n * exp(-l) / (1 - exp(-l))^2     # curvature L''(lambda)
+nI  <- function(l) n / (l * (1 - exp(-l))) - n * exp(-l) / (1 - exp(-l))^2
+lhat <- uniroot(g, c(1e-6, 20), tol = 1e-12)$root   # reference value for the pictures
 lam  <- seq(0.4, 4, length.out = 400)               # plotting grid used throughout
 c(naive_mean = xbar, mle = lhat, true_lambda = 1.5)
 ```
@@ -221,63 +235,64 @@ c(naive_mean = xbar, mle = lhat, true_lambda = 1.5)
 #| fig-width: 9
 #| fig-height: 3.6
 par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.2, 1))
-plot(lam, ll(lam) - ll(lhat), type = "l", lwd = 2, main = "log-likelihood",
-     xlab = TeX("$\\lambda$"), ylab = TeX("$\\ell(\\lambda) - \\ell(\\hat{\\lambda})$"))
+plot(lam, nll(lam) - nll(lhat), type = "l", lwd = 2, main = "negative log-likelihood",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$L(\\lambda) - L(\\hat{\\lambda})$"))
 abline(v = lhat, lty = 3); abline(v = xbar, col = 4, lty = 5)
-legend("bottomleft", bty = "n", lty = c(3, 5), col = c(1, 4), legend = c("MLE", "sample mean"))
-plot(lam, S(lam), type = "l", lwd = 2, main = "score",
-     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+legend("bottomright", bty = "n", lty = c(3, 5), col = c(1, 4), legend = c("MLE", "sample mean"))
+plot(lam, g(lam), type = "l", lwd = 2, main = "gradient",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$g(\\lambda)$"))
 abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
 ```
 
-The plain sample mean **overestimates** $\lambda$ because the zeros are missing; the MLE sits where the score crosses zero.
+The plain sample mean **overestimates** $\lambda$ because the zeros are missing; the MLE sits where the gradient crosses zero.
 
 <!-- Replaces "## Fixed-Point (Simple) Iteration" and "## Fixed-Point: Two Rearrangements".
-     Depends on the ztp-setup chunk: ll, S, lam, lhat, xbar. -->
+     Depends on the ztp-setup chunk: nll, g, lam, lhat, xbar. -->
 
 ## Fixed-Point Iteration: Two Rearrangements {.smaller}
 
-The score equation $S(\lambda) = 0$ can be written as
+The stationarity equation $g(\lambda) = 0$ can be written as
 $$
 \frac{\overline x}{\lambda} = \frac{1}{1 - e^{-\lambda}} .
 $$
 
 Solving for the $\lambda$ on the left gives one rearrangement; solving for the exponential gives another:
 $$
-\lambda = \overline x\,(1 - e^{-\lambda}) =: g_1(\lambda),
+\lambda = \overline x\,(1 - e^{-\lambda}) =: \varphi_1(\lambda),
 \qquad
-\lambda = -\log\!\Big(1 - \frac{\lambda}{\overline x}\Big) =: g_2(\lambda) .
+\lambda = -\log\!\Big(1 - \frac{\lambda}{\overline x}\Big) =: \varphi_2(\lambda) .
 $$
 
-Both have exactly the same fixed points, $\hat\lambda$ and the spurious root $\lambda = 0$, and indeed $g_2 = g_1^{-1}$.
+Both have exactly the same fixed points, $\hat\lambda$ and the spurious root $\lambda = 0$, and indeed $\varphi_2 = \varphi_1^{-1}$.
+(The map is written $\varphi$, not $g$, because $g$ is reserved for the gradient.)
 
 ## Fixed-Point Iteration: The Method {.smaller}
 
-Pick a rearrangement $\lambda = g(\lambda)$ and iterate
+Pick a rearrangement $\lambda = \varphi(\lambda)$ and iterate
 $$
-\lambda_{k+1} = g(\lambda_k), \qquad k = 0, 1, 2, \ldots
+\lambda_{k+1} = \varphi(\lambda_k), \qquad k = 0, 1, 2, \ldots
 $$
 
-Writing $e_k = \lambda_k - \lambda^*$ and expanding $g$ about the fixed point, $e_{k+1} \approx g'(\lambda^*) e_k$:
+Writing $e_k = \lambda_k - \lambda^*$ and expanding $\varphi$ about the fixed point, $e_{k+1} \approx \varphi'(\lambda^*) e_k$:
 
-- the iteration converges to $\lambda^*$ when $|g'(\lambda^*)| < 1$, and the error then shrinks by that **constant factor** each step — **linear** convergence;
-- it is repelled from $\lambda^*$ when $|g'(\lambda^*)| > 1$.
+- the iteration converges to $\lambda^*$ when $|\varphi'(\lambda^*)| < 1$, and the error then shrinks by that **constant factor** each step — **linear** convergence;
+- it is repelled from $\lambda^*$ when $|\varphi'(\lambda^*)| > 1$.
 
-Here $g_1'(\lambda) = \overline x\, e^{-\lambda}$ and $g_2'(\lambda) = (\overline x - \lambda)^{-1}$. Since $g_2 = g_1^{-1}$, the slopes are reciprocal at every fixed point, so **at most one** of the two rearrangements can converge to $\hat\lambda$.
+Here $\varphi_1'(\lambda) = \overline x\, e^{-\lambda}$ and $\varphi_2'(\lambda) = (\overline x - \lambda)^{-1}$. Since $\varphi_2 = \varphi_1^{-1}$, the slopes are reciprocal at every fixed point, so **at most one** of the two rearrangements can converge to $\hat\lambda$.
 
 ```{r}
 #| label: fixed-point
-fixed_point <- function(g, x0, tol = 1e-8, maxit = 500) {
-  for (k in 1:maxit) { x1 <- g(x0); if (abs(x1 - x0) < tol) return(c(root = x1, iter = k)); x0 <- x1 }
+fixed_point <- function(phi, x0, tol = 1e-8, maxit = 500) {
+  for (k in 1:maxit) { x1 <- phi(x0); if (abs(x1 - x0) < tol) return(c(root = x1, iter = k)); x0 <- x1 }
   stop("not converged")
 }
-g1 <- function(l) xbar * (1 - exp(-l))
-g2 <- function(l) -log(1 - l / xbar)
-fixed_point(g1, x0 = xbar)
-c(g1_slope = xbar * exp(-lhat), g2_slope = 1 / (xbar - lhat))    # reciprocals
+phi1 <- function(l) xbar * (1 - exp(-l))
+phi2 <- function(l) -log(1 - l / xbar)
+fixed_point(phi1, x0 = xbar)
+c(phi1_slope = xbar * exp(-lhat), phi2_slope = 1 / (xbar - lhat))    # reciprocals
 ```
 
-Advantage: no derivatives. Disadvantage: a suitable $g$ must be found, and the rearrangement alone decides the outcome.
+Advantage: no derivatives. Disadvantage: a suitable $\varphi$ must be found, and the rearrangement alone decides the outcome.
 
 ## Fixed-Point: The Cobweb {.smaller}
 
@@ -285,13 +300,13 @@ Advantage: no derivatives. Disadvantage: a suitable $g$ must be found, and the r
 #| label: fixed-point-cobweb
 #| fig-width: 9
 #| fig-height: 4
-cobweb <- function(g, x0, nstep, main) {
+cobweb <- function(phi, x0, nstep, main) {
   gg <- seq(0.05, 1.9, length.out = 300)
-  plot(gg, g(gg), type = "l", lwd = 2, xlim = c(0, 1.9), ylim = c(0, 1.9),
-       xlab = TeX("$\\lambda_k$"), ylab = TeX("$g(\\lambda_k)$"), main = main)
+  plot(gg, phi(gg), type = "l", lwd = 2, xlim = c(0, 1.9), ylim = c(0, 1.9),
+       xlab = TeX("$\\lambda_k$"), ylab = TeX("$\\varphi(\\lambda_k)$"), main = main)
   abline(0, 1, lty = 2); points(lhat, lhat, pch = 19, cex = 1.3)
   for (k in 1:nstep) {
-    x1 <- g(x0); if (!is.finite(x1) || x1 < 0) break
+    x1 <- phi(x0); if (!is.finite(x1) || x1 < 0) break
     segments(x0, x0, x0, x1, col = 2, lwd = 2)     # up (or down) to the curve
     segments(x0, x1, x1, x1, col = 2, lwd = 2)     # across to the diagonal
     points(x0, x1, pch = 19, col = 2, cex = 0.8)
@@ -299,11 +314,11 @@ cobweb <- function(g, x0, nstep, main) {
   }
 }
 par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.4, 1))
-cobweb(g1, x0 = 1.85, nstep = 6, main = TeX("$g_1$: converges, $|g_1'| < 1$"))
-cobweb(g2, x0 = 1.40, nstep = 6, main = TeX("$g_2$: repelled, $|g_2'| > 1$"))
+cobweb(phi1, x0 = 1.85, nstep = 6, main = TeX("$\\varphi_1$: converges, $|\\varphi_1'| < 1$"))
+cobweb(phi2, x0 = 1.40, nstep = 6, main = TeX("$\\varphi_2$: repelled, $|\\varphi_2'| > 1$"))
 ```
 
-The staircase walks to the intersection of $g$ with the $45^\circ$ line. For $g_1$ the crossing is shallow and each step strides toward it; $g_2$ is the inverse map, its slope there is the reciprocal, and the iterates are pushed away from $\hat\lambda$ toward the fixed point at $\lambda = 0$.
+The staircase walks to the intersection of $\varphi$ with the $45^\circ$ line. For $\varphi_1$ the crossing is shallow and each step strides toward it; $\varphi_2$ is the inverse map, its slope there is the reciprocal, and the iterates are pushed away from $\hat\lambda$ toward the fixed point at $\lambda = 0$.
 
 ## Fixed-Point: Traces of the Iterates {.smaller}
 
@@ -311,16 +326,16 @@ The staircase walks to the intersection of $g$ with the $45^\circ$ line. For $g_
 #| label: fixed-point-trace
 #| fig-width: 9.5
 #| fig-height: 4
-trace_fp <- function(g, x0, nstep) {
+trace_fp <- function(phi, x0, nstep) {
   p <- x0
   for (k in 1:nstep) {
-    xn <- g(p[k])
+    xn <- phi(p[k])
     if (!is.finite(xn) || xn <= 0) break
     p <- c(p, xn)
   }
   p
 }
-t1 <- trace_fp(g1, 1.85, 14); t2 <- trace_fp(g2, 1.40, 14)
+t1 <- trace_fp(phi1, 1.85, 14); t2 <- trace_fp(phi2, 1.40, 14)
 par(mfrow = c(1, 2), mar = c(4.2, 4.4, 2.4, 1))
 
 ## (a) the iterates themselves
@@ -330,7 +345,7 @@ lines(seq_along(t2) - 1, t2, type = "b", pch = 19, lwd = 2, col = 2)
 abline(h = lhat, lty = 3); abline(h = 0, lty = 3)
 mtext(TeX("$\\hat{\\lambda}$"), side = 4, at = lhat, las = 1, line = 0.3, cex = 0.9)
 legend("topright", bty = "n", lwd = 2, pch = 19, col = c(1, 2),
-       legend = c(TeX("$g_1$"), TeX("$g_2$")))
+       legend = c(TeX("$\\varphi_1$"), TeX("$\\varphi_2$")))
 
 ## (b) the errors, on a log scale
 e1 <- pmax(abs(t1 - lhat), 1e-16); e2 <- pmax(abs(t2 - lhat), 1e-16)
@@ -340,29 +355,29 @@ plot(seq_along(e1) - 1, e1, type = "b", pch = 19, lwd = 2, log = "y",
 lines(seq_along(e2) - 1, e2, type = "b", pch = 19, lwd = 2, col = 2)
 lines(0:14, e1[1] * (xbar * exp(-lhat))^(0:14), lty = 5, col = 4, lwd = 2)
 legend("bottomleft", bty = "n", lwd = 2, lty = c(1, 1, 5), pch = c(19, 19, NA),
-       col = c(1, 2, 4), legend = c(TeX("$g_1$"), TeX("$g_2$"), TeX("rate $|g_1'(\\hat{\\lambda})|^k$")))
+       col = c(1, 2, 4), legend = c(TeX("$\\varphi_1$"), TeX("$\\varphi_2$"), TeX("rate $|\\varphi_1'(\\hat{\\lambda})|^k$")))
 ```
 
-Left: $g_1$ settles onto $\hat\lambda$ within a few steps, while $g_2$ slides past it and decays toward the spurious fixed point at zero. Right: the $g_1$ error falls along a straight line on the log scale, with the slope predicted by $|g_1'(\hat\lambda)|$ — one fixed number of digits gained per iteration, against Newton's doubling. The $g_2$ error rises and then flattens at $\hat\lambda$, the distance from the limit $0$ to the root it failed to find.
+Left: $\varphi_1$ settles onto $\hat\lambda$ within a few steps, while $\varphi_2$ slides past it and decays toward the spurious fixed point at zero. Right: the $\varphi_1$ error falls along a straight line on the log scale, with the slope predicted by $|\varphi_1'(\hat\lambda)|$ — one fixed number of digits gained per iteration, against Newton's doubling. The $\varphi_2$ error rises and then flattens at $\hat\lambda$, the distance from the limit $0$ to the root it failed to find.
 
 
 ## Bisection
 
-If $S$ is continuous and $S(a)$, $S(b)$ have opposite signs, a root lies in $[a, b]$. Evaluate $S$ at the midpoint and keep the half that still brackets the root.
+If $g$ is continuous and $g(a)$, $g(b)$ have opposite signs, a root lies in $[a, b]$. Evaluate $g$ at the midpoint and keep the half that still brackets the root.
 
 ```{r}
 #| label: bisection
-bisection <- function(S, a, b, tol = 1e-8) {
+bisection <- function(g, a, b, tol = 1e-8) {
   k <- 0
-  while (b - a > tol) { m <- (a + b) / 2; if (S(a) * S(m) <= 0) b <- m else a <- m; k <- k + 1 }
+  while (b - a > tol) { m <- (a + b) / 2; if (g(a) * g(m) <= 0) b <- m else a <- m; k <- k + 1 }
   c(root = (a + b) / 2, iter = k)
 }
-bisection(S, 0.1, 10)
+bisection(g, 0.1, 10)
 ```
 
 - Guaranteed to converge; the bracket halves each step, so $\log_2\big((b-a)/\text{tol}\big) \approx 30$ iterations here.
 
-- Needs only $S$, not $S'$. R's `uniroot()` uses a refined version (Brent's method).
+- Needs only $g$, not $g'$. R's `uniroot()` uses a refined version (Brent's method).
 
 ## Bisection, Visualized
 
@@ -370,9 +385,9 @@ bisection(S, 0.1, 10)
 #| label: bisection-plot
 #| fig-width: 8
 #| fig-height: 4
-Sv <- S(lam); yr <- range(Sv); pad <- 0.35 * diff(yr)
-plot(lam, Sv, type = "l", lwd = 2, ylim = c(yr[1], yr[2] + pad),
-     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+gv <- g(lam); yr <- range(gv); pad <- 0.35 * diff(yr)
+plot(lam, gv, type = "l", lwd = 2, ylim = c(yr[1], yr[2] + pad),
+     xlab = TeX("$\\lambda$"), ylab = TeX("$g(\\lambda)$"))
 abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.3)
 
 a <- 0.5; b <- 3.6
@@ -381,21 +396,21 @@ for (k in 1:4) {
   m <- (a + b) / 2
   segments(a, ylev[k], b, ylev[k], col = 4, lwd = 3)      # the current bracket
   points(c(a, b), rep(ylev[k], 2), pch = "|", col = 4)
-  segments(m, ylev[k], m, S(m), lty = 3, col = 2)         # midpoint carried down to S
+  segments(m, ylev[k], m, g(m), lty = 3, col = 2)         # midpoint carried down to g
   points(m, ylev[k], pch = 19, col = 2)
-  if (S(a) * S(m) <= 0) b <- m else a <- m
+  if (g(a) * g(m) <= 0) b <- m else a <- m
 }
 ```
 
-Each bar is the bracket at one iteration; the dot is its midpoint, mapped onto $S$ to decide which half survives. The bracket halves every step regardless of the shape of $S$ — no faster near the root than far from it.
+Each bar is the bracket at one iteration; the dot is its midpoint, mapped onto $g$ to decide which half survives. The bracket halves every step regardless of the shape of $g$ — no faster near the root than far from it.
 
 ## Newton–Raphson: Derivation
 
-Approximate the score by its tangent line at the current point $\theta_k$ and solve for where the tangent hits zero:
+Approximate the gradient by its tangent line at the current point $\theta_k$ and solve for where the tangent hits zero:
 $$
-S(\theta) \approx S(\theta_k) + S'(\theta_k)(\theta - \theta_k) = 0
+g(\theta) \approx g(\theta_k) + g'(\theta_k)(\theta - \theta_k) = 0
 \quad\Longrightarrow\quad
-\theta_{k+1} = \theta_k - \frac{S(\theta_k)}{S'(\theta_k)} = \theta_k - \frac{\ell'(\theta_k)}{\ell''(\theta_k)} .
+\theta_{k+1} = \theta_k - \frac{g(\theta_k)}{g'(\theta_k)} = \theta_k - \frac{\mathcal{L}'(\theta_k)}{\mathcal{L}''(\theta_k)} .
 $$
 
 ```{r}
@@ -404,15 +419,15 @@ $$
 #| fig-width: 7
 #| fig-height: 3.4
 par(mar = c(4.2, 4.2, 2.2, 1))
-l0 <- 3.0; l1 <- l0 - S(l0) / dS(l0)
-plot(lam, S(lam), type = "l", lwd = 2, main = "one Newton step",
-     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+l0 <- 3.0; l1 <- l0 - g(l0) / dg(l0)
+plot(lam, g(lam), type = "l", lwd = 2, main = "one Newton step",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$g(\\lambda)$"))
 abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
 xt <- c(l1 - 0.3, l0 + 0.3)                      # draw the whole tangent, not just the step
-lines(xt, S(l0) + dS(l0) * (xt - l0), col = 2, lwd = 2)
-points(c(l0, l1), c(S(l0), 0), pch = 19, col = 2)
-segments(l1, 0, l1, S(l1), lty = 3, col = "grey40")
-text(l0, S(l0), TeX("$\\lambda_k$"), pos = 4)
+lines(xt, g(l0) + dg(l0) * (xt - l0), col = 2, lwd = 2)
+points(c(l0, l1), c(g(l0), 0), pch = 19, col = 2)
+segments(l1, 0, l1, g(l1), lty = 3, col = "grey40")
+text(l0, g(l0), TeX("$\\lambda_k$"), pos = 4)
 text(l1, 0, TeX("$\\lambda_{k+1}$"), pos = 1)
 ```
 
@@ -423,63 +438,63 @@ text(l1, 0, TeX("$\\lambda_{k+1}$"), pos = 1)
 #| fig-width: 10
 #| fig-height: 4.2
 it <- 0.5                                        # starting value
-for (k in 1:3) it <- c(it, it[k] - S(it[k]) / dS(it[k]))
+for (k in 1:3) it <- c(it, it[k] - g(it[k]) / dg(it[k]))
 par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.4, 1))
 
-## (a) tangents to the score
-plot(lam, S(lam), type = "l", lwd = 2, main = "tangents to the score",
-     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+## (a) tangents to the gradient
+plot(lam, g(lam), type = "l", lwd = 2, main = "tangents to the gradient",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$g(\\lambda)$"))
 abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
 for (k in 1:3) {
   xt <- range(c(it[k], it[k + 1])) + c(-0.15, 0.15)
-  lines(xt, S(it[k]) + dS(it[k]) * (xt - it[k]), col = 2, lwd = 2)
-  segments(it[k + 1], 0, it[k + 1], S(it[k + 1]), lty = 3, col = "grey40")
-  points(it[k], S(it[k]), pch = 19, col = 2, cex = 0.9)
+  lines(xt, g(it[k]) + dg(it[k]) * (xt - it[k]), col = 2, lwd = 2)
+  segments(it[k + 1], 0, it[k + 1], g(it[k + 1]), lty = 3, col = "grey40")
+  points(it[k], g(it[k]), pch = 19, col = 2, cex = 0.9)
   mtext(TeX(sprintf("$\\lambda_%d$", k - 1)), side = 1, at = it[k], line = -1, col = 2, cex = 0.8)
 }
 
-## (b) the quadratic model that each step maximizes
-llc <- function(l) ll(l) - ll(lhat)
-plot(lam, llc(lam), type = "l", lwd = 2, main = "the quadratic model behind each step",
-     xlab = TeX("$\\lambda$"), ylab = TeX("$\\ell(\\lambda) - \\ell(\\hat{\\lambda})$"))
+## (b) the quadratic model that each step minimizes
+nllc <- function(l) nll(l) - nll(lhat)
+plot(lam, nllc(lam), type = "l", lwd = 2, main = "the quadratic model behind each step",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$L(\\lambda) - L(\\hat{\\lambda})$"))
 for (k in 1:3) {
   w <- seq(it[k] - 1, it[k] + 1, length.out = 200)
-  lines(w, llc(it[k]) + S(it[k]) * (w - it[k]) + 0.5 * dS(it[k]) * (w - it[k])^2,
+  lines(w, nllc(it[k]) + g(it[k]) * (w - it[k]) + 0.5 * dg(it[k]) * (w - it[k])^2,
         col = 2, lwd = 1.5, lty = 5)
-  segments(it[k + 1], par("usr")[3], it[k + 1], llc(it[k + 1]), lty = 3, col = "grey40")
-  points(it[k], llc(it[k]), pch = 19, col = 2, cex = 0.9)
+  segments(it[k + 1], par("usr")[3], it[k + 1], nllc(it[k + 1]), lty = 3, col = "grey40")
+  points(it[k], nllc(it[k]), pch = 19, col = 2, cex = 0.9)
 }
 points(lhat, 0, pch = 19, cex = 1.2)
 ```
 
-Left: each red line is the tangent to $S$ at the current iterate, followed down to the axis to give the next one. Right: the same steps seen on $\ell$ — the dashed parabola is the second-order Taylor expansion at $\lambda_k$, and $\lambda_{k+1}$ is its vertex. As the iterates approach $\hat\lambda$ the parabola hugs the log-likelihood and the vertex lands essentially on the MLE.
+Left: each red line is the tangent to $g$ at the current iterate, followed down to the axis to give the next one. Right: the same steps seen on $\mathcal{L}$ — the dashed parabola is the second-order Taylor expansion at $\lambda_k$, and $\lambda_{k+1}$ is its vertex. As the iterates approach $\hat\lambda$ the parabola hugs $\mathcal{L}$ and the vertex lands essentially on the MLE.
 
 
 ## Newton–Raphson in R
 
 ```{r}
 #| label: nr-code
-newton <- function(S, dS, x0, tol = 1e-8, maxit = 100, trace = FALSE) {
+newton <- function(g, dg, x0, tol = 1e-8, maxit = 100, trace = FALSE) {
   for (k in 1:maxit) {
-    x1 <- x0 - S(x0) / dS(x0)
+    x1 <- x0 - g(x0) / dg(x0)
     if (trace) cat(sprintf("iter %2d: %.10f\n", k, x1))
     if (!is.finite(x1)) stop("diverged")
     if (abs(x1 - x0) < tol) return(c(root = x1, iter = k))
     x0 <- x1 }
   stop("not converged")
 }
-newton(S, dS, x0 = xbar, trace = TRUE)
+newton(g, dg, x0 = xbar, trace = TRUE)
 ```
 
-Iteration counts on the same problem: fixed point `r fixed_point(g1, xbar)["iter"]`, bisection 30, golden 40, Newton `r newton(S, dS, xbar)["iter"]`.
+Iteration counts on the same problem: fixed point `r fixed_point(phi1, xbar)["iter"]`, bisection 30, golden 40, Newton `r newton(g, dg, xbar)["iter"]`.
 
 ## Convergence Rate of Newton–Raphson
 
-Let $e_k = \theta_k - \hat\theta$. Expanding $S(\hat\theta) = 0$ around $\theta_k$:
+Let $e_k = \theta_k - \hat\theta$. Expanding $g(\hat\theta) = 0$ around $\theta_k$:
 $$
-0 = S(\theta_k) - S'(\theta_k)e_k + \tfrac12 S''(\xi)e_k^2
+0 = g(\theta_k) - g'(\theta_k)e_k + \tfrac12 g''(\xi)e_k^2
 \quad\Longrightarrow\quad
-e_{k+1} = e_k - \frac{S(\theta_k)}{S'(\theta_k)} = \frac{S''(\xi)}{2S'(\theta_k)}\,e_k^2 .
+e_{k+1} = e_k - \frac{g(\theta_k)}{g'(\theta_k)} = \frac{g''(\xi)}{2g'(\theta_k)}\,e_k^2 .
 $$
 
 **Quadratic convergence**: the error is squared each step, so the number of correct digits roughly **doubles**. Linear methods gain a fixed number of digits per step.
@@ -490,8 +505,8 @@ $$
 #| fig-width: 7
 #| fig-height: 3.4
 par(mar = c(4.2, 4.2, 1.5, 1))
-err_newton <- {e <- c(); x0 <- 3; for (k in 1:6) { x0 <- x0 - S(x0)/dS(x0); e <- c(e, abs(x0 - lhat)) }; e}
-err_bisec  <- {a <- 0.1; b <- 10; e <- c(); for (k in 1:6) { m <- (a+b)/2; if (S(a)*S(m) <= 0) b <- m else a <- m; e <- c(e, abs((a+b)/2 - lhat)) }; e}
+err_newton <- {e <- c(); x0 <- 3; for (k in 1:6) { x0 <- x0 - g(x0)/dg(x0); e <- c(e, abs(x0 - lhat)) }; e}
+err_bisec  <- {a <- 0.1; b <- 10; e <- c(); for (k in 1:6) { m <- (a+b)/2; if (g(a)*g(m) <= 0) b <- m else a <- m; e <- c(e, abs((a+b)/2 - lhat)) }; e}
 plot(1:6, pmax(err_newton, 1e-16), log = "y", type = "b", pch = 19, ylim = c(1e-16, 10),
      xlab = "iteration", ylab = "|error| (log scale)")
 lines(1:6, err_bisec, type = "b", col = 2, pch = 19)
@@ -502,26 +517,26 @@ legend("bottomleft", c("Newton", "bisection"), col = 1:2, pch = 19, bty = "n")
 
 Newton uses only **local** information, so it can misbehave:
 
-- **Wrong curvature**: if $\ell''(\theta_k) > 0$, the step moves toward a *minimum* or diverges.
-- **Overshooting**: a flat score ($S'(\theta_k) \approx 0$) gives a huge step.
+- **Wrong curvature**: if $g'(\theta_k) = \mathcal{L}''(\theta_k) < 0$, the step moves toward a *maximum* of $\mathcal{L}$ or diverges.
+- **Overshooting**: a flat gradient ($g'(\theta_k) \approx 0$) gives a huge step.
 - **Multiple roots**: it converges to whichever root is nearest the start, possibly a local maximum.
 
-The truncated Poisson overshoots from a poor start: at $\lambda_0 = 3.5$ the score is already flat, so the tangent crosses zero outside the parameter space.
+The truncated Poisson overshoots from a poor start: at $\lambda_0 = 3.5$ the gradient is already flat, so the tangent crosses zero outside the parameter space.
 
 ```{r}
 #| label: nr-overshoot
 #| fig-width: 8
 #| fig-height: 3.8
-l0 <- 3.5; l_nr <- l0 - S(l0) / dS(l0)
+l0 <- 3.5; l_nr <- l0 - g(l0) / dg(l0)
 par(mar = c(4.2, 4.2, 1.5, 1))
-plot(NA, xlim = c(-0.8, 4), ylim = range(S(lam)),
-     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+plot(NA, xlim = c(-0.8, 4), ylim = range(g(lam)),
+     xlab = TeX("$\\lambda$"), ylab = TeX("$g(\\lambda)$"))
 rect(-0.8, par("usr")[3], 0, par("usr")[4], col = "grey90", border = NA)
 text(-0.4, 0.55 * par("usr")[4], TeX("$\\lambda < 0$"), col = "grey30", cex = 0.9)
-lines(lam, S(lam), lwd = 2); abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
+lines(lam, g(lam), lwd = 2); abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
 xt <- c(l_nr - 0.2, l0 + 0.3)
-lines(xt, S(l0) + dS(l0) * (xt - l0), col = 2, lwd = 2)
-points(c(l0, l_nr), c(S(l0), 0), pch = 19, col = 2)
+lines(xt, g(l0) + dg(l0) * (xt - l0), col = 2, lwd = 2)
+points(c(l0, l_nr), c(g(l0), 0), pch = 19, col = 2)
 mtext(TeX("$\\lambda_0$"), side = 1, at = l0, line = -1, col = 2, cex = 0.9)
 mtext(TeX("$\\lambda_1$"), side = 1, at = l_nr, line = -1, col = 2, cex = 0.9)
 ```
@@ -529,57 +544,57 @@ mtext(TeX("$\\lambda_1$"), side = 1, at = l_nr, line = -1, col = 2, cex = 0.9)
 ```{r}
 #| label: nr-overshoot-num
 c(lambda_1 = l_nr)
-tryCatch(newton(S, dS, l0), error = function(e) conditionMessage(e))
+tryCatch(newton(g, dg, l0), error = function(e) conditionMessage(e))
 ```
 
-Safeguards: start from a robust estimate, **halve the step** until $\ell$ increases, or fall back to bisection/golden section, which only need a bracket.
+Safeguards: start from a robust estimate, **halve the step** until $\mathcal{L}$ decreases, or fall back to bisection/golden section, which only need a bracket.
 
 ## Flat Tails: The Cauchy Location Model {.smaller}
 
-A single-observation Cauchy likelihood shows the same failure in pure form: $f(\theta) = -\ell(\theta) = \log(1+\theta^2)$ has derivative $s(\theta) = 2\theta/(1+\theta^2)$, which rises, turns over at $\theta = 1$, then decays — the Newton step blows up wherever $s$ is flat.
+A single-observation Cauchy likelihood shows the same failure in pure form: $\mathcal{L}(\theta) = -\ell(\theta) = \log(1+\theta^2)$ has gradient $g(\theta) = 2\theta/(1+\theta^2)$, which rises, turns over at $\theta = 1$, then decays — the Newton step blows up wherever $g$ is flat.
 
 ```{r}
 #| label: cauchy-flat
 #| fig-width: 9
 #| fig-height: 3.4
-lik <- function(t) log(1 + t^2)
-sder <- function(t) 2 * t / (1 + t^2)
+nll_c <- function(t) log(1 + t^2)
+g_c   <- function(t) 2 * t / (1 + t^2)
 par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.2, 1))
-curve(lik, -5, 5, n = 400, lwd = 2, xlab = TeX("$\\theta$"), main = "negative log-likelihood")
-curve(sder, -5, 5, n = 400, lwd = 2, xlab = TeX("$\\theta$"), main = "derivative: flat tails")
+curve(nll_c, -5, 5, n = 400, lwd = 2, xlab = TeX("$\\theta$"), ylab = TeX("$L(\\theta)$"), main = "negative log-likelihood")
+curve(g_c, -5, 5, n = 400, lwd = 2, xlab = TeX("$\\theta$"), ylab = TeX("$g(\\theta)$"), main = "gradient: flat tails")
 abline(h = 0, lty = 3); abline(v = c(-1, 1), col = 2, lty = 2)
 ```
 
-From $\theta_0 = 0.5$ Newton converges quadratically; from $\theta_0 = 1.2$, beyond the inflection point, it runs away — each step landing where the derivative is flatter still.
+From $\theta_0 = 0.5$ Newton converges quadratically; from $\theta_0 = 1.2$, beyond the inflection point, it runs away — each step landing where the gradient is flatter still.
 
 ```{r}
 #| label: cauchy-starts
 set.seed(2024)
 x_c <- rcauchy(8, 3)
-Sc  <- function(t) sum(2 * (x_c - t) / (1 + (x_c - t)^2))       # Cauchy score
-dSc <- function(t) sum(2 * ((x_c - t)^2 - 1) / (1 + (x_c - t)^2)^2)
+g_cau  <- function(t) sum(2 * (t - x_c) / (1 + (x_c - t)^2))       # gradient of the Cauchy nll
+dg_cau <- function(t) sum(2 * (1 - (x_c - t)^2) / (1 + (x_c - t)^2)^2)
 starts <- c(-5, 0, median(x_c), 8)
-sapply(starts, function(s) tryCatch(newton(Sc, dSc, s)["root"], error = function(e) NA))
+sapply(starts, function(s) tryCatch(newton(g_cau, dg_cau, s)["root"], error = function(e) NA))
 ```
 
 ## Univariate Fisher Scoring
 
-Replace the observed curvature $-\ell''(\theta_k)$ by its expectation $nI(\theta_k)$:
+Replace the observed curvature $J(\theta_k) = g'(\theta_k)$ by its expectation $nI(\theta_k)$:
 $$
-\theta_{k+1} = \theta_k + \frac{S(\theta_k)}{n I(\theta_k)} .
+\theta_{k+1} = \theta_k - \frac{g(\theta_k)}{n I(\theta_k)} .
 $$
 
-- $nI(\theta) > 0$ always, so the step is always in an ascent direction — more robust than Newton far from the optimum.
-- Near the MLE $nI(\hat\theta) \approx -\ell''(\hat\theta)$, so the two methods behave alike.
+- $nI(\theta) > 0$ always, so the step is always in a descent direction for $\mathcal{L}$ — more robust than Newton far from the optimum.
+- Near the MLE $nI(\hat\theta) \approx g'(\hat\theta)$, so the two methods behave alike.
 - Requires the expectation in closed form.
 
 ```{r}
 #| label: scoring-code
-fisher_scoring <- function(S, nI, x0, tol = 1e-8, maxit = 100) {
-  for (k in 1:maxit) { x1 <- x0 + S(x0) / nI(x0); if (abs(x1 - x0) < tol) return(c(root = x1, iter = k)); x0 <- x1 }
+fisher_scoring <- function(g, nI, x0, tol = 1e-8, maxit = 100) {
+  for (k in 1:maxit) { x1 <- x0 - g(x0) / nI(x0); if (abs(x1 - x0) < tol) return(c(root = x1, iter = k)); x0 <- x1 }
   stop("not converged")
 }
-rbind(newton = newton(S, dS, 3), scoring = fisher_scoring(S, nI, 3))
+rbind(newton = newton(g, dg, 3), scoring = fisher_scoring(g, nI, 3))
 ```
 
 ## Newton vs. Scoring from the Same Point {.smaller}
@@ -591,29 +606,29 @@ rbind(newton = newton(S, dS, 3), scoring = fisher_scoring(S, nI, 3))
 par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.4, 1))
 
 ## (a) the two lines from the bad start
-l_fs <- l0 + S(l0) / nI(l0)
-plot(NA, xlim = c(-0.8, 4), ylim = range(S(lam)), main = "observed vs. expected curvature",
-     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+l_fs <- l0 - g(l0) / nI(l0)
+plot(NA, xlim = c(-0.8, 4), ylim = range(g(lam)), main = "observed vs. expected curvature",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$g(\\lambda)$"))
 rect(-0.8, par("usr")[3], 0, par("usr")[4], col = "grey90", border = NA)
-lines(lam, S(lam), lwd = 2); abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
+lines(lam, g(lam), lwd = 2); abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
 xn <- c(l_nr - 0.2, l0 + 0.3); xf <- c(l_fs - 0.3, l0 + 0.3)
-lines(xn, S(l0) + dS(l0) * (xn - l0), col = 2, lwd = 2)
-lines(xf, S(l0) - nI(l0) * (xf - l0), col = 4, lwd = 2, lty = 5)
-points(c(l0, l_nr, l_fs), c(S(l0), 0, 0), pch = 19, col = c(1, 2, 4))
-legend("topright", bty = "n", lwd = 2, lty = c(1, 5), col = c(2, 4),
-       legend = c(TeX("Newton: slope $S'$"), TeX("scoring: slope $-nI$")))
+lines(xn, g(l0) + dg(l0) * (xn - l0), col = 2, lwd = 2)
+lines(xf, g(l0) + nI(l0) * (xf - l0), col = 4, lwd = 2, lty = 5)
+points(c(l0, l_nr, l_fs), c(g(l0), 0, 0), pch = 19, col = c(1, 2, 4))
+legend("bottomright", bty = "n", lwd = 2, lty = c(1, 5), col = c(2, 4),
+       legend = c(TeX("Newton: slope $g'$"), TeX("scoring: slope $nI$")))
 
 ## (b) the scoring path from the same start
-plot(lam, S(lam), type = "l", lwd = 2, main = "scoring converges from the bad start",
-     xlab = TeX("$\\lambda$"), ylab = TeX("$S(\\lambda)$"))
+plot(lam, g(lam), type = "l", lwd = 2, main = "scoring converges from the bad start",
+     xlab = TeX("$\\lambda$"), ylab = TeX("$g(\\lambda)$"))
 abline(h = 0, lty = 3); points(lhat, 0, pch = 19, cex = 1.2)
 fs <- l0
-for (k in 1:4) fs <- c(fs, fs[k] + S(fs[k]) / nI(fs[k]))
+for (k in 1:4) fs <- c(fs, fs[k] - g(fs[k]) / nI(fs[k]))
 for (k in 1:4) {
   xt <- range(c(fs[k], fs[k + 1])) + c(-0.1, 0.1)
-  lines(xt, S(fs[k]) - nI(fs[k]) * (xt - fs[k]), col = 4, lwd = 1.8, lty = 5)
-  segments(fs[k + 1], 0, fs[k + 1], S(fs[k + 1]), lty = 3, col = "grey40")
-  points(fs[k], S(fs[k]), pch = 19, col = 4, cex = 0.9)
+  lines(xt, g(fs[k]) + nI(fs[k]) * (xt - fs[k]), col = 4, lwd = 1.8, lty = 5)
+  segments(fs[k + 1], 0, fs[k + 1], g(fs[k + 1]), lty = 3, col = "grey40")
+  points(fs[k], g(fs[k]), pch = 19, col = 4, cex = 0.9)
 }
 ```
 
@@ -622,13 +637,13 @@ for (k in 1:4) {
 c(newton_step = l_nr, scoring_step = l_fs)
 ```
 
-The two lines pass through the same point with different slopes. Newton uses the actual slope $S'(\lambda_0)$, which is nearly flat here and throws the iterate out of the parameter space; scoring uses $-nI(\lambda_0)$, an average over hypothetical data, which stays steep and negative and keeps every iterate positive. The slopes agree as $\lambda_k \to \hat\lambda$, so the two methods finish at the same speed.
+The two lines pass through the same point with different slopes. Newton uses the actual slope $g'(\lambda_0)$, which is nearly flat here and throws the iterate out of the parameter space; scoring uses $nI(\lambda_0)$, an average over hypothetical data, which stays steeply positive and keeps every iterate positive. The slopes agree as $\lambda_k \to \hat\lambda$, so the two methods finish at the same speed.
 
 ## Golden Section Search
 
-Works on $f(\theta) = -\ell(\theta)$ directly, **without any derivative**: keep a bracket $[a, b]$ containing the minimum of a unimodal $f$ and two interior points $a' < b'$ placed at the golden ratio ($\phi \approx 0.618$).
+Works on $\mathcal{L}(\theta) = -\ell(\theta)$ directly, **without any derivative**: keep a bracket $[a, b]$ containing the minimum of a unimodal $\mathcal{L}$ and two interior points $a' < b'$ placed at the golden ratio ($\phi \approx 0.618$).
 
-- If $f(a') < f(b')$ the minimum is in $[a, b']$; otherwise in $[a', b]$.
+- If $\mathcal{L}(a') < \mathcal{L}(b')$ the minimum is in $[a, b']$; otherwise in $[a', b]$.
 - The golden placement lets the surviving interior point be **reused**, so each step costs one new evaluation and shrinks the bracket by $0.618$.
 
 ```{r}
@@ -642,7 +657,7 @@ golden <- function(f, a, b, tol = 1e-8) {
     k <- k + 1 }
   c(root = (a + b) / 2, iter = k)
 }
-golden(function(l) -ll(l), 0.1, 10)      # R equivalent: optimize(function(l) -ll(l), c(0.1, 10))
+golden(nll, 0.1, 10)                     # R equivalent: optimize(nll, c(0.1, 10))
 ```
 
 ## Golden Section, Visualized
@@ -651,11 +666,10 @@ golden(function(l) -ll(l), 0.1, 10)      # R equivalent: optimize(function(l) -l
 #| label: golden-plot
 #| fig-width: 8
 #| fig-height: 4
-f <- function(l) -ll(l)
-fv <- f(lam); yr <- range(fv); pad <- 0.3 * diff(yr)
+fv <- nll(lam); yr <- range(fv); pad <- 0.3 * diff(yr)
 plot(lam, fv, type = "l", lwd = 2, ylim = c(yr[1], yr[2] + pad),
-     xlab = TeX("$\\lambda$"), ylab = TeX("$-\\ell(\\lambda)$"))
-points(lhat, f(lhat), pch = 19, cex = 1.3)
+     xlab = TeX("$\\lambda$"), ylab = TeX("$L(\\lambda)$"))
+points(lhat, nll(lhat), pch = 19, cex = 1.3)
 
 gr <- (3 - sqrt(5)) / 2; xl <- 0.5; xu <- 3.6
 ylev <- seq(yr[2] + 0.08 * pad, yr[2] + 0.95 * pad, length.out = 3)
@@ -663,7 +677,7 @@ for (k in 1:3) {
   xml <- xl + gr * (xu - xl); xmu <- xu - gr * (xu - xl)
   segments(xl, ylev[k], xu, ylev[k], col = 4, lwd = 3)
   points(c(xl, xu), rep(ylev[k], 2), pch = "|", col = 4)
-  keep_lower <- f(xml) < f(xmu)
+  keep_lower <- nll(xml) < nll(xmu)
   points(xml, ylev[k], pch = 19, cex = 0.9, col = if (keep_lower) 4 else 2)
   points(xmu, ylev[k], pch = 19, cex = 0.9, col = if (keep_lower) 2 else 4)
   if (keep_lower) xu <- xmu else xl <- xml
@@ -676,20 +690,20 @@ The point that survives (blue) is already correctly placed for the next iteratio
 
 ## Standard Error from the Curvature
 
-At the MLE $\hat\lambda$, the observed information $J(\hat\lambda) = -\ell''(\hat\lambda) = -S'(\hat\lambda)$ and the expected information $nI(\hat\lambda)$ both estimate the precision:
+At the MLE $\hat\lambda$, the observed information $J(\hat\lambda) = \mathcal{L}''(\hat\lambda) = g'(\hat\lambda)$ and the expected information $nI(\hat\lambda)$ both estimate the precision:
 
 ```{r}
 #| label: standard-error
-c(mle = lhat, se_observed = 1 / sqrt(-dS(lhat)), se_expected = 1 / sqrt(nI(lhat)))
-lhat + c(-1.96, 1.96) / sqrt(-dS(lhat))    # 95% Wald interval
+c(mle = lhat, se_observed = 1 / sqrt(dg(lhat)), se_expected = 1 / sqrt(nI(lhat)))
+lhat + c(-1.96, 1.96) / sqrt(dg(lhat))    # 95% Wald interval
 ```
 
 ## Numerical Derivatives
 
-When $S$ or $S'$ is tedious to derive, approximate by finite differences:
+When $g$ or $g'$ is tedious to derive, approximate by finite differences:
 $$
-\ell'(\theta) \approx \frac{\ell(\theta + h) - \ell(\theta - h)}{2h}, \qquad
-\ell''(\theta) \approx \frac{\ell(\theta + h) - 2\ell(\theta) + \ell(\theta - h)}{h^2}.
+g(\theta) = \mathcal{L}'(\theta) \approx \frac{\mathcal{L}(\theta + h) - \mathcal{L}(\theta - h)}{2h}, \qquad
+g'(\theta) = \mathcal{L}''(\theta) \approx \frac{\mathcal{L}(\theta + h) - 2\mathcal{L}(\theta) + \mathcal{L}(\theta - h)}{h^2}.
 $$
 
 - $h$ too large: truncation error; $h$ too small: roundoff error (large − large). Typical choice $h \approx \sqrt{\epsilon}\,(1 + \lvert\theta\rvert) \approx 10^{-8}$ for the first derivative, $\epsilon^{1/3}$ for the second.
@@ -699,7 +713,7 @@ $$
 ```{r}
 #| label: numerical-derivative
 h <- 1e-5
-c(analytic = dS(lhat), numeric = (ll(lhat + h) - 2 * ll(lhat) + ll(lhat - h)) / h^2)
+c(analytic = dg(lhat), numeric = (nll(lhat + h) - 2 * nll(lhat) + nll(lhat - h)) / h^2)
 ```
 
 ## Does the Effort Pay Off? MLE vs. the Naive Estimator
@@ -711,7 +725,7 @@ Simulating many truncated samples shows the naive estimator's bias never vanishe
 #| fig-width: 9
 #| fig-height: 3.6
 mle_nzp <- function(n_obs)
-  uniroot(function(l) sum(n_obs) / l - length(n_obs) / (1 - exp(-l)),
+  uniroot(function(l) length(n_obs) / (1 - exp(-l)) - sum(n_obs) / l,
           c(1e-6, 50), tol = 1e-10)$root
 
 sim_nzp <- function(lambda, n_gen = 200, B = 500)
@@ -735,21 +749,21 @@ The naive estimator's bias grows as $\lambda$ shrinks, since more mass sits on t
 
 ## Gradient and Hessian
 
-For $\theta = (\theta_1, \ldots, \theta_p)'$, the **gradient** (score vector) and **Hessian** are
+For $\theta = (\theta_1, \ldots, \theta_p)'$, the **gradient** and **Hessian** of $\mathcal{L}$ are
 $$
-\nabla\ell(\theta) = \begin{pmatrix}\partial\ell/\partial\theta_1 \\ \vdots \\ \partial\ell/\partial\theta_p\end{pmatrix}, \qquad
-\nabla^2\ell(\theta) = \left(\frac{\partial^2\ell}{\partial\theta_i\,\partial\theta_j}\right)_{p\times p} .
+g(\theta) = \nabla\mathcal{L}(\theta) = \begin{pmatrix}\partial\mathcal{L}/\partial\theta_1 \\ \vdots \\ \partial\mathcal{L}/\partial\theta_p\end{pmatrix}, \qquad
+H(\theta) = \nabla^2\mathcal{L}(\theta) = \left(\frac{\partial^2\mathcal{L}}{\partial\theta_i\,\partial\theta_j}\right)_{p\times p} .
 $$
 
 
-- $\nabla\ell$ points in the direction of **steepest ascent** and is perpendicular to the contour through $\theta$.
+- $g$ points in the direction of **steepest ascent** of $\mathcal{L}$ and is perpendicular to the contour through $\theta$; every method below moves along $-g$.
 
-- $\nabla^2\ell$ describes the local curvature. At a local maximum it is negative semidefinite; if it is negative definite, the maximum is strict and locally unique. Near a maximum, $\ell$ is well approximated by a quadratic, so the Hessian determines the shape of the contours.
+- $H$ describes the local curvature. At a local minimum it is positive semidefinite; if it is positive definite, the minimum is strict and locally unique. Near the minimum, $\mathcal{L}$ is well approximated by a quadratic, so $H$ determines the shape of the contours. At the MLE, $H(\hat\theta) = J(\hat\theta)$, the observed information.
 
 
 ## Gradient and Hessian: Illustration
 
-Quadratic: $\ell(\theta) = -\tfrac12(\theta - u)'A(\theta - u)$, $A$ positive definite, $\nabla\ell = -A(\theta - u)$, $\nabla^2\ell = -A$ (constant). Contours are ellipses centred at $u$. Write $A = Q\Lambda Q'$:
+Quadratic: $\mathcal{L}(\theta) = \tfrac12(\theta - u)'A(\theta - u)$, $A$ positive definite, $g(\theta) = A(\theta - u)$, $H = A$ (constant). Contours are ellipses centred at $u$. Write $A = Q\Lambda Q'$:
 
 :::: {.columns}
 
@@ -758,8 +772,8 @@ Quadratic: $\ell(\theta) = -\tfrac12(\theta - u)'A(\theta - u)$, $A$ positive de
 - axes point along the eigenvectors of $Q$;
 - half-length along axis $j$ is $\propto 1/\sqrt{\lambda_j}$, so a large eigenvalue means high curvature and a short, well-determined direction;
 - $\lambda_{\max}/\lambda_{\min}$ measures elongation; tilted ellipses indicate correlated parameters.
-- Gradient arrows (green) are perpendicular to contours and point uphill, but not toward $u$ unless the ellipse is a circle.
-- Near its maximum any smooth $\ell$ looks like this, with $A = -\nabla^2\ell(\hat\theta)$.
+- Gradient arrows (green) are perpendicular to contours and point uphill, away from $u$; a descent method steps along $-g$, which need not point at $u$ unless the ellipse is a circle.
+- Near its minimum any smooth $\mathcal{L}$ looks like this, with $A = \nabla^2\mathcal{L}(\hat\theta) = J(\hat\theta)$.
 :::
 
 ::: {.column width="45%"}
@@ -768,13 +782,13 @@ Quadratic: $\ell(\theta) = -\tfrac12(\theta - u)'A(\theta - u)$, $A$ positive de
 #| fig-width: 7
 #| fig-height: 7
 A <- matrix(c(2, 1.2, 1.2, 1), 2)
-s <- seq(-2, 2, length.out = 80); g <- expand.grid(x = s, y = s)
-z <- matrix(apply(g, 1, function(v) -0.5 * drop(t(v) %*% A %*% v)), 80)
+s <- seq(-2, 2, length.out = 80); gridpts <- expand.grid(x = s, y = s)
+z <- matrix(apply(gridpts, 1, function(v) 0.5 * drop(t(v) %*% A %*% v)), 80)
 par(pty = "s", mar = c(4, 4, 1, 1))
 contour(s, s, z, nlevels = 12, xlab = expression(theta[1]), ylab = expression(theta[2]))
 # gradient arrows
 pts <- rbind(c(1, 1), c(-1.5, 0.5), c(0.5, -1.5))
-for (i in 1:3) { gr <- -A %*% pts[i, ]
+for (i in 1:3) { gr <- A %*% pts[i, ]
   arrows(pts[i,1], pts[i,2], pts[i,1] + 0.3*gr[1], pts[i,2] + 0.3*gr[2],
          col = 3, lwd = 2, length = 0.1) }
 # principal axes with eigenvalue labels: length 1/sqrt(lambda) on each side
@@ -791,20 +805,20 @@ points(0, 0, pch = 19)
 
 ## Multivariate Newton–Raphson
 
-Second-order Taylor expansion at $\theta_k$, maximized exactly:
+Second-order Taylor expansion at $\theta_k$, minimized exactly:
 $$
-\ell(\theta) \approx \ell(\theta_k) + \nabla\ell(\theta_k)'(\theta - \theta_k) + \tfrac12(\theta - \theta_k)'\nabla^2\ell(\theta_k)(\theta - \theta_k)
+\mathcal{L}(\theta) \approx \mathcal{L}(\theta_k) + g(\theta_k)'(\theta - \theta_k) + \tfrac12(\theta - \theta_k)'H(\theta_k)(\theta - \theta_k)
 $$
 $$
 \Longrightarrow\quad
-\underbrace{\theta_{k+1}}_{p\times1} = \theta_k - \underbrace{\big[\nabla^2\ell(\theta_k)\big]^{-1}}_{p\times p}\underbrace{\nabla\ell(\theta_k)}_{p\times1}.
+\underbrace{\theta_{k+1}}_{p\times1} = \theta_k - \underbrace{\big[H(\theta_k)\big]^{-1}}_{p\times p}\underbrace{g(\theta_k)}_{p\times1}.
 $$
 
-Compare with the univariate $\theta_{k+1} = \theta_k - \ell'(\theta_k)/\ell''(\theta_k)$: division becomes multiplication by the inverse Hessian.
+Compare with the univariate $\theta_{k+1} = \theta_k - g(\theta_k)/g'(\theta_k)$: division becomes multiplication by the inverse Hessian.
 
-**Fisher scoring** replaces $-\nabla^2\ell(\theta_k)$ by the expected information $nI(\theta_k)$:
+**Fisher scoring** replaces $H(\theta_k) = \nabla^2\mathcal{L}(\theta_k)$ by the expected information $nI(\theta_k)$:
 $$
-\theta_{k+1} = \theta_k + \big[nI(\theta_k)\big]^{-1}\nabla\ell(\theta_k).
+\theta_{k+1} = \theta_k - \big[nI(\theta_k)\big]^{-1}g(\theta_k).
 $$
 
 Each iteration costs one $p \times p$ linear solve — $O(p^3)$ — fine for $p$ in the hundreds, expensive for $p$ in the millions.
@@ -817,59 +831,59 @@ L(\beta) = \prod_{i=1}^n \pi_i^{y_i}(1-\pi_i)^{1-y_i}
 = \prod_{i=1}^n \frac{e^{y_i\eta_i}}{1 + e^{\eta_i}}
 $$
 $$
-\ell(\beta) = \sum_{i=1}^n \big[y_i\,x_i'\beta - \log(1 + e^{x_i'\beta})\big].
+\mathcal{L}(\beta) = \sum_{i=1}^n \big[\log(1 + e^{x_i'\beta}) - y_i\,x_i'\beta\big].
 $$
 
 Using $\dfrac{\partial}{\partial\beta}\log(1 + e^{x_i'\beta}) = \pi_i x_i$ and $\dfrac{\partial\pi_i}{\partial\beta} = \pi_i(1-\pi_i)x_i$:
 $$
-\nabla\ell(\beta) = \sum_{i=1}^n (y_i - \pi_i)\,x_i = X'(y - \pi), \qquad
+g(\beta) = \sum_{i=1}^n (\pi_i - y_i)\,x_i = X'(\pi - y), \qquad
 $$
 $$
-\nabla^2\ell(\beta) = -\sum_{i=1}^n \pi_i(1-\pi_i)\,x_i x_i' = -X'WX, \text{with}~W = \mathrm{diag}\big(\pi_i(1-\pi_i)\big)
+H(\beta) = \sum_{i=1}^n \pi_i(1-\pi_i)\,x_i x_i' = X'WX, \text{with}~W = \mathrm{diag}\big(\pi_i(1-\pi_i)\big)
 $$
 .
 
 ## Logistic Regression: Newton = Fisher Scoring = IRLS
 
-- $-\nabla^2\ell = X'WX$ is positive semi-definite, so $\ell$ is **concave**: any stationary point is the global maximum.
+- $H = X'WX$ is positive semi-definite, so $\mathcal{L}$ is **convex**: any stationary point is the global minimum.
 
 - The Hessian does not involve $y$, so its expectation equals itself: **Newton–Raphson and Fisher scoring coincide**.
 - The update
 $$
-\beta_{k+1} = \beta_k + (X'W_kX)^{-1}X'(y - \pi_k) = (X'W_kX)^{-1}X'W_k z_k,
+\beta_{k+1} = \beta_k - (X'W_kX)^{-1}X'(\pi_k - y) = (X'W_kX)^{-1}X'W_k z_k,
 $$ 
 $$
 z_k = X\beta_k + W_k^{-1}(y - \pi_k),
 $$
 is a weighted least squares fit of the *working response* $z_k$: **iteratively reweighted least squares (IRLS)**, which is how `glm()` fits all generalized linear models.
 
-- Caveat: if the classes are perfectly separable, $\ell$ increases forever and the MLE does not exist ($\lvert\hat\beta\rvert \to \infty$).
+- Caveat: if the classes are perfectly separable, $\mathcal{L}$ decreases forever and the MLE does not exist ($\lvert\hat\beta\rvert \to \infty$).
 
 ## Logistic Regression in R
 
 ```{r}
 n <- 500; X <- cbind(1, rnorm(n), rnorm(n)); beta_true <- c(-0.5, 1, -2)
 y <- rbinom(n, 1, plogis(X %*% beta_true))
-loglik <- function(b) sum(y * (X %*% b) - log1p(exp(X %*% b)))
-grad   <- function(b) crossprod(X, y - plogis(X %*% b))
-hess   <- function(b) { p <- plogis(X %*% b); -crossprod(X, X * drop(p * (1 - p))) }
+nll_lr <- function(b) sum(log1p(exp(X %*% b)) - y * (X %*% b))
+g_lr   <- function(b) crossprod(X, plogis(X %*% b) - y)
+H_lr   <- function(b) { p <- plogis(X %*% b); crossprod(X, X * drop(p * (1 - p))) }
 
-newton_mv <- function(grad, hess, b0, tol = 1e-8, maxit = 50) {
+newton_mv <- function(g, H, b0, tol = 1e-8, maxit = 50) {
   path <- drop(b0)
   for (k in 1:maxit) {
-    b1 <- b0 - solve(hess(b0), grad(b0)); path <- rbind(path, drop(b1))
+    b1 <- b0 - solve(H(b0), g(b0)); path <- rbind(path, drop(b1))
     if (max(abs(b1 - b0)) < tol)
-      return(list(est = drop(b1), iter = k, se = sqrt(diag(solve(-hess(b1)))), path = path))
+      return(list(est = drop(b1), iter = k, se = sqrt(diag(solve(H(b1)))), path = path))
     b0 <- b1 }
 }
-fit <- newton_mv(grad, hess, rep(0, 3)); fit$iter
+fit <- newton_mv(g_lr, H_lr, rep(0, 3)); fit$iter
 rbind(newton = fit$est, glm = coef(glm(y ~ X[, -1], family = binomial)))
 rbind(newton = fit$se, glm = sqrt(diag(vcov(glm(y ~ X[, -1], family = binomial)))))
 ```
 
 ## Variance of the MLE $\hat\beta$
 $$
-\widehat{\mathrm{Var}}(\hat\beta) = \big[-\nabla^2\ell(\hat\beta)\big]^{-1} = (X'\hat WX)^{-1}
+\widehat{\mathrm{Var}}(\hat\beta) = \big[\nabla^2\mathcal{L}(\hat\beta)\big]^{-1} = J(\hat\beta)^{-1} = (X'\hat WX)^{-1}
 = \begin{pmatrix}\hat\sigma_{00} & \cdots & \hat\sigma_{0p} \\ \vdots & \ddots & \vdots \\ \hat\sigma_{p0} & \cdots & \hat\sigma_{pp}\end{pmatrix},
 $$
 $$
@@ -885,15 +899,15 @@ This is the `summary(glm(...))` table. The variance comes from the same Hessian 
 
 ## The Need to Robustify Newton–Raphson
 
-The Newton step $d_k = -H_k^{-1} g_k$, with $g_k = \nabla f(x_k)$ and
-$H_k = \nabla^2 f(x_k)$, solves the local quadratic model exactly. Two things
+The Newton step $d_k = -H_k^{-1} g_k$, with $g_k = \nabla\mathcal{L}(\theta_k)$ and
+$H_k = \nabla^2\mathcal{L}(\theta_k)$, solves the local quadratic model exactly. Two things
 can go wrong away from the solution:
 
 - **The direction may not descend.** $g_k^\top d_k = -g_k^\top H_k^{-1} g_k < 0$
-  requires $H_k \succ 0$. Where $f$ is not convex, $H_k$ may be indefinite or
+  requires $H_k \succ 0$. Where $\mathcal{L}$ is not convex, $H_k$ may be indefinite or
   singular and $d_k$ can point uphill.
 - **The unit step may overshoot.** Even with $H_k \succ 0$, the quadratic model
-  is trustworthy only near $x_k$; $\alpha_k = 1$ can increase $f$.
+  is trustworthy only near $\theta_k$; $\alpha_k = 1$ can increase $\mathcal{L}$.
 
 The two failures are independent and need separate remedies: one fixes the
 **direction**, the other the **length**.
@@ -924,11 +938,11 @@ is inactive near a well-behaved minimum.
 ## Step length: backtracking and line search
 
 Given a descent direction, choose $\alpha_k$ by an inexact search along
-$\phi(\alpha) = f(x_k + \alpha d_k)$.
+$\phi(\alpha) = \mathcal{L}(\theta_k + \alpha d_k)$.
 
 **Armijo (sufficient decrease).**
 $$
-f(x_k + \alpha d_k) \le f(x_k) + c_1 \alpha\, g_k^\top d_k,
+\mathcal{L}(\theta_k + \alpha d_k) \le \mathcal{L}(\theta_k) + c_1 \alpha\, g_k^\top d_k,
 \qquad c_1 = 10^{-4}.
 $$
 
@@ -938,7 +952,7 @@ whenever the full Newton step is acceptable.
 
 **Curvature (Wolfe) condition.**
 $$
-g(x_k + \alpha d_k)^\top d_k \ \ge\ c_2\, g_k^\top d_k,
+g(\theta_k + \alpha d_k)^\top d_k \ \ge\ c_2\, g_k^\top d_k,
 \qquad c_2 = 0.9,
 $$
 which rules out steps that are too short. Backtracking alone cannot enforce it,
@@ -949,9 +963,9 @@ defined.
 ## The safeguarded algorithm
 
 ::: {.callout-note appearance="minimal"}
-At $x_k$: compute $g_k$, $H_k$; form $\tilde H_k \succ 0$; solve
+At $\theta_k$: compute $g_k$, $H_k$; form $\tilde H_k \succ 0$; solve
 $\tilde H_k d_k = -g_k$; find $\alpha_k$ from $\alpha_0 = 1$ by line search;
-set $x_{k+1} = x_k + \alpha_k d_k$.
+set $\theta_{k+1} = \theta_k + \alpha_k d_k$.
 :::
 
 Both safeguards are needed, and both switch themselves off:
@@ -972,31 +986,31 @@ what `nlm()` runs, which globalizes with a trust region.
 
 | method | uses | per-iteration cost | typical use |
 |:--|:--|:--|:--|
-| Nelder–Mead | $f$ only | $O(p)$ evaluations | small $p$, non-smooth or noisy $f$ |
-| gradient descent + line search | $\nabla f$ | $O(p)$ + line search | large $p$ |
-| conjugate gradient | $\nabla f$ | $O(p)$ + line search | large $p$, quadratic-like $f$ |
-| quasi-Newton (BFGS, L-BFGS) | $\nabla f$, builds $\approx$ Hessian | $O(p^2)$ / $O(mp)$ | default general-purpose |
-| Newton / Fisher scoring | $\nabla f$, $\nabla^2 f$ | $O(p^3)$ | moderate $p$, gives SEs |
+| Nelder–Mead | $\mathcal{L}$ only | $O(p)$ evaluations | small $p$, non-smooth or noisy $\mathcal{L}$ |
+| gradient descent + line search | $g$ | $O(p)$ + line search | large $p$ |
+| conjugate gradient | $g$ | $O(p)$ + line search | large $p$, quadratic-like $\mathcal{L}$ |
+| quasi-Newton (BFGS, L-BFGS) | $g$, builds $\approx$ Hessian | $O(p^2)$ / $O(mp)$ | default general-purpose |
+| Newton / Fisher scoring | $g$, $H$ | $O(p^3)$ | moderate $p$, gives SEs |
 
-All are available through `optim(par, fn, gr, method = ...)` in R. Convention below: **minimize** $f(\theta) = -\ell(\theta)$.
+All are available through `optim(par, fn, gr, method = ...)` in R. Convention below: **minimize** $\mathcal{L}(\theta) = -\ell(\theta)$, with $g = \nabla\mathcal{L}$.
 
 
 ## Gradient Descent with Line Search
 
-Move in the direction of steepest descent $d_k = -\nabla f(\theta_k)$, choosing the step length $\alpha_k$ by a **line search**:
+Move in the direction of steepest descent $d_k = -g(\theta_k)$, choosing the step length $\alpha_k$ by a **line search**:
 $$
-\theta_{k+1} = \theta_k + \alpha_k d_k, \qquad \alpha_k = \arg\min_{\alpha > 0} f(\theta_k + \alpha d_k) .
+\theta_{k+1} = \theta_k + \alpha_k d_k, \qquad \alpha_k = \arg\min_{\alpha > 0} \mathcal{L}(\theta_k + \alpha d_k) .
 $$
 
 - Exact line search: a univariate minimization (golden section / `optimize`) along the ray.
 
-- Inexact (**backtracking, Armijo**): start with $\alpha = 1$ and halve until $f(\theta_k + \alpha d_k) \le f(\theta_k) + c\,\alpha\,\nabla f(\theta_k)'d_k$ (a "sufficient decrease").
+- Inexact (**backtracking, Armijo**): start with $\alpha = 1$ and halve until $\mathcal{L}(\theta_k + \alpha d_k) \le \mathcal{L}(\theta_k) + c\,\alpha\,g(\theta_k)'d_k$ (a "sufficient decrease").
 
 ```{r}
-grad_descent <- function(f, gr, x0, maxit = 1000, tol = 1e-8) {
+grad_descent <- function(nll, g, x0, maxit = 1000, tol = 1e-8) {
   path <- x0
   for (k in 1:maxit) {
-    d <- -gr(x0); a <- optimize(function(a) f(x0 + a * d), c(0, 10))$minimum   # exact line search
+    d <- -g(x0); a <- optimize(function(a) nll(x0 + a * d), c(0, 10))$minimum   # exact line search
     x1 <- x0 + a * d; path <- rbind(path, x1)
     if (sqrt(sum((x1 - x0)^2)) < tol) break
     x0 <- x1 }
@@ -1006,13 +1020,13 @@ grad_descent <- function(f, gr, x0, maxit = 1000, tol = 1e-8) {
 
 ## Why Gradient Descent Zig-Zags
 
-With exact line search, consecutive directions are **orthogonal** ($\nabla f(\theta_{k+1})'d_k = 0$), so on elongated contours the path zig-zags across the valley:
+With exact line search, consecutive directions are **orthogonal** ($g(\theta_{k+1})'d_k = 0$), so on elongated contours the path zig-zags across the valley:
 
 ```{r}
 #| echo: false
-fq <- function(v) 0.5 * drop(t(v) %*% A %*% v); gq <- function(v) drop(A %*% v)
-gd <- grad_descent(fq, gq, c(2, -1.8), maxit = 30)
-par(pty = "s", mar = c(4, 4, 2, 1)); contour(seq(-2, 2, l = 80), seq(-2, 2, l = 80), -z, nlevels = 15, main = sprintf("gradient descent, %d iterations", gd$iter))
+nllq <- function(v) 0.5 * drop(t(v) %*% A %*% v); gq <- function(v) drop(A %*% v)
+gd <- grad_descent(nllq, gq, c(2, -1.8), maxit = 30)
+par(pty = "s", mar = c(4, 4, 2, 1)); contour(seq(-2, 2, l = 80), seq(-2, 2, l = 80), z, nlevels = 15, main = sprintf("gradient descent, %d iterations", gd$iter))
 lines(gd$path, type = "b", col = 2, pch = 19, cex = 0.6)
 ```
 
@@ -1020,7 +1034,7 @@ The number of iterations grows with the **condition number** of the Hessian (rat
 
 ## Conjugate Gradient
 
-Fix the zig-zag by making each new direction **conjugate** to the previous ones with respect to the Hessian $Q$: $d_i'Qd_j = 0$ for $i \ne j$. For a quadratic $f(\theta) = \tfrac12\theta'Q\theta - b'\theta$, minimizing along $p$ such directions reaches the exact minimum in **at most $p$ steps**.
+Fix the zig-zag by making each new direction **conjugate** to the previous ones with respect to the Hessian $Q$: $d_i'Qd_j = 0$ for $i \ne j$. For a quadratic $\mathcal{L}(\theta) = \tfrac12\theta'Q\theta - b'\theta$, minimizing along $p$ such directions reaches the exact minimum in **at most $p$ steps**.
 
 The nonlinear version builds directions from gradients only:
 $$
@@ -1030,40 +1044,40 @@ $$
 \beta_k^{FR} = \frac{g_{k+1}'g_{k+1}}{g_k'g_k}\ \text{(Fletcher–Reeves)}, \quad
 \beta_k^{PR} = \frac{g_{k+1}'(g_{k+1} - g_k)}{g_k'g_k}\ \text{(Polak–Ribière)},
 $$
-with $\theta_{k+1} = \theta_k + \alpha_k d_k$ from a line search and $g_k = \nabla f(\theta_k)$.
+with $\theta_{k+1} = \theta_k + \alpha_k d_k$ from a line search and $g_k = g(\theta_k) = \nabla\mathcal{L}(\theta_k)$.
 
 - Memory: only two vectors. No matrix ever formed. Ideal for very large $p$.
 
-- Restart with $d = -g$ every $p$ iterations, since conjugacy degrades on non-quadratic $f$.
+- Restart with $d = -g_k$ every $p$ iterations, since conjugacy degrades on non-quadratic $\mathcal{L}$.
 
 ## Conjugate Gradient in R
 
 ```{r}
-conj_grad <- function(f, gr, x0, maxit = 1000, tol = 1e-8, restart = length(x0)) {
-  g0 <- gr(x0); d <- -g0; path <- x0
+conj_grad <- function(nll, g, x0, maxit = 1000, tol = 1e-8, restart = length(x0)) {
+  g0 <- g(x0); d <- -g0; path <- x0
   for (k in 1:maxit) {
-    a <- optimize(function(a) f(x0 + a * d), c(0, 10))$minimum
-    x1 <- x0 + a * d; g1 <- gr(x1); path <- rbind(path, x1)
+    a <- optimize(function(a) nll(x0 + a * d), c(0, 10))$minimum
+    x1 <- x0 + a * d; g1 <- g(x1); path <- rbind(path, x1)
     if (sqrt(sum(g1^2)) < tol) break
     beta <- if (k %% restart == 0) 0 else max(0, sum(g1 * (g1 - g0)) / sum(g0^2))   # Polak-Ribiere+
     d <- -g1 + beta * d; x0 <- x1; g0 <- g1 }
   list(par = x1, iter = k, path = path)
 }
-cg <- conj_grad(fq, gq, c(2, -1.8))
-par(pty = "s", mar = c(4, 4, 2, 1)); contour(seq(-2, 2, l = 80), seq(-2, 2, l = 80), -z, nlevels = 15, main = sprintf("conjugate gradient, %d iterations", cg$iter))
+cg <- conj_grad(nllq, gq, c(2, -1.8))
+par(pty = "s", mar = c(4, 4, 2, 1)); contour(seq(-2, 2, l = 80), seq(-2, 2, l = 80), z, nlevels = 15, main = sprintf("conjugate gradient, %d iterations", cg$iter))
 lines(gd$path, type = "b", col = 2, pch = 19, cex = 0.6); lines(cg$path, type = "b", col = 4, pch = 19, lwd = 2)
 legend("topleft", c("gradient descent", "conjugate gradient"), col = c(2, 4), lwd = 2, bty = "n")
 ```
 
 ## Quasi-Newton: BFGS
 
-Between gradient methods and Newton: build an approximation $B_k \approx \nabla^2 f$ from successive gradient differences $s_k = \theta_{k+1} - \theta_k$, $y_k = g_{k+1} - g_k$, via a rank-two update that keeps $B_k$ positive definite. Steps are $d_k = -B_k^{-1}g_k$ with a line search.
+Between gradient methods and Newton: build an approximation $B_k \approx \nabla^2\mathcal{L}$ from successive gradient differences $s_k = \theta_{k+1} - \theta_k$, $y_k = g_{k+1} - g_k$, via a rank-two update that keeps $B_k$ positive definite. Steps are $d_k = -B_k^{-1}g_k$ with a line search.
 
 ```{r}
-negll <- function(b) -loglik(b); neggr <- function(b) -drop(grad(b))
-fits <- list(NM = optim(rep(0, 3), negll, method = "Nelder-Mead"),
-             CG = optim(rep(0, 3), negll, neggr, method = "CG"),
-             BFGS = optim(rep(0, 3), negll, neggr, method = "BFGS", hessian = TRUE))
+g_lr_vec <- function(b) drop(g_lr(b))
+fits <- list(NM = optim(rep(0, 3), nll_lr, method = "Nelder-Mead"),
+             CG = optim(rep(0, 3), nll_lr, g_lr_vec, method = "CG"),
+             BFGS = optim(rep(0, 3), nll_lr, g_lr_vec, method = "BFGS", hessian = TRUE))
 t(sapply(fits, function(f) c(f$par, f_evals = f$counts[1], g_evals = f$counts[2])))
 sqrt(diag(solve(fits$BFGS$hessian)))     # SEs from the numerically computed Hessian at the optimum
 ```
@@ -1853,16 +1867,16 @@ shinyApp(ui, server)
 
 ## Motivation: Large $n$
 
-For iid data the log-likelihood and its gradient are **sums over observations**:
+For iid data the negative log-likelihood and its gradient are **sums over observations**:
 $$
-\ell(\theta) = \sum_{i=1}^n \ell_i(\theta), \qquad \nabla\ell(\theta) = \sum_{i=1}^n \nabla\ell_i(\theta).
+\mathcal{L}(\theta) = \sum_{i=1}^n \mathcal{L}_i(\theta), \qquad g(\theta) = \sum_{i=1}^n g_i(\theta), \qquad g_i = \nabla\mathcal{L}_i .
 $$
 
 Every method so far needs the **full** gradient, an $O(np)$ pass through all data, per iteration (and Newton needs $O(np^2)$ for the Hessian). With $n$ in the millions and $p$ in the millions (neural networks), even one full gradient is expensive.
 
-**Idea.** $\nabla\ell_i(\theta)$ for a randomly chosen $i$ is an **unbiased estimate** of the average gradient:
+**Idea.** $g_i(\theta)$ for a randomly chosen $i$ is an **unbiased estimate** of the average gradient:
 $$
-E_i\big[\nabla\ell_i(\theta)\big] = \frac{1}{n}\nabla\ell(\theta).
+E_i\big[g_i(\theta)\big] = \frac{1}{n}\,g(\theta).
 $$
 
 A noisy but cheap gradient estimate is enough to make progress — a Monte Carlo idea applied to optimization.
@@ -1874,14 +1888,14 @@ For $t = 1, 2, \ldots$:
 
 1. Sample an index $i_t$ uniformly from $\{1, \ldots, n\}$ (or shuffle the data and cycle through it; one pass is an **epoch**).
 
-2. Update in the ascent direction of that single observation's log-likelihood:
+2. Update in the descent direction of that single observation's negative log-likelihood:
 $$
-\theta_{t+1} = \theta_t + \gamma_t\,\nabla\ell_{i_t}(\theta_t).
+\theta_{t+1} = \theta_t - \gamma_t\,g_{i_t}(\theta_t).
 $$
 
 **Mini-batch SGD** averages the gradient over a batch $B_t$ of $m$ observations ($m = 32$–$512$ typical):
 $$
-\theta_{t+1} = \theta_t + \gamma_t\,\frac{1}{m}\sum_{i\in B_t}\nabla\ell_i(\theta_t),
+\theta_{t+1} = \theta_t - \gamma_t\,\frac{1}{m}\sum_{i\in B_t}g_i(\theta_t),
 $$
 reducing the variance by $1/m$ at $m$ times the cost, and using vectorized/GPU arithmetic.
 
@@ -2263,20 +2277,20 @@ Let's apply SGD to logistic regrression.
 
 ```{r}
 log1pexp <- function(u) pmax(u, 0) + log1p(exp(-abs(u)))
-lik_score_info <- function(b, r, z) {
+nll_g_info <- function(b, r, z) {
   u <- b[1] + b[2] * z; p <- plogis(u); w <- p * (1 - p)
-  list(neg_loglik = -sum(u * r - log1pexp(u)),
-       neg_score  = -c(sum(r - p), sum(z * (r - p))),
-       inf        = matrix(c(sum(w), sum(z * w), sum(z * w), sum(z * z * w)), 2, 2))
+  list(nll  = -sum(u * r - log1pexp(u)),                   # L(beta)
+       g    = c(sum(p - r), sum(z * (p - r))),             # g(beta) = grad L
+       info = matrix(c(sum(w), sum(z * w), sum(z * w), sum(z * z * w)), 2, 2))
 }
-neg_logp_logistic <- function(b, z, r) { u <- b[1] + b[2] * z; -sum(u * r - log1pexp(u)) }
+nll_logistic <- function(b, z, r) { u <- b[1] + b[2] * z; -sum(u * r - log1pexp(u)) }
 mle_logistic_nr <- function(b0, no_iter, r, z) {
-  out <- matrix(NA_real_, no_iter + 1, 3, dimnames = list(NULL, c("beta0", "beta1", "neg_loglike")))
+  out <- matrix(NA_real_, no_iter + 1, 3, dimnames = list(NULL, c("beta0", "beta1", "nll")))
   b <- b0
   for (i in seq_len(no_iter + 1)) {
-    q <- lik_score_info(b, r, z); out[i, ] <- c(b, q$neg_loglik)
+    q <- nll_g_info(b, r, z); out[i, ] <- c(b, q$nll)
     if (i > no_iter) break
-    step <- tryCatch(solve(q$inf, q$neg_score), error = function(e) rep(NA_real_, 2))
+    step <- tryCatch(solve(q$info, q$g), error = function(e) rep(NA_real_, 2))
     if (any(!is.finite(step))) break
     b <- b - step
   }
@@ -2285,7 +2299,7 @@ mle_logistic_nr <- function(b0, no_iter, r, z) {
 
 set.seed(1)
 n2 <- 200; z2 <- sort(runif(n2, -2, 2)); r2 <- rbinom(n2, 1, plogis(1.5 * z2))
-logit_nlm <- nlm(neg_logp_logistic, c(0, 0), z = z2, r = r2, hessian = TRUE)
+logit_nlm <- nlm(nll_logistic, c(0, 0), z = z2, r = r2, hessian = TRUE)
 logit_nlm$estimate
 ```
 
@@ -2301,8 +2315,8 @@ sgd_logistic <- function(z, r, b0, gamma0 = 0.5, t0 = 100, epochs = 30, batch = 
       t <- t + 1
       u <- b[1] + b[2] * z[i]
       p <- plogis(u)
-      grad <- c(sum(r[i] - p), sum(z[i] * (r[i] - p))) / length(i)
-      b <- b + gamma0 / (1 + t / t0) * grad
+      gb <- c(sum(p - r[i]), sum(z[i] * (p - r[i]))) / length(i)   # batch gradient of L
+      b <- b - gamma0 / (1 + t / t0) * gb
       path <- rbind(path, b)
     }
   }
@@ -2319,7 +2333,7 @@ rbind(sgd = sg$est, nlm = logit_nlm$estimate, truth = beta_true2)
 
 ```{r}
 #| echo: false
-nr_path <- mle_logistic_nr(c(0, 0), 8, r2, z2)     # beta0, beta1, neg_loglike per Newton iteration
+nr_path <- mle_logistic_nr(c(0, 0), 8, r2, z2)     # beta0, beta1, nll per Newton iteration
 m <- 10; per_epoch <- length(z2) / m
 xs <- 0:(nrow(sg$path) - 1)
 xn <- (0:(nrow(nr_path) - 1)) * per_epoch
@@ -2345,10 +2359,10 @@ legend("right", c("SGD (mini-batch)", "Newton (per full pass)", "MLE"),
 | | needs | strength | weakness |
 |:--|:--|:--|:--|
 | bisection / golden section | bracket | always converges | 1-D only, linear |
-| Newton–Raphson | $\nabla\ell$, $\nabla^2\ell$ | quadratic convergence, SEs from Hessian | can diverge; $O(p^3)$ |
-| Fisher scoring / IRLS | $\nabla\ell$, $I(\theta)$ | positive-definite steps; GLMs | needs expectations |
-| Nelder–Mead | $\ell$ | derivative-free | slow, small $p$ |
-| gradient descent / CG / BFGS | $\nabla\ell$ | scales to large $p$ | line search; ill-conditioning |
-| SGD | $\nabla\ell_i$ | scales to large $n$ and $p$ | noisy, tuning of $\gamma_t$ |
+| Newton–Raphson | $g$, $H = \nabla^2\mathcal{L}$ | quadratic convergence, SEs from Hessian | can diverge; $O(p^3)$ |
+| Fisher scoring / IRLS | $g$, $I(\theta)$ | positive-definite steps; GLMs | needs expectations |
+| Nelder–Mead | $\mathcal{L}$ | derivative-free | slow, small $p$ |
+| gradient descent / CG / BFGS | $g$ | scales to large $p$ | line search; ill-conditioning |
+| SGD | $g_i$ | scales to large $n$ and $p$ | noisy, tuning of $\gamma_t$ |
 
-The log-likelihood is approximately quadratic near the MLE (asymptotic normality); every method above exploits that, and its curvature at the optimum delivers the standard errors.
+$\mathcal{L}$ is approximately quadratic near the MLE (asymptotic normality); every method above exploits that, and its curvature $J(\hat\theta)$ at the optimum delivers the standard errors.
